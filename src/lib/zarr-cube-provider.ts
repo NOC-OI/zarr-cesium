@@ -31,7 +31,7 @@ export class ZarrCubeProvider {
   private sliceSpacing: number;
   private showHorizontalSlices: boolean;
   private showVerticalSlices: boolean;
-  private terrainActive: boolean;
+  private belowSeaLevel: boolean;
   private volumeData: Float32Array | null = null;
   private latSliceIndex: number = -1;
   private lonSliceIndex: number = -1;
@@ -62,7 +62,7 @@ export class ZarrCubeProvider {
     this.sliceSpacing = options.sliceSpacing ?? 1;
     this.showHorizontalSlices = options.showHorizontalSlices ?? true;
     this.showVerticalSlices = options.showVerticalSlices ?? true;
-    this.terrainActive = options.terrainActive ?? false;
+    this.belowSeaLevel = options.belowSeaLevel ?? false;
     this.flipElevation = options.flipElevation ?? false;
     const [min, max] = options.scale ?? [-3, 3];
     const colors = options.colormap
@@ -257,7 +257,7 @@ export class ZarrCubeProvider {
       : 0;
 
     let heightMeters: number;
-    if (this.terrainActive) {
+    if (this.belowSeaLevel) {
       heightMeters = -elevationValue * this.verticalExaggeration;
     } else {
       heightMeters = (maxElevationValue - elevationValue) * this.verticalExaggeration;
@@ -324,7 +324,7 @@ export class ZarrCubeProvider {
         ? Math.max(...(this.dimensionValues.elevation as number[]))
         : 0;
       let height: number;
-      if (this.terrainActive) {
+      if (this.belowSeaLevel) {
         height = -elevationValue * this.verticalExaggeration;
       } else {
         height = (maxElevation - elevationValue) * this.verticalExaggeration;

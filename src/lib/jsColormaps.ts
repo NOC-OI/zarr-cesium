@@ -1,4 +1,6 @@
-const data = {
+import { ColorMapInfo } from './types';
+
+const data: ColorMapInfo = {
   Accent: {
     interpolate: false,
     colors: [
@@ -19411,11 +19413,11 @@ export const viridisR = partial('viridis_r');
 export const winter = partial('winter');
 export const winterR = partial('winter_r');
 
-export const colorScaleByName = color => {
+export const colorScaleByName = (color: string) => {
   return partial(color);
 };
 
-export const allColorScales = [
+export const allColorScales: string[] = [
   'Accent',
   'Accent_r',
   'Blues',
@@ -19580,24 +19582,38 @@ export const allColorScales = [
   'winter_r'
 ];
 
-export function colormapBuilder(color, convertToHex = false, n = 255) {
+export function colormapBuilder(
+  color: string,
+  convertTo: string = '',
+  n: number = 255,
+  opacity: number = 1
+): string[] | number[][] {
   const colorScale = colorScaleByName(color);
-  const listColors = [];
+  const listColors: string[] | number[][] = [];
   for (let i = 0; i < n; i++) {
-    let color = colorScale((1 / (n - 1)) * i);
-    if (convertToHex === true) {
-      color = rgbToHex(color);
+    let color: number[] | string = colorScale((1 / (n - 1)) * i);
+    if (opacity < 1) {
+      (color as number[]).push(opacity);
     }
-    listColors.push(color);
+    if (convertTo === 'hex') {
+      color = rgbToHex(color);
+    } else if (convertTo === 'css') {
+      if (opacity < 1) {
+        color = `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${color[3]})`;
+      } else {
+        color = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+      }
+    }
+    listColors.push(color as any);
   }
   return listColors;
 }
 
-function rgbToHex(rgbArray) {
+function rgbToHex(rgbArray: number[]) {
   return `#${((1 << 24) + (rgbArray[0] << 16) + (rgbArray[1] << 8) + rgbArray[2]).toString(16).slice(1)}`;
 }
 
-function evaluateCmap(x, name, reverse) {
+function evaluateCmap(x: number, name: string, reverse: boolean) {
   if (reverse === true) {
     x = 1 - x;
   }
@@ -19611,7 +19627,7 @@ function evaluateCmap(x, name, reverse) {
   }
 }
 
-function interpolated(x, colors) {
+function interpolated(x: number, colors: number[][]) {
   const lo = Math.floor(x * (colors.length - 1));
   const hi = Math.ceil(x * (colors.length - 1));
   const r = Math.round(((colors[lo][0] + colors[hi][0]) / 2) * 255);
@@ -19620,7 +19636,7 @@ function interpolated(x, colors) {
   return [r, g, b];
 }
 
-function qualitative(x, colors) {
+function qualitative(x: number, colors: number[][]) {
   let idx = 0;
   while (x > (idx + 1) / (colors.length - 0)) {
     idx++;
@@ -19631,13 +19647,13 @@ function qualitative(x, colors) {
   return [r, g, b];
 }
 
-function partial(name) {
+function partial(name: string) {
   if (name.endsWith('_r')) {
-    return function (x) {
+    return function (x: number) {
       return evaluateCmap(x, name.substring(0, name.length - 2), true);
     };
   } else {
-    return function (x) {
+    return function (x: number) {
       return evaluateCmap(x, name, false);
     };
   }

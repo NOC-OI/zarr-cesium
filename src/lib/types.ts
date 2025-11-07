@@ -43,7 +43,7 @@ export interface ZarrCesiumCubeLayerProviderProps {
   opacity?: number;
   showHorizontalSlices?: boolean;
   showVerticalSlices?: boolean;
-  terrainActive?: boolean;
+  belowSeaLevel?: boolean;
 }
 
 export interface DimensionValues {
@@ -69,7 +69,7 @@ export interface CubeOptions {
   sliceSpacing?: number;
   showHorizontalSlices?: boolean;
   showVerticalSlices?: boolean;
-  terrainActive?: boolean;
+  belowSeaLevel?: boolean;
   dimensionNames?: DimensionNamesProps;
   selectors?: { [key: string]: ZarrSelectorsProps };
   colorScale?: [number, number, number][];
@@ -102,7 +102,7 @@ export interface VelocityOptions {
   verticalExaggeration?: number;
   flipElevation?: boolean;
   sliceSpacing?: number;
-  terrainActive?: boolean;
+  belowSeaLevel?: boolean;
   dimensionNames?: DimensionNamesProps;
   selectors?: { [key: string]: ZarrSelectorsProps };
   colorScale?: [number, number, number][];
@@ -144,5 +144,43 @@ export type ColorMapName = (typeof allColorScales)[number];
 export interface ColorScaleProps {
   min: number;
   max: number;
-  colors: number[][];
+  colors: number[][] | string[];
+}
+
+export interface ColorMapInfo {
+  [key: string]: { interpolate: boolean; colors: number[][] };
+}
+
+export interface ZarrCubeVelocityComponentProps {
+  viewerRef: React.RefObject<Viewer>;
+  uUrl: string;
+  vUrl: string;
+  bounds: BoundsProps;
+  maxElevation?: number;
+  belowSeaLevel?: boolean;
+  dimensionNames?: DimensionNamesProps;
+  selectors?: { [key: string]: ZarrSelectorsProps };
+  flipElevation?: boolean;
+}
+
+export interface ZarrCubeComponentProps {
+  viewerRef: React.RefObject<Viewer>;
+  url: string;
+  variable: string;
+  bounds: BoundsProps;
+  showVerticalSlices?: boolean;
+  showHorizontalSlices?: boolean;
+  belowSeaLevel?: boolean;
+  dimensionNames?: DimensionNamesProps;
+  selectors?: { [key: string]: ZarrSelectorsProps };
+  flipElevation?: boolean;
+  maxElevation?: number;
+}
+
+export interface CubeVelocityProps {
+  array: Float32Array;
+  width: number;
+  height: number;
+  elevation: number;
+  dimensionValues: DimensionValues;
 }

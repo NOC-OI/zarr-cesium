@@ -1,29 +1,8 @@
 'use client';
-import { Viewer } from 'cesium';
 import React, { useEffect, useRef, useState } from 'react';
 import { ZarrCubeProvider } from './zarr-cube-provider';
-import {
-  BoundsProps,
-  ColorMapName,
-  DimensionNamesProps,
-  DimensionValues,
-  ZarrSelectorsProps
-} from './types';
+import { ColorMapName, DimensionValues, ZarrCubeComponentProps } from './types';
 import { allColorScales } from './jsColormaps';
-
-interface ZarrCubeComponentProps {
-  viewerRef: React.RefObject<Viewer>;
-  url: string;
-  variable: string;
-  bounds: BoundsProps;
-  showVerticalSlices?: boolean;
-  showHorizontalSlices?: boolean;
-  terrainActive?: boolean;
-  dimensionNames?: DimensionNamesProps;
-  selectors?: { [key: string]: ZarrSelectorsProps };
-  flipElevation?: boolean;
-  maxElevation?: number;
-}
 
 export const ZarrCubeComponent: React.FC<ZarrCubeComponentProps> = ({
   viewerRef,
@@ -32,7 +11,7 @@ export const ZarrCubeComponent: React.FC<ZarrCubeComponentProps> = ({
   bounds,
   showVerticalSlices,
   showHorizontalSlices,
-  terrainActive,
+  belowSeaLevel,
   dimensionNames,
   selectors,
   flipElevation,
@@ -69,7 +48,7 @@ export const ZarrCubeComponent: React.FC<ZarrCubeComponentProps> = ({
       opacity,
       showHorizontalSlices,
       showVerticalSlices,
-      terrainActive,
+      belowSeaLevel,
       dimensionNames,
       selectors,
       flipElevation,

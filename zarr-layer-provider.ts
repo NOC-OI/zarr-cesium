@@ -9,29 +9,24 @@ import { CRS, DimensionNamesProps, LayerOptions, XYLimits, ZarrSelectorsProps } 
 
 export class ZarrImageryLayer extends Cesium.ImageryLayer {
   declare imageryProvider: ZarrLayerProvider;
-  viewer?: Cesium.Viewer;
 
-  softRefreshCurrentView() {
-    const scene = this.viewer?.scene;
-    const collection = this.viewer?.imageryLayers;
-    if (!collection || !scene) return;
+  updateStyle(opts: Parameters<ZarrLayerProvider['updateStyle']>[0]) {
+    this.imageryProvider.updateStyle(opts);
+    const layerCollection = (this as any)._layerCollection;
+    const scene = layerCollection?._scene;
+    const surface = scene?.globe?._surface;
 
-    const idx = collection.indexOf(this);
-    collection.remove(this, false);
-    collection.add(this, idx);
-    scene.requestRender();
-  }
-
-  updateStyle(opts: { opacity?: number; scale?: [number, number]; colormap?: string }) {
-    const layerUpdated = this.imageryProvider.updateStyle({
-      scale: opts.scale,
-      colormap: opts.colormap
-    });
-    if (layerUpdated) {
-      this.softRefreshCurrentView();
+    // Invalidate all tiles for this layer
+    const layerIndex = layerCollection?.indexOf(this);
+    const layerState = surface?._tileProvider?._imageryLayerCollection?.get(layerIndex);
+    if (layerState && layerState._imageryCache) {
+      for (const key in layerState._imageryCache) delete layerState._imageryCache[key];
     }
 
-    this.alpha = opts.opacity ?? this.alpha;
+    // Then mark the quadtree dirty
+    surface?._tileProvider?._quadtree?.invalidateAllTiles?.();
+
+    scene?.requestRender();
   }
 }
 
@@ -68,6 +63,7 @@ export class ZarrLayerProvider implements Cesium.ImageryProvider {
   private levelCache = new Map();
   private levelMetadata: Map<number, { width: number; height: number }> = new Map();
   private xyLimits: XYLimits | null = null;
+  private opacity: number = 1.0;
   private colormap: string;
   private gl: WebGL2RenderingContext | null = null;
   private program: WebGLProgram | null = null;
@@ -145,18 +141,12 @@ export class ZarrLayerProvider implements Cesium.ImageryProvider {
     }
   }
 
-  static async createLayer(
-    viewer: Cesium.Viewer,
-    options: LayerOptions
-  ): Promise<ZarrImageryLayer> {
+  static async createLayer(options: LayerOptions & { alpha?: number }): Promise<ZarrImageryLayer> {
     const provider = new ZarrLayerProvider(options);
     const ready = await provider.readyPromise;
     if (!ready) throw new Error('Failed to initialize ZarrLayerProvider');
 
     const imageryLayer = new ZarrImageryLayer(provider);
-    imageryLayer.alpha = options.opacity ?? 1.0;
-    imageryLayer.viewer = viewer;
-
     return imageryLayer;
   }
 
@@ -197,40 +187,36 @@ export class ZarrLayerProvider implements Cesium.ImageryProvider {
 
   public updateColorScale(newScale: { min: number; max: number; colors: number[][] }) {
     this.colorScale = newScale;
-    this.updateColormapTexture();
+    this.rebuildColorRamp();
   }
 
   public updateStyle({
+    opacity,
     scale,
     colormap
   }: {
+    opacity?: number;
     scale?: [number, number];
     colormap?: string;
-  }): boolean {
-    if (!scale && !colormap) return false;
-    if (
-      scale &&
-      scale[0] === this.colorScale.min &&
-      scale[1] === this.colorScale.max &&
-      colormap === this.colormap
-    ) {
-      return false;
-    }
-    if (scale) ((this.colorScale.min = scale[0]), (this.colorScale.max = scale[1]));
+  }): void {
+    console.log('Updating style:', { opacity, scale, colormap });
 
-    if (colormap) {
-      this.colormap = colormap;
-      const colors = colormapBuilder(colormap) as number[][];
-      this.colorScale.colors = colors;
-      this.updateColormapTexture();
+    // If opacity or colormap changes, rebuild colors
+    if (colormap || opacity !== undefined || scale !== undefined) {
+      console.log('AAAAAAAAAAAA', this.colorScale);
+      const [min, max] = scale ?? [this.colorScale.min, this.colorScale.max];
+      this.opacity = opacity ?? this.opacity;
+      this.colormap = colormap ?? this.colormap;
+      const colors = colormapBuilder(this.colormap) as number[][];
+      this.colorScale = { min, max, colors };
+      console.log('BBBBBBBBB', this.colorScale);
+      this.rebuildColorRamp();
     }
-    return true;
   }
 
-  private updateColormapTexture(): void {
+  private rebuildColorRamp(): void {
     if (!this.gl) return;
-    if (this.colorTexture) this.gl.deleteTexture(this.colorTexture);
-    this.colorTexture = createColorRampTexture(this.gl, this.colorScale.colors, 1);
+    this.colorTexture = createColorRampTexture(this.gl, this.colorScale.colors, this.opacity);
   }
 
   private initWebGL() {
@@ -260,8 +246,9 @@ export class ZarrLayerProvider implements Cesium.ImageryProvider {
 
     this.program = createProgram(gl, vertexShader!, fragmentShader!);
     if (!this.program) return;
+    console.log('Updated color scale:', this.colorScale);
 
-    this.updateColormapTexture();
+    this.rebuildColorRamp();
 
     const positions = new Float32Array([
       -1, -1, 0, 0, 1, -1, 1, 0, -1, 1, 0, 1, -1, 1, 0, 1, 1, -1, 1, 0, 1, 1, 1, 1

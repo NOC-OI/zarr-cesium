@@ -41,16 +41,17 @@ export function createProgram(
   return program;
 }
 
-export function createColorRampTexture(
+export function createColorRampTexture2(
   gl: WebGL2RenderingContext,
-  colors: number[][]
+  colors: number[][],
+  opacity: number
 ): WebGLTexture | null {
   const colorData = new Uint8Array(colors.length * 4);
   colors.forEach((rgbArray, i) => {
     colorData[i * 4] = rgbArray[0];
     colorData[i * 4 + 1] = rgbArray[1];
     colorData[i * 4 + 2] = rgbArray[2];
-    colorData[i * 4 + 3] = 255;
+    colorData[i * 4 + 3] = Math.floor(opacity * 255);
   });
 
   const colorTexture = gl.createTexture();
@@ -70,6 +71,42 @@ export function createColorRampTexture(
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  return colorTexture;
+}
+
+export function createColorRampTexture(
+  gl: WebGL2RenderingContext,
+  colors: number[][],
+  opacity: number
+): WebGLTexture | null {
+  if (!gl) return null;
+
+  // Create or reuse a texture
+  const colorTexture = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, colorTexture);
+
+  // Flatten colors: assume each color is [r,g,b] with range 0–255 or 0–1
+  const flat = new Uint8Array(colors.length * 4);
+  const useFloat = colors[0][0] <= 1.0; // detect normalized RGB (0–1)
+
+  for (let i = 0; i < colors.length; i++) {
+    const c = colors[i];
+    flat[i * 4 + 0] = useFloat ? Math.round(c[0] * 255) : c[0];
+    flat[i * 4 + 1] = useFloat ? Math.round(c[1] * 255) : c[1];
+    flat[i * 4 + 2] = useFloat ? Math.round(c[2] * 255) : c[2];
+    flat[i * 4 + 3] = Math.floor(opacity * 255);
+  }
+
+  // Upload a 1D texture (implemented as 256×1 RGBA)
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, colors.length, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, flat);
+
+  // Clamp and interpolate
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+  gl.bindTexture(gl.TEXTURE_2D, null);
   return colorTexture;
 }
 
@@ -103,7 +140,7 @@ function addColor(
 ): [number, number, number, number] {
   const clamped = Math.min(Math.max(value, 0), 1);
 
-  const colors = colorScale.colors;
+  const colors = colorScale.colors as number[][];
   const n = colors.length;
 
   if (n === 0) {

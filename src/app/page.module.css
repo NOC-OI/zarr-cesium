@@ -1,0 +1,19 @@
+.source-link {
+    z-index: 1;
+    position: fixed;
+    left: 0.5rem;
+    top: 0.5rem;
+    font-family: sans-serif;
+    background-color: white;
+    color: blue;
+    padding: 0.25rem;
+}
+.source-link:hover {
+    background-color: lightgray;
+}
+.source-link:active {
+    background-color: gray;
+}
+.source-link:focus {
+    outline: 1px solid blue;
+}

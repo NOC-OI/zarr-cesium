@@ -50,24 +50,6 @@ export class ZarLayerProvider implements Cesium.ImageryProvider {
   private abortControllers = new Map<string, AbortController>();
   private static supportsImageBitmap: boolean | null = null;
 
-  private canvasPool: (HTMLCanvasElement | OffscreenCanvas)[] = [];
-  private canvasPoolIndex = 0;
-  private static CANVAS_POOL_SIZE = 6;
-  private supportsOffscreen = typeof OffscreenCanvas !== 'undefined';
-
-  private initCanvasPool(): void {
-    const createCanvas = (): HTMLCanvasElement | OffscreenCanvas =>
-      this.supportsOffscreen
-        ? new OffscreenCanvas(this._tileWidth, this._tileHeight)
-        : Object.assign(document.createElement('canvas'), {
-            width: this._tileWidth,
-            height: this._tileHeight
-          });
-
-    this.canvasPool = Array.from({ length: ZarLayerProvider.CANVAS_POOL_SIZE }, createCanvas);
-    this.canvasPoolIndex = 0;
-  }
-
   constructor(options: LayerOptions) {
     this.url = options.url;
     this.variable = options.variable;
@@ -87,7 +69,7 @@ export class ZarLayerProvider implements Cesium.ImageryProvider {
       : options.colorScale
         ? options.colorScale
         : colormapBuilder('viridis');
-    this.colorScale = { min, max, colors };
+    this.colorScale = { min, max, colors: colors as number[][] };
     this.selectors = options.selectors || {};
 
     this.initWebGL();
@@ -229,7 +211,6 @@ export class ZarLayerProvider implements Cesium.ImageryProvider {
 
     gl.enableVertexAttribArray(texCoordLocation);
     gl.vertexAttribPointer(texCoordLocation, 2, gl.FLOAT, false, 16, 8);
-    this.initCanvasPool();
   }
 
   private async openLevelArray(levelIdx: number) {

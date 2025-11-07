@@ -7,8 +7,8 @@ import 'cesium/Build/Cesium/Widgets/widgets.css';
 import { ZarrCubeVelocityProvider } from '@/lib/zarr-cube-velocity-provider';
 import { ZarLayerProvider } from '@/lib/zarr-layer-provider';
 import { ZarrCubeComponent } from '@/lib/zarr-cube-component';
+import { ZarrCubeVelocityComponent } from '@/lib/zarr-cube-velocity-component';
 
-const USE_TERRAIN = false;
 export const CesiumComponent: React.FunctionComponent<{
   CesiumJs: CesiumType;
 }> = ({ CesiumJs }) => {
@@ -20,7 +20,8 @@ export const CesiumComponent: React.FunctionComponent<{
   const [show3D, setShow3D] = useState(false);
   const [show2D, setShow2D] = useState(false);
   const [showCurrents, setShowCurrents] = useState(false);
-  const [terrainActive, setTerrainActive] = useState(false);
+  const [belowSeaLevel, setBelowSeaLevel] = useState(false);
+  const [gebcoTerrainEnabled, setGebcoTerrainEnabled] = useState(false);
   const verticalExaggeration = 50.0;
   useEffect(() => {
     if (!containerRef.current) return;
@@ -36,11 +37,11 @@ export const CesiumComponent: React.FunctionComponent<{
       sceneModePicker: false,
       navigationHelpButton: false
     });
-    if (USE_TERRAIN) {
+    if (gebcoTerrainEnabled) {
       viewer.scene.setTerrain(
         new CesiumJs.Terrain(CesiumJs.CesiumTerrainProvider.fromIonAssetId(2426648))
       );
-      setTerrainActive(true);
+      setBelowSeaLevel(true);
       viewer.scene.verticalExaggerationRelativeHeight = 0.0; // exaggerate around sea level
       viewer.scene.verticalExaggeration = verticalExaggeration;
     }
@@ -51,6 +52,30 @@ export const CesiumComponent: React.FunctionComponent<{
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const toggleGebcoTerrain = () => {
+    const viewer = viewerRef.current;
+    if (!viewer) return;
+
+    if (gebcoTerrainEnabled) {
+      viewer.scene.terrainProvider = new CesiumJs.EllipsoidTerrainProvider();
+      setGebcoTerrainEnabled(false);
+      setBelowSeaLevel(false);
+      setShow3D(false);
+      setShowCurrents(false);
+      viewer.scene.verticalExaggeration = 1.0;
+    } else {
+      viewer.scene.setTerrain(
+        new CesiumJs.Terrain(CesiumJs.CesiumTerrainProvider.fromIonAssetId(2426648))
+      );
+      setGebcoTerrainEnabled(true);
+      setBelowSeaLevel(true);
+      setShow3D(false);
+      setShowCurrents(false);
+      viewer.scene.verticalExaggerationRelativeHeight = 0.0; // exaggerate around sea level
+      viewer.scene.verticalExaggeration = verticalExaggeration;
+    }
+  };
 
   const toggleZarrLayer = async () => {
     const viewer = viewerRef.current;
@@ -90,45 +115,56 @@ export const CesiumComponent: React.FunctionComponent<{
     setLoading(false);
   };
 
-  useEffect(() => {
-    if (!showCurrents || !viewerRef.current) return;
+  // useEffect(() => {
+  //   if (!showCurrents || !viewerRef.current) return;
 
-    const velocityProvider = new ZarrCubeVelocityProvider(viewerRef.current, {
-      uUrl: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/nemotest101/currents/uo.zarr',
-      vUrl: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/nemotest101/currents/vo.zarr',
-      bounds: { west: -40, south: -10, east: -20, north: 10 },
-      maxElevation: 30,
-      verticalExaggeration: verticalExaggeration * 40,
-      terrainActive
-    });
+  //   // const windOptions = {
+  //   //   speedFactor: 1,
+  //   //   lineWidth: { min: 1, max: 10 },
+  //   //   lineLength: { min: 200, max: 400 },
+  //   //   particlesTextureSize: 50,
+  //   //   useViewerBounds: true,
+  //   //   dynamic: true,
+  //   //   flipY: false
+  //   // };
 
-    velocityProvider.load();
+  //   const velocityProvider = new ZarrCubeVelocityProvider(viewerRef.current, {
+  //     uUrl: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/nemotest101/currents/uo.zarr',
+  //     vUrl: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/nemotest101/currents/vo.zarr',
+  //     bounds: { west: -40, south: -10, east: -20, north: 10 },
+  //     maxElevation: 30,
+  //     scale: [0, 1],
+  //     verticalExaggeration: verticalExaggeration * 100,
+  //     belowSeaLevel,
+  //     colormap: 'jet'
+  //     // windOptions
+  //   });
 
-    return () => velocityProvider.destroy();
-  }, [showCurrents, terrainActive]);
+  //   velocityProvider.load();
+
+  //   return () => velocityProvider.destroy();
+  // }, [showCurrents, belowSeaLevel]);
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100vh' }}>
       <div ref={containerRef} style={{ width: '100%', height: '100%' }} />
-      {/* {showCurrents && (
-        <ZarrCesiumCubeVelocityLayer
+      {showCurrents && (
+        <ZarrCubeVelocityComponent
           viewerRef={viewerRef}
           uUrl="https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/nemotest101/currents/uo.zarr"
           vUrl="https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/nemotest101/currents/vo.zarr"
           bounds={{ west: -40, south: -10, east: -20, north: 10 }}
           maxElevation={30}
-          verticalExaggeration={verticalExaggeration*10}
-          flipY={true}
-          terrainActive={terrainActive}
+          belowSeaLevel={belowSeaLevel}
         />
-      )} */}
+      )}
       {show3D && (
         <ZarrCubeComponent
           viewerRef={viewerRef}
           url="https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/nemotest101/currents/uo.zarr"
           variable="uo"
           bounds={{ west: -40, south: -10, east: -20, north: 10 }}
-          terrainActive={terrainActive}
+          belowSeaLevel={belowSeaLevel}
           flipElevation={true}
           maxElevation={30}
         />
@@ -142,7 +178,7 @@ export const CesiumComponent: React.FunctionComponent<{
         //   verticalExaggeration={verticalExaggeration * 40}
         //   opacity={1}
         //   showHorizontalSlices={true}
-        //   terrainActive={terrainActive}
+        //   belowSeaLevel={belowSeaLevel}
         //   showVerticalSlices={true}
         //   selectors={{
         //     time: {
@@ -176,6 +212,19 @@ export const CesiumComponent: React.FunctionComponent<{
           border: '1px solid #ccc'
         }}
       >
+        <button
+          style={{
+            marginRight: 10,
+            background: 'white',
+            padding: '8px 14px',
+            borderRadius: 4,
+            cursor: 'pointer',
+            border: '1px solid #ccc'
+          }}
+          onClick={toggleGebcoTerrain}
+        >
+          {gebcoTerrainEnabled ? 'Remove Gebco Terrain' : 'Add Gebco Terrain'}
+        </button>
         <button
           style={{
             marginRight: 10,

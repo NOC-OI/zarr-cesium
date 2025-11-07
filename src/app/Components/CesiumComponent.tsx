@@ -2,21 +2,18 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import type { CesiumType } from '../types/cesium';
-import { type Viewer, type ImageryLayer } from 'cesium';
+import { type Viewer } from 'cesium';
 import 'cesium/Build/Cesium/Widgets/widgets.css';
-import { ZarrCubeVelocityProvider } from '@/lib/zarr-cube-velocity-provider';
-import { ZarLayerProvider } from '@/lib/zarr-layer-provider';
 import { ZarrCubeComponent } from '@/lib/zarr-cube-component';
 import { ZarrCubeVelocityComponent } from '@/lib/zarr-cube-velocity-component';
+import { ZarrLayerComponent } from '@/lib/zarr-layer-component';
 
 export const CesiumComponent: React.FunctionComponent<{
   CesiumJs: CesiumType;
 }> = ({ CesiumJs }) => {
   const viewerRef = useRef<Viewer | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const zarrLayerRef = useRef<ImageryLayer | null>(null);
 
-  const [loading, setLoading] = useState(false);
   const [show3D, setShow3D] = useState(false);
   const [show2D, setShow2D] = useState(false);
   const [showCurrents, setShowCurrents] = useState(false);
@@ -77,74 +74,6 @@ export const CesiumComponent: React.FunctionComponent<{
     }
   };
 
-  const toggleZarrLayer = async () => {
-    const viewer = viewerRef.current;
-    if (!viewer) return;
-
-    if (zarrLayerRef.current) {
-      viewer.imageryLayers.remove(zarrLayerRef.current, true);
-      zarrLayerRef.current = null;
-      setShow2D(false);
-      return;
-    }
-
-    setLoading(true);
-    const url = 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/nemotest101/pyramid2/T1d/sos_abs.zarr';
-    const provider = new ZarLayerProvider({
-      url,
-      variable: 'sos_abs',
-      scale: [30, 37],
-      colormap: 'jet',
-      tileWidth: 256,
-      tileHeight: 256,
-      minimumLevel: 0,
-      maximumLevel: 8
-    });
-
-    const ready = await provider.readyPromise;
-    if (ready) {
-      const imageryLayer = new CesiumJs.ImageryLayer(provider, { alpha: 1.0 });
-      viewer.imageryLayers.add(imageryLayer);
-      zarrLayerRef.current = imageryLayer;
-      setShow2D(true);
-
-      // Optionally fly to layer bounds
-      // viewer.camera.flyTo({ destination: provider.rectangle });
-    }
-
-    setLoading(false);
-  };
-
-  // useEffect(() => {
-  //   if (!showCurrents || !viewerRef.current) return;
-
-  //   // const windOptions = {
-  //   //   speedFactor: 1,
-  //   //   lineWidth: { min: 1, max: 10 },
-  //   //   lineLength: { min: 200, max: 400 },
-  //   //   particlesTextureSize: 50,
-  //   //   useViewerBounds: true,
-  //   //   dynamic: true,
-  //   //   flipY: false
-  //   // };
-
-  //   const velocityProvider = new ZarrCubeVelocityProvider(viewerRef.current, {
-  //     uUrl: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/nemotest101/currents/uo.zarr',
-  //     vUrl: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/nemotest101/currents/vo.zarr',
-  //     bounds: { west: -40, south: -10, east: -20, north: 10 },
-  //     maxElevation: 30,
-  //     scale: [0, 1],
-  //     verticalExaggeration: verticalExaggeration * 100,
-  //     belowSeaLevel,
-  //     colormap: 'jet'
-  //     // windOptions
-  //   });
-
-  //   velocityProvider.load();
-
-  //   return () => velocityProvider.destroy();
-  // }, [showCurrents, belowSeaLevel]);
-
   return (
     <div style={{ position: 'relative', width: '100%', height: '100vh' }}>
       <div ref={containerRef} style={{ width: '100%', height: '100%' }} />
@@ -156,6 +85,13 @@ export const CesiumComponent: React.FunctionComponent<{
           bounds={{ west: -40, south: -10, east: -20, north: 10 }}
           maxElevation={30}
           belowSeaLevel={belowSeaLevel}
+        />
+      )}
+      {show2D && (
+        <ZarrLayerComponent
+          viewerRef={viewerRef}
+          url="https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/nemotest101/pyramid2/T1d/sos_abs.zarr"
+          variable="sos_abs"
         />
       )}
       {show3D && (
@@ -175,8 +111,6 @@ export const CesiumComponent: React.FunctionComponent<{
         //   bounds={{ west: -40, south: -10, east: -20, north: 10 }}
         //   maxElevation={30}
         //   dimensionNames={{ elevation: 'level', time: 'time' }}
-        //   verticalExaggeration={verticalExaggeration * 40}
-        //   opacity={1}
         //   showHorizontalSlices={true}
         //   belowSeaLevel={belowSeaLevel}
         //   showVerticalSlices={true}
@@ -187,21 +121,6 @@ export const CesiumComponent: React.FunctionComponent<{
         //     }
         //   }}
         // />
-      )}
-      {loading && (
-        <div
-          style={{
-            position: 'absolute',
-            top: 20,
-            left: 20,
-            background: 'white',
-            padding: '10px 20px',
-            borderRadius: 4,
-            boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
-          }}
-        >
-          Loading Zarr data...
-        </div>
       )}
       <div
         style={{
@@ -234,7 +153,7 @@ export const CesiumComponent: React.FunctionComponent<{
             cursor: 'pointer',
             border: '1px solid #ccc'
           }}
-          onClick={toggleZarrLayer}
+          onClick={() => setShow2D(prev => !prev)}
         >
           {show2D ? 'Hide 2D Map' : 'Show 2D Map'}
         </button>

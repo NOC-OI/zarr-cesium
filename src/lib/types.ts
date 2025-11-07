@@ -88,6 +88,7 @@ export interface LayerOptions {
   minimumLevel?: number;
   maximumLevel?: number;
   scale?: [number, number];
+  opacity?: number;
   colormap?: ColorMapName;
   colorScale?: [number, number, number][];
   selectors?: { [key: string]: ZarrSelectorsProps };
@@ -175,6 +176,12 @@ export interface ZarrCubeComponentProps {
   selectors?: { [key: string]: ZarrSelectorsProps };
   flipElevation?: boolean;
   maxElevation?: number;
+}
+
+export interface ZarrLayerComponentProps {
+  viewerRef: React.RefObject<Viewer>;
+  url: string;
+  variable: string;
 }
 
 export interface CubeVelocityProps {

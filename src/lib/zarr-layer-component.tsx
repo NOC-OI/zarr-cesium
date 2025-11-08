@@ -47,7 +47,7 @@ export const ZarrLayerComponent: React.FC<ZarrLayerComponentProps> = ({
       if (!viewerRef.current) return;
 
       if (zarrLayerRef.current) {
-        viewerRef.current.imageryLayers.remove(zarrLayerRef.current, true);
+        viewerRef.current.imageryLayers.remove(zarrLayerRef.current, false);
         zarrLayerRef.current = null;
       }
     };

@@ -98,14 +98,15 @@ export class ZarrCubeVelocityProvider {
     const store = new zarr.FetchStore(url);
     const root = zarr.root(store);
 
-    const { zarrArray, dimIndices, attrs } = await initZarrDataset(
+    const { zarrArray, dimIndices, levelInfos, attrs } = await initZarrDataset(
       root,
       variable,
       this.dimensionNames,
       this.levelMetadata,
-      this.levelInfos,
       this.levelCache
     );
+
+    this.levelInfos = levelInfos;
 
     this.crs = this.crs || (await detectCRS(attrs, zarrArray));
 

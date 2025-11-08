@@ -77,16 +77,16 @@ export class ZarrCubeProvider {
     this.store = new zarr.FetchStore(this.url);
     this.root = zarr.root(this.store);
 
-    const { zarrArray, dimIndices, attrs } = await initZarrDataset(
+    const { zarrArray, dimIndices, levelInfos, attrs } = await initZarrDataset(
       this.root,
       this.variable,
       this.dimensionNames,
       this.levelMetadata,
-      this.levelInfos,
       this.levelCache
     );
     this.zarrArray = zarrArray;
     this.dimIndices = dimIndices;
+    this.levelInfos = levelInfos;
 
     this.crs = this.crs || (await detectCRS(attrs, zarrArray));
 

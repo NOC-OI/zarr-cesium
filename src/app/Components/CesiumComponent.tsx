@@ -8,6 +8,8 @@ import { ZarrCubeComponent } from '@/lib/zarr-cube-component';
 import { ZarrCubeVelocityComponent } from '@/lib/zarr-cube-velocity-component';
 import { ZarrLayerComponent } from '@/lib/zarr-layer-component';
 
+const CUBE_BOUNDS = { west: -40, south: -10, east: -20, north: 10 };
+
 export const CesiumComponent: React.FunctionComponent<{
   CesiumJs: CesiumType;
 }> = ({ CesiumJs }) => {
@@ -22,6 +24,7 @@ export const CesiumComponent: React.FunctionComponent<{
   const verticalExaggeration = 50.0;
   useEffect(() => {
     if (!containerRef.current) return;
+    if (viewerRef.current) return;
 
     CesiumJs.Ion.defaultAccessToken = process.env.NEXT_PUBLIC_CESIUM_TOKEN || '';
 
@@ -48,7 +51,7 @@ export const CesiumComponent: React.FunctionComponent<{
       viewer.destroy();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [CesiumJs]);
 
   const toggleGebcoTerrain = () => {
     const viewer = viewerRef.current;
@@ -69,7 +72,7 @@ export const CesiumComponent: React.FunctionComponent<{
       setBelowSeaLevel(true);
       setShow3D(false);
       setShowCurrents(false);
-      viewer.scene.verticalExaggerationRelativeHeight = 0.0; // exaggerate around sea level
+      viewer.scene.verticalExaggerationRelativeHeight = 0.0;
       viewer.scene.verticalExaggeration = verticalExaggeration;
     }
   };
@@ -82,7 +85,7 @@ export const CesiumComponent: React.FunctionComponent<{
           viewerRef={viewerRef}
           uUrl="https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/nemotest101/currents/uo.zarr"
           vUrl="https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/nemotest101/currents/vo.zarr"
-          bounds={{ west: -40, south: -10, east: -20, north: 10 }}
+          bounds={CUBE_BOUNDS}
           maxElevation={30}
           belowSeaLevel={belowSeaLevel}
         />
@@ -99,7 +102,7 @@ export const CesiumComponent: React.FunctionComponent<{
           viewerRef={viewerRef}
           url="https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/nemotest101/currents/uo.zarr"
           variable="uo"
-          bounds={{ west: -40, south: -10, east: -20, north: 10 }}
+          bounds={CUBE_BOUNDS}
           belowSeaLevel={belowSeaLevel}
           flipElevation={true}
           maxElevation={30}
@@ -108,7 +111,7 @@ export const CesiumComponent: React.FunctionComponent<{
         //   viewerRef={viewerRef}
         //   url="https://storage.googleapis.com/weatherbench2/datasets/era5/1959-2023_01_10-full_37-1h-0p25deg-chunk-1.zarr"
         //   variable="temperature"
-        //   bounds={{ west: -40, south: -10, east: -20, north: 10 }}
+        //   bounds={CUBE_BOUNDS}
         //   maxElevation={30}
         //   dimensionNames={{ elevation: 'level', time: 'time' }}
         //   showHorizontalSlices={true}

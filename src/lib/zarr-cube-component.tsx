@@ -66,10 +66,11 @@ export const ZarrCubeComponent: React.FC<ZarrCubeComponentProps> = ({
       });
     });
     return () => {
+      console.log('Destroying cube layer');
       layer.destroy();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [viewerRef, url, variable, bounds, maxElevation]);
+  }, [url, variable, bounds, maxElevation]);
 
   useEffect(() => {
     cubeRef.current?.updateSlices({

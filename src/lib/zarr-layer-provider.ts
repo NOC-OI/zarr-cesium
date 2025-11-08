@@ -3,7 +3,13 @@ import { deriveRectangleAndScheme, latDegToMercY, lonDegToMercX } from './cesium
 import * as Cesium from 'cesium';
 import { vertexShaderSource, fragmentShaderSource } from './shaders.js';
 import { colormapBuilder } from './jsColormaps';
-import { calculateSliceArgs, detectCRS, getXYLimits, initZarrDataset } from './zarr-utils';
+import {
+  calculateSliceArgs,
+  detectCRS,
+  getXYLimits,
+  initZarrDataset,
+  openLevelArray
+} from './zarr-utils';
 import { createColorRampTexture, createProgram, createShader } from './webgl-utils';
 import { CRS, DimensionNamesProps, LayerOptions, XYLimits, ZarrSelectorsProps } from './types';
 
@@ -63,7 +69,6 @@ export class ZarrLayerProvider implements Cesium.ImageryProvider {
   private dimIndices: any = {};
   private store!: zarr.FetchStore;
   private root: any;
-  private multiscaleLevels: number[] = [];
   private levelInfos: string[] = [];
   private levelCache = new Map();
   private levelMetadata: Map<number, { width: number; height: number }> = new Map();
@@ -106,23 +111,21 @@ export class ZarrLayerProvider implements Cesium.ImageryProvider {
       this.store = new zarr.FetchStore(this.url);
       this.root = zarr.root(this.store);
 
-      const { zarrArray, multiscaleLevels, dimIndices, attrs } = await initZarrDataset(
+      const { zarrArray, levelInfos, dimIndices, attrs } = await initZarrDataset(
         this.root,
         this.variable,
         this.dimensionNames,
         this.levelMetadata,
-        this.levelInfos,
         this.levelCache
       );
-
       this.zarrArray = zarrArray;
-      this.multiscaleLevels = multiscaleLevels;
+      this.levelInfos = levelInfos;
       this.dimIndices = dimIndices;
       this.xyLimits = await getXYLimits(
         this.root,
         this.dimIndices,
         this.levelInfos,
-        multiscaleLevels.length > 0
+        levelInfos.length > 0
       );
 
       this.crs = this.crs || (await detectCRS(attrs, zarrArray));
@@ -281,26 +284,13 @@ export class ZarrLayerProvider implements Cesium.ImageryProvider {
     gl.vertexAttribPointer(texCoordLocation, 2, gl.FLOAT, false, 16, 8);
   }
 
-  private async openLevelArray(levelIdx: number) {
-    if (this.levelCache.has(levelIdx)) return this.levelCache.get(levelIdx);
-    const levelPath = this.levelInfos[levelIdx];
-    const levelRoot = await this.root.resolve(levelPath);
-    const arrayLoc = this.variable ? await levelRoot.resolve(this.variable) : levelRoot;
-    const arr = await zarr.open(arrayLoc, { kind: 'array' });
-    this.levelCache.set(levelIdx, arr);
-    if (this.levelCache.size > 3) {
-      const firstKey = this.levelCache.keys().next().value;
-      this.levelCache.delete(firstKey);
-    }
-    return arr;
-  }
+  private choosePyramidLevel(cesiumLevel: number): string | null {
+    if (!this.levelInfos || this.levelInfos.length === 0) return null;
 
-  private choosePyramidLevel(cesiumLevel: number): number {
-    if (!this.multiscaleLevels || this.multiscaleLevels.length === 0) return 0;
     const maxCesium = this.maximumLevel;
     const normalized = cesiumLevel / maxCesium;
-    const index = Math.floor(normalized * (this.multiscaleLevels.length - 1));
-    return this.multiscaleLevels[index];
+    const index = Math.floor(normalized * (this.levelInfos.length - 1));
+    return this.levelInfos[index];
   }
 
   private prepareAbortController(key: string): AbortController {
@@ -313,15 +303,35 @@ export class ZarrLayerProvider implements Cesium.ImageryProvider {
 
   private async getArrayForLevel(level: number) {
     const multiscaleLevel = this.choosePyramidLevel(level);
-    const currentArray = this.levelInfos.length
-      ? await this.openLevelArray(multiscaleLevel)
-      : this.zarrArray;
 
-    const metadata = this.levelMetadata.get(multiscaleLevel);
-    const dataHeight = metadata ? metadata.height : currentArray.shape[this.dimIndices.lat.index];
-    const dataWidth = metadata ? metadata.width : currentArray.shape[this.dimIndices.lon.index];
+    if (multiscaleLevel === null) {
+      const dataHeight = this.zarrArray.shape[this.dimIndices.lat.index];
+      const dataWidth = this.zarrArray.shape[this.dimIndices.lon.index];
+      return { dataWidth, dataHeight, currentArray: this.zarrArray, multiscaleLevel: null };
+    }
 
-    return { dataWidth, dataHeight, currentArray };
+    const currentArray = await openLevelArray(
+      this.root,
+      multiscaleLevel,
+      this.variable,
+      this.levelCache
+    );
+
+    const multiscaleLevelIndex = this.levelInfos.indexOf(multiscaleLevel);
+    const metadata = this.levelMetadata.get(multiscaleLevelIndex);
+
+    if (!metadata) {
+      const dataHeight = currentArray.shape[this.dimIndices.lat.index];
+      const dataWidth = currentArray.shape[this.dimIndices.lon.index];
+      return { dataWidth, dataHeight, currentArray, multiscaleLevel };
+    }
+
+    return {
+      dataWidth: metadata.width,
+      dataHeight: metadata.height,
+      currentArray,
+      multiscaleLevel
+    };
   }
 
   private computeTileUVs(tileRect: Cesium.Rectangle) {
@@ -399,7 +409,6 @@ export class ZarrLayerProvider implements Cesium.ImageryProvider {
     y: number,
     level: number
   ): Promise<HTMLCanvasElement | ImageBitmap> {
-    // console.log(`Loading tile: x=${x}, y=${y}, level=${level}`);
     const key = `${level}/${x}/${y}`;
     const controller = this.prepareAbortController(key);
 
@@ -409,13 +418,22 @@ export class ZarrLayerProvider implements Cesium.ImageryProvider {
     }
 
     try {
-      const { dataWidth, dataHeight, currentArray } = await this.getArrayForLevel(level);
       const tileRect = this._tilingScheme.tileXYToRectangle(x, y, level);
+      const intersection = Cesium.Rectangle.intersection(tileRect, this._coverageRectangle);
+
+      if (!intersection) {
+        return this.emptyCanvas();
+      }
+
+      const { dataWidth, dataHeight, currentArray, multiscaleLevel } =
+        await this.getArrayForLevel(level);
 
       const { u0, u1, v0, v1 } = this.computeTileUVs(tileRect);
 
       const bounds = this.computePixelBounds(u0, u1, v0, v1, dataWidth, dataHeight);
-      if (!bounds) return this.emptyCanvas();
+      if (!bounds) {
+        return this.emptyCanvas();
+      }
 
       const { sliceArgs, dimensionValues } = await calculateSliceArgs(
         currentArray.shape,
@@ -424,19 +442,25 @@ export class ZarrLayerProvider implements Cesium.ImageryProvider {
         this.selectors,
         this.dimensionValues,
         this.root,
-        this.levelInfos.length > 0 ? this.levelInfos[0] : null
+        multiscaleLevel !== null ? multiscaleLevel : null
       );
+
       this.dimensionValues = dimensionValues;
+
       const data = (await ZarrLayerProvider.throttle(() =>
         zarr.get(currentArray, sliceArgs)
       )) as any;
 
       if (controller.signal.aborted) return this.emptyCanvas();
+
+      if (!data || !data.data || data.data.length === 0) {
+        return this.emptyCanvas();
+      }
+
       const flatData = new Float32Array(data.data.buffer);
 
       return this.renderWithWebGL(flatData, bounds.width, bounds.height);
     } catch (error) {
-      console.error('Tile load error:', error, ' tile:', key);
       return this.emptyCanvas();
     } finally {
       this.abortControllers.delete(key);

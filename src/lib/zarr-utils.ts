@@ -137,7 +137,6 @@ export async function calculateSliceArgs(
       );
     }
   }
-
   return { sliceArgs, dimensionValues };
 }
 
@@ -149,7 +148,12 @@ async function loadDimensionValues(
   slice?: [number, number]
 ): Promise<Float64Array | number[]> {
   if (dimensionValues[name]) return dimensionValues[name];
-  const targetRoot = levelInfo ? await root.resolve(levelInfo) : root;
+  let targetRoot;
+  if (levelInfo) {
+    targetRoot = await root.resolve(levelInfo);
+  } else {
+    targetRoot = root;
+  }
   const coordVar = await targetRoot.resolve(name);
   const coordArr = await zarr.open(coordVar, { kind: 'array' });
   const coordData = await zarr.get(coordArr);
@@ -159,34 +163,34 @@ async function loadDimensionValues(
   }
   return coordArray;
 }
-
 export async function initZarrDataset(
   root: any,
   variable: string,
   dimensions: any,
   levelMetadata: Map<number, ZarrLevelMetadata>,
-  levelInfos: string[],
   levelCache: Map<number, any>
-): Promise<{ zarrArray: any; multiscaleLevels: number[]; dimIndices: any; attrs: any }> {
+): Promise<{ zarrArray: any; levelInfos: string[]; dimIndices: any; attrs: any }> {
   const zarrGroup = await zarr.open(root, { kind: 'group' });
   const attrs = (zarrGroup.attrs ?? {}) as any;
   let zarrArray: any = null;
-  let multiscaleLevels: number[] = [];
+  let levelInfos: string[] = [];
   let dimIndices: any = {};
 
   if (attrs.multiscales && attrs.multiscales[0]?.datasets?.length) {
     const datasets = attrs.multiscales[0].datasets;
+
     for (let i = 0; i < datasets.length; i++) {
       const levelPath = datasets[i].path;
       levelInfos.push(levelPath);
       const levelArr = await openLevelArray(root, levelPath, variable, levelCache);
       const dims = identifyDimensionIndices(levelArr.attrs['_ARRAY_DIMENSIONS'], dimensions);
-      levelMetadata.set(i, {
-        width: levelArr.shape[dims.lon.index],
-        height: levelArr.shape[dims.lat.index]
-      });
+
+      const width = levelArr.shape[dims.lon.index];
+      const height = levelArr.shape[dims.lat.index];
+
+      levelMetadata.set(i, { width, height });
     }
-    multiscaleLevels = levelInfos.map((_, i) => i);
+
     zarrArray = await openLevelArray(root, levelInfos[0], variable, levelCache);
   } else {
     const arrayLocation = await root.resolve(variable);
@@ -194,9 +198,8 @@ export async function initZarrDataset(
   }
 
   dimIndices = identifyDimensionIndices(zarrArray.attrs['_ARRAY_DIMENSIONS'], dimensions);
-  return { zarrArray, multiscaleLevels, dimIndices, attrs };
+  return { zarrArray, levelInfos, dimIndices, attrs };
 }
-
 /**
  * Retrieve coordinate limits from lat/lon coordinate variables.
  */
@@ -231,7 +234,6 @@ export async function openLevelArray(
   variable: string,
   levelCache: Map<number, any>
 ): Promise<any> {
-  // Try to reuse if already loaded
   const existing = Array.from(levelCache.entries()).find(([_, val]) => val.path === levelPath);
   if (existing) return existing[1];
 
@@ -239,7 +241,6 @@ export async function openLevelArray(
   const arrayLoc = variable ? await levelRoot.resolve(variable) : levelRoot;
   const arr = await zarr.open(arrayLoc, { kind: 'array' });
 
-  // Add to cache
   const levelIndex = levelCache.size;
   levelCache.set(levelIndex, arr);
   if (levelCache.size > 3) {

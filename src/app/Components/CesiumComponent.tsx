@@ -93,8 +93,10 @@ export const CesiumComponent: React.FunctionComponent<{
       {show2D && (
         <ZarrLayerComponent
           viewerRef={viewerRef}
-          url="https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/nemotest101/pyramid2/T1d/sos_abs.zarr"
-          variable="sos_abs"
+          // url="https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/nemotest101/pyramid2/T1d/sos_abs.zarr"
+          // variable="sos_abs"
+          url="https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/nemotest101/currents/uo.zarr"
+          variable="uo"
         />
       )}
       {show3D && (

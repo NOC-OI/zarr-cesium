@@ -1,6 +1,7 @@
 import { type Viewer, type Rectangle } from 'cesium';
 import { allColorScales } from './jsColormaps';
 import { WindLayerOptions } from 'cesium-wind-layer';
+import * as zarr from 'zarrita';
 
 export interface ZarrSelectorsProps {
   selected: number | string;
@@ -191,3 +192,9 @@ export interface CubeVelocityProps {
   elevation: number;
   dimensionValues: DimensionValues;
 }
+
+export interface DimIndicesProps {
+  [key: string]: { name: string; index: number; array: zarr.Array<any> | null };
+}
+
+export type SliceArgs = (number | zarr.Slice)[];

@@ -14,6 +14,7 @@
     "cesium-wind-layer": "^0.10.0",
     "d3-scale-chromatic": "^3.1.0",
     "next": "^14.2.33",
+    "proj4": "^2.19.10",
     "react": "^18",
     "react-dom": "^18",
     "zarrita": "^0.5.4"

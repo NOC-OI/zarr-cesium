@@ -1,6 +1,12 @@
 import * as Cesium from 'cesium';
 import * as zarr from 'zarrita';
-import { calculateSliceArgs, detectCRS, getCubeDimensions, initZarrDataset } from './zarr-utils';
+import {
+  calculateSliceArgs,
+  calculateXYFromBounds,
+  detectCRS,
+  getCubeDimensions,
+  initZarrDataset
+} from './zarr-utils';
 import {
   BoundsProps,
   ColorMapName,
@@ -104,14 +110,7 @@ export class ZarrCubeProvider {
       this.maxElevation === -1
         ? shape[this.dimIndices.elevation.index]
         : Math.min(this.maxElevation, shape[this.dimIndices.elevation.index]);
-    const x = [
-      Math.floor(((this.bounds.west + 180) / 360) * width),
-      Math.floor(((this.bounds.east + 180) / 360) * width)
-    ];
-    const y = [
-      Math.floor(((90 - this.bounds.north) / 180) * height),
-      Math.floor(((90 - this.bounds.south) / 180) * height)
-    ];
+    const { x, y } = calculateXYFromBounds(this.bounds, width, height, this.crs);
     const { sliceArgs, dimensionValues } = await calculateSliceArgs(
       shape,
       {
@@ -203,7 +202,6 @@ export class ZarrCubeProvider {
     const viewer = this.viewer;
     const { nx, ny, nz } = getCubeDimensions(this.cubeDimensions, this.dimIndices);
 
-    // const [nx, ny, nz] = this.cubeDimensions as [number, number, number];
     const rect = Cesium.Rectangle.fromDegrees(
       this.bounds.west,
       this.bounds.south,

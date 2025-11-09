@@ -1,6 +1,6 @@
 import * as Cesium from 'cesium';
 import * as zarr from 'zarrita';
-import { calculateSliceArgs, detectCRS, initZarrDataset } from './zarr-utils';
+import { calculateSliceArgs, detectCRS, getCubeDimensions, initZarrDataset } from './zarr-utils';
 import {
   BoundsProps,
   ColorMapName,
@@ -8,6 +8,8 @@ import {
   CRS,
   CubeOptions,
   DimensionNamesProps,
+  DimIndicesProps,
+  ZarrLevelMetadata,
   ZarrSelectorsProps
 } from './types';
 import { colormapBuilder } from './jsColormaps';
@@ -38,11 +40,11 @@ export class ZarrCubeProvider {
   private elevationSliceIndex: number = -1;
   private levelInfos: string[] = [];
   private levelCache = new Map();
-  private levelMetadata: Map<number, { width: number; height: number }> = new Map();
-  private zarrArray: any = null;
-  private dimIndices: any = {};
+  private levelMetadata: Map<number, ZarrLevelMetadata> = new Map();
+  private zarrArray: zarr.Array<any> | null = null;
+  private dimIndices: DimIndicesProps = {};
   private store!: zarr.FetchStore;
-  private root: any;
+  private root: zarr.Location<zarr.FetchStore> | null = null;
   private colorScale: ColorScaleProps;
   private horizontalPrimitives: Cesium.Primitive | null = null;
   private verticalLonPrimitives: Cesium.Primitive | null = null;
@@ -84,7 +86,7 @@ export class ZarrCubeProvider {
       this.levelMetadata,
       this.levelCache
     );
-    this.zarrArray = zarrArray;
+    this.zarrArray = zarrArray as zarr.Array<any>;
     this.dimIndices = dimIndices;
     this.levelInfos = levelInfos;
 
@@ -197,8 +199,11 @@ export class ZarrCubeProvider {
   }
 
   private getSliceParameters() {
+    if (!this.cubeDimensions) throw new Error('Cube dimensions not set');
     const viewer = this.viewer;
-    const [nx, ny, nz] = this.cubeDimensions as [number, number, number];
+    const { nx, ny, nz } = getCubeDimensions(this.cubeDimensions, this.dimIndices);
+
+    // const [nx, ny, nz] = this.cubeDimensions as [number, number, number];
     const rect = Cesium.Rectangle.fromDegrees(
       this.bounds.west,
       this.bounds.south,
@@ -376,7 +381,7 @@ export class ZarrCubeProvider {
       } as Cesium.GeometryAttributes,
       indices: new Uint16Array(indices),
       primitiveType: Cesium.PrimitiveType.TRIANGLES,
-      boundingSphere: Cesium.BoundingSphere.fromVertices(new Float64Array(positions) as any)
+      boundingSphere: Cesium.BoundingSphere.fromVertices(positions)
     });
 
     const primitive = new Cesium.Primitive({

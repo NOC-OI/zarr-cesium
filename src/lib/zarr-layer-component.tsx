@@ -136,7 +136,6 @@ export const ZarrLayerComponent: React.FC<ZarrLayerComponentProps> = ({
           Min and Max Scale
         </label>
         <div style={{ display: 'flex', gap: '10px' }}>
-          {/* Use a slider for min scale */}
           <input
             type="range"
             min="-50"

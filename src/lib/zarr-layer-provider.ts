@@ -11,7 +11,15 @@ import {
   openLevelArray
 } from './zarr-utils';
 import { createColorRampTexture, createProgram, createShader } from './webgl-utils';
-import { CRS, DimensionNamesProps, LayerOptions, XYLimits, ZarrSelectorsProps } from './types';
+import {
+  CRS,
+  DimensionNamesProps,
+  DimIndicesProps,
+  LayerOptions,
+  XYLimits,
+  ZarrLevelMetadata,
+  ZarrSelectorsProps
+} from './types';
 
 export class ZarrImageryLayer extends Cesium.ImageryLayer {
   declare imageryProvider: ZarrLayerProvider;
@@ -44,7 +52,7 @@ export class ZarrImageryLayer extends Cesium.ImageryLayer {
 export class ZarrLayerProvider implements Cesium.ImageryProvider {
   errorEvent = new Cesium.Event();
   tileDiscardPolicy = new Cesium.NeverTileDiscardPolicy();
-  proxy: any = undefined;
+  proxy = new Cesium.DefaultProxy('');
   private url: string;
   private variable: string;
   private crs: CRS | null = null;
@@ -65,13 +73,13 @@ export class ZarrLayerProvider implements Cesium.ImageryProvider {
   private _readyPromise!: Promise<boolean>;
 
   private colorScale: { min: number; max: number; colors: number[][] };
-  private zarrArray: any = null;
-  private dimIndices: any = {};
+  private zarrArray: zarr.Array<any> | null = null;
+  private dimIndices: DimIndicesProps = {};
   private store!: zarr.FetchStore;
-  private root: any;
+  private root!: zarr.Location<zarr.FetchStore>;
   private levelInfos: string[] = [];
   private levelCache = new Map();
-  private levelMetadata: Map<number, { width: number; height: number }> = new Map();
+  private levelMetadata: Map<number, ZarrLevelMetadata> = new Map();
   private xyLimits: XYLimits | null = null;
   private colormap: string;
   private gl: WebGL2RenderingContext | null = null;
@@ -302,6 +310,9 @@ export class ZarrLayerProvider implements Cesium.ImageryProvider {
   }
 
   private async getArrayForLevel(level: number) {
+    if (!this.zarrArray) {
+      throw new Error('Zarr array not initialized');
+    }
     const multiscaleLevel = this.choosePyramidLevel(level);
 
     if (multiscaleLevel === null) {

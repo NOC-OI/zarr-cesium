@@ -1,7 +1,12 @@
 import { Viewer } from 'cesium';
 import { WindLayer, WindLayerOptions } from 'cesium-wind-layer';
 import * as zarr from 'zarrita';
-import { calculateSliceArgs, detectCRS, initZarrDataset } from './zarr-utils';
+import {
+  calculateSliceArgs,
+  calculateXYFromBounds,
+  detectCRS,
+  initZarrDataset
+} from './zarr-utils';
 import {
   BoundsProps,
   ColorMapName,
@@ -124,14 +129,7 @@ export class ZarrCubeVelocityProvider {
       maxElevation === -1
         ? shape[dimIndices.elevation.index]
         : Math.min(this.maxElevation, shape[dimIndices.elevation.index]);
-    const x = [
-      Math.floor(((this.bounds.west + 180) / 360) * width),
-      Math.floor(((this.bounds.east + 180) / 360) * width)
-    ];
-    const y = [
-      Math.floor(((90 - this.bounds.north) / 180) * height),
-      Math.floor(((90 - this.bounds.south) / 180) * height)
-    ];
+    const { x, y } = calculateXYFromBounds(this.bounds, width, height, this.crs);
 
     const { sliceArgs, dimensionValues } = await calculateSliceArgs(
       shape,
@@ -214,17 +212,9 @@ export class ZarrCubeVelocityProvider {
 
       let altitude: number;
       if (this.belowSeaLevel) {
-        if (this.flipElevation) {
-          altitude = -currentElevationValue * this.verticalExaggeration;
-        } else {
-          altitude = (maxElevationValue - currentElevationValue) * this.verticalExaggeration;
-        }
+        altitude = -currentElevationValue * this.verticalExaggeration;
       } else {
-        if (this.flipElevation) {
-          altitude = -currentElevationValue * this.verticalExaggeration;
-        } else {
-          altitude = (maxElevationValue - currentElevationValue) * this.verticalExaggeration;
-        }
+        altitude = -(maxElevationValue - currentElevationValue) * this.verticalExaggeration;
       }
 
       const layerOptions = {

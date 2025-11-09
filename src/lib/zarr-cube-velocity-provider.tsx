@@ -154,7 +154,7 @@ export class ZarrCubeVelocityProvider {
     this.dimensionValues = dimensionValues;
 
     const data = await zarr.get(zarrArray, sliceArgs);
-    const arr = this.sanitizeArray(new Float32Array(data.data as any));
+    const arr = this.sanitizeArray(new Float32Array(data.data as ArrayLike<number>));
 
     return {
       array: arr,

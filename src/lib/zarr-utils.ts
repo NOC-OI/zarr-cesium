@@ -1,3 +1,4 @@
+import proj4 from 'proj4';
 import * as zarr from 'zarrita';
 import {
   ZarrSelectorsProps,
@@ -353,4 +354,32 @@ export function getCubeDimensions(
   const ny = cubeDimensions[orderedNames.indexOf('lat')];
   const nx = cubeDimensions[orderedNames.indexOf('lon')];
   return { nx, ny, nz };
+}
+
+export function calculateXYFromBounds(
+  bounds: { west: number; south: number; east: number; north: number },
+  width: number,
+  height: number,
+  crs: CRS | null
+): { x: [number, number]; y: [number, number] } {
+  if (crs === 'EPSG:3857') {
+    const sourceCRS: CRS = 'EPSG:4326';
+    const [xWest, ySouth] = proj4(sourceCRS, crs, [bounds.west, bounds.south]);
+    const [xEast, yNorth] = proj4(sourceCRS, crs, [bounds.east, bounds.north]);
+    const worldExtent = 20037508.342789244;
+    const xMin = Math.floor(((xWest + worldExtent) / (2 * worldExtent)) * width);
+    const xMax = Math.floor(((xEast + worldExtent) / (2 * worldExtent)) * width);
+    const yMin = Math.floor(((worldExtent - yNorth) / (2 * worldExtent)) * height);
+    const yMax = Math.floor(((worldExtent - ySouth) / (2 * worldExtent)) * height);
+    return { x: [xMin, xMax], y: [yMin, yMax] };
+  } else {
+    const xMin = Math.floor(((bounds.west + 180) / 360) * width);
+    const xMax = Math.floor(((bounds.east + 180) / 360) * width);
+    const yMin = Math.floor(((90 - bounds.north) / 180) * height);
+    const yMax = Math.floor(((90 - bounds.south) / 180) * height);
+    return {
+      x: [xMin, xMax],
+      y: [yMin, yMax]
+    };
+  }
 }

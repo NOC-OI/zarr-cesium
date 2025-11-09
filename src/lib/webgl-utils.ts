@@ -81,13 +81,11 @@ export function createColorRampTexture(
 ): WebGLTexture | null {
   if (!gl) return null;
 
-  // Create or reuse a texture
   const colorTexture = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, colorTexture);
 
-  // Flatten colors: assume each color is [r,g,b] with range 0–255 or 0–1
   const flat = new Uint8Array(colors.length * 4);
-  const useFloat = colors[0][0] <= 1.0; // detect normalized RGB (0–1)
+  const useFloat = colors[0][0] <= 1.0;
 
   for (let i = 0; i < colors.length; i++) {
     const c = colors[i];
@@ -97,10 +95,8 @@ export function createColorRampTexture(
     flat[i * 4 + 3] = Math.floor(opacity * 255);
   }
 
-  // Upload a 1D texture (implemented as 256×1 RGBA)
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, colors.length, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, flat);
 
-  // Clamp and interpolate
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);

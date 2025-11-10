@@ -8,7 +8,7 @@ import { ZarrCubeComponent } from '@/lib/zarr-cube-component';
 import { ZarrCubeVelocityComponent } from '@/lib/zarr-cube-velocity-component';
 import { ZarrLayerComponent } from '@/lib/zarr-layer-component';
 
-const CUBE_BOUNDS = { west: -40, south: -10, east: -20, north: 10 };
+const CUBE_BOUNDS = { west: -50, south: -20, east: 10, north: 20 };
 
 export const CesiumComponent: React.FunctionComponent<{
   CesiumJs: CesiumType;
@@ -18,7 +18,7 @@ export const CesiumComponent: React.FunctionComponent<{
 
   const [show3D, setShow3D] = useState(false);
   const [show2D, setShow2D] = useState(false);
-  const [showCurrents, setShowCurrents] = useState(false);
+  const [showVelocity, setShowVelocity] = useState(false);
   const [belowSeaLevel, setBelowSeaLevel] = useState(false);
   const [gebcoTerrainEnabled, setGebcoTerrainEnabled] = useState(false);
   const verticalExaggeration = 50.0;
@@ -62,7 +62,7 @@ export const CesiumComponent: React.FunctionComponent<{
       setGebcoTerrainEnabled(false);
       setBelowSeaLevel(false);
       setShow3D(false);
-      setShowCurrents(false);
+      setShowVelocity(false);
       viewer.scene.verticalExaggeration = 1.0;
     } else {
       viewer.scene.setTerrain(
@@ -71,7 +71,7 @@ export const CesiumComponent: React.FunctionComponent<{
       setGebcoTerrainEnabled(true);
       setBelowSeaLevel(true);
       setShow3D(false);
-      setShowCurrents(false);
+      setShowVelocity(false);
       viewer.scene.verticalExaggerationRelativeHeight = 0.0;
       viewer.scene.verticalExaggeration = verticalExaggeration;
     }
@@ -80,14 +80,31 @@ export const CesiumComponent: React.FunctionComponent<{
   return (
     <div style={{ position: 'relative', width: '100%', height: '100vh' }}>
       <div ref={containerRef} style={{ width: '100%', height: '100%' }} />
-      {showCurrents && (
+      {showVelocity && (
+        // <ZarrCubeVelocityComponent
+        //   viewerRef={viewerRef}
+        //   urls={{
+        //     u: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/nemotest101/currents/uo.zarr',
+        //     v: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/nemotest101/currents/vo.zarr'
+        //   }}
+        //   variables={{ u: 'uo', v: 'vo' }}
+        //   bounds={CUBE_BOUNDS}
+        //   maxElevation={30}
+        //   belowSeaLevel={belowSeaLevel}
+        //   flipElevation={true}
+        // />
         <ZarrCubeVelocityComponent
           viewerRef={viewerRef}
-          uUrl="https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/nemotest101/currents/uo.zarr"
-          vUrl="https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/nemotest101/currents/vo.zarr"
+          urls={{
+            u: 'https://storage.googleapis.com/weatherbench2/datasets/era5/1959-2023_01_10-full_37-1h-0p25deg-chunk-1.zarr',
+            v: 'https://storage.googleapis.com/weatherbench2/datasets/era5/1959-2023_01_10-full_37-1h-0p25deg-chunk-1.zarr'
+          }}
+          variables={{ u: 'u_component_of_wind', v: 'v_component_of_wind' }}
           bounds={CUBE_BOUNDS}
-          maxElevation={30}
-          belowSeaLevel={belowSeaLevel}
+          maxElevation={10}
+          // belowSeaLevel={belowSeaLevel}
+          flipElevation={false}
+          dimensionNames={{ elevation: 'level', time: 'time' }}
         />
       )}
       {show2D && (
@@ -100,32 +117,32 @@ export const CesiumComponent: React.FunctionComponent<{
         />
       )}
       {show3D && (
-        <ZarrCubeComponent
-          viewerRef={viewerRef}
-          url="https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/nemotest101/currents/uo.zarr"
-          variable="uo"
-          bounds={CUBE_BOUNDS}
-          belowSeaLevel={belowSeaLevel}
-          flipElevation={true}
-          maxElevation={30}
-        />
         // <ZarrCubeComponent
         //   viewerRef={viewerRef}
-        //   url="https://storage.googleapis.com/weatherbench2/datasets/era5/1959-2023_01_10-full_37-1h-0p25deg-chunk-1.zarr"
-        //   variable="temperature"
+        //   url="https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/nemotest101/currents/uo.zarr"
+        //   variable="uo"
         //   bounds={CUBE_BOUNDS}
-        //   maxElevation={30}
-        //   dimensionNames={{ elevation: 'level', time: 'time' }}
-        //   showHorizontalSlices={true}
         //   belowSeaLevel={belowSeaLevel}
-        //   showVerticalSlices={true}
-        //   selectors={{
-        //     time: {
-        //       selected: 0,
-        //       type: 'index'
-        //     }
-        //   }}
+        //   flipElevation={true}
+        //   maxElevation={30}
         // />
+        <ZarrCubeComponent
+          viewerRef={viewerRef}
+          url="https://storage.googleapis.com/weatherbench2/datasets/era5/1959-2023_01_10-full_37-1h-0p25deg-chunk-1.zarr"
+          variable="u_component_of_wind"
+          bounds={CUBE_BOUNDS}
+          maxElevation={30}
+          dimensionNames={{ elevation: 'level', time: 'time' }}
+          showHorizontalSlices={true}
+          showVerticalSlices={true}
+          flipElevation={false}
+          selectors={{
+            time: {
+              selected: 0,
+              type: 'index'
+            }
+          }}
+        />
       )}
       <div
         style={{
@@ -183,9 +200,9 @@ export const CesiumComponent: React.FunctionComponent<{
             cursor: 'pointer',
             border: '1px solid #ccc'
           }}
-          onClick={() => setShowCurrents(prev => !prev)}
+          onClick={() => setShowVelocity(prev => !prev)}
         >
-          {showCurrents ? 'Hide Currents Layer' : 'Show Currents Layer'}
+          {showVelocity ? 'Hide Velocity Layer' : 'Show Velocity Layer'}
         </button>
       </div>
     </div>

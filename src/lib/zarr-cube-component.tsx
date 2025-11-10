@@ -27,7 +27,7 @@ export const ZarrCubeComponent: React.FC<ZarrCubeComponentProps> = ({
   });
   const [verticalExaggeration, setVerticalExaggeration] = useState(1000);
   const [opacity, setOpacity] = useState(1.0);
-  const [scale, setScale] = useState<[number, number]>([-1, 1]);
+  const [scale, setScale] = useState<[number, number]>([-100, 10]);
   const [colormap, setColormap] = useState<ColorMapName>('viridis');
 
   const [cubeDimensions, setCubeDimensions] = useState<[number, number, number] | null>(null);
@@ -243,8 +243,8 @@ export const ZarrCubeComponent: React.FC<ZarrCubeComponentProps> = ({
           {/* Use a slider for min scale */}
           <input
             type="range"
-            min="-50"
-            max="50"
+            min="-100"
+            max="10"
             value={scale[0]}
             onChange={e => updateScale(e, 0)}
             style={{ width: '30%', padding: '5px' }}
@@ -252,8 +252,8 @@ export const ZarrCubeComponent: React.FC<ZarrCubeComponentProps> = ({
           <div>{scale[0]}</div>
           <input
             type="range"
-            min="-50"
-            max="50"
+            min="-100"
+            max="10"
             value={scale[1]}
             onChange={e => updateScale(e, 1)}
             style={{ width: '30%', padding: '5px' }}

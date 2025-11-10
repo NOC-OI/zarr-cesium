@@ -97,8 +97,8 @@ export interface LayerOptions {
 }
 
 export interface VelocityOptions {
-  uUrl: string;
-  vUrl: string;
+  urls: { u: string; v: string };
+  variables: { u: string; v: string };
   bounds: { west: number; south: number; east: number; north: number };
   maxElevation?: number;
   verticalExaggeration?: number;
@@ -155,8 +155,8 @@ export interface ColorMapInfo {
 
 export interface ZarrCubeVelocityComponentProps {
   viewerRef: React.RefObject<Viewer>;
-  uUrl: string;
-  vUrl: string;
+  urls: { u: string; v: string };
+  variables: { u: string; v: string };
   bounds: BoundsProps;
   maxElevation?: number;
   belowSeaLevel?: boolean;

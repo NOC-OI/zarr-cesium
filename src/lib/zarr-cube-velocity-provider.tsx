@@ -2,6 +2,7 @@ import { Viewer } from 'cesium';
 import { WindLayer, WindLayerOptions } from 'cesium-wind-layer';
 import * as zarr from 'zarrita';
 import {
+  calculateHeightMeters,
   calculateSliceArgs,
   calculateXYFromBounds,
   detectCRS,
@@ -37,6 +38,7 @@ export class ZarrCubeVelocityProvider {
   private flipElevation: boolean = false;
   private uUrl: string;
   private vUrl: string;
+  private variables: { u: string; v: string };
   private bounds: BoundsProps;
   private crs: CRS | null = null;
   private dimensionNames: DimensionNamesProps;
@@ -56,8 +58,9 @@ export class ZarrCubeVelocityProvider {
 
   constructor(viewer: Viewer, options: VelocityOptions) {
     this.viewer = viewer;
-    this.uUrl = options.uUrl;
-    this.vUrl = options.vUrl;
+    this.uUrl = options.urls.u;
+    this.vUrl = options.urls.v;
+    this.variables = options.variables;
     this.bounds = options.bounds;
     this.crs = options.crs ?? null;
     this.dimensionNames = options.dimensionNames ?? {};
@@ -165,8 +168,8 @@ export class ZarrCubeVelocityProvider {
 
   async load(): Promise<void> {
     const [uCube, vCube] = await Promise.all([
-      this.loadZarrVariable(this.uUrl, 'uo', this.maxElevation),
-      this.loadZarrVariable(this.vUrl, 'vo', this.maxElevation)
+      this.loadZarrVariable(this.uUrl, this.variables.u, this.maxElevation),
+      this.loadZarrVariable(this.vUrl, this.variables.v, this.maxElevation)
     ]);
     if (!uCube || !vCube) {
       console.error('Failed to load U or V component data.');
@@ -184,9 +187,9 @@ export class ZarrCubeVelocityProvider {
       return;
     }
     const { uCube, vCube } = this.volumeData;
-    const { width, height, elevation, dimensionValues } = uCube;
+    const { width, height, dimensionValues } = uCube;
 
-    for (let d = 0; d < elevation; d += this.sliceSpacing) {
+    for (let d = 0; d < dimensionValues.elevation.length; d += this.sliceSpacing) {
       const offset = d * width * height;
       const uoSlice = uCube.array.subarray(offset, offset + width * height);
       const voSlice = vCube.array.subarray(offset, offset + width * height);
@@ -199,24 +202,14 @@ export class ZarrCubeVelocityProvider {
         unit: 'm s-1',
         bounds: this.bounds
       };
-
-      const elevationValues =
-        dimensionValues.elevation ?? Array.from({ length: elevation }, (_, i) => i);
-      const maxElevationValue = Math.max(...(elevationValues as number[]));
-      let currentElevationValue: number;
-      if (this.flipElevation) {
-        currentElevationValue = elevationValues[elevation - 1 - d];
-      } else {
-        currentElevationValue = elevationValues[d];
-      }
-
-      let altitude: number;
-      if (this.belowSeaLevel) {
-        altitude = -currentElevationValue * this.verticalExaggeration;
-      } else {
-        altitude = -(maxElevationValue - currentElevationValue) * this.verticalExaggeration;
-      }
-
+      const elevationValue = dimensionValues.elevation[d];
+      const altitude = calculateHeightMeters(
+        elevationValue,
+        this.dimensionValues.elevation,
+        this.verticalExaggeration,
+        this.belowSeaLevel,
+        this.flipElevation
+      );
       const layerOptions = {
         ...this.windOptions,
         particleHeight: altitude

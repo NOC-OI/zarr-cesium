@@ -1,14 +1,13 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
-import { ZarrCubeProvider } from './zarr-cube-provider';
-import { ColorMapName, DimensionValues, ZarrCubeVelocityComponentProps } from './types';
+import { ColorMapName, ZarrCubeVelocityComponentProps } from './types';
 import { allColorScales } from './jsColormaps';
 import { ZarrCubeVelocityProvider } from './zarr-cube-velocity-provider';
 
 export const ZarrCubeVelocityComponent: React.FC<ZarrCubeVelocityComponentProps> = ({
   viewerRef,
-  uUrl,
-  vUrl,
+  urls,
+  variables,
   bounds,
   maxElevation,
   dimensionNames,
@@ -18,7 +17,7 @@ export const ZarrCubeVelocityComponent: React.FC<ZarrCubeVelocityComponentProps>
 }) => {
   const velocityCubeRef = useRef<ZarrCubeVelocityProvider | null>(null);
   const [opacity, setOpacity] = useState(1.0);
-  const [scale, setScale] = useState<[number, number]>([0, 1]);
+  const [scale, setScale] = useState<[number, number]>([0, 100]);
   const [colormap, setColormap] = useState<ColorMapName>('plasma');
   const [windOptions, setWindOptions] = useState({
     speedFactor: 12,
@@ -38,14 +37,14 @@ export const ZarrCubeVelocityComponent: React.FC<ZarrCubeVelocityComponentProps>
 
   useEffect(() => {
     if (!viewerRef.current) return;
-    const currentKey = JSON.stringify({ uUrl, vUrl, bounds, maxElevation });
+    const currentKey = JSON.stringify({ uUrl: urls.u, vUrl: urls.v, bounds, maxElevation });
     if (lastKey.current === currentKey) return;
     lastKey.current = currentKey;
 
     const velocityProvider = new ZarrCubeVelocityProvider(viewerRef.current, {
-      uUrl: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/nemotest101/currents/uo.zarr',
-      vUrl: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/nemotest101/currents/vo.zarr',
-      bounds: { west: -40, south: -10, east: -20, north: 10 },
+      urls: { u: urls.u, v: urls.v },
+      variables: variables,
+      bounds,
       maxElevation: 30,
       scale,
       verticalExaggeration,
@@ -65,7 +64,7 @@ export const ZarrCubeVelocityComponent: React.FC<ZarrCubeVelocityComponentProps>
     })();
 
     return () => velocityProvider.destroy();
-  }, [viewerRef, uUrl, vUrl, bounds, maxElevation]);
+  }, [viewerRef, urls, bounds, maxElevation]);
 
   useEffect(() => {
     if (!viewerRef.current || !cubeDimensions) return;
@@ -202,8 +201,8 @@ export const ZarrCubeVelocityComponent: React.FC<ZarrCubeVelocityComponentProps>
           {/* Use a slider for min scale */}
           <input
             type="range"
-            min="-50"
-            max="50"
+            min="0"
+            max="300"
             value={scale[0]}
             onChange={e => updateScale(e, 0)}
             style={{ width: '30%', padding: '5px' }}
@@ -211,8 +210,8 @@ export const ZarrCubeVelocityComponent: React.FC<ZarrCubeVelocityComponentProps>
           <div>{scale[0]}</div>
           <input
             type="range"
-            min="-50"
-            max="50"
+            min="0"
+            max="300"
             value={scale[1]}
             onChange={e => updateScale(e, 1)}
             style={{ width: '30%', padding: '5px' }}

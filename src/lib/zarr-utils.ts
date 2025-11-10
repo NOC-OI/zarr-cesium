@@ -187,7 +187,9 @@ async function loadDimensionValues(
     coordArr = await zarr.open(coordVar, { kind: 'array' });
   }
   const coordData = await zarr.get(coordArr);
-  const coordArray = Array.from(coordData.data) as number[];
+  const coordArray = Array.from(coordData.data as number[], (v: number | bigint) =>
+    typeof v === 'bigint' ? Number(v) : v
+  );
   if (slice) {
     return coordArray.slice(slice[0], slice[1]);
   }
@@ -347,13 +349,34 @@ export async function detectCRS(
 export function getCubeDimensions(
   cubeDimensions: [number, number, number],
   dimIndices: DimIndicesProps
-): { nx: number; ny: number; nz: number } {
+): { nx: number; ny: number; nz: number; indicesOrder: string[]; strides: Record<string, number> } {
+  const [nx, ny, nz] = cubeDimensions;
   const names = ['lat', 'lon', 'elevation'];
-  const orderedNames = names.slice().sort((a, b) => dimIndices[b].index - dimIndices[a].index);
-  const nz = cubeDimensions[orderedNames.indexOf('elevation')];
-  const ny = cubeDimensions[orderedNames.indexOf('lat')];
-  const nx = cubeDimensions[orderedNames.indexOf('lon')];
-  return { nx, ny, nz };
+  const indicesOrder = names.slice().sort((a, b) => dimIndices[a].index - dimIndices[b].index);
+  const dims: Record<string, number> = { lon: nx, lat: ny, elevation: nz };
+  const strides: Record<string, number> = {};
+  strides[indicesOrder[2]] = 1;
+  strides[indicesOrder[1]] = dims[indicesOrder[2]];
+  strides[indicesOrder[0]] = dims[indicesOrder[1]] * dims[indicesOrder[2]];
+
+  return { nx, ny, nz, indicesOrder, strides };
+}
+
+export function calculateHeightMeters(
+  elevationValue: number,
+  elevationArray: Float64Array | number[] | undefined,
+  verticalExaggeration: number,
+  belowSeaLevel: boolean | undefined,
+  flipElevation: boolean = false
+): number {
+  const maxElevationValue = Math.max(...(elevationArray as number[]));
+  let firstElement: number;
+  if (belowSeaLevel) {
+    firstElement = -(flipElevation ? elevationValue : maxElevationValue - elevationValue);
+  } else {
+    firstElement = flipElevation ? maxElevationValue - elevationValue : elevationValue;
+  }
+  return firstElement * verticalExaggeration;
 }
 
 export function calculateXYFromBounds(

@@ -1,6 +1,7 @@
 import * as Cesium from 'cesium';
 import * as zarr from 'zarrita';
 import {
+  calculateHeightMeters,
   calculateSliceArgs,
   calculateXYFromBounds,
   detectCRS,
@@ -200,7 +201,10 @@ export class ZarrCubeProvider {
   private getSliceParameters() {
     if (!this.cubeDimensions) throw new Error('Cube dimensions not set');
     const viewer = this.viewer;
-    const { nx, ny, nz } = getCubeDimensions(this.cubeDimensions, this.dimIndices);
+    const { nx, ny, nz, indicesOrder, strides } = getCubeDimensions(
+      this.cubeDimensions,
+      this.dimIndices
+    );
 
     const rect = Cesium.Rectangle.fromDegrees(
       this.bounds.west,
@@ -208,7 +212,7 @@ export class ZarrCubeProvider {
       this.bounds.east,
       this.bounds.north
     );
-    return { viewer, nx, ny, nz, rect };
+    return { viewer, nx, ny, nz, indicesOrder, strides, rect };
   }
 
   private createCanvas(
@@ -230,41 +234,38 @@ export class ZarrCubeProvider {
       this.horizontalPrimitives = null;
     }
     this.elevationSliceIndex = elevationIndex;
-    const { viewer, nx, ny, nz, rect } = this.getSliceParameters();
+    const { viewer, nx, ny, nz, indicesOrder, strides, rect } = this.getSliceParameters();
     const outputCanvas = this.createCanvas(nx, ny);
     const { canvas, ctx } = outputCanvas;
     let imgData = outputCanvas.imgData;
-    let localElevationSliceIndex;
-    if (this.flipElevation) {
-      localElevationSliceIndex = nz - 1 - this.elevationSliceIndex;
-    } else {
-      localElevationSliceIndex = this.elevationSliceIndex;
-    }
+    const elevationSliceIndex = this.flipElevation
+      ? nz - 1 - this.elevationSliceIndex
+      : this.elevationSliceIndex;
     for (let y = 0; y < ny; y++) {
       for (let x = 0; x < nx; x++) {
-        const idx = localElevationSliceIndex * nx * ny + y * nx + x;
+        const coord: Record<string, number> = {
+          lon: x,
+          lat: y,
+          elevation: elevationSliceIndex
+        };
+        const idx =
+          coord[indicesOrder[0]] * strides[indicesOrder[0]] +
+          coord[indicesOrder[1]] * strides[indicesOrder[1]] +
+          coord[indicesOrder[2]] * strides[indicesOrder[2]];
         const value = this.volumeData[idx];
         const pixelIdx = (y * nx + x) * 4;
         imgData = updateImgData(value, pixelIdx, imgData, this.colorScale, this.opacity);
       }
     }
     ctx.putImageData(imgData, 0, 0);
-    const elevationValue = this.dimensionValues.elevation
-      ? this.dimensionValues.elevation[
-          this.dimensionValues.elevation.length - 1 - this.elevationSliceIndex
-        ]
-      : this.elevationSliceIndex * this.sliceSpacing;
-
-    const maxElevationValue = this.dimensionValues.elevation
-      ? Math.max(...(this.dimensionValues.elevation as number[]))
-      : 0;
-
-    let heightMeters: number;
-    if (this.belowSeaLevel) {
-      heightMeters = -elevationValue * this.verticalExaggeration;
-    } else {
-      heightMeters = (maxElevationValue - elevationValue) * this.verticalExaggeration;
-    }
+    const elevationValue = this.dimensionValues.elevation[elevationSliceIndex];
+    const heightMeters = calculateHeightMeters(
+      elevationValue,
+      this.dimensionValues.elevation,
+      this.verticalExaggeration,
+      this.belowSeaLevel,
+      this.flipElevation
+    );
 
     const primitive = new Cesium.Primitive({
       geometryInstances: new Cesium.GeometryInstance({
@@ -319,19 +320,16 @@ export class ZarrCubeProvider {
     const segmentsZ = nz - 1;
 
     for (let iz = 0; iz <= segmentsZ; iz++) {
-      const heightFraction = iz / segmentsZ;
-      const elevationValue = this.dimensionValues.elevation
-        ? this.dimensionValues.elevation[this.dimensionValues.elevation.length - 1 - iz]
-        : iz * this.sliceSpacing;
-      const maxElevation = this.dimensionValues.elevation
-        ? Math.max(...(this.dimensionValues.elevation as number[]))
-        : 0;
-      let height: number;
-      if (this.belowSeaLevel) {
-        height = -elevationValue * this.verticalExaggeration;
-      } else {
-        height = (maxElevation - elevationValue) * this.verticalExaggeration;
-      }
+      const heightFraction = this.flipElevation ? (segmentsZ - iz) / segmentsZ : iz / segmentsZ;
+      const elevationValue = this.dimensionValues.elevation[iz];
+      const height = calculateHeightMeters(
+        elevationValue,
+        this.dimensionValues.elevation,
+        this.verticalExaggeration,
+        this.belowSeaLevel,
+        this.flipElevation
+      );
+
       for (let iN = 0; iN <= segments; iN++) {
         const otherFraction = iN / segments;
         const latOrlon =
@@ -345,9 +343,9 @@ export class ZarrCubeProvider {
             : Cesium.Cartesian3.fromDegrees(slice, latOrlon, height);
         positions.push(cart.x, cart.y, cart.z);
         if (sliceType === 'lon') {
-          sts.push(otherFraction, 1 - heightFraction);
+          sts.push(otherFraction, heightFraction);
         } else {
-          sts.push(1 - otherFraction, 1 - heightFraction);
+          sts.push(1 - otherFraction, heightFraction);
         }
       }
     }
@@ -405,13 +403,23 @@ export class ZarrCubeProvider {
       this.verticalLonPrimitives = null;
     }
     this.latSliceIndex = latIndex;
-    const { viewer, nx, ny, nz, rect } = this.getSliceParameters();
+    const { viewer, nx, ny, nz, indicesOrder, strides } = this.getSliceParameters();
     const outputCanvas = this.createCanvas(nx, nz);
     const { canvas, ctx } = outputCanvas;
     let imgData = outputCanvas.imgData;
     for (let z = 0; z < nz; z++) {
+      const elevationSliceIndex = this.flipElevation ? nz - z - 1 : z;
       for (let x = 0; x < nx; x++) {
-        const idx = z * (ny * nx) + this.latSliceIndex * nx + x;
+        const coord: Record<string, number> = {
+          lon: x,
+          lat: this.latSliceIndex,
+          elevation: elevationSliceIndex
+        };
+        const idx =
+          coord[indicesOrder[0]] * strides[indicesOrder[0]] +
+          coord[indicesOrder[1]] * strides[indicesOrder[1]] +
+          coord[indicesOrder[2]] * strides[indicesOrder[2]];
+
         const value = this.volumeData[idx];
         const canvasY = nz - 1 - z;
         const pixelIdx = (canvasY * nx + x) * 4;
@@ -433,13 +441,22 @@ export class ZarrCubeProvider {
       this.verticalLatPrimitives = null;
     }
     this.lonSliceIndex = lonIndex;
-    const { viewer, nx, ny, nz, rect } = this.getSliceParameters();
+    const { viewer, nx, ny, nz, indicesOrder, strides } = this.getSliceParameters();
     const outputCanvas = this.createCanvas(ny, nz);
     const { canvas, ctx } = outputCanvas;
     let imgData = outputCanvas.imgData;
     for (let z = 0; z < nz; z++) {
+      const elevationSliceIndex = this.flipElevation ? nz - z - 1 : z;
       for (let y = 0; y < ny; y++) {
-        const idx = z * nx * ny + y * nx + this.lonSliceIndex;
+        const coord: Record<string, number> = {
+          lon: this.lonSliceIndex,
+          lat: y,
+          elevation: elevationSliceIndex
+        };
+        const idx =
+          coord[indicesOrder[0]] * strides[indicesOrder[0]] +
+          coord[indicesOrder[1]] * strides[indicesOrder[1]] +
+          coord[indicesOrder[2]] * strides[indicesOrder[2]];
         const value = this.volumeData[idx];
         const canvasY = nz - 1 - z;
         const pixelIdx = (canvasY * ny + y) * 4;

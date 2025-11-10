@@ -1,4 +1,3 @@
-
 // Vertex shader
 export const vertexShaderSource = `#version 300 es
   in vec2 a_position;
@@ -24,7 +23,6 @@ export const fragmentShaderSource = `#version 300 es
   out vec4 fragColor;
 
   void main() {
-    // float value = texture(u_dataTexture, v_texCoord).r;
     float value = texture(u_dataTexture, vec2(v_texCoord.x, 1.0 - v_texCoord.y)).r;
 
     if (value != value || value < -9998.0 || value > 9998.0) {

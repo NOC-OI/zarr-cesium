@@ -1,0 +1,15 @@
+# cool()
+
+```ts
+const cool: (x) => number[];
+```
+
+## Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `x` | `number` |
+
+## Returns
+
+`number`[]

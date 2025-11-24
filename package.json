@@ -1,36 +1,44 @@
 {
   "name": "zarr-cesium",
   "version": "0.1.0",
-  "private": true,
+  "description": "A Cesium integration library for visualizing Zarr datasets in 2D and 3D.",
+  "author": "Tobias <tobias.ferreira@noc.ac.uk>",
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "dev": "tsup src/index.ts --format cjs,esm --dts --sourcemap --watch",
+    "build": "tsup src/index.ts --format cjs,esm --dts --sourcemap --external cesium",
+    "clean": "rm -rf dist",
+    "docs": "typedoc",
+    "start:demo": "cd demo && npm run dev"
   },
-  "dependencies": {
-    "antd": "^5.27.6",
-    "cesium": "^1.115.0",
-    "cesium-wind-layer": "^0.10.0",
-    "d3-scale-chromatic": "^3.1.0",
-    "next": "^14.2.33",
-    "proj4": "^2.19.10",
-    "react": "^18",
-    "react-dom": "^18",
-    "zarrita": "^0.5.4"
+  "peerDependencies": {
+    "cesium": "*"
   },
   "devDependencies": {
-    "@types/d3-scale-chromatic": "^3.1.0",
-    "@types/eslint__eslintrc": "^2.1.2",
-    "@types/node": "^20",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
-    "copy-webpack-plugin": "^12.0.2",
-    "eslint": "^8.57.1",
-    "eslint-config-next": "14.1.4",
-    "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-prettier": "^5.5.4",
-    "prettier": "^3.6.2",
-    "typescript": "^5"
-  }
+    "@zarrita/ndarray": "^0.1.5",
+    "cesium-wind-layer": "^0.10.0",
+    "ndarray": "^1.0.19",
+    "proj4": "^2.19.10",
+    "tsup": "^8.0.2",
+    "typedoc": "^0.28.14",
+    "typedoc-plugin-markdown": "^4.9.0",
+    "typescript": "^5.6.3",
+    "zarrita": "^0.5.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/noc-oi/zarr-cesium.git"
+  },
+  "bugs": {
+    "url": "https://github.com/noc-oi/zarr-cesium/issues"
+  },
+  "homepage": "https://noc-oi.github.io/zarr-cesium",
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

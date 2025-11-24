@@ -3,6 +3,7 @@
 
 # dependencies
 /node_modules
+*/node_modules
 /.pnp
 .pnp.js
 .yarn/install-state.gz
@@ -11,8 +12,8 @@
 /coverage
 
 # next.js
-/.next/
-/out/
+demo/.next/
+demo/out/
 
 # production
 /build
@@ -34,7 +35,28 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
-next-env.d.ts
-
+demo/next-env.d.ts
+dist/
 # cesium files that gets copied over by copy webpack plugin
-/public/cesium
+demo/public/cesium
+
+
+# dependencies
+docs/node_modules
+
+# production
+docs/build
+
+# generated files
+docs/.docusaurus
+docs/.cache-loader
+
+# misc
+docs/.DS_Store
+docs/.env.local
+docs/.env.development.local
+docs/.env.test.local
+docs/.env.production.local
+docs/npm-debug.log*
+docs/yarn-debug.log*
+docs/yarn-error.log*

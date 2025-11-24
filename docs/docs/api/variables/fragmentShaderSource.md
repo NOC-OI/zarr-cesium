@@ -1,0 +1,5 @@
+# fragmentShaderSource
+
+```ts
+const fragmentShaderSource: "#version 300 es\n  precision highp float;\n\n  in vec2 v_texCoord;\n\n  uniform sampler2D u_dataTexture;\n  uniform sampler2D u_colorRamp;\n\n  uniform float u_min;\n  uniform float u_max;\n\n  uniform float u_noDataMin;\n  uniform float u_noDataMax;\n\n  uniform bool  u_useFillValue;\n  uniform float u_fillValue;\n\n  uniform float u_scaleFactor;\n  uniform float u_addOffset;\n\n  out vec4 fragColor;\n\n  void main() {\n      float raw = texture(u_dataTexture, vec2(v_texCoord.x, 1.0 - v_texCoord.y)).r;\n\n      // Convert stored_value → real_value using CF conventions\n      float value = raw * u_scaleFactor + u_addOffset;\n\n      // Mask invalid values\n      bool isNaN = (value != value);\n      bool isNoData = (value < u_noDataMin || value > u_noDataMax);\n      bool isFill = (u_useFillValue && abs(value - u_fillValue) < 1e-6);\n\n      if (isNaN || isNoData || isFill) {\n          discard;\n      }\n\n      // Normalize\n      float normalized = clamp((value - u_min) / (u_max - u_min), 0.0, 1.0);\n\n      fragColor = texture(u_colorRamp, vec2(normalized, 0.5));\n  }\n";
+```

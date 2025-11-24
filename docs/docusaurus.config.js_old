@@ -1,0 +1,36 @@
+module.exports = {
+  title: 'Zarr-Cesium',
+  tagline: 'Visualize multidimensional Zarr datasets in Cesium',
+  url: 'https://noc-oi.github.io',
+  baseUrl: '/zarr-cesium/',
+  trailingSlash: false,
+  favicon: 'assets/favicon.ico',
+  organizationName: 'NOC-OI',
+  projectName: 'zarr-cesium',
+  onBrokenLinks: 'warn',
+  onBrokenMarkdownLinks: 'warn',
+  presets: [
+    [
+      'classic',
+      {
+        docs: {
+          sidebarPath: require.resolve('./sidebars.js')
+        }
+      }
+    ]
+  ],
+  themeConfig: {
+    navbar: {
+      title: 'My Package',
+      items: [
+        { to: '/docs/intro', label: 'Docs', position: 'left' },
+        { to: '/docs/api/README', label: 'API', position: 'left' },
+        {
+          href: 'https://github.com/noc-oi/zarr-cesium',
+          label: 'GitHub',
+          position: 'right'
+        }
+      ]
+    }
+  }
+};

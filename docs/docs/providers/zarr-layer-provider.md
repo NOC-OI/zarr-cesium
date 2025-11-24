@@ -1,0 +1,288 @@
+---
+sidebar_position: 3
+title: ZarrLayerProvider
+---
+
+# ZarrLayerProvider
+
+The **ZarrLayerProvider** allows you to render **2D raster data from Zarr datasets** as a Cesium imagery layer.
+It handles:
+
+- Reading Zarr metadata and multiscale pyramids
+- WebGL rendering of tiles (fast GPU-based color mapping)
+- Dynamic slicing of dimensions (e.g., time, elevation)
+- Runtime style updates (colormap, scale, opacity)
+- CRS detection (`EPSG:4326` / `EPSG:3857`)
+- Smooth integration with Cesium’s `ImageryLayer` collection
+
+This provider works as a drop-in replacement for Cesium imagery layers, enabling you to visualize 2D scalar fields (e.g., temperature, salinity, chlorophyll) stored in Zarr format, without any server-side preprocessing or conversion.
+
+## When to Use ZarrLayerProvider
+
+Use **ZarrLayerProvider** when your dataset is:
+
+- 2D (lat × lon)
+- Optionally has **extra dimensions**: `time`, `elevation`, `depth`, etc.
+- Stored as a **Zarr array**, possibly multiscale
+- Represents **scalar fields** (not vectors)
+
+If you need:
+
+- 3D rendering → use [**ZarrCubeProvider**](./zarr-cube-provider.md)
+- 3D vector fields → use [**ZarrCubeVelocityProvider**](./zarr-cube-velocity-provider.md)
+- 2D tiled imagery using a backend server → use [**titiler**](https://github.com/developmentseed/titiler)
+
+---
+
+## Basic Example
+
+```ts
+import { Viewer } from 'cesium';
+import { ZarrLayerProvider } from '@noc-oi/zarr-cesium';
+
+const viewer = new Viewer('cesiumContainer');
+
+const options = {
+  url: 'https://example.com/data.zarr',
+  variable: 'salinity',
+  colormap: 'viridis',
+  scale: [30, 40]
+};
+
+const layer = await ZarrLayerProvider.createLayer(viewer, options);
+
+viewer.imageryLayers.add(layer);
+```
+
+## Layer Options
+
+```ts
+export interface LayerOptions {
+  url: string; // Public Zarr store
+  variable: string; // Zarr array name
+  scale?: [number, number]; // Min/max for color scaling
+  colormap?: ColorMapName; // Name from jsColormaps, based on matplotlib colormaps
+  opacity?: number; // Imagery opacity (0–1)
+  tileWidth?: number; // Cesium tile size (default 256)
+  tileHeight?: number; // Cesium tile size (default 256)
+  minimumLevel?: number; // Min zoom level
+  maximumLevel?: number; // Max zoom level
+  dimensionNames?: DimensionNamesProps; // Custom dimension names. If not provided, defaults will be used or identified automatically based on CF conventions.
+  selectors?: Record<string, ZarrSelectorsProps>; // Initial dimension slices
+  zarrVersion?: 2 | 3; // Zarr version (auto-detected if not set)
+  crs?: 'EPSG:4326' | 'EPSG:3857'; // Force CRS (auto-detected if not set)
+  noDataMin?: number; // Custom no-data minimum value. Overrides _FillValue/missing_value.
+  noDataMax?: number; // Custom no-data maximum value. Overrides _FillValue/missing_value.
+}
+```
+
+---
+
+## Dimension Selectors
+
+If your Zarr dataset has dimensions like: `time`, `level` related (e.g. `depth`, `elevation`), and others, you can slice them using the `selectors` option.
+
+You can set an initial slice using:
+
+```ts
+selectors: {
+  time: { type: 'index', selected: 0 },
+  elevation: { type: 'index', selected: 10 }
+}
+```
+
+Or slice by **value** instead of index:
+
+```ts
+selectors: {
+  time: { type: 'value', selected: '2020-01-01T00:00Z' },
+  elevation: { type: 'value', selected: 50 } // meters
+}
+```
+
+The provider automatically converts value→index using nearest-neighbor lookup. The default behavior (if no selectors are provided) is to select the first index (`0`) for each dimension.
+
+---
+
+## Creating a Layer
+
+### Static constructor
+
+```ts
+const imageryLayer = await ZarrLayerProvider.createLayer(viewer, options);
+viewer.imageryLayers.add(imageryLayer);
+```
+
+This method:
+
+1. Creates the provider
+2. Loads Zarr metadata
+3. Detects CRS
+4. Sets tiling scheme
+5. Loads the first dimension slice
+6. Returns a ready-to-use `ZarrImageryLayer`
+
+---
+
+## Runtime API
+
+When added to Cesium, the layer behaves like a normal `ImageryLayer`, **plus extra Zarr-specific features**.
+
+```ts
+const zbLayer = await ZarrLayerProvider.createLayer(viewer, options);
+viewer.imageryLayers.add(zbLayer);
+```
+
+### Update Style (colormap, scale and opacity)
+
+- colormap
+
+```ts
+zbLayer.updateStyle({ colormap: 'plasma' });
+```
+
+The full list of supported colormaps is available in the [Colormaps section](../api/type-aliases/ColorMapName.md).
+
+- scale range
+
+```ts
+zbLayer.updateStyle({ scale: [20, 35] });
+```
+
+- opacity
+
+```ts
+zbLayer.updateStyle({ opacity: 0.5 });
+// or using Cesium ImageryLayer API
+// zbLayer.alpha = 0.5;
+```
+
+After updating style, the layer performs a **soft refresh** so Cesium re-renders the tiles in the viewport with the new style.
+
+### Update dimension slicing
+
+```ts
+zbLayer.updateSelectors({
+  time: { type: 'index', selected: 5 }
+});
+```
+
+You can get the list of current dimension and current selectors values using:
+
+```ts
+const dimValues = zbLayer.provider.dimensionValues;
+const selectors = zbLayer.provider.selectors;
+```
+
+This returns a mapping of dimension names to their list of values, e.g.:
+
+```ts
+dimNames = {
+  time: ['2020-01-01T00:00Z', '2020-01-02T00:00Z', ...],
+  elevation: [0, 10, 20, 30, ...]
+}
+```
+
+And the current selectors:
+
+```ts
+selectors = {
+  time: { type: 'index', selected: 5 },
+  elevation: { type: 'index', selected: 2 }
+};
+```
+
+And with that, you can build UI controls (sliders, dropdowns) to update the layer dynamically.
+
+### Supported CRS
+
+Zarr datasets may store coordinate values in:
+
+- `EPSG:4326` (lat, lon degrees)
+- `EPSG:3857` (Web Mercator meters)
+
+The provider detects the CRS automatically using:
+
+- Zarr metadata
+- consolidated metadata
+- coordinate ranges (West/East > 360 → Web Mercator)
+
+---
+
+### Multiscale (Pyramidal) Zarr
+
+If the dataset contains Zarr multiscale metadata (generated by [ndpyramid](https://github.com/carbonplan/ndpyramid)):
+
+```json
+"multiscales": [
+  {
+    "datasets": [
+      {"path": "0"}, {"path": "1"}, {"path": "2"}
+    ]
+  }
+]
+```
+
+The provider automatically:
+
+- chooses the best level based on Cesium zoom
+- caches levels (LRU = 3)
+- correctly slices each level
+- uses metadata-supported shapes for accurate scaling
+
+No extra configuration is required.
+
+---
+
+### No-data Handling
+
+Automatically applies:
+
+- `_FillValue`
+- `missing_value`
+- `valid_min` / `valid_max`
+- or custom range
+
+Example of custom range:
+
+```ts
+noDataMin: -9999, // defaults is to Zarr attributes and then -9999
+noDataMax: 9999 // defaults is to Zarr attributes and then 9999
+```
+
+---
+
+## Performance Notes
+
+- WebGL tile rendering is extremely fast
+- Multiscale/pyramid datasets dramatically improve speed
+- `ImageBitmap` acceleration is used when available
+- Uses internal concurrency throttling (4 parallel reads)
+
+---
+
+## Summary
+
+| Feature             | Supported |
+| ------------------- | --------- |
+| 2D raster Zarr      | ✔️        |
+| Zarr v2 & v3        | ✔️        |
+| Time dimension      | ✔️        |
+| Elevation/depth     | ✔️        |
+| Multiscale pyramids | ✔️        |
+| WebGL GPU shading   | ✔️        |
+| Colormap updates    | ✔️        |
+| Dynamic slicing     | ✔️        |
+| CRS auto-detection  | ✔️        |
+
+---
+
+## Next Steps
+
+- **[ZarrCubeProvider](./zarr-cube-provider.md)** – render 3D volumes
+- **[ZarrCubeVelocityProvider](./zarr-cube-velocity-provider.md)** – render vector fields
+- **[Data Preparation](../data.md)** – Prepare Zarr datasets for the browser
+
+```
+
+```

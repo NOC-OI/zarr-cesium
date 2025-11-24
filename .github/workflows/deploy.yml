@@ -1,0 +1,69 @@
+name: Deploy Docs & Demo
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # Build docs (Docusaurus)
+      - name: Install docs dependencies
+        working-directory: ./docs
+        run: npm ci
+
+      - name: Build docs
+        working-directory: ./docs
+        run: npm run build
+
+      # Build demo (Vite)
+      - name: Install demo dependencies
+        working-directory: ./demo
+        run: npm ci
+
+      - name: Build demo
+        working-directory: ./demo
+        run: npm run build
+
+      # Prepare deployment folder
+      - name: Prepare deployment folder
+        run: |
+          mkdir deploy
+          # Demo at the root
+          cp -r demo/dist/* deploy/
+          # Docs under /docs/
+          mkdir -p deploy/docs
+          cp -r docs/build/* deploy/docs/
+
+      # Upload for GitHub Pages
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: deploy
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: pages
+        uses: actions/deploy-pages@v4

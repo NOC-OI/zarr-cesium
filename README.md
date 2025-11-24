@@ -146,7 +146,11 @@ await cube.load();
 
 For more details, see the [Zarr-cesium documentation](https://noc-oi.github.io/zarr-cesium/docs/).
 
-<video src="https://github.com/NOC-OI/zarr-cesium/releases/download/0.1.0/cube_provider.mp4" autoplay loop muted playsinline></video>
+https://github.com/NOC-OI/zarr-cesium/releases/download/0.1.0/cube_provider.mp4
+
+<!-- <video src="https://github.com/NOC-OI/zarr-cesium/releases/download/0.1.0/cube_provider.mp4" autoplay loop muted playsinline></video>
+
+![Video with a map with a 3d cube of the u component of the currents. The data is related to the outputs of NEMO NPD](https://github.com/NOC-OI/zarr-cesium/releases/download/0.1.0/cube_provider.mp4) -->
 
 > Example of visualizing a 4D Zarr dataset in a CesiumJs map as a 3D cube using Zarr-Cesium. As you can see, you can easily change slices and see the cube in different ways, styles and scales.
 

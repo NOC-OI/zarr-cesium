@@ -24,6 +24,36 @@ Traditional NetCDF/GeoTIFF-based visualization pipelines require:
 
 **Zarr-Cesium removes all of that**, streaming chunked scientific arrays directly into WebGL shaders for real-time exploration.
 
+## Screenshots
+
+<div style={{ maxWidth: "800px", margin: "0 auto" }}>
+  <video
+    src="https://github.com/NOC-OI/zarr-cesium/releases/download/0.1.0/official_zarrcesium.mp4"
+    loop
+    controls
+    muted
+    style={{ width: "100%", borderRadius: "8px" }}
+  />
+</div>
+<div style={{ maxWidth: "800px", margin: "0 auto" }}>
+  <video
+    src="https://github.com/NOC-OI/zarr-cesium/releases/download/0.1.0/layer_provider.mp4"
+    loop
+    controls
+    muted
+    style={{ width: "100%", borderRadius: "8px" }}
+  />
+</div>
+<div style={{ maxWidth: "800px", margin: "0 auto" }}>
+  <video
+    src="https://github.com/NOC-OI/zarr-cesium/releases/download/0.1.0/cube_globe.mp4"
+    loop
+    controls
+    muted
+    style={{ width: "100%", borderRadius: "8px" }}
+  />
+</div>
+
 ---
 
 ## Features
@@ -62,17 +92,6 @@ CesiumJS (WebGL)
 ↓
 2D/3D Interactive Visualization
 
-```
-
----
-
-## Screenshots
-
-ADD_INFO_HERE
-Add screenshots using the `/static/img` folder, e.g.:
-
-```md
-![Example: 2D salinity data](../static/img/sos_abs.png)
 ```
 
 ---

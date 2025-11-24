@@ -42,8 +42,9 @@ Typical datasets:
 
 If you want:
 
-- **2D rasters** → use [**ZarrLayerProvider**](./zarr-layer-provider.md)
-- **3D scalar fields** → use [**ZarrCubeProvider**](./zarr-cube-provider.md)
+- 2D rendering → use [**ZarrLayerProvider**](./zarr-layer-provider.md)
+- 3D rendering → use [**ZarrCubeProvider**](./zarr-cube-provider.md)
+- 3D vector fields + time → use [**ZarrCubeVelocityProvider**](./zarr-cube-velocity-provider.md) and drive time externally
 
 ---
 

@@ -134,7 +134,7 @@ This workflow was developed using **approximately 30 GB of NEMO NPD ocean model 
 
 We also provide a sample atmospheric dataset for testing wind-related visualisations. This dataset contains U/V wind components on a regular latitude–longitude grid, processed with the same workflow, and derived from the ERA5 reanalysis of Hurricane Florence.
 
-A full list of available datasets is provided in the **data information file** on GitHub: [https://github.com/NOC-OI/zarr-vis/demo](https://github.com/NOC-OI/zarr-vis/demo). ADD_INFO_HERE
+A full list of available datasets is provided in the **data information file** on [demo/src/application/data/layers-json.tsx](https://github.com/NOC-OI/zarr-cesium/blob/dev/demo/src/application/data/layers-json.tsx).
 
 A full demo is available:
 

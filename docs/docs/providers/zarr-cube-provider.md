@@ -43,11 +43,11 @@ Typical use cases:
 - Scientific 3D rasters
 - Volumetric scalar fields
 
-If your dataset is:
+If your need is:
 
-- **2D raster** → Use `ZarrLayerProvider`
-- **3D + time** → Use `ZarrCubeProvider` and drive time externally
-- **3D vector fields** → Use `ZarrCubeVelocityProvider`
+- 2D rendering → use [**ZarrLayerProvider**](./zarr-layer-provider.md)
+- 3D + time → Use `ZarrCubeProvider` and drive time externally
+- 3D vector fields → use [**ZarrCubeVelocityProvider**](./zarr-cube-velocity-provider.md)
 
 ---
 
@@ -73,7 +73,7 @@ const cube = new ZarrCubeProvider(viewer, options);
 
 await cube.load();
 
-// Move slices interactively
+// Move slices interactively (the first slice that you show if you don't set this is index 0)
 cube.updateSlices({
   latIndex: 20,
   lonIndex: 15,
@@ -143,8 +143,6 @@ Rendered as a textured Cesium `RectangleGeometry`:
 // Cube options
 showHorizontalSlices: true;
 ```
-
----
 
 ### Vertical Longitude (XZ plane) and Latitude (YZ plane) Slices
 

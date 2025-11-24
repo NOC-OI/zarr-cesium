@@ -85,7 +85,7 @@ npm run dev
 
 The demo site will be available at `http://localhost:3000`.
 
-If you want to use your own Zarr datasets, you can modify the demo code in `demo/pages/index.tsx` to point to your data URLs. You may need to adjust variable names, bounds, and other parameters accordingly.
+If you want to use your own Zarr datasets, you can modify the demo code in [`demo/src/application/data/layers-json.tsx`](https://github.com/NOC-OI/zarr-cesium/blob/dev/demo/src/application/data/layers-json.tsx) to point to your data URLs. You may need to adjust variable names, bounds, and other parameters accordingly.
 
 ---
 
@@ -116,7 +116,7 @@ viewer.imageryLayers.add(layer);
 
 For more details, see the [Zarr-Cesium documentation](https://noc-oi.github.io/zarr-cesium/docs/).
 
-https://github.com/user-attachments/assets/8b066725-c6c7-4b7a-9fc0-d632b623937c
+https://github.com/user-attachments/assets/33fc6dd2-38fa-4b20-a346-0a175f90eba1
 
 > Example of visualizing a Zarr dataset in a CesiumJS map using Zarr-Cesium. You can easily change the timestamp, colormap, and scale.
 

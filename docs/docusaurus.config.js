@@ -5,7 +5,7 @@ const config = {
   title: 'Zarr-Cesium',
   tagline: 'Visualize multidimensional Zarr datasets in Cesium',
   url: 'https://noc-oi.github.io',
-  baseUrl: '/zarr-cesium/',
+  baseUrl: '/zarr-cesium/docs',
 
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'

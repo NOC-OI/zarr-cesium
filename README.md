@@ -1,7 +1,7 @@
 # Zarr-Cesium Visualization Toolkit
 
 [![CI](https://github.com/noc-oi/zarr-cesium/actions/workflows/main.yml/badge.svg)](https://github.com/noc-oi/zarr-cesium/actions/workflows/main.yml)
-![NPM Version](https://img.shields.io/npm/v/@noc-oi/zarr-cesium)
+![NPM Version](https://img.shields.io/npm/v/zarr-cesium)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 **High-performance CesiumJS providers for interactive 2D and 3D visualization of environmental and atmospheric data stored in Zarr**
@@ -115,9 +115,9 @@ viewer.imageryLayers.add(layer);
 
 For more details, see the [Zarr-cesium documentation](https://noc-oi.github.io/zarr-cesium/docs/).
 
-![Video with a map with a plot of salinity map for the date 2000–01–01T12:00:00. The data is related to the outputs of NEMO NPD](public/carbonplan.gif)
+<video src="https://github.com/NOC-OI/zarr-cesium/releases/download/0.1.0/layer_provider.mp4" autoplay loop muted playsinline></video>
 
-> Example of visualizing a 10GB dataset in the browser using a carbonplan/maps adapted code. As you can see, you can easily change the timestamp, colormap, and map scale
+> Example of visualizing a Zarr dataset in a CesiumJs map using Zarr-Cesium. As you can see, you can easily change the timestamp, colormap, and map scale
 
 ---
 
@@ -146,9 +146,9 @@ await cube.load();
 
 For more details, see the [Zarr-cesium documentation](https://noc-oi.github.io/zarr-cesium/docs/).
 
-![Video with a map with a plot of salinity map for the date 2000–01–01T12:00:00. The data is related to the outputs of NEMO NPD](public/carbonplan.gif)
+<video src="https://github.com/NOC-OI/zarr-cesium/releases/download/0.1.0/cube_provider.mp4" autoplay loop muted playsinline></video>
 
-> Example of visualizing a 10GB dataset in the browser using a carbonplan/maps adapted code. As you can see, you can easily change the timestamp, colormap, and map scale
+> Example of visualizing a 4D Zarr dataset in a CesiumJs map as a 3D cube using Zarr-Cesium. As you can see, you can easily change slices and see the cube in different ways, styles and scales.
 
 ---
 

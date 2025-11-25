@@ -325,6 +325,9 @@ export const layersJson: LayersJsonType = {
           selectors: {
             time: {
               selected: 0
+            },
+            elevation: {
+              selected: [0, 22]
             }
           },
           colormap: 'jet',

@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - main
+      - dev
+  pull_request:
+    branches:
+      - main
+      - dev
   workflow_dispatch:
 
 permissions:
@@ -27,11 +32,11 @@ jobs:
 
       # Build docs (Docusaurus)
       - name: Install docs dependencies
-        working-directory: ./docs
+        working-directory: ./docusaurus
         run: npm ci
 
       - name: Build docs
-        working-directory: ./docs
+        working-directory: ./docusaurus
         run: npm run build
 
       # Build demo (Vite)
@@ -46,12 +51,12 @@ jobs:
       # Prepare deployment folder
       - name: Prepare deployment folder
         run: |
-          mkdir deploy
+          mkdir -p docs
           # Demo at the root
-          cp -r demo/dist/* deploy/
+          cp -r demo/dist/* docs/
           # Docs under /docs/
-          mkdir -p deploy/docs
-          cp -r docs/build/* deploy/docs/
+          mkdir -p docs/docs
+          cp -r docusaurus/build/* docs/docs/
 
       # Upload for GitHub Pages
       - name: Upload artifact

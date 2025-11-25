@@ -1,6 +1,6 @@
 # Zarr-Cesium Visualization Toolkit
 
-![NPM Version](https://img.shields.io/npm/v/zarr-cesium)
+[![NPM Version](https://img.shields.io/npm/v/zarr-cesium)](https://www.npmjs.com/package/zarr-cesium)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Docs](https://img.shields.io/badge/docs-online-blue)](https://noc-oi.github.io/zarr-cesium/docs)
 

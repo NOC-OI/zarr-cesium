@@ -170,13 +170,7 @@ Run:
 npm run build
 ```
 
-and optionally:
-
-```bash
-npm run lint
-```
-
-(If lint scripts exist.)
+This will check all TypeScript types, eslint rules, and prettier formatting. And then build the library.
 
 ## 📥 5.3. Pull Request Guidelines
 
@@ -187,11 +181,7 @@ npm run lint
 
 ## 📚 5.4. Updating Documentation
 
-Docs live under:
-
-```
-docs/docs/
-```
+Docs live under: `docs/`
 
 Examples:
 
@@ -239,13 +229,3 @@ Run:
 cd docs
 npm install
 ```
-
-### WindLayer errors in demo
-
-Ensure:
-
-```
-cesium-wind-layer
-```
-
-is installed in the repo root or demo project.

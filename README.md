@@ -3,7 +3,6 @@
 ![NPM Version](https://img.shields.io/npm/v/zarr-cesium)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Docs](https://img.shields.io/badge/docs-online-blue)](https://noc-oi.github.io/zarr-cesium/docs)
-[![Code style: Prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://prettier.io)
 
 **High-performance CesiumJS providers for interactive 2D and 3D visualization of environmental and atmospheric data stored in Zarr.**
 

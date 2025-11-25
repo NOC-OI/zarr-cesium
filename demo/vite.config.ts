@@ -6,6 +6,9 @@ import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig(({ mode }) => {
   const isProd = mode === 'production';
+  console.log('AAAAAAAAAAAAAAAAA');
+  console.log(`Building for ${mode} mode...`);
+  console.log('AAAAAAAAAAAAAAAAA');
 
   return {
     base: isProd ? '/zarr-cesium/' : '/',

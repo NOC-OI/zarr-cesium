@@ -21,11 +21,37 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # Build docs (Docusaurus)
+      - name: Install docs dependencies
+        working-directory: ./docusaurus
+        run: npm install
+
+      - name: Build docs
+        working-directory: ./docusaurus
+        run: npm run build
+
+      # Build demo (Vite)
+      - name: Install demo dependencies
+        working-directory: ./demo
+        run: npm install
+
+      - name: Build demo
+        working-directory: ./demo
+        run: npm run build
+
       # Prepare deployment folder
       - name: Prepare deployment folder
         run: |
           mkdir -p docs
-          touch docs/.nojekyll   # prevent GitHub Pages from running Jekyll
           # Demo at the root
           cp -r demo/dist/* docs/
           # Docs under /docs/
@@ -37,3 +63,12 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: docs
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: pages
+        uses: actions/deploy-pages@v4

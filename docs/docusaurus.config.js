@@ -38,10 +38,10 @@ const config = {
         readme: 'none',
         indexFormat: 'table',
         disableSources: true,
-        excludeCategories: ['Variables'],
         groupOrder: ['Classes', 'Interfaces', 'type-aliases', 'functions'],
-        // groupOrder: ['Classes', 'Interfaces', 'type-aliases', 'functions', 'variables'],
-        sidebar: { pretty: true },
+        sidebar: {
+          pretty: true
+        },
         textContentMappings: {
           'title.indexPage': 'API Reference',
           'title.memberPage': '{name}'
@@ -103,9 +103,9 @@ const config = {
       ({
         docs: {
           sidebarPath: './sidebars.js',
-          routeBasePath: '/' // This makes docs the root
+          routeBasePath: '/'
         },
-        blog: false, // Disable blog if you don't need it
+        blog: false,
         theme: {
           customCss: './assets/custom.css'
         }

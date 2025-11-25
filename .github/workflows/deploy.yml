@@ -2,13 +2,9 @@ name: Deploy Docs & Demo
 
 on:
   push:
-    branches:
-      - main
-      - dev
+    branches: [main, dev]
   pull_request:
-    branches:
-      - main
-      - dev
+    branches: [main, dev]
   workflow_dispatch:
 
 permissions:
@@ -30,20 +26,7 @@ jobs:
           node-version: 20
           cache: npm
 
-      - name: Install root dependencies
-        run: npm install
-
-      # Build docs (Docusaurus)
-      - name: Install docs dependencies
-        run: |
-          cd docusaurus
-          npm install
-
-      - name: Build docs
-        run: |
-          cd docusaurus
-          npm run build
-
+      # --- Build DEMO (root app) ---
       - name: Install demo dependencies
         run: |
           cd demo
@@ -54,11 +37,36 @@ jobs:
           cd demo
           npm run build
 
+      # --- Build DOCS (Docusaurus) ---
+      - name: Install docs dependencies
+        run: |
+          cd docs
+          npm install
+
+      - name: Build docs
+        run: |
+          cd docs
+          npm run build
+
+      # --- Prepare deployment folder ---
       - name: Prepare deployment folder
         run: |
-          mkdir -p docs
-          # Demo at the root
-          cp -r demo/dist/* docs/
-          # Docs under /docs/
-          mkdir -p docs/docs
-          cp -r docusaurus/build/* docs/docs/
+          mkdir -p public
+          # Demo deployed at root (/)
+          cp -r demo/dist/* public/
+          # Docs deployed at /docs/
+          mkdir -p public/docs
+          cp -r docs/build/* public/docs/
+
+      # --- Upload artifact for GH Pages ---
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4

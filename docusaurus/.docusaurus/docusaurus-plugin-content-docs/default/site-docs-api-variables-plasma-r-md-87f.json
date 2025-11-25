@@ -1,0 +1,23 @@
+{
+  "id": "api/variables/plasmaR",
+  "title": "plasmaR()",
+  "description": "Parameters",
+  "source": "@site/docs/api/variables/plasmaR.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/plasmaR",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/plasmaR",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "plasma()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/plasma"
+  },
+  "next": {
+    "title": "prism()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/prism"
+  }
+}

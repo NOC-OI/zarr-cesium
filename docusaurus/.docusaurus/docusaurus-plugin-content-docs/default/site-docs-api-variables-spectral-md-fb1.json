@@ -1,0 +1,23 @@
+{
+  "id": "api/variables/Spectral",
+  "title": "Spectral()",
+  "description": "Parameters",
+  "source": "@site/docs/api/variables/Spectral.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/Spectral",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/Spectral",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Set3R()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/Set3R"
+  },
+  "next": {
+    "title": "SpectralR()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/SpectralR"
+  }
+}

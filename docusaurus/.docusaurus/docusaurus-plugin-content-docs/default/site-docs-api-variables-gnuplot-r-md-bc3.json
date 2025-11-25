@@ -1,0 +1,23 @@
+{
+  "id": "api/variables/gnuplotR",
+  "title": "gnuplotR()",
+  "description": "Parameters",
+  "source": "@site/docs/api/variables/gnuplotR.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/gnuplotR",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/gnuplotR",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "gnuplot2R()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/gnuplot2R"
+  },
+  "next": {
+    "title": "gray()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/gray"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "id": "api/functions/initZarrDataset",
+  "title": "initZarrDataset()",
+  "description": "Opens a Zarr variable (single-scale or multiscale pyramid) and prepares its metadata.",
+  "source": "@site/docs/api/functions/initZarrDataset.md",
+  "sourceDirName": "api/functions",
+  "slug": "/api/functions/initZarrDataset",
+  "permalink": "/zarr-cesium/docs/docs/api/functions/initZarrDataset",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "identifyDimensionIndices()",
+    "permalink": "/zarr-cesium/docs/docs/api/functions/identifyDimensionIndices"
+  },
+  "next": {
+    "title": "latDegToMercY()",
+    "permalink": "/zarr-cesium/docs/docs/api/functions/latDegToMercY"
+  }
+}

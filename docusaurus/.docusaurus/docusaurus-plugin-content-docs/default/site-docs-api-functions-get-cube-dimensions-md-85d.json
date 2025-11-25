@@ -1,0 +1,23 @@
+{
+  "id": "api/functions/getCubeDimensions",
+  "title": "getCubeDimensions()",
+  "description": "Computes cube dimension ordering and strides based on dimension indices.",
+  "source": "@site/docs/api/functions/getCubeDimensions.md",
+  "sourceDirName": "api/functions",
+  "slug": "/api/functions/getCubeDimensions",
+  "permalink": "/zarr-cesium/docs/docs/api/functions/getCubeDimensions",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "extractNoDataMetadata()",
+    "permalink": "/zarr-cesium/docs/docs/api/functions/extractNoDataMetadata"
+  },
+  "next": {
+    "title": "getXYLimits()",
+    "permalink": "/zarr-cesium/docs/docs/api/functions/getXYLimits"
+  }
+}

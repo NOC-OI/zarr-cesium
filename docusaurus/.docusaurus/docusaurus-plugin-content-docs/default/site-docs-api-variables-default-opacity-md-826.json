@@ -1,0 +1,23 @@
+{
+  "id": "api/variables/DEFAULT_OPACITY",
+  "title": "DEFAULT\\_OPACITY",
+  "description": "Default opacity for layer visualization.",
+  "source": "@site/docs/api/variables/DEFAULT_OPACITY.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/DEFAULT_OPACITY",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/DEFAULT_OPACITY",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "DEFAULT\\_COLORMAP",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/DEFAULT_COLORMAP"
+  },
+  "next": {
+    "title": "DEFAULT\\_SCALE",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/DEFAULT_SCALE"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "id": "api/variables/terrainR",
+  "title": "terrainR()",
+  "description": "Parameters",
+  "source": "@site/docs/api/variables/terrainR.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/terrainR",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/terrainR",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "terrain()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/terrain"
+  },
+  "next": {
+    "title": "turbo()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/turbo"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "id": "api/variables/seismic",
+  "title": "seismic()",
+  "description": "Parameters",
+  "source": "@site/docs/api/variables/seismic.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/seismic",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/seismic",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "rainbowR()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/rainbowR"
+  },
+  "next": {
+    "title": "seismicR()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/seismicR"
+  }
+}

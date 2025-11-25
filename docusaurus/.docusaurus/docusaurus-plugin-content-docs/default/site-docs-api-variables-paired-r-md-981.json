@@ -1,0 +1,23 @@
+{
+  "id": "api/variables/PairedR",
+  "title": "PairedR()",
+  "description": "Parameters",
+  "source": "@site/docs/api/variables/PairedR.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/PairedR",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/PairedR",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Paired()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/Paired"
+  },
+  "next": {
+    "title": "Pastel1()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/Pastel1"
+  }
+}

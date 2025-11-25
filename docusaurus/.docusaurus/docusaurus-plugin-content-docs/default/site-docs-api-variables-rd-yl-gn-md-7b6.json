@@ -1,0 +1,23 @@
+{
+  "id": "api/variables/RdYlGn",
+  "title": "RdYlGn()",
+  "description": "Parameters",
+  "source": "@site/docs/api/variables/RdYlGn.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/RdYlGn",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/RdYlGn",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "RdYlBuR()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/RdYlBuR"
+  },
+  "next": {
+    "title": "RdYlGnR()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/RdYlGnR"
+  }
+}

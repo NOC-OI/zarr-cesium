@@ -1,0 +1,23 @@
+{
+  "id": "api/variables/PurplesR",
+  "title": "PurplesR()",
+  "description": "Parameters",
+  "source": "@site/docs/api/variables/PurplesR.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/PurplesR",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/PurplesR",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Purples()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/Purples"
+  },
+  "next": {
+    "title": "RdBu()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/RdBu"
+  }
+}

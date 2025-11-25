@@ -1,0 +1,23 @@
+{
+  "id": "api/interfaces/DimensionValues",
+  "title": "DimensionValues",
+  "description": "Mapping of dimension names to their corresponding coordinate arrays.",
+  "source": "@site/docs/api/interfaces/DimensionValues.md",
+  "sourceDirName": "api/interfaces",
+  "slug": "/api/interfaces/DimensionValues",
+  "permalink": "/zarr-cesium/docs/docs/api/interfaces/DimensionValues",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "DimensionNamesProps",
+    "permalink": "/zarr-cesium/docs/docs/api/interfaces/DimensionNamesProps"
+  },
+  "next": {
+    "title": "LayerOptions",
+    "permalink": "/zarr-cesium/docs/docs/api/interfaces/LayerOptions"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "id": "api/variables/nipySpectral",
+  "title": "nipySpectral()",
+  "description": "Parameters",
+  "source": "@site/docs/api/variables/nipySpectral.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/nipySpectral",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/nipySpectral",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "mercProj",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/mercProj"
+  },
+  "next": {
+    "title": "nipySpectralR()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/nipySpectralR"
+  }
+}

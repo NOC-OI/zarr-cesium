@@ -1,0 +1,23 @@
+{
+  "id": "api/variables/afmhotR",
+  "title": "afmhotR()",
+  "description": "Parameters",
+  "source": "@site/docs/api/variables/afmhotR.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/afmhotR",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/afmhotR",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "afmhot()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/afmhot"
+  },
+  "next": {
+    "title": "allColorScales",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/allColorScales"
+  }
+}

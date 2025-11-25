@@ -1,0 +1,23 @@
+{
+  "id": "api/variables/AccentR",
+  "title": "AccentR()",
+  "description": "Parameters",
+  "source": "@site/docs/api/variables/AccentR.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/AccentR",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/AccentR",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Accent()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/Accent"
+  },
+  "next": {
+    "title": "Blues()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/Blues"
+  }
+}

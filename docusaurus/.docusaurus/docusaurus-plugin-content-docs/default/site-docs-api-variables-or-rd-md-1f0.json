@@ -1,0 +1,23 @@
+{
+  "id": "api/variables/OrRd",
+  "title": "OrRd()",
+  "description": "Parameters",
+  "source": "@site/docs/api/variables/OrRd.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/OrRd",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/OrRd",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "GreysR()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/GreysR"
+  },
+  "next": {
+    "title": "OrRdR()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/OrRdR"
+  }
+}

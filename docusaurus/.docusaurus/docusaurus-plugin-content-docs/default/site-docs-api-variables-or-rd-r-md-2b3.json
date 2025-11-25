@@ -1,0 +1,23 @@
+{
+  "id": "api/variables/OrRdR",
+  "title": "OrRdR()",
+  "description": "Parameters",
+  "source": "@site/docs/api/variables/OrRdR.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/OrRdR",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/OrRdR",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "OrRd()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/OrRd"
+  },
+  "next": {
+    "title": "Oranges()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/Oranges"
+  }
+}

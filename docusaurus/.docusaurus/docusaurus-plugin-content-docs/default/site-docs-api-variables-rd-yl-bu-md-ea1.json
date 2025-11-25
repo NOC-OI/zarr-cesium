@@ -1,0 +1,23 @@
+{
+  "id": "api/variables/RdYlBu",
+  "title": "RdYlBu()",
+  "description": "Parameters",
+  "source": "@site/docs/api/variables/RdYlBu.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/RdYlBu",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/RdYlBu",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "RdPuR()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/RdPuR"
+  },
+  "next": {
+    "title": "RdYlBuR()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/RdYlBuR"
+  }
+}

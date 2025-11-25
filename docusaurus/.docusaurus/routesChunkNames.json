@@ -1,0 +1,970 @@
+{
+  "/zarr-cesium/docs/__docusaurus/debug-db1": {
+    "__comp": "__comp---theme-debug-config-23-a-2ff",
+    "__context": {
+      "plugin": "plugin---zarr-cesium-docs-docusaurus-debugb-38-ccf"
+    }
+  },
+  "/zarr-cesium/docs/__docusaurus/debug/config-8b2": {
+    "__comp": "__comp---theme-debug-config-23-a-2ff",
+    "__context": {
+      "plugin": "plugin---zarr-cesium-docs-docusaurus-debugb-38-ccf"
+    }
+  },
+  "/zarr-cesium/docs/__docusaurus/debug/content-019": {
+    "__comp": "__comp---theme-debug-contentba-8-ce7",
+    "__context": {
+      "plugin": "plugin---zarr-cesium-docs-docusaurus-debugb-38-ccf"
+    },
+    "__props": "__props---zarr-cesium-docs-docusaurus-debug-content-53-b-9cc"
+  },
+  "/zarr-cesium/docs/__docusaurus/debug/globalData-b3b": {
+    "__comp": "__comp---theme-debug-global-dataede-0fa",
+    "__context": {
+      "plugin": "plugin---zarr-cesium-docs-docusaurus-debugb-38-ccf"
+    }
+  },
+  "/zarr-cesium/docs/__docusaurus/debug/metadata-ece": {
+    "__comp": "__comp---theme-debug-site-metadata-68-e-3d4",
+    "__context": {
+      "plugin": "plugin---zarr-cesium-docs-docusaurus-debugb-38-ccf"
+    }
+  },
+  "/zarr-cesium/docs/__docusaurus/debug/registry-6de": {
+    "__comp": "__comp---theme-debug-registry-679-501",
+    "__context": {
+      "plugin": "plugin---zarr-cesium-docs-docusaurus-debugb-38-ccf"
+    }
+  },
+  "/zarr-cesium/docs/__docusaurus/debug/routes-bbf": {
+    "__comp": "__comp---theme-debug-routes-946-699",
+    "__context": {
+      "plugin": "plugin---zarr-cesium-docs-docusaurus-debugb-38-ccf"
+    }
+  },
+  "/zarr-cesium/docs/docs-7fe": {
+    "__comp": "__comp---theme-docs-root-5-e-9-0b6",
+    "__context": {
+      "plugin": "plugin---zarr-cesium-docs-docsaba-6de"
+    }
+  },
+  "/zarr-cesium/docs/docs-fde": {
+    "__comp": "__comp---theme-doc-version-roota-7-b-5de",
+    "__props": "__props---zarr-cesium-docs-docs-29-f-bd0"
+  },
+  "/zarr-cesium/docs/docs-15b": {
+    "__comp": "__comp---theme-doc-roota-94-67a"
+  },
+  "/zarr-cesium/docs/docs/-08c": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-c-37-941"
+  },
+  "/zarr-cesium/docs/docs/api/-227": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-5-e-8-aca"
+  },
+  "/zarr-cesium/docs/docs/api/classes/ZarrCubeProvider-62e": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-classes-zarr-cube-provider-6-f-8-762"
+  },
+  "/zarr-cesium/docs/docs/api/classes/ZarrCubeVelocityProvider-f6d": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-classes-zarr-cube-velocity-provider-43-b-2a4"
+  },
+  "/zarr-cesium/docs/docs/api/classes/ZarrImageryLayer-5c5": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-classes-zarr-imagery-layer-6-f-8-b3a"
+  },
+  "/zarr-cesium/docs/docs/api/classes/ZarrLayerProvider-e56": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-classes-zarr-layer-provider-381-f7a"
+  },
+  "/zarr-cesium/docs/docs/api/functions/calculateElevationSlice-9c5": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-functions-calculate-elevation-sliceadb-1c8"
+  },
+  "/zarr-cesium/docs/docs/api/functions/calculateHeightMeters-f10": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-functions-calculate-height-metersa-2-e-35b"
+  },
+  "/zarr-cesium/docs/docs/api/functions/calculateNearestIndex-3e0": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-functions-calculate-nearest-index-598-d65"
+  },
+  "/zarr-cesium/docs/docs/api/functions/calculateSliceArgs-d24": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-functions-calculate-slice-argsfa-5-b3b"
+  },
+  "/zarr-cesium/docs/docs/api/functions/calculateXYFromBounds-3c8": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-functions-calculate-xy-from-bounds-128-af7"
+  },
+  "/zarr-cesium/docs/docs/api/functions/colormapBuilder-3c3": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-functions-colormap-builder-8-be-4a6"
+  },
+  "/zarr-cesium/docs/docs/api/functions/colorScaleByName-8fb": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-functions-color-scale-by-namef-79-2d1"
+  },
+  "/zarr-cesium/docs/docs/api/functions/createColorRampTexture-986": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-functions-create-color-ramp-texture-110-5dd"
+  },
+  "/zarr-cesium/docs/docs/api/functions/createProgram-4f8": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-functions-create-program-918-5b8"
+  },
+  "/zarr-cesium/docs/docs/api/functions/createShader-20b": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-functions-create-shaderfa-7-07f"
+  },
+  "/zarr-cesium/docs/docs/api/functions/deriveRectangleAndScheme-3fa": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-functions-derive-rectangle-and-scheme-05-e-581"
+  },
+  "/zarr-cesium/docs/docs/api/functions/detectCRS-70c": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-functions-detect-cr-sd-2-c-cd8"
+  },
+  "/zarr-cesium/docs/docs/api/functions/extractNoDataMetadata-217": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-functions-extract-no-data-metadatad-51-0a4"
+  },
+  "/zarr-cesium/docs/docs/api/functions/getCubeDimensions-420": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-functions-get-cube-dimensions-85-d-6f3"
+  },
+  "/zarr-cesium/docs/docs/api/functions/getXYLimits-279": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-functions-get-xy-limits-520-097"
+  },
+  "/zarr-cesium/docs/docs/api/functions/identifyDimensionIndices-adf": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-functions-identify-dimension-indices-1-b-1-79d"
+  },
+  "/zarr-cesium/docs/docs/api/functions/initZarrDataset-40e": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-functions-init-zarr-dataset-6-ca-270"
+  },
+  "/zarr-cesium/docs/docs/api/functions/latDegToMercY-e90": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-functions-lat-deg-to-merc-y-179-1bd"
+  },
+  "/zarr-cesium/docs/docs/api/functions/loadDimensionValues-5d3": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-functions-load-dimension-values-05-a-1bc"
+  },
+  "/zarr-cesium/docs/docs/api/functions/lonDegToMercX-9f7": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-functions-lon-deg-to-merc-x-66-b-86a"
+  },
+  "/zarr-cesium/docs/docs/api/functions/openLevelArray-c66": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-functions-open-level-arrayc-67-207"
+  },
+  "/zarr-cesium/docs/docs/api/functions/resolveNoDataRange-117": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-functions-resolve-no-data-range-640-df6"
+  },
+  "/zarr-cesium/docs/docs/api/functions/updateImgData-002": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-functions-update-img-data-99-c-253"
+  },
+  "/zarr-cesium/docs/docs/api/functions/validateBounds-b2f": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-functions-validate-boundsbc-2-759"
+  },
+  "/zarr-cesium/docs/docs/api/interfaces/BoundsProps-ea1": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-interfaces-bounds-propsdee-00f"
+  },
+  "/zarr-cesium/docs/docs/api/interfaces/ColorMapInfo-0ee": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-interfaces-color-map-info-10-e-491"
+  },
+  "/zarr-cesium/docs/docs/api/interfaces/ColorScaleProps-85c": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-interfaces-color-scale-props-9-ed-68a"
+  },
+  "/zarr-cesium/docs/docs/api/interfaces/CubeOptions-bfd": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-interfaces-cube-options-3-fc-079"
+  },
+  "/zarr-cesium/docs/docs/api/interfaces/CubeVelocityProps-808": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-interfaces-cube-velocity-propse-12-e86"
+  },
+  "/zarr-cesium/docs/docs/api/interfaces/DataSliceProps-f21": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-interfaces-data-slice-props-9-eb-3d4"
+  },
+  "/zarr-cesium/docs/docs/api/interfaces/DimensionNamesProps-a4b": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-interfaces-dimension-names-props-597-c60"
+  },
+  "/zarr-cesium/docs/docs/api/interfaces/DimensionValues-215": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-interfaces-dimension-values-7-a-5-dd1"
+  },
+  "/zarr-cesium/docs/docs/api/interfaces/DimIndicesProps-780": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-interfaces-dim-indices-props-0-fa-5f2"
+  },
+  "/zarr-cesium/docs/docs/api/interfaces/LayerOptions-ce8": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-interfaces-layer-optionsc-82-a7e"
+  },
+  "/zarr-cesium/docs/docs/api/interfaces/VelocityOptions-b44": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-interfaces-velocity-options-169-cf7"
+  },
+  "/zarr-cesium/docs/docs/api/interfaces/XYLimits-1fc": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-interfaces-xy-limitsb-9-a-e47"
+  },
+  "/zarr-cesium/docs/docs/api/interfaces/XYLimitsProps-4c2": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-interfaces-xy-limits-propsd-45-384"
+  },
+  "/zarr-cesium/docs/docs/api/interfaces/ZarrLevelMetadata-142": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-interfaces-zarr-level-metadata-967-fd1"
+  },
+  "/zarr-cesium/docs/docs/api/interfaces/ZarrSelectorsProps-0fe": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-interfaces-zarr-selectors-propsbb-5-184"
+  },
+  "/zarr-cesium/docs/docs/api/type-aliases/ColorMapName-d55": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-type-aliases-color-map-name-25-d-b89"
+  },
+  "/zarr-cesium/docs/docs/api/type-aliases/CRS-fba": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-type-aliases-cr-sea-1-3fb"
+  },
+  "/zarr-cesium/docs/docs/api/type-aliases/SliceArgs-d73": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-type-aliases-slice-argsf-0-d-bcf"
+  },
+  "/zarr-cesium/docs/docs/api/variables/Accent-d5e": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-accentf-8-c-368"
+  },
+  "/zarr-cesium/docs/docs/api/variables/AccentR-baa": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-accent-refb-215"
+  },
+  "/zarr-cesium/docs/docs/api/variables/afmhot-b9a": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-afmhot-630-5e3"
+  },
+  "/zarr-cesium/docs/docs/api/variables/afmhotR-2a6": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-afmhot-rdf-7-482"
+  },
+  "/zarr-cesium/docs/docs/api/variables/allColorScales-910": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-all-color-scales-785-2cc"
+  },
+  "/zarr-cesium/docs/docs/api/variables/autumn-58a": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-autumnfa-5-a5d"
+  },
+  "/zarr-cesium/docs/docs/api/variables/autumnR-09a": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-autumn-rcd-0-a47"
+  },
+  "/zarr-cesium/docs/docs/api/variables/binary-7f9": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-binary-797-43d"
+  },
+  "/zarr-cesium/docs/docs/api/variables/binaryR-0f2": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-binary-rbab-830"
+  },
+  "/zarr-cesium/docs/docs/api/variables/Blues-5ac": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-blues-220-d7c"
+  },
+  "/zarr-cesium/docs/docs/api/variables/BluesR-bff": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-blues-rcc-5-174"
+  },
+  "/zarr-cesium/docs/docs/api/variables/bone-ad2": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-bone-07-f-976"
+  },
+  "/zarr-cesium/docs/docs/api/variables/boneR-e0f": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-bone-r-84-a-dae"
+  },
+  "/zarr-cesium/docs/docs/api/variables/BrBG-c48": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-br-bg-564-692"
+  },
+  "/zarr-cesium/docs/docs/api/variables/BrBGR-62e": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-br-bgr-85-a-003"
+  },
+  "/zarr-cesium/docs/docs/api/variables/brg-685": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-brgefe-19a"
+  },
+  "/zarr-cesium/docs/docs/api/variables/brgR-9ad": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-brg-r-941-a56"
+  },
+  "/zarr-cesium/docs/docs/api/variables/BuGn-db2": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-bu-gna-21-f33"
+  },
+  "/zarr-cesium/docs/docs/api/variables/BuGnR-36b": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-bu-gn-reaa-ee1"
+  },
+  "/zarr-cesium/docs/docs/api/variables/BuPu-cda": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-bu-pu-198-453"
+  },
+  "/zarr-cesium/docs/docs/api/variables/BuPuR-5bf": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-bu-pu-re-34-f4f"
+  },
+  "/zarr-cesium/docs/docs/api/variables/bwr-3e7": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-bwr-3-fd-80e"
+  },
+  "/zarr-cesium/docs/docs/api/variables/bwrR-032": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-bwr-rc-73-538"
+  },
+  "/zarr-cesium/docs/docs/api/variables/cividis-b76": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-cividiscb-9-0b3"
+  },
+  "/zarr-cesium/docs/docs/api/variables/cividisR-ad0": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-cividis-r-2-e-6-b16"
+  },
+  "/zarr-cesium/docs/docs/api/variables/CMRmap-201": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-cm-rmap-228-37a"
+  },
+  "/zarr-cesium/docs/docs/api/variables/CMRmapR-1fb": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-cm-rmap-rc-57-ba5"
+  },
+  "/zarr-cesium/docs/docs/api/variables/cool-f62": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-cool-493-0cb"
+  },
+  "/zarr-cesium/docs/docs/api/variables/coolR-0f2": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-cool-r-59-a-205"
+  },
+  "/zarr-cesium/docs/docs/api/variables/coolwarm-e2b": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-coolwarm-402-91a"
+  },
+  "/zarr-cesium/docs/docs/api/variables/coolwarmR-77e": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-coolwarm-rfa-5-d2b"
+  },
+  "/zarr-cesium/docs/docs/api/variables/copper-a7f": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-copper-922-601"
+  },
+  "/zarr-cesium/docs/docs/api/variables/copperR-ffd": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-copper-r-1-c-6-020"
+  },
+  "/zarr-cesium/docs/docs/api/variables/cubehelix-e39": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-cubehelixc-3-a-c67"
+  },
+  "/zarr-cesium/docs/docs/api/variables/cubehelixR-cf3": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-cubehelix-r-79-b-8b4"
+  },
+  "/zarr-cesium/docs/docs/api/variables/Dark2-83c": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-dark-25-ad-d35"
+  },
+  "/zarr-cesium/docs/docs/api/variables/Dark2R-864": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-dark-2-r-2-e-2-ed9"
+  },
+  "/zarr-cesium/docs/docs/api/variables/DEFAULT_COLORMAP-2a8": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-default-colorma-pf-9-f-0ef"
+  },
+  "/zarr-cesium/docs/docs/api/variables/DEFAULT_OPACITY-acd": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-default-opacity-826-7ff"
+  },
+  "/zarr-cesium/docs/docs/api/variables/DEFAULT_SCALE-c37": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-default-scale-3-fa-365"
+  },
+  "/zarr-cesium/docs/docs/api/variables/DEFAULT_VERTICAL_EXAGGERATION-811": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-default-vertical-exaggeratio-nd-8-a-0fc"
+  },
+  "/zarr-cesium/docs/docs/api/variables/DEFAULT_WIND_OPTIONS-60c": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-default-wind-option-sb-63-e47"
+  },
+  "/zarr-cesium/docs/docs/api/variables/flag-4d2": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-flagcc-7-801"
+  },
+  "/zarr-cesium/docs/docs/api/variables/flagR-86b": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-flag-r-0-c-6-bdb"
+  },
+  "/zarr-cesium/docs/docs/api/variables/fragmentShaderSource-51e": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-fragment-shader-source-7-f-6-5b9"
+  },
+  "/zarr-cesium/docs/docs/api/variables/gistEarth-39a": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-gist-earthed-1-d04"
+  },
+  "/zarr-cesium/docs/docs/api/variables/gistEarthR-f06": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-gist-earth-ra-01-a55"
+  },
+  "/zarr-cesium/docs/docs/api/variables/gistGray-fb1": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-gist-gray-854-4c1"
+  },
+  "/zarr-cesium/docs/docs/api/variables/gistGrayR-e56": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-gist-gray-r-6-db-11c"
+  },
+  "/zarr-cesium/docs/docs/api/variables/gistHeat-23d": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-gist-heat-526-96d"
+  },
+  "/zarr-cesium/docs/docs/api/variables/gistHeatR-aab": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-gist-heat-r-223-b35"
+  },
+  "/zarr-cesium/docs/docs/api/variables/gistNcar-8ac": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-gist-ncar-07-e-3ab"
+  },
+  "/zarr-cesium/docs/docs/api/variables/gistNcarR-db0": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-gist-ncar-rc-44-b6b"
+  },
+  "/zarr-cesium/docs/docs/api/variables/gistRainbow-c8e": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-gist-rainbow-205-039"
+  },
+  "/zarr-cesium/docs/docs/api/variables/gistRainbowR-259": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-gist-rainbow-rd-21-7d7"
+  },
+  "/zarr-cesium/docs/docs/api/variables/gistStern-e6d": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-gist-stern-37-a-b4a"
+  },
+  "/zarr-cesium/docs/docs/api/variables/gistSternR-269": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-gist-stern-rd-08-9aa"
+  },
+  "/zarr-cesium/docs/docs/api/variables/gistYarg-a23": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-gist-yarga-32-6d9"
+  },
+  "/zarr-cesium/docs/docs/api/variables/gistYargR-e16": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-gist-yarg-r-17-d-044"
+  },
+  "/zarr-cesium/docs/docs/api/variables/GnBu-549": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-gn-bu-0-b-5-ac3"
+  },
+  "/zarr-cesium/docs/docs/api/variables/GnBuR-f5f": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-gn-bu-r-47-d-5c9"
+  },
+  "/zarr-cesium/docs/docs/api/variables/gnuplot-fdc": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-gnuplot-026-4bb"
+  },
+  "/zarr-cesium/docs/docs/api/variables/gnuplot2-e7b": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-gnuplot-297-d-a13"
+  },
+  "/zarr-cesium/docs/docs/api/variables/gnuplot2R-d6e": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-gnuplot-2-r-5-ae-eb2"
+  },
+  "/zarr-cesium/docs/docs/api/variables/gnuplotR-57f": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-gnuplot-rbc-3-415"
+  },
+  "/zarr-cesium/docs/docs/api/variables/gray-ed6": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-gray-1-c-2-0df"
+  },
+  "/zarr-cesium/docs/docs/api/variables/grayR-b36": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-gray-r-3-da-829"
+  },
+  "/zarr-cesium/docs/docs/api/variables/Greens-a28": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-greens-170-f92"
+  },
+  "/zarr-cesium/docs/docs/api/variables/GreensR-e11": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-greens-r-385-c56"
+  },
+  "/zarr-cesium/docs/docs/api/variables/Greys-2e7": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-greysa-6-f-552"
+  },
+  "/zarr-cesium/docs/docs/api/variables/GreysR-dcc": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-greys-rc-45-187"
+  },
+  "/zarr-cesium/docs/docs/api/variables/hot-5e6": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-hot-641-a8c"
+  },
+  "/zarr-cesium/docs/docs/api/variables/hotR-667": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-hot-r-5-ad-0a9"
+  },
+  "/zarr-cesium/docs/docs/api/variables/hsv-a49": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-hsva-9-f-6d3"
+  },
+  "/zarr-cesium/docs/docs/api/variables/hsvR-1d1": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-hsv-r-69-e-86b"
+  },
+  "/zarr-cesium/docs/docs/api/variables/inferno-744": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-infernof-00-475"
+  },
+  "/zarr-cesium/docs/docs/api/variables/infernoR-5cd": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-inferno-r-258-a43"
+  },
+  "/zarr-cesium/docs/docs/api/variables/jet-a38": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-jetd-6-b-9ad"
+  },
+  "/zarr-cesium/docs/docs/api/variables/jetR-400": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-jet-r-6-d-1-945"
+  },
+  "/zarr-cesium/docs/docs/api/variables/magma-f18": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-magmae-3-c-7fe"
+  },
+  "/zarr-cesium/docs/docs/api/variables/magmaR-1f1": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-magma-r-79-c-a81"
+  },
+  "/zarr-cesium/docs/docs/api/variables/mercProj-527": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-merc-proj-65-f-8fa"
+  },
+  "/zarr-cesium/docs/docs/api/variables/nipySpectral-7b6": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-nipy-spectral-639-bca"
+  },
+  "/zarr-cesium/docs/docs/api/variables/nipySpectralR-c8f": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-nipy-spectral-r-103-edc"
+  },
+  "/zarr-cesium/docs/docs/api/variables/ocean-41a": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-oceanffe-16f"
+  },
+  "/zarr-cesium/docs/docs/api/variables/oceanR-2e5": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-ocean-re-48-bae"
+  },
+  "/zarr-cesium/docs/docs/api/variables/Oranges-333": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-orangesa-7-c-b2f"
+  },
+  "/zarr-cesium/docs/docs/api/variables/OrangesR-1c6": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-oranges-rf-29-c45"
+  },
+  "/zarr-cesium/docs/docs/api/variables/OrRd-e0e": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-or-rd-1-f-0-a35"
+  },
+  "/zarr-cesium/docs/docs/api/variables/OrRdR-a2f": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-or-rd-r-2-b-3-99c"
+  },
+  "/zarr-cesium/docs/docs/api/variables/Paired-54b": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-paired-358-248"
+  },
+  "/zarr-cesium/docs/docs/api/variables/PairedR-16b": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-paired-r-981-0d9"
+  },
+  "/zarr-cesium/docs/docs/api/variables/Pastel1-17b": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-pastel-1-e-91-7be"
+  },
+  "/zarr-cesium/docs/docs/api/variables/Pastel1R-118": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-pastel-1-r-62-b-799"
+  },
+  "/zarr-cesium/docs/docs/api/variables/Pastel2-8f2": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-pastel-23-f-5-2c0"
+  },
+  "/zarr-cesium/docs/docs/api/variables/Pastel2R-34d": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-pastel-2-rf-53-90d"
+  },
+  "/zarr-cesium/docs/docs/api/variables/pink-5f1": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-pinkecd-eec"
+  },
+  "/zarr-cesium/docs/docs/api/variables/pinkR-2bd": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-pink-r-8-c-2-141"
+  },
+  "/zarr-cesium/docs/docs/api/variables/PiYG-bbb": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-pi-y-ge-10-e59"
+  },
+  "/zarr-cesium/docs/docs/api/variables/PiYGR-9b8": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-pi-yg-rdd-9-d51"
+  },
+  "/zarr-cesium/docs/docs/api/variables/plasma-bb3": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-plasmaa-0-e-a1b"
+  },
+  "/zarr-cesium/docs/docs/api/variables/plasmaR-dbe": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-plasma-r-87-f-416"
+  },
+  "/zarr-cesium/docs/docs/api/variables/PRGn-432": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-pr-gn-2-da-6cf"
+  },
+  "/zarr-cesium/docs/docs/api/variables/PRGnR-917": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-pr-gn-r-12-c-7ef"
+  },
+  "/zarr-cesium/docs/docs/api/variables/prism-db8": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-prism-91-f-520"
+  },
+  "/zarr-cesium/docs/docs/api/variables/prismR-e8d": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-prism-rc-39-f39"
+  },
+  "/zarr-cesium/docs/docs/api/variables/PuBu-2f5": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-pu-bu-304-83f"
+  },
+  "/zarr-cesium/docs/docs/api/variables/PuBuGn-1b6": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-pu-bu-gnf-0-b-43b"
+  },
+  "/zarr-cesium/docs/docs/api/variables/PuBuGnR-df2": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-pu-bu-gn-r-305-00d"
+  },
+  "/zarr-cesium/docs/docs/api/variables/PuBuR-d60": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-pu-bu-r-7-fd-40c"
+  },
+  "/zarr-cesium/docs/docs/api/variables/PuOr-dbe": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-pu-orbbb-89c"
+  },
+  "/zarr-cesium/docs/docs/api/variables/PuOrR-832": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-pu-or-rb-57-fea"
+  },
+  "/zarr-cesium/docs/docs/api/variables/PuRd-641": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-pu-rdef-8-6ab"
+  },
+  "/zarr-cesium/docs/docs/api/variables/PuRdR-571": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-pu-rd-rdc-1-148"
+  },
+  "/zarr-cesium/docs/docs/api/variables/Purples-006": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-purples-4-d-1-b89"
+  },
+  "/zarr-cesium/docs/docs/api/variables/PurplesR-769": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-purples-rb-80-683"
+  },
+  "/zarr-cesium/docs/docs/api/variables/rainbow-97b": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-rainbow-46-a-963"
+  },
+  "/zarr-cesium/docs/docs/api/variables/rainbowR-2ed": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-rainbow-r-305-c6d"
+  },
+  "/zarr-cesium/docs/docs/api/variables/RdBu-3fa": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-rd-bu-783-ab2"
+  },
+  "/zarr-cesium/docs/docs/api/variables/RdBuR-d13": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-rd-bu-r-5-a-3-afb"
+  },
+  "/zarr-cesium/docs/docs/api/variables/RdGy-070": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-rd-gy-2-bd-863"
+  },
+  "/zarr-cesium/docs/docs/api/variables/RdGyR-6b4": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-rd-gy-r-386-7c1"
+  },
+  "/zarr-cesium/docs/docs/api/variables/RdPu-cd8": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-rd-pu-534-502"
+  },
+  "/zarr-cesium/docs/docs/api/variables/RdPuR-a3b": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-rd-pu-refa-a3b"
+  },
+  "/zarr-cesium/docs/docs/api/variables/RdYlBu-414": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-rd-yl-buea-1-76f"
+  },
+  "/zarr-cesium/docs/docs/api/variables/RdYlBuR-fe9": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-rd-yl-bu-r-550-de2"
+  },
+  "/zarr-cesium/docs/docs/api/variables/RdYlGn-e3d": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-rd-yl-gn-7-b-6-4e7"
+  },
+  "/zarr-cesium/docs/docs/api/variables/RdYlGnR-f47": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-rd-yl-gn-r-396-9fe"
+  },
+  "/zarr-cesium/docs/docs/api/variables/Reds-f2c": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-reds-9-ba-445"
+  },
+  "/zarr-cesium/docs/docs/api/variables/RedsR-6d8": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-reds-r-350-6b2"
+  },
+  "/zarr-cesium/docs/docs/api/variables/seismic-8ab": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-seismic-991-c4d"
+  },
+  "/zarr-cesium/docs/docs/api/variables/seismicR-2dd": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-seismic-r-90-a-fbc"
+  },
+  "/zarr-cesium/docs/docs/api/variables/Set1-6a1": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-set-1358-e35"
+  },
+  "/zarr-cesium/docs/docs/api/variables/Set1R-0da": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-set-1-r-5-bf-b42"
+  },
+  "/zarr-cesium/docs/docs/api/variables/Set2-7a9": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-set-25-e-5-75f"
+  },
+  "/zarr-cesium/docs/docs/api/variables/Set2R-009": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-set-2-rb-80-a87"
+  },
+  "/zarr-cesium/docs/docs/api/variables/Set3-e64": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-set-3-ecd-278"
+  },
+  "/zarr-cesium/docs/docs/api/variables/Set3R-c6d": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-set-3-rf-06-210"
+  },
+  "/zarr-cesium/docs/docs/api/variables/Spectral-026": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-spectralfb-1-2dc"
+  },
+  "/zarr-cesium/docs/docs/api/variables/SpectralR-c2b": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-spectral-raa-5-595"
+  },
+  "/zarr-cesium/docs/docs/api/variables/spring-016": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-springfe-0-f38"
+  },
+  "/zarr-cesium/docs/docs/api/variables/springR-b95": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-spring-r-0-d-0-a35"
+  },
+  "/zarr-cesium/docs/docs/api/variables/summer-882": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-summer-487-0a0"
+  },
+  "/zarr-cesium/docs/docs/api/variables/summerR-1e4": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-summer-r-983-6e2"
+  },
+  "/zarr-cesium/docs/docs/api/variables/tab10-efb": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-tab-1072-d-148"
+  },
+  "/zarr-cesium/docs/docs/api/variables/tab10R-5b6": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-tab-10-rda-9-d5d"
+  },
+  "/zarr-cesium/docs/docs/api/variables/tab20-cc1": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-tab-2008-e-62b"
+  },
+  "/zarr-cesium/docs/docs/api/variables/tab20b-c58": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-tab-20-b-2-ef-354"
+  },
+  "/zarr-cesium/docs/docs/api/variables/tab20bR-ac0": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-tab-20-b-raa-2-37c"
+  },
+  "/zarr-cesium/docs/docs/api/variables/tab20c-717": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-tab-20-c-0-d-5-5f7"
+  },
+  "/zarr-cesium/docs/docs/api/variables/tab20cR-5d7": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-tab-20-c-r-9-e-8-6d8"
+  },
+  "/zarr-cesium/docs/docs/api/variables/tab20R-0e9": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-tab-20-r-0-f-9-bf6"
+  },
+  "/zarr-cesium/docs/docs/api/variables/terrain-a9a": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-terrain-1-be-dff"
+  },
+  "/zarr-cesium/docs/docs/api/variables/terrainR-d2b": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-terrain-r-5-a-2-826"
+  },
+  "/zarr-cesium/docs/docs/api/variables/turbo-1b7": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-turbo-480-8c8"
+  },
+  "/zarr-cesium/docs/docs/api/variables/turboR-9e7": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-turbo-r-277-230"
+  },
+  "/zarr-cesium/docs/docs/api/variables/twilight-9d0": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-twilight-0-f-6-940"
+  },
+  "/zarr-cesium/docs/docs/api/variables/twilightR-288": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-twilight-r-539-630"
+  },
+  "/zarr-cesium/docs/docs/api/variables/twilightShifted-753": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-twilight-shifted-68-c-0b9"
+  },
+  "/zarr-cesium/docs/docs/api/variables/twilightShiftedR-89c": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-twilight-shifted-r-3-a-5-de9"
+  },
+  "/zarr-cesium/docs/docs/api/variables/vertexShaderSource-c76": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-vertex-shader-source-2-b-0-088"
+  },
+  "/zarr-cesium/docs/docs/api/variables/viridis-c99": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-viridis-87-e-e5d"
+  },
+  "/zarr-cesium/docs/docs/api/variables/viridisR-6fd": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-viridis-r-1-a-4-7cd"
+  },
+  "/zarr-cesium/docs/docs/api/variables/winter-bcb": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-winterfc-3-b5e"
+  },
+  "/zarr-cesium/docs/docs/api/variables/winterR-852": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-winter-rbaf-2cc"
+  },
+  "/zarr-cesium/docs/docs/api/variables/Wistia-d0e": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-wistia-190-c0b"
+  },
+  "/zarr-cesium/docs/docs/api/variables/WistiaR-dec": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-wistia-r-17-b-4b3"
+  },
+  "/zarr-cesium/docs/docs/api/variables/YlGn-d52": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-yl-gn-0-ea-912"
+  },
+  "/zarr-cesium/docs/docs/api/variables/YlGnBu-2e5": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-yl-gn-bu-748-49d"
+  },
+  "/zarr-cesium/docs/docs/api/variables/YlGnBuR-940": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-yl-gn-bu-r-9-a-6-3e8"
+  },
+  "/zarr-cesium/docs/docs/api/variables/YlGnR-875": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-yl-gn-r-548-443"
+  },
+  "/zarr-cesium/docs/docs/api/variables/YlOrBr-f92": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-yl-or-br-1-d-4-db7"
+  },
+  "/zarr-cesium/docs/docs/api/variables/YlOrBrR-336": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-yl-or-br-r-0-a-9-9cb"
+  },
+  "/zarr-cesium/docs/docs/api/variables/YlOrRd-cfd": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-yl-or-rda-3-b-ff2"
+  },
+  "/zarr-cesium/docs/docs/api/variables/YlOrRdR-007": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-api-variables-yl-or-rd-r-2-d-6-8ba"
+  },
+  "/zarr-cesium/docs/docs/data-052": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-data-761-75f"
+  },
+  "/zarr-cesium/docs/docs/getting-started-3d1": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-getting-startedd-58-c12"
+  },
+  "/zarr-cesium/docs/docs/providers/zarr-cube-provider-319": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-providers-zarr-cube-provider-73-c-091"
+  },
+  "/zarr-cesium/docs/docs/providers/zarr-cube-velocity-provider-c66": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-providers-zarr-cube-velocity-provider-1-da-699"
+  },
+  "/zarr-cesium/docs/docs/providers/zarr-layer-provider-6d2": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---zarr-cesium-docs-docs-providers-zarr-layer-provider-197-ce9"
+  }
+}

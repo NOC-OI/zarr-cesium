@@ -1,0 +1,23 @@
+{
+  "id": "api/variables/mercProj",
+  "title": "mercProj",
+  "description": "Global Web Mercator projection instance used for coordinate conversions.",
+  "source": "@site/docs/api/variables/mercProj.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/mercProj",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/mercProj",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "magmaR()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/magmaR"
+  },
+  "next": {
+    "title": "nipySpectral()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/nipySpectral"
+  }
+}

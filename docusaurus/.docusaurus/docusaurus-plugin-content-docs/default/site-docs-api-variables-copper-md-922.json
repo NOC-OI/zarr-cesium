@@ -1,0 +1,23 @@
+{
+  "id": "api/variables/copper",
+  "title": "copper()",
+  "description": "Parameters",
+  "source": "@site/docs/api/variables/copper.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/copper",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/copper",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "coolwarmR()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/coolwarmR"
+  },
+  "next": {
+    "title": "copperR()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/copperR"
+  }
+}

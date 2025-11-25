@@ -1,0 +1,23 @@
+{
+  "id": "api/variables/YlOrBr",
+  "title": "YlOrBr()",
+  "description": "Parameters",
+  "source": "@site/docs/api/variables/YlOrBr.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/YlOrBr",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/YlOrBr",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "YlGnR()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/YlGnR"
+  },
+  "next": {
+    "title": "YlOrBrR()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/YlOrBrR"
+  }
+}

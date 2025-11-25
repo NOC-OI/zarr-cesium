@@ -1,0 +1,23 @@
+{
+  "id": "api/variables/PuRd",
+  "title": "PuRd()",
+  "description": "Parameters",
+  "source": "@site/docs/api/variables/PuRd.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/PuRd",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/PuRd",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "PuOrR()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/PuOrR"
+  },
+  "next": {
+    "title": "PuRdR()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/PuRdR"
+  }
+}

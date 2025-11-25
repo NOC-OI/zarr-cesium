@@ -1,0 +1,23 @@
+{
+  "id": "api/variables/RdGyR",
+  "title": "RdGyR()",
+  "description": "Parameters",
+  "source": "@site/docs/api/variables/RdGyR.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/RdGyR",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/RdGyR",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "RdGy()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/RdGy"
+  },
+  "next": {
+    "title": "RdPu()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/RdPu"
+  }
+}

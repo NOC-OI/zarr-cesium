@@ -1,0 +1,23 @@
+{
+  "id": "api/variables/gistStern",
+  "title": "gistStern()",
+  "description": "Parameters",
+  "source": "@site/docs/api/variables/gistStern.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/gistStern",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/gistStern",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "gistRainbowR()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/gistRainbowR"
+  },
+  "next": {
+    "title": "gistSternR()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/gistSternR"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "id": "api/variables/cividis",
+  "title": "cividis()",
+  "description": "Parameters",
+  "source": "@site/docs/api/variables/cividis.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/cividis",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/cividis",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "bwrR()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/bwrR"
+  },
+  "next": {
+    "title": "cividisR()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/cividisR"
+  }
+}

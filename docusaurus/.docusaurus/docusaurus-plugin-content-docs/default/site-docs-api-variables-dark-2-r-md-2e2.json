@@ -1,0 +1,23 @@
+{
+  "id": "api/variables/Dark2R",
+  "title": "Dark2R()",
+  "description": "Parameters",
+  "source": "@site/docs/api/variables/Dark2R.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/Dark2R",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/Dark2R",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Dark2()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/Dark2"
+  },
+  "next": {
+    "title": "GnBu()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/GnBu"
+  }
+}

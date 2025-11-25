@@ -1,0 +1,23 @@
+{
+  "id": "api/functions/identifyDimensionIndices",
+  "title": "identifyDimensionIndices()",
+  "description": "Identify the indices of common dimensions (lat, lon, time, elevation)",
+  "source": "@site/docs/api/functions/identifyDimensionIndices.md",
+  "sourceDirName": "api/functions",
+  "slug": "/api/functions/identifyDimensionIndices",
+  "permalink": "/zarr-cesium/docs/docs/api/functions/identifyDimensionIndices",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "getXYLimits()",
+    "permalink": "/zarr-cesium/docs/docs/api/functions/getXYLimits"
+  },
+  "next": {
+    "title": "initZarrDataset()",
+    "permalink": "/zarr-cesium/docs/docs/api/functions/initZarrDataset"
+  }
+}

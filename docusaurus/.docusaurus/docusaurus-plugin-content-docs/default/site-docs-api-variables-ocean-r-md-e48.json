@@ -1,0 +1,23 @@
+{
+  "id": "api/variables/oceanR",
+  "title": "oceanR()",
+  "description": "Parameters",
+  "source": "@site/docs/api/variables/oceanR.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/oceanR",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/oceanR",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "ocean()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/ocean"
+  },
+  "next": {
+    "title": "pink()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/pink"
+  }
+}

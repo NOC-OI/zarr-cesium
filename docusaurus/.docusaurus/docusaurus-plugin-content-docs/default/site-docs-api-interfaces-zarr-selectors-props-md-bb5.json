@@ -1,0 +1,23 @@
+{
+  "id": "api/interfaces/ZarrSelectorsProps",
+  "title": "ZarrSelectorsProps",
+  "description": "Describes a selector for a Zarr dataset dimension.",
+  "source": "@site/docs/api/interfaces/ZarrSelectorsProps.md",
+  "sourceDirName": "api/interfaces",
+  "slug": "/api/interfaces/ZarrSelectorsProps",
+  "permalink": "/zarr-cesium/docs/docs/api/interfaces/ZarrSelectorsProps",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "ZarrLevelMetadata",
+    "permalink": "/zarr-cesium/docs/docs/api/interfaces/ZarrLevelMetadata"
+  },
+  "next": {
+    "title": "CRS",
+    "permalink": "/zarr-cesium/docs/docs/api/type-aliases/CRS"
+  }
+}

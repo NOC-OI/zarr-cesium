@@ -1,0 +1,23 @@
+{
+  "id": "api/variables/gistRainbow",
+  "title": "gistRainbow()",
+  "description": "Parameters",
+  "source": "@site/docs/api/variables/gistRainbow.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/gistRainbow",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/gistRainbow",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "gistNcarR()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/gistNcarR"
+  },
+  "next": {
+    "title": "gistRainbowR()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/gistRainbowR"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "id": "api/index",
+  "title": "API Reference",
+  "description": "Classes",
+  "source": "@site/docs/api/index.md",
+  "sourceDirName": "api",
+  "slug": "/api/",
+  "permalink": "/zarr-cesium/docs/docs/api/",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Data Preparation",
+    "permalink": "/zarr-cesium/docs/docs/data"
+  },
+  "next": {
+    "title": "ZarrCubeProvider",
+    "permalink": "/zarr-cesium/docs/docs/api/classes/ZarrCubeProvider"
+  }
+}

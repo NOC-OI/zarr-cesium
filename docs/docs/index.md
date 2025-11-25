@@ -1,6 +1,8 @@
 ---
-sidebar_position: 1
+id: index
 title: Introduction
+sidebar_position: 0
+slug: /
 ---
 
 # Zarr-Cesium

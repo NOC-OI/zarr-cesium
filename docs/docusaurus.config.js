@@ -102,12 +102,10 @@ const config = {
       /** @type {import('@docusaurus/preset-classic').Options} */
       ({
         docs: {
-          sidebarPath: './sidebars.js'
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          // editUrl:
-          //   'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/'
+          sidebarPath: './sidebars.js',
+          routeBasePath: '/' // This makes docs the root
         },
+        blog: false, // Disable blog if you don't need it
         theme: {
           customCss: './assets/custom.css'
         }
@@ -146,7 +144,7 @@ const config = {
             items: [
               {
                 label: 'Zarr-Cesium Docs',
-                to: '/docs/index'
+                to: 'index'
               }
             ]
           },

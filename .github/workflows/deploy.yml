@@ -50,11 +50,9 @@ jobs:
 
       - name: Prepare deployment folder
         run: |
-          mkdir -p public
-          # Demo deployed at root (/)
+          mkdir -p public/docs
           cp -r demo/dist/* public/
-          # Docs deployed at /docs/
-          cp -r docs/build/* public/
+          cp -r docs/build/* public/docs/
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

@@ -15,9 +15,6 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      NODE_ENV: production
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

@@ -4,9 +4,10 @@ import cesium from 'vite-plugin-cesium';
 import path from 'path';
 import tailwindcss from '@tailwindcss/vite';
 
-const isProd = process.env.NODE_ENV === 'production';
+// const isProd = process.env.NODE_ENV === 'production';
 export default defineConfig({
-  base: isProd ? 'zarr-cesium/' : '/',
+  // base: isProd ? 'zarr-cesium/' : '/',
+  base: 'zarr-cesium/',
   plugins: [react(), cesium(), tailwindcss()],
   resolve: {
     alias: {

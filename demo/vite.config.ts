@@ -11,11 +11,7 @@ export default defineConfig(({ mode }) => {
     base: isProd ? '/zarr-cesium/' : '/',
     plugins: [react(), cesium(), tailwindcss()],
     define: {
-      CESIUM_BASE_URL: JSON.stringify(isProd ? '/zarr-cesium/cesium' : '/cesium')
-    },
-    build: {
-      outDir: 'dist',
-      assetsDir: '.'
+      CESIUM_BASE_URL: JSON.stringify(isProd ? '/zarr-cesium/zarr-cesium/cesium' : '/cesium')
     },
     resolve: {
       alias: {

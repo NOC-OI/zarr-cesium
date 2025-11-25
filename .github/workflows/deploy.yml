@@ -32,23 +32,25 @@ jobs:
 
       # Build docs (Docusaurus)
       - name: Install docs dependencies
-        working-directory: ./docusaurus
-        run: npm install
+        run: |
+          cd docusaurus
+          npm install
 
       - name: Build docs
-        working-directory: ./docusaurus
-        run: npm run build
+        run: |
+          cd docusaurus
+          npm install
 
-      # Build demo (Vite)
       - name: Install demo dependencies
-        working-directory: ./demo
-        run: npm install
+        run: |
+          cd demo
+          npm install
 
       - name: Build demo
-        working-directory: ./demo
-        run: npm run build
+        run: |
+          cd demo
+          npm run build
 
-      # Prepare deployment folder
       - name: Prepare deployment folder
         run: |
           mkdir -p docs

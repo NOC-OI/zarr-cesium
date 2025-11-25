@@ -3,41 +3,6 @@ import ComponentCreator from '@docusaurus/ComponentCreator';
 
 export default [
   {
-    path: '/zarr-cesium/docs/__docusaurus/debug',
-    component: ComponentCreator('/zarr-cesium/docs/__docusaurus/debug', 'db1'),
-    exact: true
-  },
-  {
-    path: '/zarr-cesium/docs/__docusaurus/debug/config',
-    component: ComponentCreator('/zarr-cesium/docs/__docusaurus/debug/config', '8b2'),
-    exact: true
-  },
-  {
-    path: '/zarr-cesium/docs/__docusaurus/debug/content',
-    component: ComponentCreator('/zarr-cesium/docs/__docusaurus/debug/content', '019'),
-    exact: true
-  },
-  {
-    path: '/zarr-cesium/docs/__docusaurus/debug/globalData',
-    component: ComponentCreator('/zarr-cesium/docs/__docusaurus/debug/globalData', 'b3b'),
-    exact: true
-  },
-  {
-    path: '/zarr-cesium/docs/__docusaurus/debug/metadata',
-    component: ComponentCreator('/zarr-cesium/docs/__docusaurus/debug/metadata', 'ece'),
-    exact: true
-  },
-  {
-    path: '/zarr-cesium/docs/__docusaurus/debug/registry',
-    component: ComponentCreator('/zarr-cesium/docs/__docusaurus/debug/registry', '6de'),
-    exact: true
-  },
-  {
-    path: '/zarr-cesium/docs/__docusaurus/debug/routes',
-    component: ComponentCreator('/zarr-cesium/docs/__docusaurus/debug/routes', 'bbf'),
-    exact: true
-  },
-  {
     path: '/zarr-cesium/docs/docs',
     component: ComponentCreator('/zarr-cesium/docs/docs', '7fe'),
     routes: [

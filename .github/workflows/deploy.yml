@@ -39,7 +39,7 @@ jobs:
       - name: Build docs
         run: |
           cd docusaurus
-          npm install
+          npm run build
 
       - name: Install demo dependencies
         run: |

@@ -13,6 +13,10 @@ export default defineConfig(({ mode }) => {
     define: {
       CESIUM_BASE_URL: JSON.stringify(isProd ? '/zarr-cesium/cesium' : '/cesium')
     },
+    build: {
+      outDir: 'dist',
+      assetsDir: '.'
+    },
     resolve: {
       alias: {
         '@': './src',

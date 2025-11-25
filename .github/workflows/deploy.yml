@@ -57,7 +57,7 @@ jobs:
           # Docs deployed at /docs/
           mkdir -p public/docs
           cp -r docs/build/* public/docs/
-
+          cp -r docusaurus/build/* public/
       # --- Upload artifact for GH Pages ---
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

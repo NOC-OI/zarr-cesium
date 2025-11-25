@@ -1,0 +1,23 @@
+{
+  "id": "api/variables/bone",
+  "title": "bone()",
+  "description": "Parameters",
+  "source": "@site/docs/api/variables/bone.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/bone",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/bone",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "binaryR()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/binaryR"
+  },
+  "next": {
+    "title": "boneR()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/boneR"
+  }
+}

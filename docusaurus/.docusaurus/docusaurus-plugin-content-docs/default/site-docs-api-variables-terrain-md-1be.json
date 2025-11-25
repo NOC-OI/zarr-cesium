@@ -1,0 +1,23 @@
+{
+  "id": "api/variables/terrain",
+  "title": "terrain()",
+  "description": "Parameters",
+  "source": "@site/docs/api/variables/terrain.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/terrain",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/terrain",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "tab20cR()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/tab20cR"
+  },
+  "next": {
+    "title": "terrainR()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/terrainR"
+  }
+}

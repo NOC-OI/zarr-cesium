@@ -1,0 +1,23 @@
+{
+  "id": "api/variables/copperR",
+  "title": "copperR()",
+  "description": "Parameters",
+  "source": "@site/docs/api/variables/copperR.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/copperR",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/copperR",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "copper()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/copper"
+  },
+  "next": {
+    "title": "cubehelix()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/cubehelix"
+  }
+}

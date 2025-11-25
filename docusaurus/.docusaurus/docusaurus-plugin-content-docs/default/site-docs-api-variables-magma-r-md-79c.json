@@ -1,0 +1,23 @@
+{
+  "id": "api/variables/magmaR",
+  "title": "magmaR()",
+  "description": "Parameters",
+  "source": "@site/docs/api/variables/magmaR.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/magmaR",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/magmaR",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "magma()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/magma"
+  },
+  "next": {
+    "title": "mercProj",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/mercProj"
+  }
+}

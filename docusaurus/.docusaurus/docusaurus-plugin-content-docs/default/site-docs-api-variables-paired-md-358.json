@@ -1,0 +1,23 @@
+{
+  "id": "api/variables/Paired",
+  "title": "Paired()",
+  "description": "Parameters",
+  "source": "@site/docs/api/variables/Paired.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/Paired",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/Paired",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "PRGnR()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/PRGnR"
+  },
+  "next": {
+    "title": "PairedR()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/PairedR"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "id": "api/functions/lonDegToMercX",
+  "title": "lonDegToMercX()",
+  "description": "Converts a longitude in degrees into a Web Mercator X coordinate (meters).",
+  "source": "@site/docs/api/functions/lonDegToMercX.md",
+  "sourceDirName": "api/functions",
+  "slug": "/api/functions/lonDegToMercX",
+  "permalink": "/zarr-cesium/docs/docs/api/functions/lonDegToMercX",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "loadDimensionValues()",
+    "permalink": "/zarr-cesium/docs/docs/api/functions/loadDimensionValues"
+  },
+  "next": {
+    "title": "openLevelArray()",
+    "permalink": "/zarr-cesium/docs/docs/api/functions/openLevelArray"
+  }
+}

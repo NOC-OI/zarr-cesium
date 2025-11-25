@@ -1,0 +1,23 @@
+{
+  "id": "api/variables/prismR",
+  "title": "prismR()",
+  "description": "Parameters",
+  "source": "@site/docs/api/variables/prismR.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/prismR",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/prismR",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "prism()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/prism"
+  },
+  "next": {
+    "title": "rainbow()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/rainbow"
+  }
+}

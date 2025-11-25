@@ -1,0 +1,23 @@
+{
+  "id": "api/variables/gistHeatR",
+  "title": "gistHeatR()",
+  "description": "Parameters",
+  "source": "@site/docs/api/variables/gistHeatR.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/gistHeatR",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/gistHeatR",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "gistHeat()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/gistHeat"
+  },
+  "next": {
+    "title": "gistNcar()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/gistNcar"
+  }
+}

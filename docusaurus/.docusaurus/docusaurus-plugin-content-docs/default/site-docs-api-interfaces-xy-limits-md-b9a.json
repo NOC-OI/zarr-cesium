@@ -1,0 +1,23 @@
+{
+  "id": "api/interfaces/XYLimits",
+  "title": "XYLimits",
+  "description": "Describes the XY coordinate boundaries of a dataset.",
+  "source": "@site/docs/api/interfaces/XYLimits.md",
+  "sourceDirName": "api/interfaces",
+  "slug": "/api/interfaces/XYLimits",
+  "permalink": "/zarr-cesium/docs/docs/api/interfaces/XYLimits",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "VelocityOptions",
+    "permalink": "/zarr-cesium/docs/docs/api/interfaces/VelocityOptions"
+  },
+  "next": {
+    "title": "XYLimitsProps",
+    "permalink": "/zarr-cesium/docs/docs/api/interfaces/XYLimitsProps"
+  }
+}

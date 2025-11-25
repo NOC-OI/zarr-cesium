@@ -1,0 +1,1168 @@
+{
+  "docusaurus-plugin-content-docs": {
+    "default": {
+      "path": "/zarr-cesium/docs/docs",
+      "versions": [
+        {
+          "name": "current",
+          "label": "Next",
+          "isLast": true,
+          "path": "/zarr-cesium/docs/docs",
+          "mainDocId": "index",
+          "docs": [
+            {
+              "id": "api/classes/ZarrCubeProvider",
+              "path": "/zarr-cesium/docs/docs/api/classes/ZarrCubeProvider",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/classes/ZarrCubeVelocityProvider",
+              "path": "/zarr-cesium/docs/docs/api/classes/ZarrCubeVelocityProvider",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/classes/ZarrImageryLayer",
+              "path": "/zarr-cesium/docs/docs/api/classes/ZarrImageryLayer",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/classes/ZarrLayerProvider",
+              "path": "/zarr-cesium/docs/docs/api/classes/ZarrLayerProvider",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/functions/calculateElevationSlice",
+              "path": "/zarr-cesium/docs/docs/api/functions/calculateElevationSlice",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/functions/calculateHeightMeters",
+              "path": "/zarr-cesium/docs/docs/api/functions/calculateHeightMeters",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/functions/calculateNearestIndex",
+              "path": "/zarr-cesium/docs/docs/api/functions/calculateNearestIndex",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/functions/calculateSliceArgs",
+              "path": "/zarr-cesium/docs/docs/api/functions/calculateSliceArgs",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/functions/calculateXYFromBounds",
+              "path": "/zarr-cesium/docs/docs/api/functions/calculateXYFromBounds",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/functions/colormapBuilder",
+              "path": "/zarr-cesium/docs/docs/api/functions/colormapBuilder",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/functions/colorScaleByName",
+              "path": "/zarr-cesium/docs/docs/api/functions/colorScaleByName",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/functions/createColorRampTexture",
+              "path": "/zarr-cesium/docs/docs/api/functions/createColorRampTexture",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/functions/createProgram",
+              "path": "/zarr-cesium/docs/docs/api/functions/createProgram",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/functions/createShader",
+              "path": "/zarr-cesium/docs/docs/api/functions/createShader",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/functions/deriveRectangleAndScheme",
+              "path": "/zarr-cesium/docs/docs/api/functions/deriveRectangleAndScheme",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/functions/detectCRS",
+              "path": "/zarr-cesium/docs/docs/api/functions/detectCRS",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/functions/extractNoDataMetadata",
+              "path": "/zarr-cesium/docs/docs/api/functions/extractNoDataMetadata",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/functions/getCubeDimensions",
+              "path": "/zarr-cesium/docs/docs/api/functions/getCubeDimensions",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/functions/getXYLimits",
+              "path": "/zarr-cesium/docs/docs/api/functions/getXYLimits",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/functions/identifyDimensionIndices",
+              "path": "/zarr-cesium/docs/docs/api/functions/identifyDimensionIndices",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/functions/initZarrDataset",
+              "path": "/zarr-cesium/docs/docs/api/functions/initZarrDataset",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/functions/latDegToMercY",
+              "path": "/zarr-cesium/docs/docs/api/functions/latDegToMercY",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/functions/loadDimensionValues",
+              "path": "/zarr-cesium/docs/docs/api/functions/loadDimensionValues",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/functions/lonDegToMercX",
+              "path": "/zarr-cesium/docs/docs/api/functions/lonDegToMercX",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/functions/openLevelArray",
+              "path": "/zarr-cesium/docs/docs/api/functions/openLevelArray",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/functions/resolveNoDataRange",
+              "path": "/zarr-cesium/docs/docs/api/functions/resolveNoDataRange",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/functions/updateImgData",
+              "path": "/zarr-cesium/docs/docs/api/functions/updateImgData",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/functions/validateBounds",
+              "path": "/zarr-cesium/docs/docs/api/functions/validateBounds",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/index",
+              "path": "/zarr-cesium/docs/docs/api/",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/interfaces/BoundsProps",
+              "path": "/zarr-cesium/docs/docs/api/interfaces/BoundsProps",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/interfaces/ColorMapInfo",
+              "path": "/zarr-cesium/docs/docs/api/interfaces/ColorMapInfo",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/interfaces/ColorScaleProps",
+              "path": "/zarr-cesium/docs/docs/api/interfaces/ColorScaleProps",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/interfaces/CubeOptions",
+              "path": "/zarr-cesium/docs/docs/api/interfaces/CubeOptions",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/interfaces/CubeVelocityProps",
+              "path": "/zarr-cesium/docs/docs/api/interfaces/CubeVelocityProps",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/interfaces/DataSliceProps",
+              "path": "/zarr-cesium/docs/docs/api/interfaces/DataSliceProps",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/interfaces/DimensionNamesProps",
+              "path": "/zarr-cesium/docs/docs/api/interfaces/DimensionNamesProps",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/interfaces/DimensionValues",
+              "path": "/zarr-cesium/docs/docs/api/interfaces/DimensionValues",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/interfaces/DimIndicesProps",
+              "path": "/zarr-cesium/docs/docs/api/interfaces/DimIndicesProps",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/interfaces/LayerOptions",
+              "path": "/zarr-cesium/docs/docs/api/interfaces/LayerOptions",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/interfaces/VelocityOptions",
+              "path": "/zarr-cesium/docs/docs/api/interfaces/VelocityOptions",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/interfaces/XYLimits",
+              "path": "/zarr-cesium/docs/docs/api/interfaces/XYLimits",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/interfaces/XYLimitsProps",
+              "path": "/zarr-cesium/docs/docs/api/interfaces/XYLimitsProps",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/interfaces/ZarrLevelMetadata",
+              "path": "/zarr-cesium/docs/docs/api/interfaces/ZarrLevelMetadata",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/interfaces/ZarrSelectorsProps",
+              "path": "/zarr-cesium/docs/docs/api/interfaces/ZarrSelectorsProps",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/type-aliases/ColorMapName",
+              "path": "/zarr-cesium/docs/docs/api/type-aliases/ColorMapName",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/type-aliases/CRS",
+              "path": "/zarr-cesium/docs/docs/api/type-aliases/CRS",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/type-aliases/SliceArgs",
+              "path": "/zarr-cesium/docs/docs/api/type-aliases/SliceArgs",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/Accent",
+              "path": "/zarr-cesium/docs/docs/api/variables/Accent",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/AccentR",
+              "path": "/zarr-cesium/docs/docs/api/variables/AccentR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/afmhot",
+              "path": "/zarr-cesium/docs/docs/api/variables/afmhot",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/afmhotR",
+              "path": "/zarr-cesium/docs/docs/api/variables/afmhotR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/allColorScales",
+              "path": "/zarr-cesium/docs/docs/api/variables/allColorScales",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/autumn",
+              "path": "/zarr-cesium/docs/docs/api/variables/autumn",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/autumnR",
+              "path": "/zarr-cesium/docs/docs/api/variables/autumnR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/binary",
+              "path": "/zarr-cesium/docs/docs/api/variables/binary",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/binaryR",
+              "path": "/zarr-cesium/docs/docs/api/variables/binaryR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/Blues",
+              "path": "/zarr-cesium/docs/docs/api/variables/Blues",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/BluesR",
+              "path": "/zarr-cesium/docs/docs/api/variables/BluesR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/bone",
+              "path": "/zarr-cesium/docs/docs/api/variables/bone",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/boneR",
+              "path": "/zarr-cesium/docs/docs/api/variables/boneR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/BrBG",
+              "path": "/zarr-cesium/docs/docs/api/variables/BrBG",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/BrBGR",
+              "path": "/zarr-cesium/docs/docs/api/variables/BrBGR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/brg",
+              "path": "/zarr-cesium/docs/docs/api/variables/brg",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/brgR",
+              "path": "/zarr-cesium/docs/docs/api/variables/brgR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/BuGn",
+              "path": "/zarr-cesium/docs/docs/api/variables/BuGn",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/BuGnR",
+              "path": "/zarr-cesium/docs/docs/api/variables/BuGnR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/BuPu",
+              "path": "/zarr-cesium/docs/docs/api/variables/BuPu",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/BuPuR",
+              "path": "/zarr-cesium/docs/docs/api/variables/BuPuR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/bwr",
+              "path": "/zarr-cesium/docs/docs/api/variables/bwr",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/bwrR",
+              "path": "/zarr-cesium/docs/docs/api/variables/bwrR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/cividis",
+              "path": "/zarr-cesium/docs/docs/api/variables/cividis",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/cividisR",
+              "path": "/zarr-cesium/docs/docs/api/variables/cividisR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/CMRmap",
+              "path": "/zarr-cesium/docs/docs/api/variables/CMRmap",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/CMRmapR",
+              "path": "/zarr-cesium/docs/docs/api/variables/CMRmapR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/cool",
+              "path": "/zarr-cesium/docs/docs/api/variables/cool",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/coolR",
+              "path": "/zarr-cesium/docs/docs/api/variables/coolR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/coolwarm",
+              "path": "/zarr-cesium/docs/docs/api/variables/coolwarm",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/coolwarmR",
+              "path": "/zarr-cesium/docs/docs/api/variables/coolwarmR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/copper",
+              "path": "/zarr-cesium/docs/docs/api/variables/copper",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/copperR",
+              "path": "/zarr-cesium/docs/docs/api/variables/copperR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/cubehelix",
+              "path": "/zarr-cesium/docs/docs/api/variables/cubehelix",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/cubehelixR",
+              "path": "/zarr-cesium/docs/docs/api/variables/cubehelixR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/Dark2",
+              "path": "/zarr-cesium/docs/docs/api/variables/Dark2",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/Dark2R",
+              "path": "/zarr-cesium/docs/docs/api/variables/Dark2R",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/DEFAULT_COLORMAP",
+              "path": "/zarr-cesium/docs/docs/api/variables/DEFAULT_COLORMAP",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/DEFAULT_OPACITY",
+              "path": "/zarr-cesium/docs/docs/api/variables/DEFAULT_OPACITY",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/DEFAULT_SCALE",
+              "path": "/zarr-cesium/docs/docs/api/variables/DEFAULT_SCALE",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/DEFAULT_VERTICAL_EXAGGERATION",
+              "path": "/zarr-cesium/docs/docs/api/variables/DEFAULT_VERTICAL_EXAGGERATION",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/DEFAULT_WIND_OPTIONS",
+              "path": "/zarr-cesium/docs/docs/api/variables/DEFAULT_WIND_OPTIONS",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/flag",
+              "path": "/zarr-cesium/docs/docs/api/variables/flag",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/flagR",
+              "path": "/zarr-cesium/docs/docs/api/variables/flagR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/fragmentShaderSource",
+              "path": "/zarr-cesium/docs/docs/api/variables/fragmentShaderSource",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/gistEarth",
+              "path": "/zarr-cesium/docs/docs/api/variables/gistEarth",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/gistEarthR",
+              "path": "/zarr-cesium/docs/docs/api/variables/gistEarthR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/gistGray",
+              "path": "/zarr-cesium/docs/docs/api/variables/gistGray",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/gistGrayR",
+              "path": "/zarr-cesium/docs/docs/api/variables/gistGrayR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/gistHeat",
+              "path": "/zarr-cesium/docs/docs/api/variables/gistHeat",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/gistHeatR",
+              "path": "/zarr-cesium/docs/docs/api/variables/gistHeatR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/gistNcar",
+              "path": "/zarr-cesium/docs/docs/api/variables/gistNcar",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/gistNcarR",
+              "path": "/zarr-cesium/docs/docs/api/variables/gistNcarR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/gistRainbow",
+              "path": "/zarr-cesium/docs/docs/api/variables/gistRainbow",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/gistRainbowR",
+              "path": "/zarr-cesium/docs/docs/api/variables/gistRainbowR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/gistStern",
+              "path": "/zarr-cesium/docs/docs/api/variables/gistStern",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/gistSternR",
+              "path": "/zarr-cesium/docs/docs/api/variables/gistSternR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/gistYarg",
+              "path": "/zarr-cesium/docs/docs/api/variables/gistYarg",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/gistYargR",
+              "path": "/zarr-cesium/docs/docs/api/variables/gistYargR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/GnBu",
+              "path": "/zarr-cesium/docs/docs/api/variables/GnBu",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/GnBuR",
+              "path": "/zarr-cesium/docs/docs/api/variables/GnBuR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/gnuplot",
+              "path": "/zarr-cesium/docs/docs/api/variables/gnuplot",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/gnuplot2",
+              "path": "/zarr-cesium/docs/docs/api/variables/gnuplot2",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/gnuplot2R",
+              "path": "/zarr-cesium/docs/docs/api/variables/gnuplot2R",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/gnuplotR",
+              "path": "/zarr-cesium/docs/docs/api/variables/gnuplotR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/gray",
+              "path": "/zarr-cesium/docs/docs/api/variables/gray",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/grayR",
+              "path": "/zarr-cesium/docs/docs/api/variables/grayR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/Greens",
+              "path": "/zarr-cesium/docs/docs/api/variables/Greens",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/GreensR",
+              "path": "/zarr-cesium/docs/docs/api/variables/GreensR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/Greys",
+              "path": "/zarr-cesium/docs/docs/api/variables/Greys",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/GreysR",
+              "path": "/zarr-cesium/docs/docs/api/variables/GreysR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/hot",
+              "path": "/zarr-cesium/docs/docs/api/variables/hot",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/hotR",
+              "path": "/zarr-cesium/docs/docs/api/variables/hotR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/hsv",
+              "path": "/zarr-cesium/docs/docs/api/variables/hsv",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/hsvR",
+              "path": "/zarr-cesium/docs/docs/api/variables/hsvR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/inferno",
+              "path": "/zarr-cesium/docs/docs/api/variables/inferno",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/infernoR",
+              "path": "/zarr-cesium/docs/docs/api/variables/infernoR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/jet",
+              "path": "/zarr-cesium/docs/docs/api/variables/jet",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/jetR",
+              "path": "/zarr-cesium/docs/docs/api/variables/jetR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/magma",
+              "path": "/zarr-cesium/docs/docs/api/variables/magma",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/magmaR",
+              "path": "/zarr-cesium/docs/docs/api/variables/magmaR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/mercProj",
+              "path": "/zarr-cesium/docs/docs/api/variables/mercProj",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/nipySpectral",
+              "path": "/zarr-cesium/docs/docs/api/variables/nipySpectral",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/nipySpectralR",
+              "path": "/zarr-cesium/docs/docs/api/variables/nipySpectralR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/ocean",
+              "path": "/zarr-cesium/docs/docs/api/variables/ocean",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/oceanR",
+              "path": "/zarr-cesium/docs/docs/api/variables/oceanR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/Oranges",
+              "path": "/zarr-cesium/docs/docs/api/variables/Oranges",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/OrangesR",
+              "path": "/zarr-cesium/docs/docs/api/variables/OrangesR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/OrRd",
+              "path": "/zarr-cesium/docs/docs/api/variables/OrRd",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/OrRdR",
+              "path": "/zarr-cesium/docs/docs/api/variables/OrRdR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/Paired",
+              "path": "/zarr-cesium/docs/docs/api/variables/Paired",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/PairedR",
+              "path": "/zarr-cesium/docs/docs/api/variables/PairedR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/Pastel1",
+              "path": "/zarr-cesium/docs/docs/api/variables/Pastel1",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/Pastel1R",
+              "path": "/zarr-cesium/docs/docs/api/variables/Pastel1R",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/Pastel2",
+              "path": "/zarr-cesium/docs/docs/api/variables/Pastel2",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/Pastel2R",
+              "path": "/zarr-cesium/docs/docs/api/variables/Pastel2R",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/pink",
+              "path": "/zarr-cesium/docs/docs/api/variables/pink",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/pinkR",
+              "path": "/zarr-cesium/docs/docs/api/variables/pinkR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/PiYG",
+              "path": "/zarr-cesium/docs/docs/api/variables/PiYG",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/PiYGR",
+              "path": "/zarr-cesium/docs/docs/api/variables/PiYGR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/plasma",
+              "path": "/zarr-cesium/docs/docs/api/variables/plasma",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/plasmaR",
+              "path": "/zarr-cesium/docs/docs/api/variables/plasmaR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/PRGn",
+              "path": "/zarr-cesium/docs/docs/api/variables/PRGn",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/PRGnR",
+              "path": "/zarr-cesium/docs/docs/api/variables/PRGnR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/prism",
+              "path": "/zarr-cesium/docs/docs/api/variables/prism",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/prismR",
+              "path": "/zarr-cesium/docs/docs/api/variables/prismR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/PuBu",
+              "path": "/zarr-cesium/docs/docs/api/variables/PuBu",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/PuBuGn",
+              "path": "/zarr-cesium/docs/docs/api/variables/PuBuGn",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/PuBuGnR",
+              "path": "/zarr-cesium/docs/docs/api/variables/PuBuGnR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/PuBuR",
+              "path": "/zarr-cesium/docs/docs/api/variables/PuBuR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/PuOr",
+              "path": "/zarr-cesium/docs/docs/api/variables/PuOr",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/PuOrR",
+              "path": "/zarr-cesium/docs/docs/api/variables/PuOrR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/PuRd",
+              "path": "/zarr-cesium/docs/docs/api/variables/PuRd",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/PuRdR",
+              "path": "/zarr-cesium/docs/docs/api/variables/PuRdR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/Purples",
+              "path": "/zarr-cesium/docs/docs/api/variables/Purples",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/PurplesR",
+              "path": "/zarr-cesium/docs/docs/api/variables/PurplesR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/rainbow",
+              "path": "/zarr-cesium/docs/docs/api/variables/rainbow",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/rainbowR",
+              "path": "/zarr-cesium/docs/docs/api/variables/rainbowR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/RdBu",
+              "path": "/zarr-cesium/docs/docs/api/variables/RdBu",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/RdBuR",
+              "path": "/zarr-cesium/docs/docs/api/variables/RdBuR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/RdGy",
+              "path": "/zarr-cesium/docs/docs/api/variables/RdGy",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/RdGyR",
+              "path": "/zarr-cesium/docs/docs/api/variables/RdGyR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/RdPu",
+              "path": "/zarr-cesium/docs/docs/api/variables/RdPu",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/RdPuR",
+              "path": "/zarr-cesium/docs/docs/api/variables/RdPuR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/RdYlBu",
+              "path": "/zarr-cesium/docs/docs/api/variables/RdYlBu",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/RdYlBuR",
+              "path": "/zarr-cesium/docs/docs/api/variables/RdYlBuR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/RdYlGn",
+              "path": "/zarr-cesium/docs/docs/api/variables/RdYlGn",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/RdYlGnR",
+              "path": "/zarr-cesium/docs/docs/api/variables/RdYlGnR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/Reds",
+              "path": "/zarr-cesium/docs/docs/api/variables/Reds",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/RedsR",
+              "path": "/zarr-cesium/docs/docs/api/variables/RedsR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/seismic",
+              "path": "/zarr-cesium/docs/docs/api/variables/seismic",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/seismicR",
+              "path": "/zarr-cesium/docs/docs/api/variables/seismicR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/Set1",
+              "path": "/zarr-cesium/docs/docs/api/variables/Set1",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/Set1R",
+              "path": "/zarr-cesium/docs/docs/api/variables/Set1R",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/Set2",
+              "path": "/zarr-cesium/docs/docs/api/variables/Set2",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/Set2R",
+              "path": "/zarr-cesium/docs/docs/api/variables/Set2R",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/Set3",
+              "path": "/zarr-cesium/docs/docs/api/variables/Set3",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/Set3R",
+              "path": "/zarr-cesium/docs/docs/api/variables/Set3R",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/Spectral",
+              "path": "/zarr-cesium/docs/docs/api/variables/Spectral",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/SpectralR",
+              "path": "/zarr-cesium/docs/docs/api/variables/SpectralR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/spring",
+              "path": "/zarr-cesium/docs/docs/api/variables/spring",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/springR",
+              "path": "/zarr-cesium/docs/docs/api/variables/springR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/summer",
+              "path": "/zarr-cesium/docs/docs/api/variables/summer",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/summerR",
+              "path": "/zarr-cesium/docs/docs/api/variables/summerR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/tab10",
+              "path": "/zarr-cesium/docs/docs/api/variables/tab10",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/tab10R",
+              "path": "/zarr-cesium/docs/docs/api/variables/tab10R",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/tab20",
+              "path": "/zarr-cesium/docs/docs/api/variables/tab20",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/tab20b",
+              "path": "/zarr-cesium/docs/docs/api/variables/tab20b",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/tab20bR",
+              "path": "/zarr-cesium/docs/docs/api/variables/tab20bR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/tab20c",
+              "path": "/zarr-cesium/docs/docs/api/variables/tab20c",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/tab20cR",
+              "path": "/zarr-cesium/docs/docs/api/variables/tab20cR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/tab20R",
+              "path": "/zarr-cesium/docs/docs/api/variables/tab20R",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/terrain",
+              "path": "/zarr-cesium/docs/docs/api/variables/terrain",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/terrainR",
+              "path": "/zarr-cesium/docs/docs/api/variables/terrainR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/turbo",
+              "path": "/zarr-cesium/docs/docs/api/variables/turbo",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/turboR",
+              "path": "/zarr-cesium/docs/docs/api/variables/turboR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/twilight",
+              "path": "/zarr-cesium/docs/docs/api/variables/twilight",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/twilightR",
+              "path": "/zarr-cesium/docs/docs/api/variables/twilightR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/twilightShifted",
+              "path": "/zarr-cesium/docs/docs/api/variables/twilightShifted",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/twilightShiftedR",
+              "path": "/zarr-cesium/docs/docs/api/variables/twilightShiftedR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/vertexShaderSource",
+              "path": "/zarr-cesium/docs/docs/api/variables/vertexShaderSource",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/viridis",
+              "path": "/zarr-cesium/docs/docs/api/variables/viridis",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/viridisR",
+              "path": "/zarr-cesium/docs/docs/api/variables/viridisR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/winter",
+              "path": "/zarr-cesium/docs/docs/api/variables/winter",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/winterR",
+              "path": "/zarr-cesium/docs/docs/api/variables/winterR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/Wistia",
+              "path": "/zarr-cesium/docs/docs/api/variables/Wistia",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/WistiaR",
+              "path": "/zarr-cesium/docs/docs/api/variables/WistiaR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/YlGn",
+              "path": "/zarr-cesium/docs/docs/api/variables/YlGn",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/YlGnBu",
+              "path": "/zarr-cesium/docs/docs/api/variables/YlGnBu",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/YlGnBuR",
+              "path": "/zarr-cesium/docs/docs/api/variables/YlGnBuR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/YlGnR",
+              "path": "/zarr-cesium/docs/docs/api/variables/YlGnR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/YlOrBr",
+              "path": "/zarr-cesium/docs/docs/api/variables/YlOrBr",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/YlOrBrR",
+              "path": "/zarr-cesium/docs/docs/api/variables/YlOrBrR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/YlOrRd",
+              "path": "/zarr-cesium/docs/docs/api/variables/YlOrRd",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "api/variables/YlOrRdR",
+              "path": "/zarr-cesium/docs/docs/api/variables/YlOrRdR",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "data",
+              "path": "/zarr-cesium/docs/docs/data",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "getting-started",
+              "path": "/zarr-cesium/docs/docs/getting-started",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "index",
+              "path": "/zarr-cesium/docs/docs/",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "providers/zarr-cube-provider",
+              "path": "/zarr-cesium/docs/docs/providers/zarr-cube-provider",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "providers/zarr-cube-velocity-provider",
+              "path": "/zarr-cesium/docs/docs/providers/zarr-cube-velocity-provider",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "providers/zarr-layer-provider",
+              "path": "/zarr-cesium/docs/docs/providers/zarr-layer-provider",
+              "sidebar": "tutorialSidebar"
+            }
+          ],
+          "draftIds": [],
+          "sidebars": {
+            "tutorialSidebar": {
+              "link": {
+                "path": "/zarr-cesium/docs/docs/",
+                "label": "Zarr-Cesium"
+              }
+            }
+          }
+        }
+      ],
+      "breadcrumbs": true
+    }
+  }
+}

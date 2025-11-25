@@ -1,0 +1,23 @@
+{
+  "id": "api/variables/coolwarm",
+  "title": "coolwarm()",
+  "description": "Parameters",
+  "source": "@site/docs/api/variables/coolwarm.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/coolwarm",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/coolwarm",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "coolR()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/coolR"
+  },
+  "next": {
+    "title": "coolwarmR()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/coolwarmR"
+  }
+}

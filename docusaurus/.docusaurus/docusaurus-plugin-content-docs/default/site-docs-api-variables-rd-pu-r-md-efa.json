@@ -1,0 +1,23 @@
+{
+  "id": "api/variables/RdPuR",
+  "title": "RdPuR()",
+  "description": "Parameters",
+  "source": "@site/docs/api/variables/RdPuR.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/RdPuR",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/RdPuR",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "RdPu()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/RdPu"
+  },
+  "next": {
+    "title": "RdYlBu()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/RdYlBu"
+  }
+}

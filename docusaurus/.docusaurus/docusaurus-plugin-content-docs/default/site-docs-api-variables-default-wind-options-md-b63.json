@@ -1,0 +1,23 @@
+{
+  "id": "api/variables/DEFAULT_WIND_OPTIONS",
+  "title": "DEFAULT\\_WIND\\_OPTIONS",
+  "description": "Default configuration for WindLayer rendering.",
+  "source": "@site/docs/api/variables/DEFAULT_WIND_OPTIONS.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/DEFAULT_WIND_OPTIONS",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/DEFAULT_WIND_OPTIONS",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "DEFAULT\\_VERTICAL\\_EXAGGERATION",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/DEFAULT_VERTICAL_EXAGGERATION"
+  },
+  "next": {
+    "title": "Dark2()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/Dark2"
+  }
+}

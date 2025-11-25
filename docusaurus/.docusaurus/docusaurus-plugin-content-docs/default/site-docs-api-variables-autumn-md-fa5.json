@@ -1,0 +1,23 @@
+{
+  "id": "api/variables/autumn",
+  "title": "autumn()",
+  "description": "Parameters",
+  "source": "@site/docs/api/variables/autumn.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/autumn",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/autumn",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "allColorScales",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/allColorScales"
+  },
+  "next": {
+    "title": "autumnR()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/autumnR"
+  }
+}

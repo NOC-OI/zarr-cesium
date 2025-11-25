@@ -1,0 +1,23 @@
+{
+  "id": "api/functions/createShader",
+  "title": "createShader()",
+  "description": "Creates and compiles a WebGL shader from source code.",
+  "source": "@site/docs/api/functions/createShader.md",
+  "sourceDirName": "api/functions",
+  "slug": "/api/functions/createShader",
+  "permalink": "/zarr-cesium/docs/docs/api/functions/createShader",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "createProgram()",
+    "permalink": "/zarr-cesium/docs/docs/api/functions/createProgram"
+  },
+  "next": {
+    "title": "deriveRectangleAndScheme()",
+    "permalink": "/zarr-cesium/docs/docs/api/functions/deriveRectangleAndScheme"
+  }
+}

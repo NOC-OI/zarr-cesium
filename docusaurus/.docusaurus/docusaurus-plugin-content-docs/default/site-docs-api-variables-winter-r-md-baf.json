@@ -1,0 +1,19 @@
+{
+  "id": "api/variables/winterR",
+  "title": "winterR()",
+  "description": "Parameters",
+  "source": "@site/docs/api/variables/winterR.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/winterR",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/winterR",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "winter()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/winter"
+  }
+}

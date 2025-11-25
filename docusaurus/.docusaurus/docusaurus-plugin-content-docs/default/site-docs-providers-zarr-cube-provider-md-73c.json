@@ -1,0 +1,27 @@
+{
+  "id": "providers/zarr-cube-provider",
+  "title": "ZarrCubeProvider",
+  "description": "The ZarrCubeProvider renders 3D volumetric (cube) Zarr datasets as Cesium primitives.",
+  "source": "@site/docs/providers/zarr-cube-provider.md",
+  "sourceDirName": "providers",
+  "slug": "/providers/zarr-cube-provider",
+  "permalink": "/zarr-cesium/docs/docs/providers/zarr-cube-provider",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 4,
+  "frontMatter": {
+    "sidebar_position": 4,
+    "title": "ZarrCubeProvider"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "ZarrLayerProvider",
+    "permalink": "/zarr-cesium/docs/docs/providers/zarr-layer-provider"
+  },
+  "next": {
+    "title": "ZarrCubeVelocityProvider",
+    "permalink": "/zarr-cesium/docs/docs/providers/zarr-cube-velocity-provider"
+  }
+}

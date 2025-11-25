@@ -37,7 +37,7 @@ jobs:
       # Build demo (Vite)
       - name: Install demo dependencies
         working-directory: ./demo
-        run: npm ci
+        run: npm install
 
       - name: Build demo
         working-directory: ./demo

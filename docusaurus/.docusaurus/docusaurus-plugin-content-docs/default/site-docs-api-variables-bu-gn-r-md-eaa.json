@@ -1,0 +1,23 @@
+{
+  "id": "api/variables/BuGnR",
+  "title": "BuGnR()",
+  "description": "Parameters",
+  "source": "@site/docs/api/variables/BuGnR.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/BuGnR",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/BuGnR",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "BuGn()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/BuGn"
+  },
+  "next": {
+    "title": "BuPu()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/BuPu"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "id": "api/variables/springR",
+  "title": "springR()",
+  "description": "Parameters",
+  "source": "@site/docs/api/variables/springR.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/springR",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/springR",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "spring()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/spring"
+  },
+  "next": {
+    "title": "summer()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/summer"
+  }
+}

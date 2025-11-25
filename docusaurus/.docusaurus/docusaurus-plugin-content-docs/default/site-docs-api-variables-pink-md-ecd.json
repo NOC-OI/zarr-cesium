@@ -1,0 +1,23 @@
+{
+  "id": "api/variables/pink",
+  "title": "pink()",
+  "description": "Parameters",
+  "source": "@site/docs/api/variables/pink.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/pink",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/pink",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "oceanR()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/oceanR"
+  },
+  "next": {
+    "title": "pinkR()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/pinkR"
+  }
+}

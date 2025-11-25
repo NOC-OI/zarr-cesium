@@ -1,0 +1,23 @@
+{
+  "id": "api/variables/turboR",
+  "title": "turboR()",
+  "description": "Parameters",
+  "source": "@site/docs/api/variables/turboR.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/turboR",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/turboR",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "turbo()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/turbo"
+  },
+  "next": {
+    "title": "twilight()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/twilight"
+  }
+}

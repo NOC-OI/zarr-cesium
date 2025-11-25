@@ -1,0 +1,27 @@
+{
+  "id": "providers/zarr-cube-velocity-provider",
+  "title": "ZarrCubeVelocityProvider",
+  "description": "The ZarrCubeVelocityProvider loads and visualizes 3D vector fields (U, V components) from Zarr datasets as animated particle layers in Cesium using the WindLayer from cesium-wind-layer",
+  "source": "@site/docs/providers/zarr-cube-velocity-provider.md",
+  "sourceDirName": "providers",
+  "slug": "/providers/zarr-cube-velocity-provider",
+  "permalink": "/zarr-cesium/docs/docs/providers/zarr-cube-velocity-provider",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 5,
+  "frontMatter": {
+    "sidebar_position": 5,
+    "title": "ZarrCubeVelocityProvider"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "ZarrCubeProvider",
+    "permalink": "/zarr-cesium/docs/docs/providers/zarr-cube-provider"
+  },
+  "next": {
+    "title": "Data Preparation",
+    "permalink": "/zarr-cesium/docs/docs/data"
+  }
+}

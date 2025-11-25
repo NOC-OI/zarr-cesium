@@ -1,0 +1,23 @@
+{
+  "id": "api/variables/winter",
+  "title": "winter()",
+  "description": "Parameters",
+  "source": "@site/docs/api/variables/winter.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/winter",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/winter",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "viridisR()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/viridisR"
+  },
+  "next": {
+    "title": "winterR()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/winterR"
+  }
+}

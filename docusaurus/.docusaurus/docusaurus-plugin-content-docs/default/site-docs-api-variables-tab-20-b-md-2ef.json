@@ -1,0 +1,23 @@
+{
+  "id": "api/variables/tab20b",
+  "title": "tab20b()",
+  "description": "Parameters",
+  "source": "@site/docs/api/variables/tab20b.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/tab20b",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/tab20b",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "tab20R()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/tab20R"
+  },
+  "next": {
+    "title": "tab20bR()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/tab20bR"
+  }
+}

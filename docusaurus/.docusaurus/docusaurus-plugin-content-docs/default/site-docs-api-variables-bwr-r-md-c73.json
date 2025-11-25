@@ -1,0 +1,23 @@
+{
+  "id": "api/variables/bwrR",
+  "title": "bwrR()",
+  "description": "Parameters",
+  "source": "@site/docs/api/variables/bwrR.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/bwrR",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/bwrR",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "bwr()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/bwr"
+  },
+  "next": {
+    "title": "cividis()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/cividis"
+  }
+}

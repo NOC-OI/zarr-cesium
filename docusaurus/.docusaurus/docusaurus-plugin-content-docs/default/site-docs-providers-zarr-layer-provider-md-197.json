@@ -1,0 +1,27 @@
+{
+  "id": "providers/zarr-layer-provider",
+  "title": "ZarrLayerProvider",
+  "description": "The ZarrLayerProvider allows you to render 2D raster data from Zarr datasets as a Cesium imagery layer.",
+  "source": "@site/docs/providers/zarr-layer-provider.md",
+  "sourceDirName": "providers",
+  "slug": "/providers/zarr-layer-provider",
+  "permalink": "/zarr-cesium/docs/docs/providers/zarr-layer-provider",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 3,
+  "frontMatter": {
+    "sidebar_position": 3,
+    "title": "ZarrLayerProvider"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Getting Started",
+    "permalink": "/zarr-cesium/docs/docs/getting-started"
+  },
+  "next": {
+    "title": "ZarrCubeProvider",
+    "permalink": "/zarr-cesium/docs/docs/providers/zarr-cube-provider"
+  }
+}

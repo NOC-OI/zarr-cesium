@@ -1,0 +1,23 @@
+{
+  "id": "api/variables/spring",
+  "title": "spring()",
+  "description": "Parameters",
+  "source": "@site/docs/api/variables/spring.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/spring",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/spring",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "seismicR()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/seismicR"
+  },
+  "next": {
+    "title": "springR()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/springR"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "id": "api/variables/cubehelixR",
+  "title": "cubehelixR()",
+  "description": "Parameters",
+  "source": "@site/docs/api/variables/cubehelixR.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/cubehelixR",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/cubehelixR",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "cubehelix()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/cubehelix"
+  },
+  "next": {
+    "title": "flag()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/flag"
+  }
+}

@@ -1,10 +1,11 @@
 # Zarr-Cesium Visualization Toolkit
 
-[![CI](https://github.com/noc-oi/zarr-cesium/actions/workflows/main.yml/badge.svg)](https://github.com/noc-oi/zarr-cesium/actions/workflows/main.yml)
 ![NPM Version](https://img.shields.io/npm/v/zarr-cesium)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Docs](https://img.shields.io/badge/docs-online-blue)](https://noc-oi.github.io/zarr-cesium/docs)
+[![Code style: Prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://prettier.io)
 
-**High-performance CesiumJS providers for interactive 2D and 3D visualization of environmental and atmospheric data stored in Zarr**
+**High-performance CesiumJS providers for interactive 2D and 3D visualization of environmental and atmospheric data stored in Zarr.**
 
 - Documentation: [https://noc-oi.github.io/zarr-cesium/docs](https://noc-oi.github.io/zarr-cesium/docs)
 - Demo: [https://noc-oi.github.io/zarr-cesium/](https://noc-oi.github.io/zarr-cesium/)
@@ -13,7 +14,7 @@
 
 ## Overview
 
-**Zarr-Cesium** Visualization Toolkit provides **CesiumJS data providers** for rendering n-dimensional datasets stored in the [Zarr](https://zarr.dev) format — streamed directly from cloud object stores (HTTP/S3/GCS) without preprocessing or conversion and without a backend server.
+The **Zarr-Cesium Visualization Toolkit** provides **CesiumJS data providers** for rendering n-dimensional datasets stored in the [Zarr](https://zarr.dev) format — streamed directly from cloud object stores (HTTP/S3/GCS) without preprocessing, conversion, or a backend server.
 
 ### Features
 
@@ -21,13 +22,13 @@
   Read datasets from any Zarr store, including public cloud object storage.
 
 - **Multiscale or single-scale datasets**
-  Automatically handles multi-resolution (from [ndpyramid](https://github.com/carbonplan/ndpyramid)) or standard Zarr datasets (without multiscale).
+  Automatically handles multi-resolution datasets (from [ndpyramid](https://github.com/carbonplan/ndpyramid)) or standard Zarr datasets.
 
 - **2D & 3D visualization**
   Render gridded scalar, vector, and volumetric data directly in CesiumJS.
 
 - **CRS-aware**
-  Supports both EPSG:4326 (Geographic) and EPSG:3857 (Web Mercator) coordinate systems with automatic detection and transformation.
+  Supports EPSG:4326 (Geographic) and EPSG:3857 (Web Mercator) coordinate systems with automatic detection and transformation.
 
 - **On-demand streaming**
   Tiles and slices are fetched and decoded dynamically — no conversion to imagery tiles required.
@@ -44,11 +45,11 @@
 
 The toolkit provides **three Cesium provider classes**, each specialized for a different data type:
 
-| Provider Class             | Purpose              | Description                                                                              |
-| -------------------------- | -------------------- | ---------------------------------------------------------------------------------------- |
-| `ZarrLayerProvider`        | 2D scalar fields     | Renders single-level variables as Cesium imagery layers (e.g. temperature, chlorophyll). |
-| `ZarrCubeProvider`         | 3D volumetric fields | Renders volumetric cubes with horizontal and vertical slices (e.g. ocean temperature).   |
-| `ZarrCubeVelocityProvider` | 3D vector fields     | Visualizes vector flow (u/v components) using animated particle advection.               |
+| Provider Class             | Purpose              | Description                                                                               |
+| -------------------------- | -------------------- | ----------------------------------------------------------------------------------------- |
+| `ZarrLayerProvider`        | 2D scalar fields     | Renders single-level variables as Cesium imagery layers (e.g., temperature, chlorophyll). |
+| `ZarrCubeProvider`         | 3D volumetric fields | Renders volumetric cubes with horizontal and vertical slices (e.g., ocean temperature).   |
+| `ZarrCubeVelocityProvider` | 3D vector fields     | Visualizes vector flow (u/v components) using animated particle advection.                |
 
 ---
 
@@ -84,7 +85,7 @@ npm run dev
 
 The demo site will be available at `http://localhost:3000`.
 
-If you want to use your own Zarr datasets, you can modify the demo code in the `demo/pages/index.tsx` file to point to your data URLs. You may need to adjust the variable names, bounds, and other parameters accordingly.
+If you want to use your own Zarr datasets, you can modify the demo code in [`demo/src/application/data/layers-json.tsx`](https://github.com/NOC-OI/zarr-cesium/blob/dev/demo/src/application/data/layers-json.tsx) to point to your data URLs. You may need to adjust variable names, bounds, and other parameters accordingly.
 
 ---
 
@@ -92,7 +93,7 @@ If you want to use your own Zarr datasets, you can modify the demo code in the `
 
 ### 1. `ZarrLayerProvider`
 
-Renders **2D scalar fields** as Cesium imagery overlays using WebGL. It supports both single-scale and multiscale Zarr datasets, and has GPU-accelerated color mapping.
+Renders **2D scalar fields** as Cesium imagery overlays using WebGL. It supports both single-scale and multiscale Zarr datasets, and provides GPU-accelerated color mapping.
 
 **Example:**
 
@@ -113,17 +114,17 @@ const layer = await ZarrLayerProvider.createLayer(viewer, options);
 viewer.imageryLayers.add(layer);
 ```
 
-For more details, see the [Zarr-cesium documentation](https://noc-oi.github.io/zarr-cesium/docs/).
+For more details, see the [Zarr-Cesium documentation](https://noc-oi.github.io/zarr-cesium/docs/).
 
-<video src="https://github.com/NOC-OI/zarr-cesium/releases/download/0.1.0/layer_provider.mp4" autoplay loop muted playsinline></video>
+https://github.com/user-attachments/assets/33fc6dd2-38fa-4b20-a346-0a175f90eba1
 
-> Example of visualizing a Zarr dataset in a CesiumJs map using Zarr-Cesium. As you can see, you can easily change the timestamp, colormap, and map scale
+> Example of visualizing a Zarr dataset in a CesiumJS map using Zarr-Cesium. You can easily change the timestamp, colormap, and scale.
 
 ---
 
 ### 2. `ZarrCubeProvider`
 
-Renders **3D volumetric Zarr cubes** as Cesium primitives — including vertical and horizontal slices. It supports both Zarr v2/v3 and multiscale datasets, and also adjustable color mapping and vertical exaggeration.
+Renders **3D volumetric Zarr cubes** as Cesium primitives — including vertical and horizontal slices. It supports both Zarr v2/v3 and multiscale datasets, with adjustable color mapping and vertical exaggeration.
 
 **Example:**
 
@@ -144,11 +145,11 @@ const cube = new ZarrCubeProvider(viewer, {
 await cube.load();
 ```
 
-For more details, see the [Zarr-cesium documentation](https://noc-oi.github.io/zarr-cesium/docs/).
+For more details, see the [Zarr-Cesium documentation](https://noc-oi.github.io/zarr-cesium/docs/).
 
-<video src="https://github.com/NOC-OI/zarr-cesium/releases/download/0.1.0/cube_provider.mp4" autoplay loop muted playsinline></video>
+https://github.com/user-attachments/assets/8b066725-c6c7-4b7a-9fc0-d632b623937c
 
-> Example of visualizing a 4D Zarr dataset in a CesiumJs map as a 3D cube using Zarr-Cesium. As you can see, you can easily change slices and see the cube in different ways, styles and scales.
+> Example of visualizing a 4D Zarr dataset in a CesiumJS map as a 3D cube using Zarr-Cesium. You can easily change slices and view the cube in different ways, styles, and scales.
 
 ---
 
@@ -179,11 +180,11 @@ const velocity = new ZarrCubeVelocityProvider(viewer, {
 await velocity.load();
 ```
 
-For more details, see the [Zarr-cesium documentation](https://noc-oi.github.io/zarr-cesium/docs/).
+For more details, see the [Zarr-Cesium documentation](https://noc-oi.github.io/zarr-cesium/docs/).
 
-![Video with a map with a plot of salinity map for the date 2000–01–01T12:00:00. The data is related to the outputs of NEMO NPD](public/carbonplan.gif)
+https://github.com/user-attachments/assets/a54ddd70-9b00-4a3e-9cb9-41025cceffd0
 
-> Example of visualizing a 10GB dataset in the browser using a carbonplan/maps adapted code. As you can see, you can easily change the timestamp, colormap, and map scale
+> Example of visualizing wind-speed vector data from Zarr in a CesiumJS map using Zarr-Cesium. This dataset is from Hurricane Florence, which occurred in 2018. You can easily change the timestamp, colormap, and particle speed.
 
 ---
 
@@ -200,4 +201,4 @@ This tool is built with:
 - [cesium-wind-layer](https://github.com/hongfaqiu/cesium-wind-layer)
 - [jscolormaps](https://github.com/timothygebhard/js-colormaps)
 
-This work is part of the [Atlantis project](https://atlantis.ac.uk/), a UK initiative supporting long-term ocean observations and marine science in the Atlantic. This project is led by the [National Oceanography Centre (NOC)](https://noc.ac.uk/).
+This work is part of the [Atlantis project](https://atlantis.ac.uk/), a UK initiative supporting long-term ocean observations and marine science in the Atlantic. The project is led by the [National Oceanography Centre (NOC)](https://noc.ac.uk/).

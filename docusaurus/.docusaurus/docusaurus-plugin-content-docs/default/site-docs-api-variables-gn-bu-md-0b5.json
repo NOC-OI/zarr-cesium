@@ -1,0 +1,23 @@
+{
+  "id": "api/variables/GnBu",
+  "title": "GnBu()",
+  "description": "Parameters",
+  "source": "@site/docs/api/variables/GnBu.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/GnBu",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/GnBu",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Dark2R()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/Dark2R"
+  },
+  "next": {
+    "title": "GnBuR()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/GnBuR"
+  }
+}

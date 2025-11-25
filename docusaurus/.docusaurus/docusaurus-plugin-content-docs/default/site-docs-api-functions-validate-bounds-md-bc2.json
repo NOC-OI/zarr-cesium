@@ -1,0 +1,23 @@
+{
+  "id": "api/functions/validateBounds",
+  "title": "validateBounds()",
+  "description": "Validates whether geographic bounds are logically consistent.",
+  "source": "@site/docs/api/functions/validateBounds.md",
+  "sourceDirName": "api/functions",
+  "slug": "/api/functions/validateBounds",
+  "permalink": "/zarr-cesium/docs/docs/api/functions/validateBounds",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "updateImgData()",
+    "permalink": "/zarr-cesium/docs/docs/api/functions/updateImgData"
+  },
+  "next": {
+    "title": "API Reference",
+    "permalink": "/zarr-cesium/docs/docs/api/"
+  }
+}

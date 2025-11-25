@@ -1,0 +1,23 @@
+{
+  "id": "api/variables/allColorScales",
+  "title": "allColorScales",
+  "description": "List of all available colormap names (including reversed versions).",
+  "source": "@site/docs/api/variables/allColorScales.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/allColorScales",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/allColorScales",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "afmhotR()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/afmhotR"
+  },
+  "next": {
+    "title": "autumn()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/autumn"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "id": "api/interfaces/LayerOptions",
+  "title": "LayerOptions",
+  "description": "Configuration for a 2D raster (image) layer visualization.",
+  "source": "@site/docs/api/interfaces/LayerOptions.md",
+  "sourceDirName": "api/interfaces",
+  "slug": "/api/interfaces/LayerOptions",
+  "permalink": "/zarr-cesium/docs/docs/api/interfaces/LayerOptions",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "DimensionValues",
+    "permalink": "/zarr-cesium/docs/docs/api/interfaces/DimensionValues"
+  },
+  "next": {
+    "title": "VelocityOptions",
+    "permalink": "/zarr-cesium/docs/docs/api/interfaces/VelocityOptions"
+  }
+}

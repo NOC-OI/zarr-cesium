@@ -1,0 +1,23 @@
+{
+  "id": "api/variables/gistGrayR",
+  "title": "gistGrayR()",
+  "description": "Parameters",
+  "source": "@site/docs/api/variables/gistGrayR.md",
+  "sourceDirName": "api/variables",
+  "slug": "/api/variables/gistGrayR",
+  "permalink": "/zarr-cesium/docs/docs/api/variables/gistGrayR",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "gistGray()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/gistGray"
+  },
+  "next": {
+    "title": "gistHeat()",
+    "permalink": "/zarr-cesium/docs/docs/api/variables/gistHeat"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "id": "api/functions/loadDimensionValues",
+  "title": "loadDimensionValues()",
+  "description": "Loads the coordinate values for a specific dimension.",
+  "source": "@site/docs/api/functions/loadDimensionValues.md",
+  "sourceDirName": "api/functions",
+  "slug": "/api/functions/loadDimensionValues",
+  "permalink": "/zarr-cesium/docs/docs/api/functions/loadDimensionValues",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "latDegToMercY()",
+    "permalink": "/zarr-cesium/docs/docs/api/functions/latDegToMercY"
+  },
+  "next": {
+    "title": "lonDegToMercX()",
+    "permalink": "/zarr-cesium/docs/docs/api/functions/lonDegToMercX"
+  }
+}

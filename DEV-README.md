@@ -78,7 +78,7 @@ cd zarr-cesium/demo
 Create a `.env` file inside `demo/`:
 
 ```env
-NEXT_PUBLIC_CESIUM_TOKEN=your_cesium_access_token_here
+VITE_CESIUM_TOKEN=your_cesium_access_token_here
 ```
 
 If you don't have a token, create a free account at [https://cesium.com/ion/](https://cesium.com/ion/).
@@ -101,11 +101,7 @@ The demo will be available at:
 
 ## Customize the Demo (Use Your Own Zarr Data)
 
-Edit:
-
-```
-demo/pages/index.tsx
-```
+Edit: [`demo/src/application/data/layers-json.tsx`](https://github.com/NOC-OI/zarr-cesium/blob/dev/demo/src/application/data/layers-json.tsx).
 
 You can change:
 
@@ -113,7 +109,10 @@ You can change:
 - Variable names (`temperature`, `uo`, `vo`, etc.)
 - Bounds
 - Colormaps
-- Providers (`ZarrLayerProvider`, `ZarrCubeProvider`, `ZarrCubeVelocityProvider`)
+- Providers:
+  - dataType "zarr-cesium" uses provider `ZarrLayerProvider`
+  - dataType "zarr-cube" uses provider `ZarrCubeProvider`
+  - dataType "zarr-cube-velocity" uses provider `ZarrCubeVelocityProvider`
 
 This file is intentionally simple to help you experiment quickly.
 
@@ -207,24 +206,6 @@ cd docs
 npm run start
 ```
 
-## 🧪 5.5. Testing New Providers
-
-You can test new providers or APIs through:
-
-### Option A — The demo website
-
-Modify `demo/pages/index.tsx`
-
-### Option B — A custom sandbox
-
-Create separate scripts inside:
-
-```
-sandbox/
-```
-
-(You can create this folder freely.)
-
 ---
 
 # 6. Deployment (Docs Only)
@@ -242,15 +223,15 @@ This depends on your project’s hosting setup (GitHub Pages, Vercel, etc.).
 
 # 7. Troubleshooting
 
-### ✔️ Cesium access token errors
+### Cesium access token errors
 
 Make sure `.env` is present in the demo directory:
 
 ```
-NEXT_PUBLIC_CESIUM_TOKEN=...
+VITE_CESIUM_TOKEN=...
 ```
 
-### ✔️ Missing dependencies in docs
+### Missing dependencies in docs
 
 Run:
 
@@ -259,7 +240,7 @@ cd docs
 npm install
 ```
 
-### ✔️ WindLayer errors in demo
+### WindLayer errors in demo
 
 Ensure:
 
@@ -268,13 +249,3 @@ cesium-wind-layer
 ```
 
 is installed in the repo root or demo project.
-
----
-
-# 8. Questions or Issues?
-
-Open an issue on GitHub:
-
-👉 [https://github.com/noc-oi/zarr-cesium/issues](https://github.com/noc-oi/zarr-cesium/issues)
-
-We’re happy to help!

@@ -59,18 +59,3 @@ jobs:
           # Docs under /docs/
           mkdir -p docs/docs
           cp -r docusaurus/build/* docs/docs/
-
-      # Upload for GitHub Pages
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: docs
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Deploy to GitHub Pages
-        id: pages
-        uses: actions/deploy-pages@v4

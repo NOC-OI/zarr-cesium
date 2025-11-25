@@ -125,11 +125,16 @@ const config = {
             type: 'doc',
             docId: 'index',
             position: 'left',
-            label: 'Docs'
+            label: 'Zarr-Cesium Docs'
           },
           {
-            href: 'https://github.com/tgreyuk/typedoc-plugin-markdown/tree/next/packages/docusaurus-plugin-typedoc',
+            href: 'https://github.com/NOC-OI/zarr-cesium',
             label: 'GitHub',
+            position: 'right'
+          },
+          {
+            label: 'Demo',
+            href: 'https://noc-oi.github.io/zarr-cesium',
             position: 'right'
           }
         ]
@@ -138,11 +143,10 @@ const config = {
         style: 'dark',
         links: [
           {
-            title: 'Docs',
             items: [
               {
-                label: 'Tutorial',
-                to: '/docs/intro'
+                label: 'Zarr-Cesium Docs',
+                to: '/docs/index'
               }
             ]
           },
@@ -151,7 +155,11 @@ const config = {
             items: [
               {
                 label: 'GitHub',
-                href: 'https://github.com/facebook/docusaurus'
+                href: 'https://github.com/NOC-OI/zarr-cesium'
+              },
+              {
+                label: 'Demo',
+                href: 'https://noc-oi.github.io/zarr-cesium'
               }
             ]
           }

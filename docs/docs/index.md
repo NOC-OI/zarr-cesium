@@ -3,11 +3,10 @@ sidebar_position: 1
 title: Introduction
 ---
 
-# Zarr-Cesium Visualization Toolkit
+# Zarr-Cesium
 
 **High-performance CesiumJS providers for interactive 2D and 3D visualization of environmental and atmospheric data stored in Zarr.**
 
-- **Documentation:** https://noc-oi.github.io/zarr-cesium/docs
 - **Demo:** https://noc-oi.github.io/zarr-cesium/
 
 Zarr-Cesium enables **direct, client-side visualization of scientific datasets** stored in the [Zarr](https://zarr.dev) format. No preprocessing. No tile servers. No backend.

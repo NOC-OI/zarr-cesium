@@ -15,7 +15,9 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      NODE_ENV: production
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -39,7 +41,6 @@ jobs:
           cd demo
           npm run build
 
-      # --- Build DOCS (Docusaurus) ---
       - name: Install docs dependencies
         run: |
           cd docs
@@ -50,7 +51,6 @@ jobs:
           cd docs
           npm run build
 
-      # --- Prepare deployment folder ---
       - name: Prepare deployment folder
         run: |
           mkdir -p public
@@ -58,7 +58,6 @@ jobs:
           cp -r demo/dist/* public/
           # Docs deployed at /docs/
           cp -r docs/build/* public/
-      # --- Upload artifact for GH Pages ---
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

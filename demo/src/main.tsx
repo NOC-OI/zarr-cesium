@@ -4,11 +4,7 @@ import './index.css';
 import App from './App.tsx';
 
 createRoot(document.getElementById('root')!).render(
-  import.meta.env.PROD ? (
-    <StrictMode>
-      <App />
-    </StrictMode>
-  ) : (
+  <StrictMode>
     <App />
-  )
+  </StrictMode>
 );

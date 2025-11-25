@@ -7,6 +7,8 @@ import { SideBarLink } from './side-bar-link';
 import { DimensionsToggle } from '../dimensions-toggle';
 import { useLayersManagementHandle } from '../../application/use-layers';
 import type { InfoButtonBoxType, LayersJsonType, LayersLegendType } from '../../types';
+import GitHubIcon from '@mui/icons-material/GitHub';
+import DescriptionIcon from '@mui/icons-material/Description';
 
 interface SideBarProps {
   listLayers: LayersJsonType;
@@ -49,6 +51,18 @@ export function SideBar({ listLayers }: SideBarProps) {
             onClick={handleShowSelection}
             active={sideBarOption === 'data_exploration'}
             icon={MapIcon}
+          />
+          <SideBarLink
+            title={'Source Code'}
+            id={'source_code'}
+            href={'https://github.com/noc-oi/zarr-cesium'}
+            icon={GitHubIcon}
+          />
+          <SideBarLink
+            title={'Documentation'}
+            id={'documentation'}
+            href={'https://noc-oi.github.io/zarr-cesium/docs/'}
+            icon={DescriptionIcon}
           />
         </div>
         <div>

@@ -26,7 +26,7 @@ jobs:
           cache: npm
 
       - name: Inject Cesium token
-        run: echo "CESIUM_TOKEN=${{ secrets.CESIUM_TOKEN }}" >> $GITHUB_ENV
+        run: echo "VITE_CESIUM_TOKEN=${{ secrets.VITE_CESIUM_TOKEN }}" >> $GITHUB_ENV
 
       - name: Install root dependencies
         run: npm install
@@ -38,7 +38,7 @@ jobs:
 
       - name: Build demo
         env:
-          CESIUM_TOKEN: ${{ secrets.CESIUM_TOKEN }}
+          VITE_CESIUM_TOKEN: ${{ secrets.VITE_CESIUM_TOKEN }}
         run: |
           cd demo
           npm run build

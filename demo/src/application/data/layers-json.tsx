@@ -95,7 +95,6 @@ export const layersJson: LayersJsonType = {
           'Surface pressure data for Hurricane Florence from ERA5 reanalysis. This dataset contains 3D surface pressure data (time, latitude, longitude) stored in a Zarr v3 format and EPSG:4326 coordinate reference system.',
         params: {
           url: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/hurricanes/era5/florence',
-          // url: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/hurricanes/era5/florence2',
           variable: 'surface_pressure',
           zarrVersion: 3,
           colormap: 'jet',

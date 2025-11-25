@@ -36,10 +36,8 @@ export const fragmentShaderSource = `#version 300 es
   void main() {
       float raw = texture(u_dataTexture, vec2(v_texCoord.x, 1.0 - v_texCoord.y)).r;
 
-      // Convert stored_value → real_value using CF conventions
       float value = raw * u_scaleFactor + u_addOffset;
 
-      // Mask invalid values
       bool isNaN = (value != value);
       bool isNoData = (value < u_noDataMin || value > u_noDataMax);
       bool isFill = (u_useFillValue && abs(value - u_fillValue) < 1e-6);
@@ -48,7 +46,6 @@ export const fragmentShaderSource = `#version 300 es
           discard;
       }
 
-      // Normalize
       float normalized = clamp((value - u_min) / (u_max - u_min), 0.0, 1.0);
 
       fragColor = texture(u_colorRamp, vec2(normalized, 0.5));

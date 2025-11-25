@@ -57,6 +57,7 @@ jobs:
         run: |
           mkdir -p public/docs
           cp -r demo/dist/* public/
+          mv public/zarr-cesium/* public/
           cp -r docs/build/* public/docs/
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

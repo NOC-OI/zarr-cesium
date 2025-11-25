@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Docs](https://img.shields.io/badge/docs-online-blue)](https://noc-oi.github.io/zarr-cesium/docs)
 
-**High-performance CesiumJS providers for interactive 2D and 3D visualization of environmental and atmospheric data stored in Zarr.**
+**High-performance CesiumJS providers for interactive 2D and 3D visualization of environmental geospatial data stored in Zarr.**
 
 - Documentation: [https://noc-oi.github.io/zarr-cesium/docs](https://noc-oi.github.io/zarr-cesium/docs)
 - Demo: [https://noc-oi.github.io/zarr-cesium/](https://noc-oi.github.io/zarr-cesium/)

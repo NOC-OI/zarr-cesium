@@ -89,37 +89,6 @@ export const layersJson: LayersJsonType = {
   },
   'Zarr-Cesium-Cube': {
     layerNames: {
-      'u-currents_v2': {
-        dataType: 'zarr-cube',
-        dataDescription: ['U-component currents', 'm/s'],
-        content:
-          'U-component of the currents. This is a output from NEMO NPD-EORCA1 model. This dataset contains 4D data (time, depth, latitude, longitude) stored in a Zarr v2 format and EPSG:4326 coordinate reference system.',
-        params: {
-          url: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/nemotest101/currents/uo.zarr',
-          variable: 'uo',
-          flipElevation: true,
-          selectors: {
-            time: {
-              selected: 0,
-              type: 'index'
-            },
-            elevation: {
-              selected: [0, 22]
-            }
-          },
-          zarrVersion: 2,
-          colormap: 'jet',
-          scale: [-1, 1],
-          bounds: { west: -50, south: -20, east: 10, north: 20 },
-          crs: undefined,
-          verticalExaggeration: 4500,
-          opacity: undefined,
-          showHorizontalSlices: undefined,
-          showVerticalSlices: undefined,
-          belowSeaLevel: undefined,
-          dimensionNames: undefined
-        }
-      },
       'salinity-pyramid_v3': {
         dataType: 'zarr-cube',
         dataDescription: ['Salinity', ''],
@@ -199,6 +168,37 @@ export const layersJson: LayersJsonType = {
           bounds: { west: -95, south: 15, east: -40, north: 45 },
           crs: undefined,
           verticalExaggeration: 10,
+          opacity: undefined,
+          showHorizontalSlices: undefined,
+          showVerticalSlices: undefined,
+          belowSeaLevel: undefined,
+          dimensionNames: undefined
+        }
+      },
+      'u-currents_v2': {
+        dataType: 'zarr-cube',
+        dataDescription: ['U-component currents', 'm/s'],
+        content:
+          'U-component of the currents. This is a output from NEMO NPD-EORCA1 model. This dataset contains 4D data (time, depth, latitude, longitude) stored in a Zarr v2 format and EPSG:4326 coordinate reference system.',
+        params: {
+          url: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/nemotest101/currents/uo.zarr',
+          variable: 'uo',
+          flipElevation: true,
+          selectors: {
+            time: {
+              selected: 0,
+              type: 'index'
+            },
+            elevation: {
+              selected: [0, 22]
+            }
+          },
+          zarrVersion: 2,
+          colormap: 'jet',
+          scale: [-1, 1],
+          bounds: { west: -50, south: -20, east: 10, north: 20 },
+          crs: undefined,
+          verticalExaggeration: 4500,
           opacity: undefined,
           showHorizontalSlices: undefined,
           showVerticalSlices: undefined,

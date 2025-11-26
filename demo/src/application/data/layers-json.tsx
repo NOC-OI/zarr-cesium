@@ -3,31 +3,6 @@ import type { LayersJsonType } from '../../types';
 export const layersJson: LayersJsonType = {
   'Zarr-cesium': {
     layerNames: {
-      salinity_v2: {
-        dataType: 'zarr-cesium',
-        dataDescription: ['Salinity', ''],
-        content:
-          'Salinity outputs from NEMO NPD-EORCA1 model. This dataset contains 3D data (time, latitude, longitude) stored in a Zarr v2 format and EPSG:4326 coordinate reference system.',
-        params: {
-          url: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/nemotest101/T1d/sos_abs.zarr',
-          variable: 'sos_abs',
-          selectors: {
-            time: {
-              selected: 0
-            }
-          },
-          zarrVersion: 2,
-          colormap: 'viridis',
-          scale: [30, 37],
-          crs: undefined,
-          opacity: undefined,
-          dimensionNames: undefined,
-          tileWidth: undefined,
-          tileHeight: undefined,
-          minimumLevel: undefined,
-          maximumLevel: undefined
-        }
-      },
       salinity_pyramid_v2: {
         dataType: 'zarr-cesium',
         dataDescription: ['Salinity', ''],

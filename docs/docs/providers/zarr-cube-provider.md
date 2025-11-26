@@ -277,6 +277,18 @@ The provider automatically re-renders all slice primitives, but without reloadin
 
 ---
 
+### Remove Layers
+
+To remove all slice primitives from the scene:
+
+```ts
+cube.destroy();
+```
+
+This frees all resources.
+
+---
+
 ### Multiscale Support
 
 If the dataset defines Zarr multiscale pyramids, e.g.:

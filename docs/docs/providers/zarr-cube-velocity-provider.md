@@ -265,6 +265,18 @@ The `windOptions` allows fine-tuning of particle system parameters. For more inf
 
 ---
 
+### Remove Layers
+
+To remove all velocity layers from the Cesium viewer:
+
+```ts
+windCube.destroy();
+```
+
+This cleans up all WindLayer instances and frees resources.
+
+---
+
 ### Multiscale Support
 
 If the dataset defines Zarr multiscale pyramids, e.g.:

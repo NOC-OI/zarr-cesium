@@ -228,6 +228,51 @@ export async function calculateSliceArgs(
 }
 
 /**
+ * Constructs Zarr slice arguments for extracting a subregion of a multidimensional array.
+ *
+ * This function:
+ * - Converts geographic / elevation slice ranges into Zarr slice objects.
+ * - Converts value-based selectors (e.g. `{type: "value", selected: 2020}`) into nearest index selectors.
+ * - Optionally loads dimension coordinate arrays for the selected slice.
+ * - Produces a *new* selector map describing index-based selections.
+ *
+ * @param shape               Full array shape.
+ * @param dataSlice           Pixel-space slice ranges `{ startX, endX, startY, endY, startElevation?, endElevation? }` (see {@link DataSliceProps}).
+ * @param dimIndices          Mapping of dimension names → indices as returned by `identifyDimensionIndices` (see {@link DimIndicesProps}).
+ * @param selectors           User-provided selection map (lat/lon/elevation/time/etc.). See {@link ZarrSelectorsProps}.
+ * @param dimensionValues     Cache of already-loaded coordinate arrays (mutated by this function).
+ * @param root                Root Zarr group location.
+ * @param levelInfo           Optional multiscale subpath.
+ * @param zarrVersion         Zarr version (2 or 3).
+ * @param updateDimensionValues  If true, rewrites dimensionValues only for the selected ranges.
+ *
+ * @returns An object containing:
+ *   - `sliceArgs`: Array of slice objects/indexes matching the array's dimensions. See {@link SliceArgs}.
+ *   - `dimensionValues`: Possibly updated coordinate arrays.
+ *   - `selectors`: Updated index-based selectors. See {@link ZarrSelectorsProps}.
+ */
+export function calculateSliceArgsRequestImage(
+  shape: number[],
+  dataSlice: DataSliceProps,
+  dimIndices: DimIndicesProps,
+  selectors: { [key: string]: ZarrSelectorsProps }
+): SliceArgs {
+  const sliceArgs: SliceArgs = new Array(shape.length).fill(0);
+  for (const dimName of Object.keys(dimIndices)) {
+    const dimInfo = dimIndices[dimName];
+    if (dimName === 'lon') {
+      sliceArgs[dimInfo.index] = zarr.slice(dataSlice.startX, dataSlice.endX);
+    } else if (dimName === 'lat') {
+      sliceArgs[dimInfo.index] = zarr.slice(dataSlice.startY, dataSlice.endY);
+    } else {
+      const dimSelection = selectors[dimName];
+      sliceArgs[dimInfo.index] = dimSelection.selected as number;
+    }
+  }
+  return sliceArgs;
+}
+
+/**
  * Finds the index of the value in `values` nearest to `target`.
  * @param values - Array of numeric values.
  * @param target - Target value to find.

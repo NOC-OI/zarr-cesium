@@ -184,7 +184,7 @@ export class ZarrLayerProvider implements ImageryProvider {
   private gl: WebGL2RenderingContext | null = null;
   private program: WebGLProgram | null = null;
   private colorTexture: WebGLTexture | null = null;
-  private static readonly concurrencyLimit = 4;
+  private static readonly concurrencyLimit = 15;
   private static activeRequests = 0;
   private static readonly queue: (() => void)[] = [];
   private abortControllers = new Map<string, AbortController>();

@@ -220,9 +220,12 @@ export class ZarrCubeProvider {
     this.selectors = selectors;
     this.dimensionValues = dimensionValues;
     this.elevationShape = this.zarrArray.shape[this.dimIndices.elevation.index];
-    const data = (await ZarrCubeProvider.throttle(() =>
-      zarrNdarray.get(this.zarrArray!, sliceArgs)
-    )) as ndarray.NdArray<any>;
+
+    const data = (await zarr.get(this.zarrArray, sliceArgs)) as ndarray.NdArray<any>;
+
+    // const data = (await ZarrCubeProvider.throttle(() =>
+    //   zarrNdarray.get(this.zarrArray!, sliceArgs)
+    // )) as ndarray.NdArray<any>;
 
     this.volumeData = ndarray(data.data, data.shape, data.stride);
 

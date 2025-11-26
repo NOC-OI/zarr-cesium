@@ -209,9 +209,11 @@ export class ZarrCubeVelocityProvider {
     this.dimensionValues = dimensionValues;
     this.elevationShape = zarrArray.shape[dimIndices.elevation.index];
 
-    const data = (await ZarrCubeVelocityProvider.throttle(() =>
-      zarr.get(zarrArray!, sliceArgs)
-    )) as ndarray.NdArray<any>;
+    const data = await zarr.get(zarrArray, sliceArgs);
+
+    // const data = (await ZarrCubeVelocityProvider.throttle(() =>
+    //   zarr.get(zarrArray!, sliceArgs)
+    // )) as ndarray.NdArray<any>;
     const arr = this.sanitizeArray(new Float32Array(data.data as ArrayLike<number>));
 
     return {

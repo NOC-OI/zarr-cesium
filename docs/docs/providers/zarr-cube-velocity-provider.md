@@ -42,8 +42,9 @@ Typical datasets:
 
 If you want:
 
-- **2D rasters** → use [**ZarrLayerProvider**](./zarr-layer-provider.md)
-- **3D scalar fields** → use [**ZarrCubeProvider**](./zarr-cube-provider.md)
+- 2D rendering → use [**ZarrLayerProvider**](./zarr-layer-provider.md)
+- 3D rendering → use [**ZarrCubeProvider**](./zarr-cube-provider.md)
+- 3D vector fields + time → use [**ZarrCubeVelocityProvider**](./zarr-cube-velocity-provider.md) and drive time externally
 
 ---
 
@@ -261,6 +262,18 @@ This applies instantly to all existing layers.
 The full list of supported colormaps is available in the [Colormaps section](../api/type-aliases/ColorMapName.md).
 
 The `windOptions` allows fine-tuning of particle system parameters. For more info, see the [`WindLayerOptions` information on cesium-wind-layer github repo](https://github.com/hongfaqiu/cesium-wind-layer)
+
+---
+
+### Remove Layers
+
+To remove all velocity layers from the Cesium viewer:
+
+```ts
+windCube.destroy();
+```
+
+This cleans up all WindLayer instances and frees resources.
 
 ---
 

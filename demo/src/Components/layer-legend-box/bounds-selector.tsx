@@ -20,7 +20,6 @@ export default function BoundsSelector({
 
     setSelectedLayers(prev => {
       const layer = prev[layerLegendName];
-      // Always clone deeply
       const updatedParams = {
         ...layer.params,
         bounds: { ...value }

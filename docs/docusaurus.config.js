@@ -5,13 +5,8 @@ const config = {
   title: 'Zarr-Cesium',
   tagline: 'Visualize multidimensional Zarr datasets in Cesium',
   url: 'https://noc-oi.github.io',
-  baseUrl: '/zarr-cesium/docs',
+  baseUrl: '/zarr-cesium/docs/',
 
-  // Set the /<baseUrl>/ pathname under which your site is served
-  // For GitHub pages deployment, it is often '/<projectName>/'
-
-  // GitHub pages deployment config.
-  // If you aren't using GitHub pages, you don't need these.
   organizationName: 'NOC-OI',
   projectName: 'zarr-cesium',
   onBrokenLinks: 'warn',
@@ -20,9 +15,6 @@ const config = {
       onBrokenMarkdownLinks: 'warn'
     }
   },
-  // Even if you don't use internationalization, you can use this field to set
-  // useful metadata like html lang. For example, if your site is Chinese, you
-  // may want to replace "en" with "zh-Hans".
   i18n: {
     defaultLocale: 'en',
     locales: ['en']
@@ -38,10 +30,10 @@ const config = {
         readme: 'none',
         indexFormat: 'table',
         disableSources: true,
-        excludeCategories: ['Variables'],
         groupOrder: ['Classes', 'Interfaces', 'type-aliases', 'functions'],
-        // groupOrder: ['Classes', 'Interfaces', 'type-aliases', 'functions', 'variables'],
-        sidebar: { pretty: true },
+        sidebar: {
+          pretty: true
+        },
         textContentMappings: {
           'title.indexPage': 'API Reference',
           'title.memberPage': '{name}'
@@ -102,12 +94,10 @@ const config = {
       /** @type {import('@docusaurus/preset-classic').Options} */
       ({
         docs: {
-          sidebarPath: './sidebars.js'
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          // editUrl:
-          //   'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/'
+          sidebarPath: './sidebars.js',
+          routeBasePath: '/'
         },
+        blog: false,
         theme: {
           customCss: './assets/custom.css'
         }
@@ -125,11 +115,16 @@ const config = {
             type: 'doc',
             docId: 'index',
             position: 'left',
-            label: 'Docs'
+            label: 'Zarr-Cesium Docs'
           },
           {
-            href: 'https://github.com/tgreyuk/typedoc-plugin-markdown/tree/next/packages/docusaurus-plugin-typedoc',
+            href: 'https://github.com/NOC-OI/zarr-cesium',
             label: 'GitHub',
+            position: 'right'
+          },
+          {
+            label: 'Demo',
+            href: 'https://noc-oi.github.io/zarr-cesium',
             position: 'right'
           }
         ]
@@ -138,11 +133,10 @@ const config = {
         style: 'dark',
         links: [
           {
-            title: 'Docs',
             items: [
               {
-                label: 'Tutorial',
-                to: '/docs/intro'
+                label: 'Zarr-Cesium Docs',
+                to: 'index'
               }
             ]
           },
@@ -151,7 +145,11 @@ const config = {
             items: [
               {
                 label: 'GitHub',
-                href: 'https://github.com/facebook/docusaurus'
+                href: 'https://github.com/NOC-OI/zarr-cesium'
+              },
+              {
+                label: 'Demo',
+                href: 'https://noc-oi.github.io/zarr-cesium'
               }
             ]
           }

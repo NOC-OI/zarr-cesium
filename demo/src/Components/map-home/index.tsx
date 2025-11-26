@@ -61,9 +61,6 @@ export function MapHome({ listLayers }: MapHomeProps) {
           )
         });
         setLoading(false);
-
-        // viewerRef.current.scene.camera.moveEnd.addEventListener(() => {
-        // });
       }
     },
     [setLoading]

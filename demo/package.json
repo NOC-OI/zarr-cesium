@@ -24,7 +24,7 @@
     "react-dom": "^19.2.0",
     "react-draggable": "^4.5.0",
     "react-transition-group": "^4.4.5",
-    "zarr-cesium": "0.1.1"
+    "zarr-cesium": "0.1.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

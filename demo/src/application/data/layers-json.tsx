@@ -139,7 +139,7 @@ export const layersJson: LayersJsonType = {
             }
           },
           zarrVersion: 3,
-          multiscaleLevel: 3,
+          multiscaleLevel: 1,
           colormap: 'jet',
           scale: [30, 37],
           bounds: { west: -50, south: -20, east: 10, north: 20 },
@@ -171,7 +171,7 @@ export const layersJson: LayersJsonType = {
               selected: [0, 10]
             }
           },
-          multiscaleLevel: 3,
+          multiscaleLevel: 1,
           colormap: 'jet',
           scale: [0, 30],
           bounds: { west: -50, south: -20, east: 10, north: 20 },

@@ -121,10 +121,6 @@ pyramid_ds.to_zarr("multiscale.zarr",, zarr_version=3)
 
 # 5. Example Dataset
 
-Here’s a smoother, more polished version:
-
----
-
 This workflow was developed using **approximately 30 GB of NEMO NPD ocean model output** (documentation available at [https://noc-msm.github.io/NOC_Near_Present_Day/](https://noc-msm.github.io/NOC_Near_Present_Day/)). The dataset includes:
 
 - Multiple physical variables
@@ -154,7 +150,7 @@ Rechunk (small spatial chunks)
         ↓
 Build pyramids (ndpyramid)
         ↓
-Write Zarr v2 (consolidated metadata)
+Write Zarr v2/v3
         ↓
 Load in browser (Zarr-Cesium)
 ```

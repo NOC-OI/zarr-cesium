@@ -114,7 +114,7 @@ This ensures compatibility with Zarr-Cesium and efficient loading in the browser
 If you are using **Zarr v3**, ensure your Zarr store is accessible via HTTP(S) and follows the Zarr v3 specification:
 
 ```python
-pyramid_ds.to_zarr("multiscale.zarr",, zarr_version=3)
+pyramid_ds.to_zarr("multiscale.zarr", zarr_version=3)
 ```
 
 ---
@@ -134,8 +134,8 @@ A full list of available datasets is provided in the **data information file** o
 
 A full demo is available:
 
-- GitHub: [https://github.com/NOC-OI/zarr-vis/demo](https://github.com/NOC-OI/zarr-vis/demo)
-- Live demo: [https://noc-oi.github.io/zarr-vis/](https://noc-oi.github.io/zarr-vis/)
+- GitHub: [https://github.com/NOC-OI/zarr-cesium/demo](https://github.com/NOC-OI/zarr-cesium/demo)
+- Live demo: [https://noc-oi.github.io/zarr-cesium/](https://noc-oi.github.io/zarr-cesium/)
 
 ---
 

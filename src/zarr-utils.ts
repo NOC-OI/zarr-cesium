@@ -240,11 +240,6 @@ export async function calculateSliceArgs(
  * @param dataSlice           Pixel-space slice ranges `{ startX, endX, startY, endY, startElevation?, endElevation? }` (see {@link DataSliceProps}).
  * @param dimIndices          Mapping of dimension names → indices as returned by `identifyDimensionIndices` (see {@link DimIndicesProps}).
  * @param selectors           User-provided selection map (lat/lon/elevation/time/etc.). See {@link ZarrSelectorsProps}.
- * @param dimensionValues     Cache of already-loaded coordinate arrays (mutated by this function).
- * @param root                Root Zarr group location.
- * @param levelInfo           Optional multiscale subpath.
- * @param zarrVersion         Zarr version (2 or 3).
- * @param updateDimensionValues  If true, rewrites dimensionValues only for the selected ranges.
  *
  * @returns An object containing:
  *   - `sliceArgs`: Array of slice objects/indexes matching the array's dimensions. See {@link SliceArgs}.

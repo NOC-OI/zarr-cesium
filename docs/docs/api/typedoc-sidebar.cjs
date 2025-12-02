@@ -135,6 +135,11 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "api/functions/calculateSliceArgsRequestImage",
+          label: "calculateSliceArgsRequestImage"
+        },
+        {
+          type: "doc",
           id: "api/functions/calculateXYFromBounds",
           label: "calculateXYFromBounds"
         },

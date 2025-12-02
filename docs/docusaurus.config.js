@@ -135,15 +135,6 @@ const config = {
           {
             items: [
               {
-                label: 'Zarr-Cesium Docs',
-                to: 'docs/index'
-              }
-            ]
-          },
-          {
-            title: 'More',
-            items: [
-              {
                 label: 'GitHub',
                 href: 'https://github.com/NOC-OI/zarr-cesium'
               },

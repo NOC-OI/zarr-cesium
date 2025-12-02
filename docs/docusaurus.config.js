@@ -136,7 +136,7 @@ const config = {
             items: [
               {
                 label: 'Zarr-Cesium Docs',
-                to: 'index'
+                to: 'docs/index'
               }
             ]
           },
@@ -154,7 +154,7 @@ const config = {
             ]
           }
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} Zarr-Cesium, Inc. Built with Docusaurus.`
+        copyright: `Copyright © ${new Date().getFullYear()} National Oceanography Centre (NOC).`
       },
       prism: {
         theme: prismThemes.github,

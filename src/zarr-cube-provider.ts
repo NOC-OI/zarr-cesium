@@ -10,6 +10,7 @@ import {
   initZarrDataset
 } from './zarr-utils';
 import {
+  DimensionValues,
   type BoundsProps,
   type ColorMapName,
   type ColorScaleProps,
@@ -76,7 +77,7 @@ import {
  */
 export class ZarrCubeProvider {
   /** Values of the cube’s coordinate dimensions (latitude, longitude, elevation, etc.). */
-  public dimensionValues: { [key: string]: Float64Array | number[] } = {};
+  public dimensionValues: DimensionValues = {};
   /** Size of the cube in [longitude, latitude, elevation]. */
   public cubeDimensions: [number, number, number] | null = null;
   /** Unique identifier for the cube provider instance. */
@@ -447,8 +448,8 @@ export class ZarrCubeProvider {
     ctx.putImageData(imgData, 0, 0);
     const elevationValue = this.dimensionValues.elevation[elevationSliceIndex];
     const heightMeters = calculateHeightMeters(
-      elevationValue,
-      this.dimensionValues.elevation,
+      elevationValue as number,
+      this.dimensionValues.elevation as number[],
       this.verticalExaggeration,
       this.belowSeaLevel,
       this.flipElevation
@@ -510,8 +511,8 @@ export class ZarrCubeProvider {
       const heightFraction = this.flipElevation ? (segmentsZ - iz) / segmentsZ : iz / segmentsZ;
       const elevationValue = this.dimensionValues.elevation[iz];
       const height = calculateHeightMeters(
-        elevationValue,
-        this.dimensionValues.elevation,
+        elevationValue as number,
+        this.dimensionValues.elevation as number[],
         this.verticalExaggeration,
         this.belowSeaLevel,
         this.flipElevation

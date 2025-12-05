@@ -4,8 +4,15 @@
   "description": "A Cesium integration library for visualizing Zarr datasets in 2D and 3D.",
   "author": "Tobias <tobias.ferreira@noc.ac.uk>",
   "license": "MIT",
+  "type": "module",
   "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
+  "module": "./dist/index.js",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "types": "./dist/index.d.ts",
   "sideEffects": false,
   "files": [
@@ -13,7 +20,7 @@
   ],
   "scripts": {
     "dev": "tsup src/index.ts --format cjs,esm --dts --sourcemap --watch",
-    "build": "tsup src/index.ts --format cjs,esm --dts --sourcemap --external cesium",
+    "build": "tsup src/index.ts --format esm --dts --sourcemap --external cesium",
     "clean": "rm -rf dist",
     "docs": "typedoc",
     "start:demo": "cd demo && npm run dev"

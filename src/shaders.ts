@@ -35,6 +35,7 @@ export const fragmentShaderSource = `#version 300 es
 
   void main() {
       float raw = texture(u_dataTexture, vec2(v_texCoord.x, 1.0 - v_texCoord.y)).r;
+      // float raw = texture(u_dataTexture, v_texCoord).r;
 
       float value = raw * u_scaleFactor + u_addOffset;
 

@@ -49,7 +49,7 @@ import {
  */
 export class ZarrCubeVelocityProvider {
   /** Dimension coordinate arrays (e.g. lat, lon, elevation). */
-  public dimensionValues: { [key: string]: Float64Array | number[] } = {};
+  public dimensionValues: { [key: string]: Float64Array | number[] | string[] } = {};
   /** Cube dimensions: [longitude, latitude, elevation]. */
   public cubeDimensions: [number, number, number] | null = null;
   /** Unique identifier for the cube provider instance. */
@@ -268,8 +268,8 @@ export class ZarrCubeVelocityProvider {
       };
       const elevationValue = dimensionValues.elevation[d];
       const altitude = calculateHeightMeters(
-        elevationValue,
-        this.dimensionValues.elevation,
+        elevationValue as number,
+        this.dimensionValues.elevation as number[],
         this.verticalExaggeration,
         this.belowSeaLevel,
         this.flipElevation

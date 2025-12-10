@@ -23,8 +23,10 @@ import {
   type CRS,
   type DataSliceProps,
   type DimIndicesProps,
-  type SliceArgs
+  type SliceArgs,
+  DimensionValues
 } from './types';
+import { decodeCFTime } from './decodeCFTime';
 
 const DIMENSION_ALIASES_DEFAULT: { [key in keyof DimensionNamesProps]: string[] } = {
   lat: ['lat', 'latitude', 'y', 'Latitude', 'Y'],
@@ -128,14 +130,14 @@ export async function calculateSliceArgs(
   dataSlice: DataSliceProps,
   dimIndices: DimIndicesProps,
   selectors: { [key: string]: ZarrSelectorsProps },
-  dimensionValues: { [key: string]: Float64Array | number[] },
+  dimensionValues: DimensionValues,
   root: zarr.Location<zarr.FetchStore>,
   levelInfo: string | null,
   zarrVersion: 2 | 3 | null,
   updateDimensionValues: boolean = false
 ): Promise<{
   sliceArgs: SliceArgs;
-  dimensionValues: { [key: string]: Float64Array | number[] };
+  dimensionValues: DimensionValues;
   selectors: { [key: string]: ZarrSelectorsProps };
 }> {
   const sliceArgs: SliceArgs = new Array(shape.length).fill(0);
@@ -240,11 +242,6 @@ export async function calculateSliceArgs(
  * @param dataSlice           Pixel-space slice ranges `{ startX, endX, startY, endY, startElevation?, endElevation? }` (see {@link DataSliceProps}).
  * @param dimIndices          Mapping of dimension names → indices as returned by `identifyDimensionIndices` (see {@link DimIndicesProps}).
  * @param selectors           User-provided selection map (lat/lon/elevation/time/etc.). See {@link ZarrSelectorsProps}.
- * @param dimensionValues     Cache of already-loaded coordinate arrays (mutated by this function).
- * @param root                Root Zarr group location.
- * @param levelInfo           Optional multiscale subpath.
- * @param zarrVersion         Zarr version (2 or 3).
- * @param updateDimensionValues  If true, rewrites dimensionValues only for the selected ranges.
  *
  * @returns An object containing:
  *   - `sliceArgs`: Array of slice objects/indexes matching the array's dimensions. See {@link SliceArgs}.
@@ -278,12 +275,19 @@ export function calculateSliceArgsRequestImage(
  * @param target - Target value to find.
  * @returns Index of the nearest value.
  */
-export function calculateNearestIndex(values: Float64Array | number[], target: number): number {
+export function calculateNearestIndex(
+  values: Float64Array | number[] | string[],
+  target: number | string
+): number {
   const selectedValue = target;
   let nearestIdx = 0;
   let minDiff = Infinity;
+  const isTime = typeof values[0] === 'string';
+  const targetValue = isTime ? Date.parse(target as string) : Number(target);
+
   values.forEach((val, i) => {
-    const diff = Math.abs(val - selectedValue);
+    const numericVal = isTime ? Date.parse(val as string) : Number(val);
+    const diff = Math.abs(numericVal - targetValue);
     if (diff < minDiff) {
       minDiff = diff;
       nearestIdx = i;
@@ -322,21 +326,21 @@ export async function calculateElevationSlice(
   shapeElevation: number,
   dimInfo: DimIndicesProps['elevation'],
   selectorsElevation: ZarrSelectorsProps | undefined,
-  dimensionValuesWithElevation: { [key: string]: Float64Array | number[] },
+  dimensionValuesWithElevation: DimensionValues,
   root: zarr.Location<zarr.FetchStore>,
   levelInfo: string | null,
   zarrVersion: 2 | 3 | null
 ): Promise<{
-  dimensionValuesWithElevation: { [key: string]: Float64Array | number[] };
+  dimensionValuesWithElevation: DimensionValues;
   elevationSlice: [number, number];
 }> {
-  dimensionValuesWithElevation['elevation'] = await loadDimensionValues(
+  dimensionValuesWithElevation['elevation'] = (await loadDimensionValues(
     dimensionValuesWithElevation,
     levelInfo,
     dimInfo,
     root,
     zarrVersion
-  );
+  )) as Float64Array | number[];
 
   let startElevation = 0;
   let endElevation = shapeElevation;
@@ -412,13 +416,13 @@ export async function calculateElevationSlice(
  * @returns The loaded coordinate array for the dimension.
  */
 export async function loadDimensionValues(
-  dimensionValues: Record<string, Float64Array | number[]>,
+  dimensionValues: DimensionValues,
   levelInfo: string | null,
   dimIndices: DimIndicesProps[string],
   root: zarr.Location<zarr.FetchStore>,
   zarrVersion: 2 | 3 | null,
   slice?: [number, number]
-): Promise<Float64Array | number[]> {
+): Promise<Float64Array | number[] | string[]> {
   if (dimensionValues[dimIndices.name]) return dimensionValues[dimIndices.name];
   let targetRoot;
   if (levelInfo) {
@@ -440,11 +444,20 @@ export async function loadDimensionValues(
     coordArr = await localFunc(coordVar, { kind: 'array' });
   }
   const coordData = await zarr.get(coordArr);
-  const coordArray = Array.from(coordData.data as number[], (v: number | bigint) =>
+  let coordArray = Array.from(coordData.data as number[], (v: number | bigint) =>
     typeof v === 'bigint' ? Number(v) : v
-  );
+  ) as Float64Array | number[] | string[];
   if (slice) {
-    return coordArray.slice(slice[0], slice[1]);
+    coordArray = coordArray.slice(slice[0], slice[1]);
+  }
+  if (dimIndices.name === 'time') {
+    try {
+      const units = coordArr.attrs.units;
+      const calendar = coordArr.attrs.calendar;
+      coordArray = decodeCFTime(coordArray as number[], units, calendar);
+    } catch (err) {
+      console.warn('Failed to decode CF time coordinate:', err);
+    }
   }
   return coordArray;
 }

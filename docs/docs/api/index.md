@@ -37,6 +37,7 @@
 | [calculateHeightMeters](functions/calculateHeightMeters.md) | Converts elevation index to Cesium height (meters), applying vertical exaggeration and optional below-sea-level offset. |
 | [calculateNearestIndex](functions/calculateNearestIndex.md) | Finds the index of the value in `values` nearest to `target`. |
 | [calculateSliceArgs](functions/calculateSliceArgs.md) | Constructs Zarr slice arguments for extracting a subregion of a multidimensional array. |
+| [calculateSliceArgsRequestImage](functions/calculateSliceArgsRequestImage.md) | Constructs Zarr slice arguments for extracting a subregion of a multidimensional array. |
 | [calculateXYFromBounds](functions/calculateXYFromBounds.md) | Converts geographic bounds (lat/lon) to pixel-space indices for slicing Zarr arrays. Supports both EPSG:4326 and EPSG:3857 projections. |
 | [colormapBuilder](functions/colormapBuilder.md) | Builds a color ramp (discrete or continuous) from a specified colormap. |
 | [colorScaleByName](functions/colorScaleByName.md) | Returns a color scale function for a given colormap name. |

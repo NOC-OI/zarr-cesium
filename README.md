@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Docs](https://img.shields.io/badge/docs-online-blue)](https://noc-oi.github.io/zarr-cesium/docs)
 
-**High-performance CesiumJS providers for interactive 2D and 3D visualization of environmental geospatial data stored in Zarr.**
+**CesiumJS providers for interactive 2D and 3D visualization of environmental geospatial data stored in Zarr.**
 
 - Documentation: [https://noc-oi.github.io/zarr-cesium/docs](https://noc-oi.github.io/zarr-cesium/docs)
 - Demo: [https://noc-oi.github.io/zarr-cesium/](https://noc-oi.github.io/zarr-cesium/)
@@ -56,8 +56,6 @@ The toolkit provides **three Cesium provider classes**, each specialized for a d
 
 ```bash
 npm install zarr-cesium
-# or
-yarn add zarr-cesium
 ```
 
 ## Run the demo website locally
@@ -72,7 +70,7 @@ cd zarr-cesium/demo
 Create a `.env` file in the `demo` directory with your Cesium access token:
 
 ```env
-NEXT_PUBLIC_CESIUM_TOKEN=your_cesium_access_token_here
+VITE_CESIUM_TOKEN=your_cesium_access_token_here
 ```
 
 Install dependencies and start the development server:

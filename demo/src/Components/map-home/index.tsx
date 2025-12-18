@@ -2,7 +2,7 @@ import { Ion, type Viewer } from 'cesium';
 import { useEffect, useRef, useCallback } from 'react';
 import * as Cesium from 'cesium';
 import { useContextHandle } from '../../application/use-context';
-import type { keyable, LayersJsonType } from '../../types';
+import type { keyable } from '../../types';
 import { useLayersManagementHandle } from '../../application/use-layers';
 import { generateSelectedLayer, viewerMap } from './_actions/get-layers';
 import {
@@ -22,18 +22,15 @@ import { CESIUM_START_COORDINATES, VERTICAL_EXAGGERATION } from '../../lib/map-l
 
 Ion.defaultAccessToken = import.meta.env.VITE_CESIUM_TOKEN;
 
-interface MapHomeProps {
-  listLayers: LayersJsonType;
-}
-
-export function MapHome({ listLayers }: MapHomeProps) {
+export function MapHome() {
   const {
     selectedLayers,
     setSelectedLayers,
     actualLayer,
     layerAction,
     setLayerAction,
-    gebcoTerrainEnabled
+    gebcoTerrainEnabled,
+    listLayers
   } = useLayersManagementHandle();
   const viewerRef = useRef<Viewer | null>(null);
   const velocityCubeRef = useRef<ZarrCubeVelocityProvider | null>(null);

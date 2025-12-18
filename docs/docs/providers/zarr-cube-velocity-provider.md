@@ -35,7 +35,7 @@ Use this provider when you have:
 
 Typical datasets:
 
-- Ocean model outputs (NEMO, ROMS, MOM6)
+- Ocean model outputs (NEMO, ROMS, HYCOM)
 - Atmospheric reanalysis winds
 - Climate simulation velocity cubes
 - Any Zarr-based U/V dataset
@@ -52,7 +52,7 @@ If you want:
 
 ```ts
 import { Viewer } from 'cesium';
-import { ZarrCubeVelocityProvider } from '@noc-oi/zarr-cesium';
+import { ZarrCubeVelocityProvider } from 'zarr-cesium';
 
 const viewer = new Viewer('cesiumContainer');
 
@@ -113,7 +113,7 @@ This loads:
 - Windowed spatial slice (based on bounds)
 - Elevation slice ranges and spacing
 
-Then it automatically creates Cesium `WindLayer` instances.
+Then it automatically creates Cesium `WindLayer` instances (one per elevation slice) and adds them to the viewer.
 
 ---
 
@@ -153,13 +153,60 @@ Plus user-configurable **particle system settings**:
 
 ```ts
 {
-  particleHeight: altitude,
-  particleDensity,
-  particleSize,
-  particleAge,
-  particleSpeed,
+  speedFactor,
+  lineWidth,
+  lineLength,
+  particlesTextureSize,
+  flipY
   ...
 }
+```
+
+---
+
+## Supported CRS
+
+Zarr datasets may store coordinate values in:
+
+- `EPSG:4326` (lat, lon degrees)
+- `EPSG:3857` (Web Mercator meters)
+
+The provider detects the CRS automatically using:
+
+- Zarr metadata
+- consolidated metadata
+- coordinate ranges (West/East > 360 → Web Mercator)
+
+For example, you can set the CRS explicitly:
+
+```ts
+// set CRS to Web Mercator in LayerOptions
+crs: 'EPSG:3857';
+```
+
+---
+
+## Multiscale Support
+
+If the dataset defines Zarr multiscale pyramids, e.g.:
+
+```json
+"multiscales": [
+  { "datasets": [ {"path": "0"}, {"path": "1"}, {"path": "2"} ] }
+]
+```
+
+Then:
+
+- The provider loads the requested `multiscaleLevel`
+- Resolution, W×H×Z, and bounding box adapt
+- Switching levels triggers a reload
+
+For example, you can set the desired level (default is `0`, the lowest resolution):
+
+```ts
+// set multiscale level in CubeOptions
+multiscaleLevel: 1; // loads level "1"
 ```
 
 ---
@@ -265,52 +312,7 @@ The `windOptions` allows fine-tuning of particle system parameters. For more inf
 
 ---
 
-### Remove Layers
-
-To remove all velocity layers from the Cesium viewer:
-
-```ts
-windCube.destroy();
-```
-
-This cleans up all WindLayer instances and frees resources.
-
----
-
-### Multiscale Support
-
-If the dataset defines Zarr multiscale pyramids, e.g.:
-
-```json
-"multiscales": [
-  { "datasets": [ {"path": "0"}, {"path": "1"}, {"path": "2"} ] }
-]
-```
-
-Then:
-
-- The provider loads the requested `multiscaleLevel`
-- Resolution, W×H×Z, and bounding box adapt
-- Switching levels triggers a reload
-
----
-
-### Supported CRS
-
-Zarr datasets may store coordinate values in:
-
-- `EPSG:4326` (lat, lon degrees)
-- `EPSG:3857` (Web Mercator meters)
-
-The provider detects the CRS automatically using:
-
-- Zarr metadata
-- consolidated metadata
-- coordinate ranges (West/East > 360 → Web Mercator)
-
----
-
-### Clearing & Destroying
+### Remove Layers, Clearing & Destroying
 
 Remove all velocity layers:
 

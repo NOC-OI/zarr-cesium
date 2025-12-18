@@ -55,7 +55,7 @@ If your need is:
 
 ```ts
 import { Viewer } from 'cesium';
-import { ZarrCubeProvider } from '@noc-oi/zarr-cesium';
+import { ZarrCubeProvider } from 'zarr-cesium';
 
 const viewer = new Viewer('cesiumContainer');
 
@@ -80,6 +80,8 @@ cube.updateSlices({
   elevationIndex: 5
 });
 ```
+
+This creates a **stack of slice primitives**: horizontal, vertical longitude, and vertical latitude.
 
 ---
 
@@ -140,7 +142,7 @@ Rendered as a textured Cesium `RectangleGeometry`:
 - Height computed from elevation coordinate values
 
 ```ts
-// Cube options
+// set the following Cube options to true
 showHorizontalSlices: true;
 ```
 
@@ -152,8 +154,55 @@ A vertical wall following a **constant latitude** or **constant longitude**.
 - Surface extrudes between bottom and top
 
 ```ts
-// Cube options
+// set the following Cube options to true
 showVerticalSlices: true;
+```
+
+---
+
+## Supported CRS
+
+Zarr datasets may store coordinate values in:
+
+- `EPSG:4326` (lat, lon degrees)
+- `EPSG:3857` (Web Mercator meters)
+
+The provider detects the CRS automatically using:
+
+- Zarr metadata
+- consolidated metadata
+- coordinate ranges (West/East > 360 → Web Mercator)
+
+For example, you can set the CRS explicitly:
+
+```ts
+// set CRS to Web Mercator in LayerOptions
+crs: 'EPSG:3857';
+```
+
+---
+
+## Multiscale Support
+
+If the dataset defines Zarr multiscale pyramids, e.g.:
+
+```json
+"multiscales": [
+  { "datasets": [ {"path": "0"}, {"path": "1"}, {"path": "2"} ] }
+]
+```
+
+Then:
+
+- The provider loads the requested `multiscaleLevel`
+- Resolution, W×H×Z, and bounding box adapt
+- Switching levels triggers a reload
+
+For example, you can set the desired level (default is `0`, the lowest resolution):
+
+```ts
+// set multiscale level in CubeOptions
+multiscaleLevel: 1; // loads level "1"
 ```
 
 ---
@@ -172,11 +221,7 @@ cube.updateSlices({
 });
 ```
 
-All parameters are optional:
-
-```ts
-cube.updateSlices({ elevationIndex: 20 });
-```
+All the parameters are optional. If not provided, the current value is retained.
 
 Internally this updates:
 
@@ -275,54 +320,11 @@ cube.updateStyle({
 
 The provider automatically re-renders all slice primitives, but without reloading data.
 
----
-
-### Remove Layers
-
-To remove all slice primitives from the scene:
-
-```ts
-cube.destroy();
-```
-
-This frees all resources.
+The full list of supported colormaps is available in the [Colormaps section](../api/type-aliases/ColorMapName.md).
 
 ---
 
-### Multiscale Support
-
-If the dataset defines Zarr multiscale pyramids, e.g.:
-
-```json
-"multiscales": [
-  { "datasets": [ {"path": "0"}, {"path": "1"}, {"path": "2"} ] }
-]
-```
-
-Then:
-
-- The provider loads the requested `multiscaleLevel`
-- Resolution, W×H×Z, and bounding box adapt
-- Switching levels triggers a reload
-
----
-
-### Supported CRS
-
-Zarr datasets may store coordinate values in:
-
-- `EPSG:4326` (lat, lon degrees)
-- `EPSG:3857` (Web Mercator meters)
-
-The provider detects the CRS automatically using:
-
-- Zarr metadata
-- consolidated metadata
-- coordinate ranges (West/East > 360 → Web Mercator)
-
----
-
-### Clearing & Destroying
+### Remove Layers, Clearing & Destroying
 
 Remove all slice primitives:
 
@@ -335,17 +337,6 @@ Destroy and free resources:
 ```ts
 cube.destroy();
 ```
-
----
-
-## Performance Features
-
-- GPU-accelerated pixel shading
-- Concurrency throttling (4 parallel Zarr reads)
-- Windowed 3D slicing based on bounds
-- Efficient `ndarray` stride-based lookup
-- Reuse of Cesium textures
-- Only changed slices rerender
 
 ---
 

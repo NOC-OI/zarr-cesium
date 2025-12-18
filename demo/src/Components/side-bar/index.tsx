@@ -6,15 +6,13 @@ import { LayerLegendBox } from '../layer-legend-box';
 import { SideBarLink } from './side-bar-link';
 import { DimensionsToggle } from '../dimensions-toggle';
 import { useLayersManagementHandle } from '../../application/use-layers';
-import type { InfoButtonBoxType, LayersJsonType, LayersLegendType } from '../../types';
+import type { InfoButtonBoxType, LayersLegendType } from '../../types';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import DescriptionIcon from '@mui/icons-material/Description';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
+import { AddCustomZarrData } from '../add-custom-zarr-data';
 
-interface SideBarProps {
-  listLayers: LayersJsonType;
-}
-
-export function SideBar({ listLayers }: SideBarProps) {
+export function SideBar() {
   const [sideBarOption, setSideBarOption] = useState('');
   const [infoButtonBox, setInfoButtonBox] = useState<InfoButtonBoxType>({});
 
@@ -43,7 +41,7 @@ export function SideBar({ listLayers }: SideBarProps) {
 
   return (
     <div className="flex absolute left-2 top-[2vh] z-10">
-      <div className="relative max-h-[80vh] bg-gray-900 rounded-2xl text-base p-1.5 z-20 shadow-[0px_4px_4px_rgba(0,0,0,1)]">
+      <div className="relative max-h-[80vh] bg-[rgba(17,17,17,0.6)] rounded-2xl text-base p-1.5 z-20 shadow-[0px_4px_4px_rgba(0,0,0,1)]">
         <div className="flex gap-3 md:gap-6 pl-2 pr-2">
           <SideBarLink
             title={'Data Exploration'}
@@ -51,6 +49,13 @@ export function SideBar({ listLayers }: SideBarProps) {
             onClick={handleShowSelection}
             active={sideBarOption === 'data_exploration'}
             icon={MapIcon}
+          />
+          <SideBarLink
+            title={'Add Your Own Zarr Data'}
+            id={'add_your_own_zarr_data'}
+            onClick={handleShowSelection}
+            active={sideBarOption === 'add_your_own_zarr_data'}
+            icon={AddCircleIcon}
           />
           <SideBarLink
             title={'Source Code'}
@@ -67,10 +72,10 @@ export function SideBar({ listLayers }: SideBarProps) {
         </div>
         <div>
           <DataExplorationSelection
-            listLayers={listLayers}
             display={sideBarOption === 'data_exploration'}
             setInfoButtonBox={setInfoButtonBox}
           />
+          <AddCustomZarrData display={sideBarOption === 'add_your_own_zarr_data'} />
         </div>
       </div>
       <DimensionsToggle />

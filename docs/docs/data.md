@@ -5,7 +5,7 @@ title: Data Preparation
 
 # Data Preparation for Zarr-Cesium
 
-Zarr-Cesium works best when datasets are prepared with **web visualization constraints** in mind:
+Although Zarr-Cesium can work with any Zarr dataset, it works best when datasets are prepared with **web visualization constraints** in mind:
 
 - Projection
 - Chunking
@@ -51,11 +51,11 @@ Chunk size dramatically affects browser speed.
 
 **Best practices:**
 
-| Workflow          | Ideal chunk size   | Why                           |
-| ----------------- | ------------------ | ----------------------------- |
-| HPC / analysis    | 10–100 MB          | Efficient for Dask            |
-| Web visualization | **100–500 KB**     | Fast requests, limits latency |
-| Map tiles         | 256×256 or 512×512 | Aligns with screen tiles      |
+| Workflow          | Ideal chunk size            | Why                           |
+| ----------------- | --------------------------- | ----------------------------- |
+| HPC / analysis    | 10–100 MB                   | Efficient for Dask            |
+| Web visualization | **100–500 KB**              | Fast requests, limits latency |
+| Map tiles         | 128×128, 256×256 or 512×512 | Aligns with screen tiles      |
 
 Avoid chunking across non-spatial dimensions (time, depth):
 
@@ -121,7 +121,8 @@ pyramid_ds.to_zarr("multiscale.zarr", zarr_version=3)
 
 # 5. Example Dataset
 
-This workflow was developed using **approximately 30 GB of NEMO NPD ocean model output** (documentation available at [https://noc-msm.github.io/NOC_Near_Present_Day/](https://noc-msm.github.io/NOC_Near_Present_Day/)). The dataset includes:
+The example dataset used in the demo and documentation is prepared using the above workflow.
+We used **approximately 30 GB of NEMO NPD ocean model output** (documentation available at [https://noc-msm.github.io/NOC_Near_Present_Day/](https://noc-msm.github.io/NOC_Near_Present_Day/)). The dataset includes:
 
 - Multiple physical variables
 - Depth and time dimensions

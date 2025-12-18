@@ -12,8 +12,9 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
-    "@mui/icons-material": "^7.3.5",
-    "@mui/material": "^7.3.5",
+    "@hookform/resolvers": "^5.2.2",
+    "@mui/icons-material": "^7.3.6",
+    "@mui/material": "^7.3.6",
     "@tailwindcss/vite": "^4.1.17",
     "axios": "^1.13.2",
     "cesium": "1.119.0",
@@ -23,8 +24,10 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-draggable": "^4.5.0",
+    "react-hook-form": "^7.68.0",
     "react-transition-group": "^4.4.5",
-    "zarr-cesium": "0.1.4"
+    "zarr-cesium": "0.1.4",
+    "zod": "^4.1.13"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

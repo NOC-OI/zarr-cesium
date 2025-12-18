@@ -113,7 +113,10 @@ export interface DataExplorationTypeProps {
 }
 
 export interface DataExplorationSelectionProps {
-  listLayers: LayersJsonType;
   display: boolean;
   setInfoButtonBox: React.Dispatch<React.SetStateAction<InfoButtonBoxType>>;
+}
+
+export interface AddCustomZarrDataProps {
+  display: boolean;
 }

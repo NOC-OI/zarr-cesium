@@ -23,6 +23,26 @@ export const layersJson: LayersJsonType = {
           maximumLevel: undefined
         }
       },
+      e3t: {
+        dataType: 'zarr-cesium',
+        dataDescription: ['Salinity', ''],
+        content:
+          'Salinity outputs from NEMO NPD-EORCA1 model. This dataset contains 3D data (time, latitude, longitude) stored in a Zarr v2 format with a multiscale pyramid structure and EPSG:3857 coordinate reference system.',
+        params: {
+          url: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/manual6-pyramid/npd-eorca1-era5v1/gn/T1y/e3t',
+          variable: 'e3t',
+          zarrVersion: 3,
+          colormap: 'inferno',
+          scale: [1, 1.2],
+          crs: undefined,
+          opacity: undefined,
+          dimensionNames: undefined,
+          tileWidth: undefined,
+          tileHeight: undefined,
+          minimumLevel: undefined,
+          maximumLevel: undefined
+        }
+      },
       'temperature-pyramid_v3': {
         dataType: 'zarr-cesium',
         dataDescription: ['Temperature', 'deg C'],

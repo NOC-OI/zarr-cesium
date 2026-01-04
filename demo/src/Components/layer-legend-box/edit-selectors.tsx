@@ -1,4 +1,4 @@
-import { type CubeOptions, type VelocityOptions } from 'zarr-cesium';
+import { type CubeOptions, type VelocityOptions } from '../../../../dist';
 import { useLayersManagementHandle } from '../../application/use-layers';
 import type { DimensionLegendProps } from '../../types';
 import BoundsSelector from './bounds-selector';

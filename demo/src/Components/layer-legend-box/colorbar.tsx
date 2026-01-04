@@ -10,7 +10,7 @@ export function ColorBar({ layerLegend }: ColorBarProps) {
 
   const { listColors, listColorsValues } = calculateColorsForLegend(
     layerLegend.colormap,
-    layerLegend.scale,
+    layerLegend.clim,
     30
   );
   return (

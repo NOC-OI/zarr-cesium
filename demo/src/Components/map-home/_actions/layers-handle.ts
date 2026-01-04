@@ -9,7 +9,7 @@ import {
   type CubeOptions,
   ZarrCubeProvider,
   ZarrCubeVelocityProvider
-} from 'zarr-cesium';
+} from '../../../../../dist';
 
 export function getBoundsFromBBox(bbox: number[] | null): [[number, number], [number, number]] {
   if (!bbox || bbox.length !== 4) return DEFAULT_BOUNDS;
@@ -92,12 +92,12 @@ export async function changeMapColors(
   const layerInfo = selectedLayers[actualLayer];
   if (layerInfo.dataType === 'zarr-cube') {
     zarrCesiumRefs.cubeRef.current?.updateStyle({
-      scale: layerInfo.params.scale,
+      clim: layerInfo.params.clim,
       colormap: layerInfo.params.colormap
     });
   } else if (layerInfo.dataType === 'zarr-cube-velocity') {
     zarrCesiumRefs.velocityCubeRef.current?.updateStyle({
-      scale: layerInfo.params.scale,
+      clim: layerInfo.params.clim,
       colormap: layerInfo.params.colormap
     });
   } else {
@@ -264,14 +264,14 @@ export async function changeMapCubeParams(
   if (layerInfo.dataType === 'zarr-cube') {
     const params = layerInfo.params as CubeOptions;
     zarrCesiumRefs.cubeRef.current?.updateStyle({
-      scale: params.scale,
+      clim: params.clim,
       colormap: params.colormap,
       verticalExaggeration: params.verticalExaggeration
     });
   } else if (layerInfo.dataType === 'zarr-cube-velocity') {
     const params = layerInfo.params as VelocityOptions;
     zarrCesiumRefs.velocityCubeRef.current?.updateStyle({
-      scale: params.scale,
+      clim: params.clim,
       colormap: params.colormap,
       windOptions: params.windOptions
     });

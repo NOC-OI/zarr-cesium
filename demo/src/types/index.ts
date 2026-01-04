@@ -4,8 +4,8 @@ import type {
   ZarrCubeProvider,
   ZarrCubeVelocityProvider,
   ZarrSelectorsProps
-} from 'zarr-cesium';
-import type { CubeOptions, LayerOptions, VelocityOptions } from 'zarr-cesium';
+} from '../../../dist';
+import type { CubeOptions, LayerOptions, VelocityOptions } from '../../../dist';
 
 export interface keyable {
   [key: string]: any;
@@ -29,7 +29,7 @@ export interface InfoButtonBoxType {
 export interface TitilerOptions {
   url: string;
   variable: string;
-  scale?: [number, number];
+  clim?: [number, number];
   colormap?: string;
   opacity?: number;
   selectors?: { [key: string]: ZarrSelectorsProps };
@@ -72,7 +72,7 @@ export interface LayersLegendType {
 export interface LayerLegendType {
   dataDescription: [string, string];
   colormap: string;
-  scale: [number, number];
+  clim: [number, number];
 }
 
 export interface SelectedLayersType {

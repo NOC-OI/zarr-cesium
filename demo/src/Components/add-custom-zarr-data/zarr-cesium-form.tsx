@@ -25,7 +25,7 @@ export function ZarrCesiumForm({ register, control, errors }: ZarrCesiumFormProp
         error={errors?.params?.zarrVersion?.message}
       />
       <ColormapField control={control} error={errors?.params?.colormap?.message} />
-      <ScaleField control={control} error={errors?.params?.scale?.message} />
+      <ScaleField control={control} error={errors?.params?.clim?.message} />
       <DimensionNamesSection register={register} error={errors?.params?.dimensionNames?.message} />
     </div>
   );

@@ -13,7 +13,7 @@ export const layersJson: LayersJsonType = {
           variable: 'sos_abs',
           zarrVersion: 2,
           colormap: 'inferno',
-          scale: [30, 37],
+          clim: [30, 37],
           crs: undefined,
           opacity: undefined,
           dimensionNames: undefined,
@@ -33,7 +33,7 @@ export const layersJson: LayersJsonType = {
           variable: 'e3t',
           zarrVersion: 3,
           colormap: 'inferno',
-          scale: [1, 1.2],
+          clim: [1, 1.2],
           crs: undefined,
           opacity: undefined,
           dimensionNames: undefined,
@@ -53,7 +53,7 @@ export const layersJson: LayersJsonType = {
           variable: 'tos_con',
           zarrVersion: 3,
           colormap: 'hot',
-          scale: [0, 27],
+          clim: [0, 27],
           crs: undefined,
           opacity: undefined,
           dimensionNames: undefined,
@@ -73,7 +73,7 @@ export const layersJson: LayersJsonType = {
           variable: 'thetao_con',
           zarrVersion: 3,
           colormap: 'BrBG',
-          scale: [0, 27],
+          clim: [0, 27],
           crs: undefined,
           opacity: undefined,
           dimensionNames: undefined,
@@ -93,7 +93,7 @@ export const layersJson: LayersJsonType = {
           variable: 'surface_pressure',
           zarrVersion: 3,
           colormap: 'jet',
-          scale: [75000, 104000],
+          clim: [75000, 104000],
           noDataMin: 0,
           noDataMax: 999999,
           crs: undefined,
@@ -130,7 +130,7 @@ export const layersJson: LayersJsonType = {
           zarrVersion: 3,
           multiscaleLevel: 1,
           colormap: 'jet',
-          scale: [30, 37],
+          clim: [30, 37],
           bounds: { west: -50, south: -20, east: 10, north: 20 },
           crs: undefined,
           verticalExaggeration: 10000,
@@ -162,7 +162,7 @@ export const layersJson: LayersJsonType = {
           },
           multiscaleLevel: 1,
           colormap: 'jet',
-          scale: [0, 30],
+          clim: [0, 30],
           bounds: { west: -50, south: -20, east: 10, north: 20 },
           crs: undefined,
           verticalExaggeration: 10000,
@@ -184,7 +184,7 @@ export const layersJson: LayersJsonType = {
           flipElevation: false,
           zarrVersion: 3,
           colormap: 'jet',
-          scale: [0, 40],
+          clim: [0, 40],
           bounds: { west: -95, south: 15, east: -40, north: 45 },
           crs: undefined,
           verticalExaggeration: 10,
@@ -215,7 +215,7 @@ export const layersJson: LayersJsonType = {
           },
           zarrVersion: 2,
           colormap: 'jet',
-          scale: [-1, 1],
+          clim: [-1, 1],
           bounds: { west: -50, south: -20, east: 10, north: 20 },
           crs: undefined,
           verticalExaggeration: 4500,
@@ -255,7 +255,7 @@ export const layersJson: LayersJsonType = {
             }
           },
           colormap: 'jet',
-          scale: [0, 1],
+          clim: [0, 1],
           verticalExaggeration: undefined,
           sliceSpacing: undefined,
           belowSeaLevel: undefined,
@@ -290,7 +290,7 @@ export const layersJson: LayersJsonType = {
             }
           },
           colormap: 'jet',
-          scale: [0, 0.6],
+          clim: [0, 0.6],
           verticalExaggeration: 4500,
           sliceSpacing: undefined,
           belowSeaLevel: undefined,
@@ -326,7 +326,7 @@ export const layersJson: LayersJsonType = {
             }
           },
           colormap: 'jet',
-          scale: [0, 0.5],
+          clim: [0, 0.5],
           verticalExaggeration: undefined,
           sliceSpacing: undefined,
           belowSeaLevel: undefined,
@@ -352,7 +352,7 @@ export const layersJson: LayersJsonType = {
           flipElevation: false,
           zarrVersion: 3,
           colormap: 'jet',
-          scale: [0, 20],
+          clim: [0, 20],
           selectors: {
             elevation: {
               selected: [2, 17]
@@ -382,7 +382,7 @@ export const layersJson: LayersJsonType = {
         params: {
           url: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/nemotest101/T1d/sos_abs.zarr',
           variable: 'sos_abs',
-          scale: [30, 37]
+          clim: [30, 37]
         }
       }
     }

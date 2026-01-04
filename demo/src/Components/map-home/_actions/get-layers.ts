@@ -1,8 +1,8 @@
 import type { Viewer } from 'cesium';
-import { ZarrCubeProvider, ZarrCubeVelocityProvider, ZarrLayerProvider } from 'zarr-cesium';
+import { ZarrCubeProvider, ZarrCubeVelocityProvider, ZarrLayerProvider } from '../../../../../dist';
 import { GetZarrLayer } from '../../../lib/map-layers/addZarrLayer';
 import type { DataInfoType, keyable, SelectedLayersType, ZarrCesiumRefs } from '../../../types';
-import type { CubeOptions, LayerOptions, VelocityOptions } from 'zarr-cesium';
+import type { CubeOptions, LayerOptions, VelocityOptions } from '../../../../../dist';
 import type React from 'react';
 
 export function viewerMap(viewerRef: React.RefObject<Viewer | null>, dataType: string) {

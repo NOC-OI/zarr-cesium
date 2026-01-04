@@ -45,7 +45,7 @@ export function ZarrCubeVelocityForm({ register, control, errors }: ZarrCesiumFo
         error={errors?.params?.flipElevation?.message}
       />
       <ColormapField control={control} error={errors?.params?.colormap?.message} />
-      <ScaleField control={control} error={errors?.params?.scale?.message} />
+      <ScaleField control={control} error={errors?.params?.clim?.message} />
       <BoundsField control={control} error={errors?.params?.bounds?.message} />
       <DimensionNamesSection register={register} error={errors?.params?.dimensionNames?.message} />
     </div>

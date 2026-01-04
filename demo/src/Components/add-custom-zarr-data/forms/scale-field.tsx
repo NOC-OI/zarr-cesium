@@ -13,7 +13,7 @@ interface ScaleFieldProps {
 
 export function ScaleField({
   control,
-  name = 'params.scale',
+  name = 'params.clim',
   label = 'Scale',
   step = 0.1,
   padding = 10,

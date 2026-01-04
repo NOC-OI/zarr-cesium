@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useLayersManagementHandle } from '../../application/use-layers';
 import type { DimensionSelectorProps } from '../../types';
 import Slider from '@mui/material/Slider';
-import type { CubeOptions, VelocityOptions } from 'zarr-cesium';
+import type { CubeOptions, VelocityOptions } from '../../../../dist';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 export default function DimensionSelector({

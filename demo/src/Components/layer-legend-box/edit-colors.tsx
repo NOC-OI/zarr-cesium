@@ -1,4 +1,9 @@
-import { allColorScales, DEFAULT_COLORMAP, DEFAULT_SCALE, type ColorMapName } from 'zarr-cesium';
+import {
+  allColorScales,
+  DEFAULT_COLORMAP,
+  DEFAULT_COLORMAP_LIMITS,
+  type ColorMapName
+} from '../../../../dist';
 import { useLayersManagementHandle } from '../../application/use-layers';
 import type { LayersLegendType } from '../../types';
 import Slider from '@mui/material/Slider';
@@ -10,7 +15,7 @@ export function EditColors({ layerLegendName }: { layerLegendName: string }) {
     useLayersManagementHandle();
 
   const [scaleLimits, setScaleLimits] = useState<[number, number]>(
-    layerLegend[layerLegendName]?.scale || DEFAULT_SCALE
+    layerLegend[layerLegendName]?.clim || DEFAULT_COLORMAP_LIMITS
   );
   const [colormap, setColormap] = useState<ColorMapName>(
     layerLegend[layerLegendName]?.colormap || DEFAULT_COLORMAP
@@ -22,7 +27,7 @@ export function EditColors({ layerLegendName }: { layerLegendName: string }) {
       const newLayerLegend = { ...layerLegend };
       newLayerLegend[layerLegendName] = {
         ...newLayerLegend[layerLegendName],
-        scale: scaleLimits,
+        clim: scaleLimits,
         colormap: colormap
       };
       return newLayerLegend;
@@ -33,7 +38,7 @@ export function EditColors({ layerLegendName }: { layerLegendName: string }) {
         params: {
           ...prev[layerLegendName].params,
           colormap: colormap,
-          scale: scaleLimits
+          clim: scaleLimits
         }
       };
       return { ...prev, [layerLegendName]: updatedLayer };

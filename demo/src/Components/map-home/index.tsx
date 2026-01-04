@@ -17,7 +17,7 @@ import {
   removeLayerFromMap,
   updateSeaLevelLayerReference
 } from './_actions/layers-handle';
-import type { ZarrCubeProvider, ZarrCubeVelocityProvider } from 'zarr-cesium';
+import type { ZarrCubeProvider, ZarrCubeVelocityProvider } from '../../../../dist';
 import { CESIUM_START_COORDINATES, VERTICAL_EXAGGERATION } from '../../lib/map-layers/utils';
 
 Ion.defaultAccessToken = import.meta.env.VITE_CESIUM_TOKEN;

@@ -26,7 +26,7 @@
     "react-draggable": "^4.5.0",
     "react-hook-form": "^7.68.0",
     "react-transition-group": "^4.4.5",
-    "zarr-cesium": "0.1.4",
+    "zarr-cesium": "../",
     "zod": "^4.1.13"
   },
   "devDependencies": {

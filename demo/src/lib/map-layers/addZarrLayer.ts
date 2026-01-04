@@ -1,4 +1,4 @@
-import { DEFAULT_OPACITY } from 'zarr-cesium';
+import { DEFAULT_OPACITY } from '../../../../dist';
 import type { keyable, SelectedLayer, TitilerOptions } from '../../types';
 import { ZARR_TILE_SERVER_URL } from './utils';
 import * as Cesium from 'cesium';
@@ -15,12 +15,12 @@ export class GetZarrLayer {
     this.params = layerName.params as TitilerOptions;
     this.actualLayer = actualLayer;
     this.layer = null;
-    this.url = this.params.url;
+    this.url = this.params.source;
   }
 
   async getTile() {
     const params: keyable = {
-      url: this.params.url,
+      url: this.params.source,
       variable: this.params.variable,
       reference: false,
       decode_times: true,
@@ -28,17 +28,18 @@ export class GetZarrLayer {
     };
     if (this.layerName.params?.colormap) {
       params.colormap_name = this.layerName.params.colormap;
-      params.rescale = this.layerName.params.scale
-        ? `${this.layerName.params.scale[0]},${this.layerName.params.scale[1]}`
+      params.rescale = this.layerName.params.clim
+        ? `${this.layerName.params.clim[0]},${this.layerName.params.clim[1]}`
         : '0,1';
     }
-    if (this.layerName.params?.scale) {
-      params.rescale = this.layerName.params.scale
-        ? `${this.layerName.params.scale[0]},${this.layerName.params.scale[1]}`
+    if (this.layerName.params?.clim) {
+      params.rescale = this.layerName.params.clim
+        ? `${this.layerName.params.clim[0]},${this.layerName.params.clim[1]}`
         : '0,1';
     }
     let dropDims = '';
     const dimensionsInfo = this.layerName.dimensions || {};
+
     Object.keys(dimensionsInfo).forEach(dimension => {
       if (dimension === 'time') {
         const value = dimensionsInfo.time.values[

@@ -16,32 +16,22 @@
 import proj4 from 'proj4';
 import * as zarr from 'zarrita';
 import {
-  type ZarrSelectorsProps,
   type ZarrLevelMetadata,
   type DimensionNamesProps,
-  type XYLimitsProps,
   type CRS,
   type DataSliceProps,
   type DimIndicesProps,
   type SliceArgs,
-  DimensionValues
+  DimensionValues,
+  Selectors,
+  NormalizedSelectors,
+  SelectorSpec,
+  SelectorValue,
+  XYLimits,
+  CFCalendar
 } from './types';
 import { decodeCFTime } from './decodeCFTime';
-
-const DIMENSION_ALIASES_DEFAULT: { [key in keyof DimensionNamesProps]: string[] } = {
-  lat: ['lat', 'latitude', 'y', 'Latitude', 'Y'],
-  lon: ['lon', 'longitude', 'x', 'Longitude', 'X', 'lng'],
-  time: ['time', 't', 'Time', 'time_counter'],
-  elevation: ['depth', 'z', 'Depth', 'level', 'lev', 'deptht', 'elevation', 'depthu', 'depthv']
-};
-
-const CF_MAPPINGS: { [key in keyof DimensionNamesProps]: string[] } = {
-  lat: ['latitude'],
-  lon: ['longitude'],
-  time: ['time'],
-  elevation: ['height', 'depth', 'altitude', 'air_pressure', 'pressure', 'geopotential_height']
-};
-
+import { DIMENSION_ALIASES_DEFAULT, CF_MAPPINGS } from './constants';
 /**
  * Identify the indices of common dimensions (lat, lon, time, elevation)
  * in a Zarr array, optionally using CF-compliant standard names or custom dimension mappings.
@@ -129,7 +119,7 @@ export async function calculateSliceArgs(
   shape: number[],
   dataSlice: DataSliceProps,
   dimIndices: DimIndicesProps,
-  selectors: { [key: string]: ZarrSelectorsProps },
+  selectors: NormalizedSelectors,
   dimensionValues: DimensionValues,
   root: zarr.Location<zarr.FetchStore>,
   levelInfo: string | null,
@@ -138,7 +128,7 @@ export async function calculateSliceArgs(
 ): Promise<{
   sliceArgs: SliceArgs;
   dimensionValues: DimensionValues;
-  selectors: { [key: string]: ZarrSelectorsProps };
+  selectors: NormalizedSelectors;
 }> {
   const sliceArgs: SliceArgs = new Array(shape.length).fill(0);
   const newDimensionValues = structuredClone(dimensionValues);
@@ -229,6 +219,34 @@ export async function calculateSliceArgs(
   return { sliceArgs, dimensionValues: newDimensionValues, selectors: newSelectors };
 }
 
+const resolveOpenFunc = (zarrVersion: 2 | 3 | null): typeof zarr.open => {
+  if (zarrVersion === 2) return zarr.open.v2 as typeof zarr.open;
+  if (zarrVersion === 3) return zarr.open.v3 as typeof zarr.open;
+  return zarr.open;
+};
+
+export function normalizeSelectors(selectors: Selectors): NormalizedSelectors {
+  return (Object.entries(selectors) as [string, SelectorValue | SelectorSpec][]).reduce(
+    (acc, [dimName, value]) => {
+      acc[dimName] = toSelectorProps(value);
+      return acc;
+    },
+    {} as NormalizedSelectors
+  );
+}
+
+export function toSelectorProps(value: SelectorValue | SelectorSpec): SelectorSpec {
+  if (value && typeof value === 'object' && !Array.isArray(value) && 'selected' in value) {
+    const normalized = value as SelectorSpec;
+    return {
+      selected: normalized.selected,
+      type: normalized.type ?? 'value'
+    };
+  }
+
+  return { selected: value as SelectorValue, type: 'value' };
+}
+
 /**
  * Constructs Zarr slice arguments for extracting a subregion of a multidimensional array.
  *
@@ -252,7 +270,7 @@ export function calculateSliceArgsRequestImage(
   shape: number[],
   dataSlice: DataSliceProps,
   dimIndices: DimIndicesProps,
-  selectors: { [key: string]: ZarrSelectorsProps }
+  selectors: NormalizedSelectors
 ): SliceArgs {
   const sliceArgs: SliceArgs = new Array(shape.length).fill(0);
   for (const dimName of Object.keys(dimIndices)) {
@@ -325,7 +343,7 @@ export function calculateNearestIndex(
 export async function calculateElevationSlice(
   shapeElevation: number,
   dimInfo: DimIndicesProps['elevation'],
-  selectorsElevation: ZarrSelectorsProps | undefined,
+  selectorsElevation: NormalizedSelectors['elevation'] | undefined,
   dimensionValuesWithElevation: DimensionValues,
   root: zarr.Location<zarr.FetchStore>,
   levelInfo: string | null,
@@ -351,8 +369,8 @@ export async function calculateElevationSlice(
     let firstElevation: number | null = null;
     let secondElevation;
     if (typeof selectorsElevation.selected === 'object') {
-      firstElevation = selectorsElevation.selected[0];
-      secondElevation = selectorsElevation.selected[1];
+      firstElevation = selectorsElevation.selected[0] as number;
+      secondElevation = selectorsElevation.selected[1] as number;
     } else {
       secondElevation = selectorsElevation.selected as number;
     }
@@ -424,23 +442,13 @@ export async function loadDimensionValues(
   slice?: [number, number]
 ): Promise<Float64Array | number[] | string[]> {
   if (dimensionValues[dimIndices.name]) return dimensionValues[dimIndices.name];
-  let targetRoot;
-  if (levelInfo) {
-    targetRoot = await root.resolve(levelInfo);
-  } else {
-    targetRoot = root;
-  }
+  const targetRoot = levelInfo ? root.resolve(levelInfo) : root;
   let coordArr;
   if (dimIndices.array) {
     coordArr = dimIndices.array;
   } else {
-    const coordVar = await targetRoot.resolve(dimIndices.name);
-    let localFunc = zarr.open as any;
-    if (zarrVersion === 2) {
-      localFunc = zarr.open.v2;
-    } else if (zarrVersion === 3) {
-      localFunc = zarr.open.v3;
-    }
+    const coordVar = targetRoot.resolve(dimIndices.name);
+    const localFunc = resolveOpenFunc(zarrVersion);
     coordArr = await localFunc(coordVar, { kind: 'array' });
   }
   const coordData = await zarr.get(coordArr);
@@ -452,8 +460,8 @@ export async function loadDimensionValues(
   }
   if (dimIndices.name === 'time') {
     try {
-      const units = coordArr.attrs.units;
-      const calendar = coordArr.attrs.calendar;
+      const units = coordArr.attrs.units as string;
+      const calendar = coordArr.attrs.calendar as CFCalendar | undefined;
       coordArray = decodeCFTime(coordArray as number[], units, calendar);
     } catch (err) {
       console.warn('Failed to decode CF time coordinate:', err);
@@ -668,7 +676,7 @@ export async function getXYLimits(
   levelInfos: string[],
   multiscale: boolean,
   zarrVersion: 2 | 3 | null
-): Promise<XYLimitsProps> {
+): Promise<XYLimits> {
   const levelRoot = multiscale ? await root.resolve(levelInfos[0]) : root;
   let localFunc = zarr.open as any;
   if (zarrVersion === 2) {
@@ -823,7 +831,7 @@ export function extractNoDataMetadata(zarrArray: zarr.Array<any>): {
 export async function detectCRS(
   attrs: Record<string, any>,
   arr: zarr.Array<any> | null,
-  xyLimits?: XYLimitsProps
+  xyLimits?: XYLimits
 ): Promise<CRS> {
   const attrCRS = attrs?.multiscales?.[0]?.datasets?.[0]?.crs ?? arr?.attrs?.crs;
   if (attrCRS) {
@@ -928,4 +936,39 @@ export function calculateXYFromBounds(
       y: [yMin, yMax]
     };
   }
+}
+
+interface BandInfo {
+  band: number | string;
+  index: number;
+}
+
+function getBandInformation(selector: NormalizedSelectors): Record<string, BandInfo> {
+  const result: Record<string, BandInfo> = {};
+
+  for (const [key, value] of Object.entries(selector)) {
+    const selected = value?.selected;
+    const normalized = Array.isArray(selected) ? selected : null;
+
+    if (normalized && Array.isArray(normalized)) {
+      normalized.forEach((v, idx) => {
+        const bandValue = v as string | number;
+        const bandName = typeof bandValue === 'string' ? bandValue : `${key}_${bandValue}`;
+        result[bandName] = { band: bandValue, index: idx };
+      });
+    }
+  }
+
+  return result;
+}
+
+export function getBands(variable: string, selector: NormalizedSelectors): string[] {
+  const bandInfo = getBandInformation(selector);
+  const bandNames = Object.keys(bandInfo);
+
+  if (bandNames.length === 0) {
+    return [variable];
+  }
+
+  return bandNames;
 }

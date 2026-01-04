@@ -10,7 +10,7 @@ Configuration for a 3D cube visualization (volumetric rendering).
 optional belowSeaLevel: boolean;
 ```
 
-***
+---
 
 ### bounds
 
@@ -42,7 +42,7 @@ south: number;
 west: number;
 ```
 
-***
+---
 
 ### colormap?
 
@@ -50,15 +50,15 @@ west: number;
 optional colormap: string;
 ```
 
-***
+---
 
 ### colorScale?
 
 ```ts
-optional colorScale: [number, number, number][];
+optional colorclim: [number, number, number][];
 ```
 
-***
+---
 
 ### crs?
 
@@ -66,7 +66,7 @@ optional colorScale: [number, number, number][];
 optional crs: CRS | null;
 ```
 
-***
+---
 
 ### dimensionNames?
 
@@ -74,7 +74,7 @@ optional crs: CRS | null;
 optional dimensionNames: DimensionNamesProps;
 ```
 
-***
+---
 
 ### flipElevation?
 
@@ -82,7 +82,7 @@ optional dimensionNames: DimensionNamesProps;
 optional flipElevation: boolean;
 ```
 
-***
+---
 
 ### multiscaleLevel?
 
@@ -90,7 +90,7 @@ optional flipElevation: boolean;
 optional multiscaleLevel: number;
 ```
 
-***
+---
 
 ### opacity?
 
@@ -98,15 +98,15 @@ optional multiscaleLevel: number;
 optional opacity: number;
 ```
 
-***
+---
 
 ### scale?
 
 ```ts
-optional scale: [number, number];
+optional clim: [number, number];
 ```
 
-***
+---
 
 ### selectors?
 
@@ -120,7 +120,7 @@ optional selectors: object;
 [key: string]: ZarrSelectorsProps
 ```
 
-***
+---
 
 ### showHorizontalSlices?
 
@@ -128,7 +128,7 @@ optional selectors: object;
 optional showHorizontalSlices: boolean;
 ```
 
-***
+---
 
 ### showVerticalSlices?
 
@@ -136,7 +136,7 @@ optional showHorizontalSlices: boolean;
 optional showVerticalSlices: boolean;
 ```
 
-***
+---
 
 ### url
 
@@ -144,7 +144,7 @@ optional showVerticalSlices: boolean;
 url: string;
 ```
 
-***
+---
 
 ### variable
 
@@ -152,7 +152,7 @@ url: string;
 variable: string;
 ```
 
-***
+---
 
 ### verticalExaggeration?
 
@@ -160,7 +160,7 @@ variable: string;
 optional verticalExaggeration: number;
 ```
 
-***
+---
 
 ### zarrVersion?
 

@@ -75,7 +75,6 @@ export function AddZarrForm() {
 
     reset(getDefaultLayerValues(data.dataType));
   };
-  console.log('listLayers in AddZarrForm:', listLayers);
   return (
     <FormProvider {...form}>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 p-6 ...">

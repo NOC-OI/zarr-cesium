@@ -23,22 +23,20 @@ import ndarray from 'ndarray';
 /*                             BASIC DATA STRUCTURES                          */
 /* -------------------------------------------------------------------------- */
 
-/**
- * Describes a selector for a Zarr dataset dimension.
- *
- * @example
- * ```ts
- * { selected: 0, type: 'index' }
- * { selected: 1000, type: 'value' }
- * { selected: [0, 10], type: 'index' }
- * ```
- */
-export interface ZarrSelectorsProps {
-  /** Selected index, value, or range. */
-  selected: number | string | [number, number];
-  /** Selection mode: by index or by physical value. */
+// Selector value can be a single number/string or an array of numbers/strings.
+export type SelectorValue = number | number[] | string | string[];
+
+// Selector specification with optional type ('index' or 'value').
+export interface SelectorSpec {
+  selected: SelectorValue;
   type?: 'index' | 'value';
 }
+
+// Public shape for callers: full selector object (per-dimension value or spec).
+export type Selectors = Record<string, SelectorValue | SelectorSpec>;
+
+// Internal normalized form (object per dimension).
+export type NormalizedSelectors = Record<string, SelectorSpec>;
 
 /**
  * Describes the XY coordinate boundaries of a dataset.
@@ -87,6 +85,27 @@ export interface DimIndicesProps {
   [key: string]: { name: string; index: number; array: zarr.Array<any> | null };
 }
 
+/**
+ * Metadata for an untiled Zarr multiscale level.
+ */
+export interface UntiledLevel {
+  asset: string;
+  scale: [number, number];
+  translation: [number, number];
+  shape?: number[];
+  chunks?: number[];
+  scaleFactor?: number;
+  addOffset?: number;
+  fillValue?: number | null;
+  dtype?: string | null;
+}
+
+export interface CustomShaderConfig {
+  bands: string[];
+  customFrag?: string;
+  customUniforms?: Record<string, number>;
+}
+
 /* -------------------------------------------------------------------------- */
 /*                            VISUALIZATION OPTIONS                           */
 /* -------------------------------------------------------------------------- */
@@ -95,7 +114,8 @@ export interface DimIndicesProps {
  * Configuration for a 3D cube visualization (volumetric rendering).
  */
 export interface CubeOptions {
-  url: string;
+  id?: string;
+  source: string;
   variable: string;
   bounds: { west: number; south: number; east: number; north: number };
   crs?: CRS | null;
@@ -105,12 +125,12 @@ export interface CubeOptions {
   showVerticalSlices?: boolean;
   belowSeaLevel?: boolean;
   dimensionNames?: DimensionNamesProps;
-  selectors?: { [key: string]: ZarrSelectorsProps };
+  selectors?: Selectors;
   colorScale?: [number, number, number][];
   multiscaleLevel?: number;
   zarrVersion?: 2 | 3;
   flipElevation?: boolean;
-  scale?: [number, number];
+  clim?: [number, number];
   colormap?: ColorMapName;
 }
 
@@ -118,41 +138,65 @@ export interface CubeOptions {
  * Configuration for a 2D raster (image) layer visualization.
  */
 export interface LayerOptions {
-  url: string;
+  id?: string;
+  source: string;
   variable: string;
-  crs?: CRS | null;
+  selectors?: Selectors;
+  colorScale?: [number, number, number][];
+  colormap?: ColorMapName;
+  clim?: [number, number];
+  opacity?: number;
   tileWidth?: number;
   tileHeight?: number;
   minimumLevel?: number;
   maximumLevel?: number;
-  scale?: [number, number];
-  opacity?: number;
-  colormap?: ColorMapName;
-  colorScale?: [number, number, number][];
-  selectors?: { [key: string]: ZarrSelectorsProps };
   zarrVersion?: 2 | 3;
   dimensionNames?: DimensionNamesProps;
+  bounds?: BoundsProps;
+  latIsAscending?: boolean | null;
   noDataMin?: number;
   noDataMax?: number;
+  customFrag?: string;
+  uniforms?: Record<string, number>;
+  onLoadingStateChange?: LoadingStateCallback;
+  throttleMs?: number;
+  proj4?: string;
+  crs?: CRS | null;
 }
+
+/**
+ * Represents the loading state of a dataset or layer.
+ */
+export interface LoadingState {
+  loading: boolean;
+  metadata: boolean;
+  chunks: boolean;
+  error?: Error | null;
+}
+
+/**
+ * Loading State Callback type definition.
+ */
+export type LoadingStateCallback = (state: LoadingState) => void;
 
 /**
  * Configuration for a vector (velocity) visualization layer.
  */
 export interface VelocityOptions {
-  urls: { u: string; v: string };
+  id?: string;
+  sources: { u: string; v: string };
   variables: { u: string; v: string };
-  bounds: { west: number; south: number; east: number; north: number };
+  bounds: BoundsProps;
   verticalExaggeration?: number;
   flipElevation?: boolean;
   sliceSpacing?: number;
   belowSeaLevel?: boolean;
   dimensionNames?: DimensionNamesProps;
-  selectors?: { [key: string]: ZarrSelectorsProps };
+  selectors?: Selectors;
   multiscaleLevel?: number;
   opacity?: number;
   crs?: CRS | null;
-  scale?: [number, number];
+  clim?: [number, number];
   colormap?: ColorMapName;
   zarrVersion?: 2 | 3;
   windOptions?: Partial<WindLayerOptions>;
@@ -166,16 +210,6 @@ export interface BoundsProps {
   south: number;
   east: number;
   north: number;
-}
-
-/**
- * Alias of {@link XYLimits} with explicit type name for Zarr coordinate bounds.
- */
-export interface XYLimitsProps {
-  xMin: number;
-  xMax: number;
-  yMin: number;
-  yMax: number;
 }
 
 /**

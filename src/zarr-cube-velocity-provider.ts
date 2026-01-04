@@ -7,27 +7,25 @@ import {
   calculateSliceArgs,
   calculateXYFromBounds,
   detectCRS,
-  initZarrDataset
+  initZarrDataset,
+  normalizeSelectors
 } from './zarr-utils';
 import {
+  NormalizedSelectors,
+  Selectors,
   type BoundsProps,
   type ColorMapName,
   type ColorScaleProps,
   type CRS,
   type CubeVelocityProps,
   type DimensionNamesProps,
-  type VelocityOptions,
-  type ZarrSelectorsProps
+  type VelocityOptions
 } from './types';
 import { colormapBuilder } from './jsColormaps';
 
 import ndarray from 'ndarray';
-import {
-  DEFAULT_COLORMAP,
-  DEFAULT_VERTICAL_EXAGGERATION,
-  DEFAULT_WIND_OPTIONS,
-  validateBounds
-} from './cesium-utils';
+import { validateBounds } from './cesium-utils';
+import { DEFAULT_COLORMAP, DEFAULT_VERTICAL_EXAGGERATION, DEFAULT_WIND_OPTIONS } from './constants';
 
 /**
  * Provider responsible for loading and rendering 3D velocity fields (U and V components)
@@ -40,7 +38,7 @@ import {
  * @example
  * ```ts
  * const provider = new ZarrCubeVelocityProvider(viewer, {
- *   urls: { u: 'uo.zarr', v: 'vo.zarr' },
+ *   sources: { u: 'uo.zarr', v: 'vo.zarr' },
  *   variables: { u: 'uo', v: 'vo' },
  *   bounds: { west: -10, south: 30, east: 10, north: 45 }
  * });
@@ -55,7 +53,9 @@ export class ZarrCubeVelocityProvider {
   /** Unique identifier for the cube provider instance. */
   public id: string = '';
   /** User-defined selectors for slicing dimensions. */
-  public selectors: { [key: string]: ZarrSelectorsProps };
+  public selectors: Selectors;
+  private normalizedSelectors: NormalizedSelectors = {};
+
   /** Shape (size) of the elevation dimension. */
   public elevationShape: number = 0;
   /** Information about multiscale levels in the Zarr dataset. */
@@ -68,8 +68,8 @@ export class ZarrCubeVelocityProvider {
   private zarrVersion: 2 | 3 | null = null;
   private layers: WindLayer[] = [];
   private flipElevation: boolean = false;
-  private uUrl: string;
-  private vUrl: string;
+  private uSource: string;
+  private vSource: string;
   private variables: { u: string; v: string };
   private crs: CRS | null = null;
   private dimensionNames: DimensionNamesProps;
@@ -95,8 +95,9 @@ export class ZarrCubeVelocityProvider {
    */
   constructor(viewer: Viewer, options: VelocityOptions) {
     this.viewer = viewer;
-    this.uUrl = options.urls.u;
-    this.vUrl = options.urls.v;
+    this.id = options.id ?? '';
+    this.uSource = options.sources.u;
+    this.vSource = options.sources.v;
     this.variables = options.variables;
     this.bounds = options.bounds;
     this.crs = options.crs ?? null;
@@ -108,7 +109,7 @@ export class ZarrCubeVelocityProvider {
     this.sliceSpacing = options.sliceSpacing ?? 1;
     this.belowSeaLevel = options.belowSeaLevel ?? false;
     this.zarrVersion = options.zarrVersion ?? null;
-    const [min, max] = options.scale ?? [-3, 3];
+    const [min, max] = options.clim ?? [-3, 3];
     this.colormap = options.colormap || DEFAULT_COLORMAP;
     const colors = colormapBuilder(this.colormap, 'css', 255, this.opacity);
     this.colorScale = { min, max, colors };
@@ -145,8 +146,11 @@ export class ZarrCubeVelocityProvider {
       if (next) next();
     }
   }
-  private async loadZarrVariable(url: string, variable: string): Promise<CubeVelocityProps | null> {
-    const store = new zarr.FetchStore(url);
+  private async loadZarrVariable(
+    source: string,
+    variable: string
+  ): Promise<CubeVelocityProps | null> {
+    const store = new zarr.FetchStore(source);
     const root = zarr.root(store);
 
     const { zarrArray, dimIndices, levelInfos, attrs, multiscaleLevel } = await initZarrDataset(
@@ -179,7 +183,7 @@ export class ZarrCubeVelocityProvider {
     const { dimensionValuesWithElevation, elevationSlice } = await calculateElevationSlice(
       shape[dimIndices.elevation.index],
       dimIndices.elevation,
-      this.selectors.elevation,
+      this.normalizedSelectors.elevation,
       this.dimensionValues,
       root,
       this.levelInfos.length > 0 ? this.levelInfos[this.multiscaleLevel] : null,
@@ -198,14 +202,14 @@ export class ZarrCubeVelocityProvider {
         endElevation: elevationSlice[1]
       },
       dimIndices,
-      this.selectors,
+      this.normalizedSelectors,
       dimensionValuesWithElevation,
       root,
       this.levelInfos.length > 0 ? this.levelInfos[this.multiscaleLevel] : null,
       this.zarrVersion,
       true
     );
-    this.selectors = selectors;
+    this.normalizedSelectors = selectors;
     this.dimensionValues = dimensionValues;
     this.elevationShape = zarrArray.shape[dimIndices.elevation.index];
 
@@ -231,9 +235,11 @@ export class ZarrCubeVelocityProvider {
    * @returns Promise resolved when both datasets are loaded and rendered as wind layers.
    */
   async load(): Promise<void> {
+    this.normalizedSelectors = normalizeSelectors(this.selectors);
+
     const [uCube, vCube] = await Promise.all([
-      this.loadZarrVariable(this.uUrl, this.variables.u),
-      this.loadZarrVariable(this.vUrl, this.variables.v)
+      this.loadZarrVariable(this.uSource, this.variables.u),
+      this.loadZarrVariable(this.vSource, this.variables.v)
     ]);
     if (!uCube || !vCube) {
       console.error('Failed to load U or V component data.');
@@ -288,7 +294,7 @@ export class ZarrCubeVelocityProvider {
    * Updates the dimension selectors, multiscale level, or geographic bounds,
    * and reloads the velocity data accordingly.
    * @param options:
-   * - selectors - New dimension selectors. See {@link ZarrSelectorsProps}.
+   * - selectors - New dimension selectors. See {@link ZarrSelectorssProps}.
    * - multiscaleLevel - New multiscale level to load.
    * - bounds - Updated geographic bounds. See {@link BoundsProps}.
    */
@@ -297,7 +303,7 @@ export class ZarrCubeVelocityProvider {
     multiscaleLevel,
     bounds
   }: {
-    selectors?: { [key: string]: ZarrSelectorsProps };
+    selectors?: Selectors;
     multiscaleLevel?: number;
     bounds?: BoundsProps;
   }) {

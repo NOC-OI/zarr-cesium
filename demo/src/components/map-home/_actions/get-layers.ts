@@ -1,8 +1,8 @@
 import type { Viewer } from 'cesium';
-import { ZarrCubeProvider, ZarrCubeVelocityProvider, ZarrLayerProvider } from 'zarr-cesium';
+import { ZarrCubeProvider, ZarrCubeVelocityProvider, ZarrLayerProvider } from '../../../../../dist';
 import { GetZarrLayer } from '../../../lib/map-layers/addZarrLayer';
 import type { DataInfoType, keyable, SelectedLayersType, ZarrCesiumRefs } from '../../../types';
-import type { CubeOptions, LayerOptions, VelocityOptions } from 'zarr-cesium';
+import type { CubeOptions, LayerOptions, VelocityOptions } from '../../../../../dist';
 import type React from 'react';
 
 export function viewerMap(viewerRef: React.RefObject<Viewer | null>, dataType: string) {
@@ -28,53 +28,41 @@ export async function generateSelectedLayer(
       layers.remove(layer);
     }
   });
-  try {
-    if (layerName.dataType === 'zarr-cesium') {
-      const layer = await getZarrCesiumLayer(layerName, actualLayer, viewerRef);
-      updateSelectedLayersWithDimensions(
-        layer.imageryProvider,
-        actualLayer,
-        selectedLayers,
-        setSelectedLayers
-      );
-      layers.add(layer);
-    } else if (layerName.dataType === 'zarr-cube') {
-      const layer = await getZarrCube(
-        layerName,
-        actualLayer,
-        viewerRef,
-        zarrCesiumRefs.cubeRef,
-        gebcoTerrainEnabled
-      );
-      updateSelectedLayersWithDimensions(
-        layer,
-        actualLayer,
-        selectedLayers,
-        setSelectedLayers,
-        true
-      );
-    } else if (layerName.dataType === 'zarr-cube-velocity') {
-      const layer = await getZarrCubeVelocity(
-        layerName,
-        actualLayer,
-        viewerRef,
-        zarrCesiumRefs.velocityCubeRef,
-        gebcoTerrainEnabled
-      );
-      updateSelectedLayersWithDimensions(
-        layer,
-        actualLayer,
-        selectedLayers,
-        setSelectedLayers,
-        true
-      );
-    } else if (layerName.dataType === 'zarr-titiler') {
-      const layer = await getZarrLayer(layerName, actualLayer);
-      layers.add(layer);
-    }
-  } catch (err) {
-    return { error: err instanceof Error ? err.message : 'Error adding layer' };
+  // try {
+  if (layerName.dataType === 'zarr-cesium') {
+    const layer = await getZarrCesiumLayer(layerName, actualLayer, viewerRef);
+    updateSelectedLayersWithDimensions(
+      layer.imageryProvider,
+      actualLayer,
+      selectedLayers,
+      setSelectedLayers
+    );
+    layers.add(layer);
+  } else if (layerName.dataType === 'zarr-cube') {
+    const layer = await getZarrCube(
+      layerName,
+      actualLayer,
+      viewerRef,
+      zarrCesiumRefs.cubeRef,
+      gebcoTerrainEnabled
+    );
+    updateSelectedLayersWithDimensions(layer, actualLayer, selectedLayers, setSelectedLayers, true);
+  } else if (layerName.dataType === 'zarr-cube-velocity') {
+    const layer = await getZarrCubeVelocity(
+      layerName,
+      actualLayer,
+      viewerRef,
+      zarrCesiumRefs.velocityCubeRef,
+      gebcoTerrainEnabled
+    );
+    updateSelectedLayersWithDimensions(layer, actualLayer, selectedLayers, setSelectedLayers, true);
+  } else if (layerName.dataType === 'zarr-titiler') {
+    const layer = await getZarrLayer(layerName, actualLayer);
+    layers.add(layer);
   }
+  // } catch (err) {
+  //   return { error: err instanceof Error ? err.message : 'Error adding layer' };
+  // }
 }
 
 export function updateSelectedLayersWithDimensions(
@@ -87,6 +75,7 @@ export function updateSelectedLayersWithDimensions(
   if (!setSelectedLayers) return;
   const selected = selectedLayers[actualLayer];
   const dimensions: Record<string, { values: any; selected: any; indices?: number[] }> = {};
+
   Object.keys(layer.dimensionValues).forEach((dimKey: string) => {
     if (dimKey === 'lat' || dimKey === 'lon') {
       if (!cube) return;

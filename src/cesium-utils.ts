@@ -24,11 +24,10 @@ import {
   BoundsProps,
   CRS,
   type DimIndicesProps,
-  type XYLimitsProps,
+  type XYLimits,
   type ZarrLevelMetadata
 } from './types';
 import * as zarr from 'zarrita';
-import { WindLayerOptions } from 'cesium-wind-layer';
 
 /**
  * Global Web Mercator projection instance used for coordinate conversions.
@@ -78,46 +77,6 @@ export function validateBounds(bounds: BoundsProps): boolean {
 }
 
 /**
- * Default vertical exaggeration factor for Zarr cube visualization.
- */
-export const DEFAULT_VERTICAL_EXAGGERATION = 5000;
-
-/**
- * Default colormap for data visualization.
- */
-export const DEFAULT_COLORMAP = 'viridis';
-
-/**
- * Default data scale range for visualization.
- */
-export const DEFAULT_SCALE: [number, number] = [0, 1];
-
-/**
- * Default opacity for layer visualization.
- */
-export const DEFAULT_OPACITY = 1;
-
-/**
- * Default configuration for `WindLayer` rendering.
- *
- * These values are chosen to provide responsive and visually clear
- * particle animations for typical 1 km – 5 km atmospheric grid spacing.
- *
- * Users may override any property when constructing a `WindLayer`.
- *
- * @see WindLayerOptions
- */
-export const DEFAULT_WIND_OPTIONS: Partial<WindLayerOptions> = {
-  speedFactor: 12,
-  lineWidth: { min: 1, max: 3 },
-  lineLength: { min: 0, max: 400 },
-  particlesTextureSize: 50,
-  useViewerBounds: true,
-  dynamic: true,
-  flipY: true
-};
-
-/**
  * Converts a latitude value (in degrees) to Web Mercator Y coordinate (in meters).
  *
  * @remarks
@@ -157,9 +116,9 @@ export function latDegToMercY(latDeg: number) {
  *
  * @returns `{ rectangle, tilingScheme }`
  */
-export function deriveRectangleAndScheme(
+export function deriveRectangleAndSchemeOld(
   crs: CRS,
-  xyLimits: XYLimitsProps,
+  xyLimits: XYLimits,
   levelMetadata: Map<number, ZarrLevelMetadata>,
   zarrArray: zarr.Array<any>,
   dimIndices: DimIndicesProps
@@ -197,6 +156,36 @@ export function deriveRectangleAndScheme(
     yMin = yMin - dy / 2 - epsilon;
     yMax = yMax + dy / 2 + epsilon;
 
+    if (crs === 'EPSG:3857') {
+      const proj = new WebMercatorProjection();
+      const sw = proj.unproject(new Cartesian3(xMin, yMin, 0));
+      const ne = proj.unproject(new Cartesian3(xMax, yMax, 0));
+      rectangle = Rectangle.fromRadians(sw.longitude, sw.latitude, ne.longitude, ne.latitude);
+      tilingScheme = new WebMercatorTilingScheme();
+    } else {
+      rectangle = Rectangle.fromDegrees(xMin, yMin, xMax, yMax);
+      tilingScheme = new GeographicTilingScheme();
+    }
+  } catch (e) {
+    console.warn('Rectangle derivation failed — falling back to default.', e);
+    tilingScheme =
+      crs === 'EPSG:3857' ? new WebMercatorTilingScheme() : new GeographicTilingScheme();
+    rectangle = tilingScheme.rectangle;
+  }
+  return { rectangle, tilingScheme };
+}
+
+export function deriveRectangleAndScheme(
+  crs: CRS,
+  xyLimits: XYLimits
+): {
+  rectangle: Rectangle;
+  tilingScheme: TilingScheme;
+} {
+  let { xMin, xMax, yMin, yMax } = xyLimits;
+  let rectangle: Rectangle;
+  let tilingScheme: TilingScheme;
+  try {
     if (crs === 'EPSG:3857') {
       const proj = new WebMercatorProjection();
       const sw = proj.unproject(new Cartesian3(xMin, yMin, 0));

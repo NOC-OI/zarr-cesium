@@ -5,11 +5,11 @@ import Slider from '@mui/material/Slider';
 import {
   allColorScales,
   DEFAULT_COLORMAP,
-  DEFAULT_SCALE,
+  DEFAULT_COLORMAP_LIMITS,
   DEFAULT_VERTICAL_EXAGGERATION,
   type ColorMapName,
   type CubeOptions
-} from 'zarr-cesium';
+} from '../../../../dist';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
@@ -180,21 +180,21 @@ export function CubeOptionsSelector({ layerLegendName }: LayerLegendBoxProps) {
         <div className="flex items-center gap-3">
           <div className="flex-1 flex items-center gap-2">
             <span className="text-sm text-white">
-              {params.scale ? params.scale[0] : DEFAULT_SCALE[0]}
+              {params.clim ? params.clim[0] : DEFAULT_COLORMAP_LIMITS[0]}
             </span>
             <Slider
               getAriaLabel={() => 'Elevation range'}
-              value={params.scale || DEFAULT_SCALE}
-              min={params.scale ? params.scale[0] - 10 : DEFAULT_SCALE[0] - 10}
-              max={params.scale ? params.scale[1] + 10 : DEFAULT_SCALE[1] + 10}
+              value={params.clim || DEFAULT_COLORMAP_LIMITS}
+              min={params.clim ? params.clim[0] - 10 : DEFAULT_COLORMAP_LIMITS[0] - 10}
+              max={params.clim ? params.clim[1] + 10 : DEFAULT_COLORMAP_LIMITS[1] + 10}
               disableSwap
               step={0.1}
-              onChange={(_, v) => handleUpdateParams({ scale: v as [number, number] })}
+              onChange={(_, v) => handleUpdateParams({ clim: v as [number, number] })}
               className="clickable"
               color="success"
             />
             <span className="text-sm text-white">
-              {params.scale ? params.scale[1] : DEFAULT_SCALE[1]}
+              {params.clim ? params.clim[1] : DEFAULT_COLORMAP_LIMITS[1]}
             </span>
           </div>
         </div>

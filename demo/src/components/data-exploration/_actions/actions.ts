@@ -7,7 +7,7 @@ import type {
   SelectedLayersType,
   TitilerOptions
 } from '../../../types';
-import { DEFAULT_COLORMAP, DEFAULT_OPACITY } from 'zarr-cesium';
+import { DEFAULT_COLORMAP, DEFAULT_OPACITY } from '../../../../../dist';
 
 export function handleChangeOpacity(
   e: React.ChangeEvent<HTMLInputElement>,
@@ -60,15 +60,15 @@ export async function handleClickLegend(
   selectedLayers?: SelectedLayersType
 ) {
   const legendLayerName = `${content}_${subLayer}`;
-  let scale: [number, number];
+  let clim: [number, number];
   if (!selectedLayers) {
-    if (layerInfo.params.scale) {
-      scale = layerInfo.params.scale;
+    if (layerInfo.params.clim) {
+      clim = layerInfo.params.clim;
     } else {
-      scale = [0, 1];
+      clim = [0, 1];
     }
   } else {
-    scale = selectedLayers[`${content}_${subLayer}`].params.scale || [0, 1];
+    clim = selectedLayers[`${content}_${subLayer}`].params.clim || [0, 1];
   }
   const colorName = selectedLayers
     ? selectedLayers[`${content}_${subLayer}`].params.colormap || DEFAULT_COLORMAP
@@ -79,7 +79,7 @@ export async function handleClickLegend(
     delete newLayerLegend[legendLayerName];
     newLayerLegend[legendLayerName] = {
       colormap: colorName,
-      scale: scale,
+      clim: clim,
       dataDescription: layerInfo.dataDescription || ['', '']
     };
     return newLayerLegend;
@@ -139,7 +139,7 @@ export async function addMapLayer(
   setLayerAction('add');
   const newSelectedLayer = layerInfo.dataInfo;
   if (['zarr-titiler', 'zarr-cesium'].includes(newSelectedLayer.dataType)) {
-    newSelectedLayer.params.scale = newSelectedLayer.params.scale || [0, 1];
+    newSelectedLayer.params.clim = newSelectedLayer.params.clim || [0, 1];
     newSelectedLayer.params.colormap = newSelectedLayer.params.colormap
       ? newSelectedLayer.params.colormap
       : 'jet';
@@ -182,7 +182,7 @@ export async function handleChangeMapLayerAndAddLegend(
   if (checked) {
     if (['zarr-titiler'].includes(layerInfo.dataInfo.dataType)) {
       const params = layerInfo.dataInfo.params as TitilerOptions;
-      const layerUrl = params.url;
+      const layerUrl = params.source;
       const url = `${ZARR_TILE_SERVER_URL}time_values?url=${encodeURIComponent(layerUrl)}`;
 
       const response = await fetch(url);

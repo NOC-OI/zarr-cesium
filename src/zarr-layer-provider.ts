@@ -5,25 +5,24 @@ import { colormapBuilder } from './jsColormaps';
 import {
   calculateNearestIndex,
   calculateSliceArgsRequestImage,
-  detectCRS,
-  extractNoDataMetadata,
-  getXYLimits,
-  initZarrDataset,
+  getBands,
   loadDimensionValues,
-  openLevelArray,
-  resolveNoDataRange
+  normalizeSelectors,
+  toSelectorProps
 } from './zarr-utils';
 import { createColorRampTexture, createProgram, createShader, detectBrowser } from './webgl-utils';
 import {
+  BoundsProps,
   ColorMapName,
+  CustomShaderConfig,
   DimensionValues,
+  NormalizedSelectors,
+  Selectors,
   type CRS,
   type DimensionNamesProps,
   type DimIndicesProps,
   type LayerOptions,
-  type XYLimits,
-  type ZarrLevelMetadata,
-  type ZarrSelectorsProps
+  type XYLimits
 } from './types';
 import {
   ImageryProvider,
@@ -38,6 +37,7 @@ import {
   Event,
   WebMercatorTilingScheme
 } from 'cesium';
+import { ZarrStore } from './zarr-store';
 
 /**
  * Custom Cesium imagery layer for Zarr datasets.
@@ -50,7 +50,7 @@ import {
  * @param viewer - Cesium viewer instance.
  */
 export class ZarrImageryLayer extends ImageryLayer {
-  /** Unique identifier for the cube provider instance. */
+  /** Unique identifier for the layer provider instance. */
   public id: string = '';
   declare imageryProvider: ZarrLayerProvider;
   viewer?: Viewer;
@@ -73,12 +73,12 @@ export class ZarrImageryLayer extends ImageryLayer {
    * Update the visual style of the imagery layer.
    * @param opts - Style options to update.
    * @param opts.opacity - Layer opacity.
-   * @param opts.scale - [min, max] range for data scaling.
+   * @param opts.clim - [min, max] range for data scaling.
    * @param opts.colormap - Colormap name.
    */
-  updateStyle(opts: { opacity?: number; scale?: [number, number]; colormap?: ColorMapName }) {
+  updateStyle(opts: { opacity?: number; clim?: [number, number]; colormap?: ColorMapName }) {
     const layerUpdated = this.imageryProvider.updateStyle({
-      scale: opts.scale,
+      clim: opts.clim,
       colormap: opts.colormap
     });
     if (layerUpdated) {
@@ -92,7 +92,7 @@ export class ZarrImageryLayer extends ImageryLayer {
    * Update the selectors used for slicing the Zarr dataset.
    * @param selectors - New selectors to apply.
    */
-  updateSelectors(selectors: { [key: string]: ZarrSelectorsProps }) {
+  updateSelectors(selectors: Selectors) {
     const layerUpdated = this.imageryProvider.updateSelectors(selectors);
     if (layerUpdated) {
       this.softRefreshCurrentView();
@@ -110,9 +110,9 @@ export class ZarrImageryLayer extends ImageryLayer {
  * @example
  * ```ts
  * const provider = new ZarrLayerProvider({
- *   url: 'https://example.com/my.zarr',
+ *   source: 'https://example.com/my.zarr',
  *   variable: 'temperature',
- *   scale: [0, 40],
+ *   clim: [0, 40],
  *   colormap: 'jet'
  * });
  * const imageryLayer = new ZarrImageryLayer(provider);
@@ -127,14 +127,17 @@ export class ZarrLayerProvider implements ImageryProvider {
   /** Values of the data coordinate dimensions (latitude, longitude, elevation, etc.). */
   public dimensionValues: DimensionValues = {};
   /** User-defined selectors for slicing dimensions. */
-  public selectors: { [key: string]: ZarrSelectorsProps } = {
+  private _selectors: Selectors = {
     time: { selected: 0, type: 'index' },
     elevation: { selected: 0, type: 'index' }
   };
-  private url: string;
+  private normalizedSelector: NormalizedSelectors = {};
+  private source: string;
   private variable: string;
+  private dataTexture: WebGLTexture | null = null;
+  private quadBuffer: WebGLBuffer | null = null;
+  private attribs: { [key: string]: number } = {};
   private zarrVersion: 2 | 3 | null = null;
-  private crs: CRS | null = null;
   private dimensionNames: DimensionNamesProps;
   private uniforms: { [key: string]: WebGLUniformLocation | null } = {};
   private noDataMin: number | undefined;
@@ -154,120 +157,126 @@ export class ZarrLayerProvider implements ImageryProvider {
   private _ready = false;
   private _readyPromise!: Promise<boolean>;
   private _emptyCanvas: HTMLCanvasElement | null = null;
-
+  private zarrStore: ZarrStore | null = null;
+  private bandNames: string[] = [];
+  private customShaderConfig: CustomShaderConfig | null = null;
   private colorScale: { min: number; max: number; colors: number[][] };
-  private zarrArray: zarr.Array<any> | null = null;
   private dimIndices: DimIndicesProps = {};
-  private store!: zarr.FetchStore;
-  private root!: zarr.Location<zarr.FetchStore>;
   private levelInfos: string[] = [];
-  private levelCache = new Map();
-  private levelMetadata: Map<number, ZarrLevelMetadata> = new Map();
-  private xyLimits: XYLimits | null = null;
   private colormap: ColorMapName;
+  private proj4: string | undefined;
+  private crs: CRS | null = null;
+  private bounds: BoundsProps | undefined;
+  private latIsAscending: boolean | null = null;
+  private customFrag: string | undefined;
+  private customUniforms: Record<string, number> = {};
   private gl: WebGL2RenderingContext | null = null;
   private program: WebGLProgram | null = null;
   private colorTexture: WebGLTexture | null = null;
-  private static readonly concurrencyLimit = 15;
+  private static readonly concurrencyLimit = 32;
   private static activeRequests = 0;
   private static readonly queue: (() => void)[] = [];
   private abortControllers = new Map<string, AbortController>();
   private destroyed = false;
   private static supportsImageBitmap: boolean | null = null;
+  private selectorVersion = 0;
 
   constructor(options: LayerOptions) {
-    this.url = options.url;
+    this.source = options.source;
     this.variable = options.variable;
-    this._tilingScheme = new WebMercatorTilingScheme();
-    this._coverageRectangle = this._tilingScheme.rectangle;
-    this.crs = options.crs || null;
+    this._selectors = options.selectors || {};
+    const [min, max] = options.clim ?? [-3, 3];
+    this.colormap = options.colormap ?? 'viridis';
+    const colors = colormapBuilder(this.colormap);
+    this.colorScale = { min, max, colors: colors as number[][] };
     this._tileWidth = options.tileWidth ?? 256;
     this._tileHeight = options.tileHeight ?? 256;
     this._minimumLevel = options.minimumLevel ?? 0;
     this._maximumLevel = options.maximumLevel ?? 8;
-    this._credit = new Credit('Zarr Data');
-    this.dimensionNames = options.dimensionNames ?? {};
     this.zarrVersion = options.zarrVersion ?? null;
     this.dimensionValues = {};
-    const [min, max] = options.scale ?? [-3, 3];
-    this.colormap = options.colormap ?? 'viridis';
-    const colors = colormapBuilder(this.colormap);
-    this.colorScale = { min, max, colors: colors as number[][] };
-    this.selectors = options.selectors || {};
+    this.bounds = options.bounds;
+    this.latIsAscending = options.latIsAscending ?? null;
     this.noDataMin = options.noDataMin;
     this.noDataMax = options.noDataMax;
 
+    this.crs = options.crs || null;
+    this.dimensionNames = options.dimensionNames ?? {};
+    this._tilingScheme = new WebMercatorTilingScheme();
+    this._coverageRectangle = this._tilingScheme.rectangle;
+
+    this._credit = new Credit('Zarr Data');
     this.initWebGL();
     this._readyPromise = this.initialize().then(ok => ((this._ready = ok), ok));
   }
 
   private async initialize(): Promise<boolean> {
     try {
-      this.store = new zarr.FetchStore(this.url);
-      this.root = zarr.root(this.store);
+      this.zarrStore = new ZarrStore({
+        source: this.source,
+        version: this.zarrVersion,
+        variable: this.variable,
+        dimensionNames: this.dimensionNames,
+        bounds: this.bounds,
+        latIsAscending: this.latIsAscending,
+        coordinateKeys: Object.keys(this._selectors),
+        proj4: this.proj4
+      });
 
-      const { zarrArray, levelInfos, dimIndices, attrs } = await initZarrDataset(
-        this.store,
-        this.root,
-        this.variable,
-        this.dimensionNames,
-        this.levelMetadata,
-        this.levelCache,
-        this.zarrVersion
-      );
-      this.zarrArray = zarrArray;
-      this.levelInfos = levelInfos;
-      this.dimIndices = dimIndices;
-      this.xyLimits = await getXYLimits(
-        this.root,
-        this.dimIndices,
-        this.levelInfos,
-        this.levelInfos.length > 0,
-        this.zarrVersion
-      );
+      await this.zarrStore.initialized;
 
-      const meta = extractNoDataMetadata(zarrArray);
+      const desc = this.zarrStore.describe();
 
-      const range = resolveNoDataRange(
-        this.noDataMin,
-        this.noDataMax,
-        meta.metadataMin,
-        meta.metadataMax
-      );
+      this.levelInfos = desc.levels;
+      this.dimIndices = desc.dimIndices;
+      this.scaleFactor = desc.scaleFactor;
+      this.offset = desc.addOffset;
 
-      this.noDataMin = range.noDataMin;
-      this.noDataMax = range.noDataMax;
+      if (this.fillValue === null && desc.fill_value !== null && desc.fill_value !== undefined) {
+        this.fillValue = desc.fill_value;
+      }
 
-      this.fillValue = meta.useFillValue ? meta.fillValue : 0;
-      this.useFillValue = meta.useFillValue;
-
-      this.scaleFactor = attrs.scale_factor ?? 1;
-      this.offset = attrs.add_offset ?? 0;
-      this.crs = this.crs || (await detectCRS(attrs, zarrArray));
+      this.normalizedSelector = normalizeSelectors(this._selectors);
+      await this.loadInitialDimensionValues();
 
       const { rectangle, tilingScheme } = deriveRectangleAndScheme(
-        this.crs,
-        this.xyLimits,
-        this.levelMetadata,
-        zarrArray,
-        dimIndices
+        this.zarrStore.crs,
+        this.zarrStore.xyLimits as XYLimits
       );
 
       this._coverageRectangle = rectangle;
       this._tilingScheme = tilingScheme;
-      await this.loadInitialDimensionValues();
+
+      this.bandNames = getBands(this.variable, this.normalizedSelector);
+      if (this.bandNames.length > 1 || this.customFrag) {
+        this.customShaderConfig = {
+          bands: this.bandNames,
+          customFrag: this.customFrag,
+          customUniforms: this.customUniforms
+        };
+      } else {
+        this.customShaderConfig = null;
+      }
 
       this._ready = true;
       return true;
     } catch (err) {
       console.error('Failed to initialize Zarr provider:', err);
+      if (this.zarrStore) {
+        this.zarrStore.cleanup();
+        this.zarrStore = null;
+      }
       return false;
     }
   }
 
   private async loadInitialDimensionValues(): Promise<void> {
-    const multiscaleLevel = this.levelInfos.length > 0 ? this.levelInfos[0] : null;
+    if (!this.zarrStore?.root) return;
 
+    const multiscaleLevel = this.levelInfos.length > 0 ? this.levelInfos[0] : null;
+    for (const [dimName, value] of Object.entries(this._selectors)) {
+      this.normalizedSelector[dimName] = toSelectorProps(value);
+    }
     for (const dimName of Object.keys(this.dimIndices)) {
       if (dimName !== 'lon' && dimName !== 'lat') {
         try {
@@ -275,16 +284,16 @@ export class ZarrLayerProvider implements ImageryProvider {
             this.dimensionValues,
             multiscaleLevel,
             this.dimIndices[dimName],
-            this.root,
-            this.zarrVersion
+            this.zarrStore.root as zarr.Location<zarr.FetchStore>,
+            this.zarrStore.version
           );
 
-          if (!this.selectors[dimName]) {
-            this.selectors[dimName] = { selected: 0, type: 'index' };
-          } else if (this.selectors[dimName].type === 'value') {
-            this.selectors[dimName].selected = calculateNearestIndex(
+          if (!this.normalizedSelector[dimName]) {
+            this.normalizedSelector[dimName] = { selected: 0, type: 'index' };
+          } else if (this.normalizedSelector[dimName].type === 'value') {
+            this.normalizedSelector[dimName].selected = calculateNearestIndex(
               this.dimensionValues[dimName],
-              this.selectors[dimName].selected as number
+              this.normalizedSelector[dimName].selected as number
             );
           }
         } catch (err) {
@@ -308,6 +317,7 @@ export class ZarrLayerProvider implements ImageryProvider {
     const imageryLayer = new ZarrImageryLayer(provider);
     imageryLayer.alpha = options.opacity ?? 1.0;
     imageryLayer.viewer = viewer;
+    if (options.id) imageryLayer.id = options.id;
 
     return imageryLayer;
   }
@@ -350,15 +360,15 @@ export class ZarrLayerProvider implements ImageryProvider {
   /**
    * Updates the visualization style for the imagery provider.
    * @param options - Parameters to update.
-   * @param options.scale - New [min, max] scale range.
+   * @param options.clim - New [min, max] colormap limits.
    * @param options.colormap - New colormap name. See {@link ColorMapName}.
    * @returns `true` if any changes were applied, otherwise `false`.
    */
-  public updateStyle(options: { scale?: [number, number]; colormap?: ColorMapName }): boolean {
-    const { scale, colormap } = options;
-    if (!scale && !colormap) return false;
-    const nextMin = scale?.[0] ?? this.colorScale.min;
-    const nextMax = scale?.[1] ?? this.colorScale.max;
+  public updateStyle(options: { clim?: [number, number]; colormap?: ColorMapName }): boolean {
+    const { clim, colormap } = options;
+    if (!clim && !colormap) return false;
+    const nextMin = clim?.[0] ?? this.colorScale.min;
+    const nextMax = clim?.[1] ?? this.colorScale.max;
     const nextColormap = colormap ?? this.colormap;
 
     if (
@@ -368,7 +378,7 @@ export class ZarrLayerProvider implements ImageryProvider {
     ) {
       return false;
     }
-    if (scale) (this.colorScale.min = scale[0]), (this.colorScale.max = scale[1]);
+    if (clim) (this.colorScale.min = clim[0]), (this.colorScale.max = clim[1]);
 
     if (colormap) {
       this.colormap = colormap;
@@ -384,17 +394,30 @@ export class ZarrLayerProvider implements ImageryProvider {
    * @param selectors - New selectors mapping. See {@link ZarrSelectorsProps}.
    * @returns `true` if any changes were applied, otherwise `false`.
    */
-  public updateSelectors(selectors: { [key: string]: ZarrSelectorsProps }): boolean {
+  public updateSelectors(selectors: Selectors): boolean {
     let layerUpdated = false;
-    if (selectors !== undefined) {
-      for (const key of Object.keys(selectors)) {
-        if (
-          !this.selectors[key] ||
-          JSON.stringify(this.selectors[key]) !== JSON.stringify(selectors[key])
-        ) {
-          this.selectors[key] = selectors[key];
-          layerUpdated = true;
-        }
+    for (const key of Object.keys(selectors ?? {})) {
+      if (
+        !this._selectors[key] ||
+        JSON.stringify(this._selectors[key]) !== JSON.stringify(selectors[key])
+      ) {
+        this._selectors[key] = selectors[key];
+        layerUpdated = true;
+      }
+    }
+    if (layerUpdated) {
+      this.normalizedSelector = normalizeSelectors(this._selectors);
+      this.selectorVersion++;
+      // Update band names and custom shader config (Mapbox style)
+      this.bandNames = getBands(this.variable, this.normalizedSelector);
+      if (this.bandNames.length > 1 || this.customFrag) {
+        this.customShaderConfig = {
+          bands: this.bandNames,
+          customFrag: this.customFrag,
+          customUniforms: this.customUniforms
+        };
+      } else {
+        this.customShaderConfig = null;
       }
     }
     return layerUpdated;
@@ -435,43 +458,48 @@ export class ZarrLayerProvider implements ImageryProvider {
 
     this.updateColormapTexture();
 
-    const positions = new Float32Array([
-      -1, -1, 0, 0, 1, -1, 1, 0, -1, 1, 0, 1, -1, 1, 0, 1, 1, -1, 1, 0, 1, 1, 1, 1
-    ]);
+    // const positions = new Float32Array([
+    //   -1, -1, 0, 0, 1, -1, 1, 0, -1, 1, 0, 1, -1, 1, 0, 1, 1, -1, 1, 0, 1, 1, 1, 1
+    // ]);
 
-    const buffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-    gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
+    this.quadBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.quadBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, 24 * 4, gl.DYNAMIC_DRAW);
+
+    // gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
 
     const positionLocation = gl.getAttribLocation(this.program, 'a_position');
     const texCoordLocation = gl.getAttribLocation(this.program, 'a_texCoord');
+    this.attribs = { a_position: positionLocation, a_texCoord: texCoordLocation };
 
     gl.enableVertexAttribArray(positionLocation);
     gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 16, 0);
 
     gl.enableVertexAttribArray(texCoordLocation);
     gl.vertexAttribPointer(texCoordLocation, 2, gl.FLOAT, false, 16, 8);
+
+    this.dataTexture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, this.dataTexture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
     this.uniforms = {
       u_dataTexture: gl.getUniformLocation(this.program, 'u_dataTexture'),
       u_colorRamp: gl.getUniformLocation(this.program, 'u_colorRamp'),
       u_min: gl.getUniformLocation(this.program, 'u_min'),
       u_max: gl.getUniformLocation(this.program, 'u_max'),
-      u_noDataMin: gl.getUniformLocation(this.program, 'u_noDataMin'),
-      u_noDataMax: gl.getUniformLocation(this.program, 'u_noDataMax'),
+      // u_noDataMin: gl.getUniformLocation(this.program, 'u_noDataMin'),
+      // u_noDataMax: gl.getUniformLocation(this.program, 'u_noDataMax'),
       u_fillValue: gl.getUniformLocation(this.program, 'u_fillValue'),
       u_useFillValue: gl.getUniformLocation(this.program, 'u_useFillValue'),
       u_scaleFactor: gl.getUniformLocation(this.program, 'u_scaleFactor'),
-      u_addOffset: gl.getUniformLocation(this.program, 'u_addOffset')
+      u_addOffset: gl.getUniformLocation(this.program, 'u_addOffset'),
+      u_texScale: gl.getUniformLocation(this.program, 'u_texScale'),
+      u_texOffset: gl.getUniformLocation(this.program, 'u_texOffset'),
+      u_channel: gl.getUniformLocation(this.program, 'u_channel')
     };
-  }
-
-  private choosePyramidLevel(cesiumLevel: number): string | null {
-    if (!this.levelInfos || this.levelInfos.length === 0) return null;
-
-    const maxCesium = this.maximumLevel;
-    const normalized = cesiumLevel / maxCesium;
-    const index = Math.floor(normalized * (this.levelInfos.length - 1));
-    return this.levelInfos[index];
   }
 
   private prepareAbortController(key: string): AbortController {
@@ -483,48 +511,12 @@ export class ZarrLayerProvider implements ImageryProvider {
     return controller;
   }
 
-  private async getArrayForLevel(level: number) {
-    if (!this.zarrArray) {
-      throw new Error('Zarr array not initialized');
-    }
-    const multiscaleLevel = this.choosePyramidLevel(level);
-
-    if (multiscaleLevel === null) {
-      const dataHeight = this.zarrArray.shape[this.dimIndices.lat.index];
-      const dataWidth = this.zarrArray.shape[this.dimIndices.lon.index];
-      return { dataWidth, dataHeight, currentArray: this.zarrArray, multiscaleLevel: null };
-    }
-
-    const currentArray = await openLevelArray(
-      this.root,
-      multiscaleLevel,
-      this.variable,
-      this.levelCache
-    );
-
-    const multiscaleLevelIndex = this.levelInfos.indexOf(multiscaleLevel);
-    const metadata = this.levelMetadata.get(multiscaleLevelIndex);
-
-    if (!metadata) {
-      const dataHeight = currentArray.shape[this.dimIndices.lat.index];
-      const dataWidth = currentArray.shape[this.dimIndices.lon.index];
-      return { dataWidth, dataHeight, currentArray, multiscaleLevel };
-    }
-
-    return {
-      dataWidth: metadata.width,
-      dataHeight: metadata.height,
-      currentArray,
-      multiscaleLevel
-    };
-  }
-
   private computeTileUVs(tileRect: Rectangle) {
     const rect = this._coverageRectangle;
     const toDeg = CesiumMath.toDegrees;
     const clamp = (v: number) => Math.max(0, Math.min(1, v));
 
-    if (this.crs === 'EPSG:3857') {
+    if (this.zarrStore!.crs === 'EPSG:3857') {
       const RXW = lonDegToMercX(toDeg(rect.west));
       const RXE = lonDegToMercX(toDeg(rect.east));
       const RYS = latDegToMercY(toDeg(rect.south));
@@ -606,14 +598,16 @@ export class ZarrLayerProvider implements ImageryProvider {
     if (this.destroyed) {
       return this.emptyCanvas();
     }
-    const key = `${level}/${x}/${y}`;
+    const version = this.selectorVersion;
+    const key = `${version}:${level}/${x}/${y}`;
+    // const key = `${level}/${x}/${y}`;
 
     const controller = this.prepareAbortController(key);
-    if (!this.ready || !this.zarrArray || !this.gl || !this.program) {
+    if (!this.ready || !this.zarrStore || !this.gl || !this.program) {
       console.warn('[requestImage] not ready yet', {
         gl: !!this.gl,
         program: !!this.program,
-        zarrArray: !!this.zarrArray
+        zarrStore: !!this.zarrStore
       });
       await this.readyPromise;
       if (!this.gl || !this.program) return this.emptyCanvas();
@@ -626,40 +620,48 @@ export class ZarrLayerProvider implements ImageryProvider {
       if (!intersection) {
         return this.emptyCanvas();
       }
+      if (version !== this.selectorVersion) return this.emptyCanvas();
 
       const fracWest = (intersection.west - tileRect.west) / (tileRect.east - tileRect.west);
       const fracEast = (intersection.east - tileRect.west) / (tileRect.east - tileRect.west);
       const fracSouth = (intersection.south - tileRect.south) / (tileRect.north - tileRect.south);
       const fracNorth = (intersection.north - tileRect.south) / (tileRect.north - tileRect.south);
+      const frac = { fracWest, fracEast, fracSouth, fracNorth };
 
-      const { dataWidth, dataHeight, currentArray, multiscaleLevel } = await this.getArrayForLevel(
-        level
-      );
+      const {
+        array: currentArray,
+        width: dataWidth,
+        height: dataHeight
+      } = await this.zarrStore!.getArrayForCesiumLevel(level, this.maximumLevel);
 
       const { u0, u1, v0, v1 } = this.computeTileUVs(tileRect);
 
       const bounds = this.computePixelBounds(u0, u1, v0, v1, dataWidth, dataHeight);
+      if (!bounds) return this.emptyCanvas();
 
-      if (!bounds) {
-        return this.emptyCanvas();
-      }
       const sliceArgs = await calculateSliceArgsRequestImage(
         currentArray.shape,
         bounds,
         this.dimIndices,
-        this.selectors
+        this.normalizedSelector
       );
-      const data = await ZarrLayerProvider.throttle(() =>
-        zarr.get(currentArray, sliceArgs, { opts: { signal: controller.signal } })
+      // Mapbox-like multi-value dims -> channel combinations
+      const multiValueDims = this.extractMultiValueDims(this.normalizedSelector);
+      // Fetch (throttled)
+      const fetched = await ZarrLayerProvider.throttle(() =>
+        this.fetchTileSubset(currentArray, sliceArgs, multiValueDims, controller.signal, version)
       );
-      const flatData = new Float32Array((data.data as Float32Array).buffer);
 
-      return this.renderWithWebGL(flatData, bounds.width, bounds.height, {
-        fracWest,
-        fracEast,
-        fracSouth,
-        fracNorth
-      });
+      if (version !== this.selectorVersion) return this.emptyCanvas();
+      console.log('Fetched tile data:', { level, x, y, fetched });
+      // const flatData = new Float32Array((data.data as Float32Array).buffer);
+      return this.renderWithWebGL(
+        fetched.data,
+        fetched.width,
+        fetched.height,
+        frac,
+        fetched.channels
+      );
     } catch (error) {
       return this.emptyCanvas();
     } finally {
@@ -667,24 +669,321 @@ export class ZarrLayerProvider implements ImageryProvider {
     }
   }
 
+  private buildChannelCombinations(
+    multiValueDims: Array<{ dimIndex: number; values: number[]; labels: (number | string)[] }>
+  ): { combinations: number[][]; labelCombinations: (number | string)[][] } {
+    let combinations: number[][] = [[]];
+    let labelCombinations: (number | string)[][] = [[]];
+
+    for (const { values, labels } of multiValueDims) {
+      const nextCombos: number[][] = [];
+      const nextLabels: (number | string)[][] = [];
+      for (let i = 0; i < values.length; i++) {
+        for (let c = 0; c < combinations.length; c++) {
+          nextCombos.push([...combinations[c], values[i]]);
+          nextLabels.push([...labelCombinations[c], labels[i]]);
+        }
+      }
+      combinations = nextCombos;
+      labelCombinations = nextLabels;
+    }
+
+    return { combinations, labelCombinations };
+  }
+
+  private extractMultiValueDims(selector: NormalizedSelectors) {
+    const out: Array<{ dimIndex: number; values: number[]; labels: (number | string)[] }> = [];
+
+    for (const [dimName, spec] of Object.entries(selector)) {
+      if (dimName === 'lat' || dimName === 'lon') continue;
+      const dimInfo = this.dimIndices[dimName];
+      if (!dimInfo) continue;
+
+      const selected = spec?.selected as any;
+      if (Array.isArray(selected) && selected.length > 1) {
+        // Treat as indices. If you want value->index resolution, wire in dimensionValues here.
+        const values = selected.map(v => (typeof v === 'number' ? v : 0));
+        out.push({ dimIndex: dimInfo.index, values, labels: selected });
+      }
+    }
+
+    return out;
+  }
+
+  private async fetchTileSubset(
+    currentArray: zarr.Array<any>,
+    sliceArgs: (number | zarr.Slice)[],
+    multiValueDims: Array<{ dimIndex: number; values: number[]; labels: (number | string)[] }>,
+    signal: AbortSignal,
+    requestVersion: number
+  ): Promise<{ data: Float32Array; width: number; height: number; channels: number }> {
+    const latIdx = this.dimIndices.lat.index;
+    const lonIdx = this.dimIndices.lon.index;
+
+    const ySlice = sliceArgs[latIdx] as zarr.Slice;
+    const xSlice = sliceArgs[lonIdx] as zarr.Slice;
+
+    const height = (ySlice.stop as number) - (ySlice.start as number);
+    const width = (xSlice.stop as number) - (xSlice.start as number);
+
+    const { combinations } = this.buildChannelCombinations(multiValueDims);
+    const channels = combinations.length || 1;
+    const pixelCount = width * height;
+
+    // Single-channel
+    if (channels === 1) {
+      const result = (await zarr.get(currentArray, sliceArgs, { opts: { signal } })) as {
+        data: ArrayLike<number>;
+      };
+
+      // If selector changed while fetching, treat as stale
+      if (requestVersion !== this.selectorVersion) throw new DOMException('Stale', 'AbortError');
+
+      const src = result.data;
+      const arr = src instanceof Float32Array ? src : new Float32Array(src as any);
+      return { data: arr, width, height, channels: 1 };
+    }
+
+    // Multi-channel: fetch each combo, pack interleaved
+    const packed = new Float32Array(pixelCount * channels);
+    const fill = this.fillValue ?? 0;
+    packed.fill(fill);
+
+    for (let c = 0; c < channels; c++) {
+      const args = [...sliceArgs];
+      const combo = combinations[c];
+
+      for (let i = 0; i < multiValueDims.length; i++) {
+        args[multiValueDims[i].dimIndex] = combo[i];
+      }
+
+      const result = (await zarr.get(currentArray, args, { opts: { signal } })) as {
+        data: ArrayLike<number>;
+      };
+
+      if (requestVersion !== this.selectorVersion) throw new DOMException('Stale', 'AbortError');
+
+      const band =
+        result.data instanceof Float32Array ? result.data : new Float32Array(result.data as any);
+
+      for (let i = 0; i < pixelCount; i++) {
+        packed[i * channels + c] = band[i];
+      }
+    }
+
+    return { data: packed, width, height, channels };
+  }
+
+  private packToRGBA(packed: Float32Array, channels: number): Float32Array {
+    const pix = packed.length / channels;
+    const rgba = new Float32Array(pix * 4);
+
+    for (let i = 0; i < pix; i++) {
+      rgba[i * 4 + 0] = packed[i * channels + 0];
+      rgba[i * 4 + 1] = channels > 1 ? packed[i * channels + 1] : packed[i * channels + 0];
+      rgba[i * 4 + 2] = channels > 2 ? packed[i * channels + 2] : packed[i * channels + 0];
+      rgba[i * 4 + 3] = channels > 3 ? packed[i * channels + 3] : packed[i * channels + 0];
+    }
+    return rgba;
+  }
+
   private async renderWithWebGL(
     data: Float32Array,
     width: number,
     height: number,
-    frac: { fracWest: number; fracEast: number; fracSouth: number; fracNorth: number }
+    frac: { fracWest: number; fracEast: number; fracSouth: number; fracNorth: number },
+    channels: number = 1
   ): Promise<any> {
     const gl = this.gl as WebGL2RenderingContext;
     if (!gl || !this.program) throw new Error('WebGL2 not initialized');
+    if (!this.dataTexture || !this.quadBuffer || !this.attribs)
+      throw new Error('WebGL resources missing');
+
+    // ===== DEBUG: Check incoming data =====
+    console.log('=== RENDER DEBUG ===');
+    console.log('Data stats:', {
+      length: data.length,
+      width,
+      height,
+      channels,
+      expectedLength: width * height * channels,
+      min: Math.min(...data),
+      max: Math.max(...data),
+      mean: data.reduce((a, b) => a + b, 0) / data.length,
+      hasNaN: Array.from(data).some(v => isNaN(v)),
+      hasInf: Array.from(data).some(v => !isFinite(v)),
+      first10: Array.from(data.slice(0, 10)),
+      fillValue: this.fillValue,
+      useFillValue: this.useFillValue
+    });
 
     const { fracWest, fracEast, fracSouth, fracNorth } = frac;
+    console.log('Fractions:', { fracWest, fracEast, fracSouth, fracNorth });
 
-    const dataTexture = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, dataTexture);
+    // ===== Upload texture =====
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, this.dataTexture);
 
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.R32F, width, height, 0, gl.RED, gl.FLOAT, data);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    if (channels === 1) {
+      console.log('Uploading R32F texture');
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.R32F, width, height, 0, gl.RED, gl.FLOAT, data);
+    } else {
+      console.log('Uploading RGBA32F texture');
+      const rgba = this.packToRGBA(data, channels);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, width, height, 0, gl.RGBA, gl.FLOAT, rgba);
+    }
 
+    let err = gl.getError();
+    if (err !== gl.NO_ERROR) {
+      console.error('Texture upload error:', err);
+    }
+
+    // ===== Setup GL state =====
+    gl.useProgram(this.program);
+    gl.viewport(0, 0, this._tileWidth, this._tileHeight);
+
+    // Clear to a visible test color first
+    gl.clearColor(0, 1, 0, 1); // Green background to verify clearing works
+    gl.clear(gl.COLOR_BUFFER_BIT);
+
+    // ===== Setup geometry =====
+    const x0 = fracWest * 2.0 - 1.0;
+    const x1 = fracEast * 2.0 - 1.0;
+    const y0 = fracSouth * 2.0 - 1.0;
+    const y1 = fracNorth * 2.0 - 1.0;
+
+    console.log('Quad coords:', { x0, x1, y0, y1 });
+
+    const positions = new Float32Array([
+      x0,
+      y0,
+      0,
+      0,
+      x1,
+      y0,
+      1,
+      0,
+      x0,
+      y1,
+      0,
+      1,
+      x0,
+      y1,
+      0,
+      1,
+      x1,
+      y0,
+      1,
+      0,
+      x1,
+      y1,
+      1,
+      1
+    ]);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.quadBuffer);
+    gl.bufferSubData(gl.ARRAY_BUFFER, 0, positions);
+
+    gl.enableVertexAttribArray(this.attribs.a_position);
+    gl.vertexAttribPointer(this.attribs.a_position, 2, gl.FLOAT, false, 16, 0);
+
+    gl.enableVertexAttribArray(this.attribs.a_texCoord);
+    gl.vertexAttribPointer(this.attribs.a_texCoord, 2, gl.FLOAT, false, 16, 8);
+
+    // ===== Bind textures and uniforms =====
+    gl.uniform1i(this.uniforms.u_dataTexture, 0);
+
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, this.colorTexture);
+    gl.uniform1i(this.uniforms.u_colorRamp, 1);
+
+    console.log('Uniforms:', {
+      min: this.colorScale.min,
+      max: this.colorScale.max,
+      fillValue: this.fillValue,
+      useFillValue: this.useFillValue,
+      scaleFactor: this.scaleFactor,
+      offset: this.offset
+    });
+
+    gl.uniform1f(this.uniforms.u_min, this.colorScale.min);
+    gl.uniform1f(this.uniforms.u_max, this.colorScale.max);
+    gl.uniform1f(this.uniforms.u_fillValue, this.fillValue ?? 0);
+    gl.uniform1i(this.uniforms.u_useFillValue, this.useFillValue ? 1 : 0);
+    gl.uniform1f(this.uniforms.u_scaleFactor, this.scaleFactor);
+    gl.uniform1f(this.uniforms.u_addOffset, this.offset);
+    gl.uniform2f(this.uniforms.u_texScale, 1.0, 1.0);
+    gl.uniform2f(this.uniforms.u_texOffset, 0.0, 0.0);
+    gl.uniform1i(this.uniforms.u_channel, 0);
+
+    err = gl.getError();
+    if (err !== gl.NO_ERROR) {
+      console.error('Uniform setup error:', err);
+    }
+
+    // ===== Draw =====
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+    err = gl.getError();
+    if (err !== gl.NO_ERROR) {
+      console.error('Draw error:', err);
+    }
+
+    // ===== Read back pixels for verification =====
+    const testPixels = new Uint8Array(16); // 2x2 grid
+    gl.readPixels(0, 0, 2, 2, gl.RGBA, gl.UNSIGNED_BYTE, testPixels);
+    console.log('Corner pixels (2x2):', Array.from(testPixels));
+
+    const centerPixels = new Uint8Array(4);
+    gl.readPixels(
+      this._tileWidth / 2,
+      this._tileHeight / 2,
+      1,
+      1,
+      gl.RGBA,
+      gl.UNSIGNED_BYTE,
+      centerPixels
+    );
+    console.log('Center pixel:', Array.from(centerPixels));
+
+    // Read raw float values
+    const rawFloats = new Float32Array(4);
+    gl.readPixels(this._tileWidth / 2, this._tileHeight / 2, 1, 1, gl.RGBA, gl.FLOAT, rawFloats);
+    console.log('Center pixel (float):', Array.from(rawFloats));
+
+    // ===== Return canvas =====
+    const fallback = document.createElement('canvas');
+    fallback.width = this._tileWidth;
+    fallback.height = this._tileHeight;
+    const ctx = fallback.getContext('2d')!;
+    ctx.drawImage(gl.canvas as HTMLCanvasElement, 0, 0);
+
+    console.log('=== END RENDER DEBUG ===\n');
+
+    return fallback;
+  }
+
+  private async renderWithWebGL2(
+    data: Float32Array,
+    width: number,
+    height: number,
+    frac: { fracWest: number; fracEast: number; fracSouth: number; fracNorth: number },
+    channels: number = 1
+  ): Promise<any> {
+    const gl = this.gl as WebGL2RenderingContext;
+    if (!gl || !this.program) throw new Error('WebGL2 not initialized');
+    if (!this.dataTexture || !this.quadBuffer || !this.attribs)
+      throw new Error('WebGL resources missing');
+
+    const { fracWest, fracEast, fracSouth, fracNorth } = frac;
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, this.dataTexture);
+    if (channels === 1) {
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.R32F, width, height, 0, gl.RED, gl.FLOAT, data);
+    } else {
+      const rgba = this.packToRGBA(data, channels);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, width, height, 0, gl.RGBA, gl.FLOAT, rgba);
+    }
     gl.useProgram(this.program);
     gl.viewport(0, 0, this._tileWidth, this._tileHeight);
 
@@ -723,21 +1022,17 @@ export class ZarrLayerProvider implements ImageryProvider {
       1
     ]);
 
-    const buffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-    gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STREAM_DRAW);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.quadBuffer);
+    gl.bufferSubData(gl.ARRAY_BUFFER, 0, positions);
+    // gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STREAM_DRAW);
 
-    const positionLocation = gl.getAttribLocation(this.program, 'a_position');
-    const texCoordLocation = gl.getAttribLocation(this.program, 'a_texCoord');
+    gl.enableVertexAttribArray(this.attribs.a_position);
+    gl.vertexAttribPointer(this.attribs.a_position, 2, gl.FLOAT, false, 16, 0);
 
-    gl.enableVertexAttribArray(positionLocation);
-    gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 16, 0);
+    gl.enableVertexAttribArray(this.attribs.a_texCoord);
+    gl.vertexAttribPointer(this.attribs.a_texCoord, 2, gl.FLOAT, false, 16, 8);
 
-    gl.enableVertexAttribArray(texCoordLocation);
-    gl.vertexAttribPointer(texCoordLocation, 2, gl.FLOAT, false, 16, 8);
-
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, dataTexture);
+    // Bind textures/uniforms
     gl.uniform1i(this.uniforms.u_dataTexture, 0);
 
     gl.activeTexture(gl.TEXTURE1);
@@ -747,34 +1042,45 @@ export class ZarrLayerProvider implements ImageryProvider {
     gl.uniform1f(this.uniforms.u_min, this.colorScale.min);
     gl.uniform1f(this.uniforms.u_max, this.colorScale.max);
 
-    gl.uniform1f(this.uniforms.u_noDataMin, this.noDataMin as number);
-    gl.uniform1f(this.uniforms.u_noDataMax, this.noDataMax as number);
-    gl.uniform1f(this.uniforms.u_fillValue, this.fillValue as number);
+    // gl.uniform1f(this.uniforms.u_noDataMin, this.noDataMin as number);
+    // gl.uniform1f(this.uniforms.u_noDataMax, this.noDataMax as number);
+    gl.uniform1f(this.uniforms.u_fillValue, 0);
+    // gl.uniform1f(this.uniforms.u_fillValue, this.fillValue as number);
     gl.uniform1i(this.uniforms.u_useFillValue, this.useFillValue ? 1 : 0);
     gl.uniform1f(this.uniforms.u_scaleFactor, this.scaleFactor);
     gl.uniform1f(this.uniforms.u_addOffset, this.offset);
 
-    gl.drawArrays(gl.TRIANGLES, 0, 6);
+    gl.uniform2f(this.uniforms.u_texScale, 1.0, 1.0);
+    gl.uniform2f(this.uniforms.u_texOffset, 0.0, 0.0);
+    gl.uniform1i(this.uniforms.u_channel, 0);
 
-    gl.deleteTexture(dataTexture);
-    gl.deleteBuffer(buffer);
-    if (this.browser === 'chrome' && (await ZarrLayerProvider.checkImageBitmapSupport())) {
-      try {
-        return await createImageBitmap(gl.canvas as HTMLCanvasElement, {
-          // imageOrientation: 'none',
-          imageOrientation: 'flipY',
-          premultiplyAlpha: 'premultiply'
-        });
-      } catch (err) {
-        console.warn('ImageBitmap fallback:', err);
-        ZarrLayerProvider.supportsImageBitmap = false;
-      }
-    }
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+    // if (this.browser === 'chrome' && (await ZarrLayerProvider.checkImageBitmapSupport())) {
+    //   try {
+    //     return await createImageBitmap(gl.canvas as HTMLCanvasElement, {
+    //       // imageOrientation: 'none',
+    //       imageOrientation: 'flipY',
+    //       premultiplyAlpha: 'premultiply'
+    //     });
+    //   } catch (err) {
+    //     console.warn('ImageBitmap fallback:', err);
+    //     ZarrLayerProvider.supportsImageBitmap = false;
+    //   }
+    // }
+    const pixels = new Uint8Array(4);
+    gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+    console.log('First pixel:', pixels); // Should NOT be [255, 0, 255, 255] if data rendered
 
     const fallback = document.createElement('canvas');
     fallback.width = this._tileWidth;
     fallback.height = this._tileHeight;
     fallback.getContext('2d')!.drawImage(gl.canvas as HTMLCanvasElement, 0, 0);
+
+    const ctx = fallback.getContext('2d')!;
+    ctx.fillStyle = 'black';
+    ctx.font = '20px sans-serif';
+    ctx.fillText('ZARR', 10, 30);
+
     return fallback;
   }
 
@@ -825,6 +1131,10 @@ export class ZarrLayerProvider implements ImageryProvider {
     return this._readyPromise;
   }
 
+  get selectors() {
+    return this.normalizedSelector;
+  }
+
   /**
    * Retrieves the credits for a specific tile.
    * @param x - Tile x coordinate.
@@ -844,5 +1154,13 @@ export class ZarrLayerProvider implements ImageryProvider {
       controller.abort();
     }
     this.abortControllers.clear();
+    if (this.gl) {
+      if (this.dataTexture) this.gl.deleteTexture(this.dataTexture);
+      if (this.quadBuffer) this.gl.deleteBuffer(this.quadBuffer);
+      if (this.colorTexture) this.gl.deleteTexture(this.colorTexture);
+    }
+    this.dataTexture = null;
+    this.quadBuffer = null;
+    this.colorTexture = null;
   }
 }

@@ -8,9 +8,9 @@ export function getDefaultLayerValues(dataType: LayerFormType['dataType']): Laye
         dataDescription: ['', ''],
         content: '',
         params: {
-          url: '',
+          source: '',
           variable: '',
-          scale: [0, 1],
+          clim: [0, 1],
           colormap: 'viridis',
           opacity: 1,
           crs: undefined
@@ -23,10 +23,10 @@ export function getDefaultLayerValues(dataType: LayerFormType['dataType']): Laye
         dataDescription: ['', ''],
         content: '',
         params: {
-          url: '',
+          source: '',
           variable: '',
           flipElevation: false,
-          scale: [0, 1],
+          clim: [0, 1],
           colormap: 'viridis',
           bounds: { west: -50, south: -20, east: 10, north: 20 },
           opacity: 1
@@ -39,9 +39,9 @@ export function getDefaultLayerValues(dataType: LayerFormType['dataType']): Laye
         dataDescription: ['', ''],
         content: '',
         params: {
-          urls: { u: '', v: '' },
+          sources: { u: '', v: '' },
           variables: { u: '', v: '' },
-          scale: [0, 1],
+          clim: [0, 1],
           bounds: { west: -50, south: -20, east: 10, north: 20 },
           colormap: 'viridis',
           flipElevation: false,

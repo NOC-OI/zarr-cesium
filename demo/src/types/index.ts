@@ -1,11 +1,11 @@
 import type { RefObject } from 'react';
 import type {
   BoundsProps,
+  Selectors,
   ZarrCubeProvider,
-  ZarrCubeVelocityProvider,
-  ZarrSelectorsProps
-} from 'zarr-cesium';
-import type { CubeOptions, LayerOptions, VelocityOptions } from 'zarr-cesium';
+  ZarrCubeVelocityProvider
+} from '../../../dist';
+import type { CubeOptions, LayerOptions, VelocityOptions } from '../../../dist';
 
 export interface keyable {
   [key: string]: any;
@@ -27,12 +27,12 @@ export interface InfoButtonBoxType {
 }
 
 export interface TitilerOptions {
-  url: string;
+  source: string;
   variable: string;
-  scale?: [number, number];
+  clim?: [number, number];
   colormap?: string;
   opacity?: number;
-  selectors?: { [key: string]: ZarrSelectorsProps };
+  selectors?: Selectors;
 }
 
 export interface FlashMessageType {
@@ -72,7 +72,7 @@ export interface LayersLegendType {
 export interface LayerLegendType {
   dataDescription: [string, string];
   colormap: string;
-  scale: [number, number];
+  clim: [number, number];
 }
 
 export interface SelectedLayersType {

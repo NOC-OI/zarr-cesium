@@ -55,18 +55,18 @@ If your need is:
 
 ```ts
 import { Viewer } from 'cesium';
-import { ZarrCubeProvider } from 'zarr-cesium';
+import { ZarrCubeProvider } from '../../../../dist';
 
 const viewer = new Viewer('cesiumContainer');
 
 const options = {
-  url: 'https://example.com/cube.zarr',
+  source: 'https://example.com/cube.zarr',
   variable: 'temperature',
   bounds: { west: -30, south: 20, east: 20, north: 60 },
   showHorizontalSlices: true,
   showVerticalSlices: true,
   colormap: 'viridis',
-  scale: [0, 25]
+  clim: [0, 25]
 };
 
 const cube = new ZarrCubeProvider(viewer, options);
@@ -89,7 +89,7 @@ This creates a **stack of slice primitives**: horizontal, vertical longitude, an
 
 ```ts
 interface CubeOptions {
-  url: string; // Public Zarr store
+  source: string; // Public Zarr store
   variable: string; // Zarr array name
   bounds: BoundsProps; // geographic rectangle
   selectors?: { [key: string]: ZarrSelectorsProps }; // Initial dimension slices
@@ -313,7 +313,7 @@ Change color scale, vertical exaggeration, opacity, etc.
 cube.updateStyle({
   verticalExaggeration: 8,
   opacity: 0.85,
-  scale: [5, 15], // data min/max
+  clim: [5, 15], // data min/max
   colormap: 'inferno'
 });
 ```

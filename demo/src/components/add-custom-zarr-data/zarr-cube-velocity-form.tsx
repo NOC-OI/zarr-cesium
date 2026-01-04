@@ -12,11 +12,11 @@ export function ZarrCubeVelocityForm({ register, control, errors }: ZarrCesiumFo
   return (
     <div className="space-y-4 bg-gray bg-opacity-30 p-4 rounded-lg border border-black">
       <p className="text-white font-bold text-lg mb-2">Zarr Cube Velocity Parameters</p>
-      <FormRow label="URL (u)" error={errors?.params?.urls?.u?.message}>
-        <StyledTextField {...register('params.urls.u')} />
+      <FormRow label="URL (u)" error={errors?.params?.sources?.u?.message}>
+        <StyledTextField {...register('params.sources.u')} />
       </FormRow>
-      <FormRow label="URL (v)" error={errors?.params?.urls?.v?.message}>
-        <StyledTextField {...register('params.urls.v')} />
+      <FormRow label="URL (v)" error={errors?.params?.sources?.v?.message}>
+        <StyledTextField {...register('params.sources.v')} />
       </FormRow>
       <FormRow label="Variable (u)" error={errors?.params?.variables?.u?.message}>
         <StyledTextField {...register('params.variables.u')} />
@@ -45,7 +45,7 @@ export function ZarrCubeVelocityForm({ register, control, errors }: ZarrCesiumFo
         error={errors?.params?.flipElevation?.message}
       />
       <ColormapField control={control} error={errors?.params?.colormap?.message} />
-      <ScaleField control={control} error={errors?.params?.scale?.message} />
+      <ScaleField control={control} error={errors?.params?.clim?.message} />
       <BoundsField control={control} error={errors?.params?.bounds?.message} />
       <DimensionNamesSection register={register} error={errors?.params?.dimensionNames?.message} />
     </div>

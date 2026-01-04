@@ -1,5 +1,4 @@
 import * as zarr from 'zarrita';
-import * as zarrNdarray from '@zarrita/ndarray';
 import {
   calculateElevationSlice,
   calculateHeightMeters,
@@ -7,10 +6,13 @@ import {
   calculateXYFromBounds,
   detectCRS,
   getCubeDimensions,
-  initZarrDataset
+  initZarrDataset,
+  normalizeSelectors
 } from './zarr-utils';
 import {
   DimensionValues,
+  NormalizedSelectors,
+  Selectors,
   type BoundsProps,
   type ColorMapName,
   type ColorScaleProps,
@@ -18,8 +20,7 @@ import {
   type CubeOptions,
   type DimensionNamesProps,
   type DimIndicesProps,
-  type ZarrLevelMetadata,
-  type ZarrSelectorsProps
+  type ZarrLevelMetadata
 } from './types';
 import { colormapBuilder } from './jsColormaps';
 import { updateImgData } from './webgl-utils';
@@ -42,13 +43,13 @@ import {
   Math
 } from 'cesium';
 import ndarray from 'ndarray';
+import { validateBounds } from './cesium-utils';
 import {
   DEFAULT_COLORMAP,
+  DEFAULT_COLORMAP_LIMITS,
   DEFAULT_OPACITY,
-  DEFAULT_SCALE,
-  DEFAULT_VERTICAL_EXAGGERATION,
-  validateBounds
-} from './cesium-utils';
+  DEFAULT_VERTICAL_EXAGGERATION
+} from './constants';
 
 /**
  * Provides rendering of volumetric (3D) Zarr datasets as Cesium primitives.
@@ -64,7 +65,7 @@ import {
  * @example
  * ```ts
  * const cubeProvider = new ZarrCubeProvider(viewer, {
- *   url: 'https://example.com/mycube.zarr',
+ *   source: 'https://example.com/mycube.zarr',
  *   variable: 'temperature',
  *   bounds: { west: -20, south: 30, east: 10, north: 60 },
  *   showHorizontalSlices: true,
@@ -83,7 +84,8 @@ export class ZarrCubeProvider {
   /** Unique identifier for the cube provider instance. */
   public id: string = '';
   /** User-defined selectors for slicing dimensions. */
-  public selectors: { [key: string]: ZarrSelectorsProps };
+  public selectors: Selectors;
+  private normalizedSelectors: NormalizedSelectors = {};
   /** Shape (size) of the elevation dimension. */
   public elevationShape: number = 0;
   /** Current index of the latitude slice being visualized. */
@@ -101,7 +103,7 @@ export class ZarrCubeProvider {
   private viewer: Viewer;
   private zarrVersion: 2 | 3 | null = null;
   private flipElevation: boolean = false;
-  private url: string;
+  private source: string;
   private variable: string;
   private crs: CRS | null = null;
   private dimensionNames: DimensionNamesProps;
@@ -134,7 +136,8 @@ export class ZarrCubeProvider {
    */
   constructor(viewer: Viewer, options: CubeOptions) {
     this.viewer = viewer;
-    this.url = options.url;
+    this.id = options.id ?? '';
+    this.source = options.source;
     this.variable = options.variable;
     this.bounds = options.bounds;
     this.dimensionNames = options.dimensionNames ?? {};
@@ -148,7 +151,7 @@ export class ZarrCubeProvider {
     this.belowSeaLevel = options.belowSeaLevel ?? false;
     this.zarrVersion = options.zarrVersion ?? null;
     this.flipElevation = options.flipElevation ?? false;
-    const [min, max] = options.scale ?? DEFAULT_SCALE;
+    const [min, max] = options.clim ?? DEFAULT_COLORMAP_LIMITS;
     this.colormap = options.colormap ?? DEFAULT_COLORMAP;
     const colors = colormapBuilder(this.colormap);
     this.colorScale = { min, max, colors };
@@ -161,7 +164,7 @@ export class ZarrCubeProvider {
    * @returns A promise that resolves when the cube data is fully loaded.
    */
   async load(force: boolean = false): Promise<void> {
-    this.store = new zarr.FetchStore(this.url);
+    this.store = new zarr.FetchStore(this.source);
     this.root = zarr.root(this.store);
     const { zarrArray, dimIndices, levelInfos, attrs, multiscaleLevel } = await initZarrDataset(
       this.store,
@@ -189,10 +192,12 @@ export class ZarrCubeProvider {
     }
     const height = shape[this.dimIndices.lat.index];
     const width = shape[this.dimIndices.lon.index];
+    this.normalizedSelectors = normalizeSelectors(this.selectors);
+
     const { dimensionValuesWithElevation, elevationSlice } = await calculateElevationSlice(
       shape[this.dimIndices.elevation.index],
       dimIndices.elevation,
-      this.selectors.elevation,
+      this.normalizedSelectors.elevation,
       this.dimensionValues,
       this.root,
       this.levelInfos.length > 0 ? this.levelInfos[this.multiscaleLevel] : null,
@@ -211,14 +216,14 @@ export class ZarrCubeProvider {
         endElevation: elevationSlice[1]
       },
       this.dimIndices,
-      this.selectors,
+      this.normalizedSelectors,
       dimensionValuesWithElevation,
       this.root,
       this.levelInfos.length > 0 ? this.levelInfos[this.multiscaleLevel] : null,
       this.zarrVersion,
       true
     );
-    this.selectors = selectors;
+    this.normalizedSelectors = selectors;
     this.dimensionValues = dimensionValues;
     this.elevationShape = this.zarrArray.shape[this.dimIndices.elevation.index];
 
@@ -291,12 +296,12 @@ export class ZarrCubeProvider {
    *  - multiscaleLevel - Multiscale level to switch to.
    *  - bounds - Updated geographic bounds. See {@link BoundsProps}.
    */
-  updateSelectors({
+  updateSelectorss({
     selectors,
     multiscaleLevel,
     bounds
   }: {
-    selectors?: { [key: string]: ZarrSelectorsProps };
+    selectors?: Selectors;
     multiscaleLevel?: number;
     bounds?: BoundsProps;
   }) {

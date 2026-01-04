@@ -95,16 +95,16 @@ Renders **2D scalar fields** as Cesium imagery overlays using WebGL. It supports
 **Example:**
 
 ```ts
-import { ZarrLayerProvider } from 'zarr-cesium';
+import { ZarrLayerProvider } from '../../../../dist';
 import { Viewer } from 'cesium';
 
 const viewer = new Viewer('cesiumContainer');
 
 const options = {
-  url: 'https://example.com/data.zarr',
+  source: 'https://example.com/data.zarr',
   variable: 'salinity',
   colormap: 'viridis',
-  scale: [30, 40]
+  clim: [30, 40]
 };
 const layer = await ZarrLayerProvider.createLayer(viewer, options);
 
@@ -126,13 +126,13 @@ Renders **3D volumetric Zarr cubes** as Cesium primitives — including vertical
 **Example:**
 
 ```ts
-import { ZarrCubeProvider } from 'zarr-cesium';
+import { ZarrCubeProvider } from '../../../../dist';
 import { Viewer } from 'cesium';
 
 const viewer = new Viewer('cesiumContainer');
 
 const cube = new ZarrCubeProvider(viewer, {
-  url: 'https://example.com/ocean_temp.zarr',
+  source: 'https://example.com/ocean_temp.zarr',
   variable: 'temperature',
   bounds: { west: -20, south: 30, east: 10, north: 60 },
   colormap: 'plasma',
@@ -159,13 +159,13 @@ It supports both Zarr v2/v3 and multiscale datasets, with configurable slice spa
 **Example:**
 
 ```ts
-import { ZarrCubeVelocityProvider } from 'zarr-cesium';
+import { ZarrCubeVelocityProvider } from '../../../../dist';
 import { Viewer } from 'cesium';
 
 const viewer = new Viewer('cesiumContainer');
 
 const velocity = new ZarrCubeVelocityProvider(viewer, {
-  urls: {
+  sources: {
     u: 'https://example.com/uo.zarr',
     v: 'https://example.com/vo.zarr'
   },

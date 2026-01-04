@@ -30,15 +30,15 @@ const viewer = new Viewer('cesiumContainer');
 ## Rendering 2D Scalar Data (ZarrLayerProvider)
 
 ```ts
-import { ZarrLayerProvider } from 'zarr-cesium';
+import { ZarrLayerProvider } from '../../../../dist';
 
 const viewer = new Viewer('cesiumContainer');
 
 const options = {
-  url: 'https://example.com/data.zarr',
+  source: 'https://example.com/data.zarr',
   variable: 'salinity',
   colormap: 'viridis',
-  scale: [30, 40]
+  clim: [30, 40]
 };
 const layer = await ZarrLayerProvider.createLayer(viewer, options);
 
@@ -64,10 +64,10 @@ More details on this provider can be found in the [ZarrLayerProvider documentati
 ## Rendering 3D Volumes (ZarrCubeProvider)
 
 ```ts
-import { ZarrCubeProvider } from 'zarr-cesium';
+import { ZarrCubeProvider } from '../../../../dist';
 
 const cube = new ZarrCubeProvider(viewer, {
-  url: 'https://example.com/ocean_temp.zarr',
+  source: 'https://example.com/ocean_temp.zarr',
   variable: 'temperature',
   bounds: { west: -20, south: 30, east: 10, north: 60 },
   colormap: 'plasma',
@@ -96,10 +96,10 @@ More details on this provider can be found in the [ZarrCubeProvider documentatio
 ## Rendering 3D Vector Fields (ZarrCubeVelocityProvider)
 
 ```ts
-import { ZarrCubeVelocityProvider } from 'zarr-cesium';
+import { ZarrCubeVelocityProvider } from '../../../../dist';
 
 const velocity = new ZarrCubeVelocityProvider(viewer, {
-  urls: {
+  sources: {
     u: 'https://example.com/uo.zarr',
     v: 'https://example.com/vo.zarr'
   },

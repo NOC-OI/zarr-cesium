@@ -15,7 +15,7 @@ and multiple visualization modes.
 
 ```ts
 const cubeProvider = new ZarrCubeProvider(viewer, {
-  url: 'https://example.com/mycube.zarr',
+  source: 'https://example.com/mycube.zarr',
   variable: 'temperature',
   bounds: { west: -20, south: 30, east: 10, north: 60 },
   showHorizontalSlices: true,
@@ -38,9 +38,9 @@ Creates a new instance of ZarrCubeProvider.
 
 #### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `viewer` | `Viewer` | Cesium viewer instance to which primitives will be added. |
+| Parameter | Type                                          | Description                                                                                 |
+| --------- | --------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `viewer`  | `Viewer`                                      | Cesium viewer instance to which primitives will be added.                                   |
 | `options` | [`CubeOptions`](../interfaces/CubeOptions.md) | Configuration for the cube visualization (see [CubeOptions](../interfaces/CubeOptions.md)). |
 
 #### Returns
@@ -61,7 +61,7 @@ Removes all currently rendered slice primitives from the scene.
 
 `void`
 
-***
+---
 
 ### destroy()
 
@@ -75,7 +75,7 @@ Destroys all allocated Cesium primitives and clears resources.
 
 `void`
 
-***
+---
 
 ### load()
 
@@ -87,9 +87,9 @@ Loads the Zarr dataset and initializes the cube data and metadata.
 
 #### Parameters
 
-| Parameter | Type | Default value | Description |
-| ------ | ------ | ------ | ------ |
-| `force` | `boolean` | `false` | If true, forces reloading of the dataset even if already loaded. |
+| Parameter | Type      | Default value | Description                                                      |
+| --------- | --------- | ------------- | ---------------------------------------------------------------- |
+| `force`   | `boolean` | `false`       | If true, forces reloading of the dataset even if already loaded. |
 
 #### Returns
 
@@ -97,7 +97,7 @@ Loads the Zarr dataset and initializes the cube data and metadata.
 
 A promise that resolves when the cube data is fully loaded.
 
-***
+---
 
 ### updateSelectors()
 
@@ -109,18 +109,18 @@ Updates the dimension selectors, multiscale level, and bounds.
 
 #### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `options:` | \{ `bounds?`: [`BoundsProps`](../interfaces/BoundsProps.md); `multiscaleLevel?`: `number`; `selectors?`: \{ \[`key`: `string`\]: [`ZarrSelectorsProps`](../interfaces/ZarrSelectorsProps.md); \}; \} | selectors - New selectors mapping. See [ZarrSelectorsProps](../interfaces/ZarrSelectorsProps.md). - multiscaleLevel - Multiscale level to switch to. - bounds - Updated geographic bounds. See [BoundsProps](../interfaces/BoundsProps.md). |
-| `options:.bounds?` | [`BoundsProps`](../interfaces/BoundsProps.md) | - |
-| `options:.multiscaleLevel?` | `number` | - |
-| `options:.selectors?` | \{ \[`key`: `string`\]: [`ZarrSelectorsProps`](../interfaces/ZarrSelectorsProps.md); \} | - |
+| Parameter                   | Type                                                                                                                                                                                                 | Description                                                                                                                                                                                                                                 |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `options:`                  | \{ `bounds?`: [`BoundsProps`](../interfaces/BoundsProps.md); `multiscaleLevel?`: `number`; `selectors?`: \{ \[`key`: `string`\]: [`ZarrSelectorsProps`](../interfaces/ZarrSelectorsProps.md); \}; \} | selectors - New selectors mapping. See [ZarrSelectorsProps](../interfaces/ZarrSelectorsProps.md). - multiscaleLevel - Multiscale level to switch to. - bounds - Updated geographic bounds. See [BoundsProps](../interfaces/BoundsProps.md). |
+| `options:.bounds?`          | [`BoundsProps`](../interfaces/BoundsProps.md)                                                                                                                                                        | -                                                                                                                                                                                                                                           |
+| `options:.multiscaleLevel?` | `number`                                                                                                                                                                                             | -                                                                                                                                                                                                                                           |
+| `options:.selectors?`       | \{ \[`key`: `string`\]: [`ZarrSelectorsProps`](../interfaces/ZarrSelectorsProps.md); \}                                                                                                              | -                                                                                                                                                                                                                                           |
 
 #### Returns
 
 `void`
 
-***
+---
 
 ### updateSlices()
 
@@ -132,20 +132,20 @@ Updates the rendered slices based on the provided indices.
 
 #### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `options:` | \{ `belowSeaLevel?`: `boolean`; `elevationIndex?`: `number`; `force?`: `boolean`; `latIndex?`: `number`; `lonIndex?`: `number`; \} | latIndex: Latitude slice index. - lonIndex: Longitude slice index. - elevationIndex: Elevation slice index. - force: Force re-render. - belowSeaLevel: Toggle below-sea-level height model. |
-| `options:.belowSeaLevel?` | `boolean` | - |
-| `options:.elevationIndex?` | `number` | - |
-| `options:.force?` | `boolean` | - |
-| `options:.latIndex?` | `number` | - |
-| `options:.lonIndex?` | `number` | - |
+| Parameter                  | Type                                                                                                                               | Description                                                                                                                                                                                 |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `options:`                 | \{ `belowSeaLevel?`: `boolean`; `elevationIndex?`: `number`; `force?`: `boolean`; `latIndex?`: `number`; `lonIndex?`: `number`; \} | latIndex: Latitude slice index. - lonIndex: Longitude slice index. - elevationIndex: Elevation slice index. - force: Force re-render. - belowSeaLevel: Toggle below-sea-level height model. |
+| `options:.belowSeaLevel?`  | `boolean`                                                                                                                          | -                                                                                                                                                                                           |
+| `options:.elevationIndex?` | `number`                                                                                                                           | -                                                                                                                                                                                           |
+| `options:.force?`          | `boolean`                                                                                                                          | -                                                                                                                                                                                           |
+| `options:.latIndex?`       | `number`                                                                                                                           | -                                                                                                                                                                                           |
+| `options:.lonIndex?`       | `number`                                                                                                                           | -                                                                                                                                                                                           |
 
 #### Returns
 
 `void`
 
-***
+---
 
 ### updateStyle()
 
@@ -157,13 +157,13 @@ Updates style parameters.
 
 #### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `options:` | \{ `colormap?`: `string`; `opacity?`: `number`; `scale?`: \[`number`, `number`\]; `verticalExaggeration?`: `number`; \} | verticalExaggeration - Vertical exaggeration factor. - opacity - Opacity. - scale - [min,max] data scaling range. - colormap - Colormap name. See [ColorMapName](../type-aliases/ColorMapName.md). |
-| `options:.colormap?` | `string` | - |
-| `options:.opacity?` | `number` | - |
-| `options:.scale?` | \[`number`, `number`\] | - |
-| `options:.verticalExaggeration?` | `number` | - |
+| Parameter                        | Type                                                                                                                    | Description                                                                                                                                                                                        |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `options:`                       | \{ `colormap?`: `string`; `opacity?`: `number`; `scale?`: \[`number`, `number`\]; `verticalExaggeration?`: `number`; \} | verticalExaggeration - Vertical exaggeration factor. - opacity - Opacity. - scale - [min,max] data scaling range. - colormap - Colormap name. See [ColorMapName](../type-aliases/ColorMapName.md). |
+| `options:.colormap?`             | `string`                                                                                                                | -                                                                                                                                                                                                  |
+| `options:.opacity?`              | `number`                                                                                                                | -                                                                                                                                                                                                  |
+| `options:.scale?`                | \[`number`, `number`\]                                                                                                  | -                                                                                                                                                                                                  |
+| `options:.verticalExaggeration?` | `number`                                                                                                                | -                                                                                                                                                                                                  |
 
 #### Returns
 
@@ -179,7 +179,7 @@ bounds: BoundsProps;
 
 Configuration defining the geographic bounds of the cube.
 
-***
+---
 
 ### cubeDimensions
 
@@ -189,7 +189,7 @@ cubeDimensions: [number, number, number] | null = null;
 
 Size of the cube in [longitude, latitude, elevation].
 
-***
+---
 
 ### dimensionValues
 
@@ -205,7 +205,7 @@ Values of the cube’s coordinate dimensions (latitude, longitude, elevation, et
 [key: string]: number[] | Float64Array<ArrayBufferLike>
 ```
 
-***
+---
 
 ### elevationShape
 
@@ -215,7 +215,7 @@ elevationShape: number = 0;
 
 Shape (size) of the elevation dimension.
 
-***
+---
 
 ### elevationSliceIndex
 
@@ -225,7 +225,7 @@ elevationSliceIndex: number = -1;
 
 Current index of the elevation slice being visualized.
 
-***
+---
 
 ### id
 
@@ -235,7 +235,7 @@ id: string = '';
 
 Unique identifier for the cube provider instance.
 
-***
+---
 
 ### latSliceIndex
 
@@ -245,7 +245,7 @@ latSliceIndex: number = -1;
 
 Current index of the latitude slice being visualized.
 
-***
+---
 
 ### levelInfos
 
@@ -255,7 +255,7 @@ levelInfos: string[] = [];
 
 Information about multiscale levels in the Zarr dataset.
 
-***
+---
 
 ### lonSliceIndex
 
@@ -265,7 +265,7 @@ lonSliceIndex: number = -1;
 
 Current index of the longitude slice being visualized.
 
-***
+---
 
 ### multiscaleLevel
 
@@ -275,7 +275,7 @@ multiscaleLevel: number = 0;
 
 Current multiscale level to load.
 
-***
+---
 
 ### selectors
 

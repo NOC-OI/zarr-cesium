@@ -7,12 +7,11 @@ import { DimensionNamesSection } from './forms/dimension-names-section';
 import { OptionalNumberField } from './forms/optional-number-field';
 
 export function ZarrCesiumForm({ register, control, errors }: ZarrCesiumFormProps) {
-  console.log('erross in ZarrCesiumForm:', errors);
   return (
     <div className="space-y-4 bg-gray bg-opacity-10 p-4 rounded-lg border border-black">
       <p className="text-white font-bold text-lg mb-2">Zarr Cesium Parameters</p>
-      <FormRow label="URL" error={errors?.params?.url?.message}>
-        <StyledTextField {...register('params.url')} placeholder="Enter URL" />
+      <FormRow label="URL" error={errors?.params?.source?.message}>
+        <StyledTextField {...register('params.source')} placeholder="Enter URL" />
       </FormRow>
       <FormRow label="Variable" error={errors?.params?.variable?.message}>
         <StyledTextField {...register('params.variable')} placeholder="Enter variable name" />
@@ -25,7 +24,7 @@ export function ZarrCesiumForm({ register, control, errors }: ZarrCesiumFormProp
         error={errors?.params?.zarrVersion?.message}
       />
       <ColormapField control={control} error={errors?.params?.colormap?.message} />
-      <ScaleField control={control} error={errors?.params?.scale?.message} />
+      <ScaleField control={control} error={errors?.params?.clim?.message} />
       <DimensionNamesSection register={register} error={errors?.params?.dimensionNames?.message} />
     </div>
   );

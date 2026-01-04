@@ -1,9 +1,9 @@
 import { ContextHandleProvider } from './application/context-handle';
 import { LayersManagementHandleProvider } from './application/layers-management';
-import { MapHome } from './Components/map-home';
-import { SideBar } from './Components/side-bar';
-import { FlashMessages } from './Components/ui/flash-messages';
-import { Loading } from './Components/ui/loading';
+import { MapHome } from './components/map-home';
+import { SideBar } from './components/side-bar';
+import { FlashMessages } from './components/ui/flash-messages';
+import { Loading } from './components/ui/loading';
 
 export function App() {
   return (

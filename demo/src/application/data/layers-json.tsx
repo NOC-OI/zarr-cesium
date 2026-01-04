@@ -9,7 +9,7 @@ export const layersJson: LayersJsonType = {
         content:
           'Salinity outputs from NEMO NPD-EORCA1 model. This dataset contains 3D data (time, latitude, longitude) stored in a Zarr v2 format with a multiscale pyramid structure and EPSG:3857 coordinate reference system.',
         params: {
-          url: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/nemotest101/pyramid2/T1d/sos_abs.zarr',
+          source: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/nemotest101/pyramid2/T1d/sos_abs.zarr',
           variable: 'sos_abs',
           zarrVersion: 2,
           colormap: 'inferno',
@@ -29,7 +29,8 @@ export const layersJson: LayersJsonType = {
         content:
           'Salinity outputs from NEMO NPD-EORCA1 model. This dataset contains 3D data (time, latitude, longitude) stored in a Zarr v2 format with a multiscale pyramid structure and EPSG:3857 coordinate reference system.',
         params: {
-          url: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/manual6-pyramid/npd-eorca1-era5v1/gn/T1y/e3t',
+          source:
+            'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/manual6-pyramid/npd-eorca1-era5v1/gn/T1y/e3t',
           variable: 'e3t',
           zarrVersion: 3,
           colormap: 'inferno',
@@ -49,7 +50,8 @@ export const layersJson: LayersJsonType = {
         content:
           'Temperature outputs from NEMO NPD-EORCA1 model. This dataset contains 3D temperature data (time, latitude, longitude) stored in a Zarr v3 format with a multiscale pyramid structure and EPSG:3857 coordinate reference system.',
         params: {
-          url: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/noc-npd-era5-demo/npd-eorca1-era5v1/gn/T1y/tos_con',
+          source:
+            'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/noc-npd-era5-demo/npd-eorca1-era5v1/gn/T1y/tos_con',
           variable: 'tos_con',
           zarrVersion: 3,
           colormap: 'hot',
@@ -69,7 +71,8 @@ export const layersJson: LayersJsonType = {
         content:
           'Temperature outputs from NEMO NPD-EORCA025 model. This dataset contains 4D temperature data (time, depth, latitude, longitude) stored in a Zarr v3 format with a multiscale pyramid structure and EPSG:3857 coordinate reference system.',
         params: {
-          url: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/noc-npd-era5-demo/npd-eorca025-era5v1/gn/T1y_4d/thetao_con',
+          source:
+            'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/noc-npd-era5-demo/npd-eorca025-era5v1/gn/T1y_4d/thetao_con',
           variable: 'thetao_con',
           zarrVersion: 3,
           colormap: 'BrBG',
@@ -89,7 +92,7 @@ export const layersJson: LayersJsonType = {
         content:
           'Surface pressure data for Hurricane Florence from ERA5 reanalysis. This dataset contains 3D surface pressure data (time, latitude, longitude) stored in a Zarr v3 format and EPSG:4326 coordinate reference system.',
         params: {
-          url: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/hurricanes/era5/florence',
+          source: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/hurricanes/era5/florence',
           variable: 'surface_pressure',
           zarrVersion: 3,
           colormap: 'jet',
@@ -115,7 +118,8 @@ export const layersJson: LayersJsonType = {
         content:
           'Salinity outputs from NEMO NPD-EORCA1 model. This dataset contains 4D data (time, depth, latitude, longitude) stored in a Zarr v3 format with a multiscale pyramid structure and EPSG:3857 coordinate reference system.',
         params: {
-          url: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/noc-npd-era5-demo/npd-eorca1-era5v1/gn/T1y/so_abs',
+          source:
+            'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/noc-npd-era5-demo/npd-eorca1-era5v1/gn/T1y/so_abs',
           variable: 'so_abs',
           flipElevation: true,
           selectors: {
@@ -147,7 +151,8 @@ export const layersJson: LayersJsonType = {
         content:
           'Temperature outputs from NEMO NPD-EORCA025 model. This dataset contains 4D temperature data (time, depth, latitude, longitude) stored in a Zarr v3 format with a multiscale pyramid structure and EPSG:3857 coordinate reference system.',
         params: {
-          url: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/noc-npd-era5-demo/npd-eorca025-era5v1/gn/T1y_4d/thetao_con',
+          source:
+            'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/noc-npd-era5-demo/npd-eorca025-era5v1/gn/T1y_4d/thetao_con',
           variable: 'thetao_con',
           zarrVersion: 3,
           flipElevation: true,
@@ -179,7 +184,7 @@ export const layersJson: LayersJsonType = {
         content:
           'Wind speed data for Hurricane Florence from ERA5 reanalysis. This dataset contains 4D wind speed data (time, height, latitude, longitude) stored in a Zarr v3 format and EPSG:4326 coordinate reference system.',
         params: {
-          url: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/hurricanes/era5/florence',
+          source: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/hurricanes/era5/florence',
           variable: 'velocity',
           flipElevation: false,
           zarrVersion: 3,
@@ -201,7 +206,7 @@ export const layersJson: LayersJsonType = {
         content:
           'U-component of the currents. This is a output from NEMO NPD-EORCA1 model. This dataset contains 4D data (time, depth, latitude, longitude) stored in a Zarr v2 format and EPSG:4326 coordinate reference system.',
         params: {
-          url: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/nemotest101/currents/uo.zarr',
+          source: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/nemotest101/currents/uo.zarr',
           variable: 'uo',
           flipElevation: true,
           selectors: {
@@ -236,7 +241,7 @@ export const layersJson: LayersJsonType = {
         content:
           'Currents outputs from NEMO NPD-EORCA1 model. This dataset contains 4D velocity data (time, depth, latitude, longitude) stored in a Zarr v2 format and EPSG:4326 coordinate reference system.',
         params: {
-          urls: {
+          sources: {
             u: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/nemotest101/currents/uo.zarr',
             v: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/nemotest101/currents/vo.zarr'
           },
@@ -272,7 +277,7 @@ export const layersJson: LayersJsonType = {
         content:
           'Currents outputs from NEMO NPD-EORCA1 model. This dataset contains 4D velocity data (time, depth, latitude, longitude) stored in a Zarr v2 format and EPSG:4326 coordinate reference system.',
         params: {
-          urls: {
+          sources: {
             u: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/nemotest101/currents/uo.zarr',
             v: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/nemotest101/currents/vo.zarr'
           },
@@ -309,7 +314,7 @@ export const layersJson: LayersJsonType = {
         content:
           'Currents outputs from NEMO NPD-EORCA1 model. This dataset contains 4D velocity data (time, depth, latitude, longitude) stored in a Zarr v3 format with a multiscale pyramid structure and EPSG:3857 coordinate reference system.',
         params: {
-          urls: {
+          sources: {
             u: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/noc-npd-era5-demo/npd-eorca1-era5v1/gn/U1y/uo2',
             v: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/noc-npd-era5-demo/npd-eorca1-era5v1/gn/V1y/vo'
           },
@@ -343,7 +348,7 @@ export const layersJson: LayersJsonType = {
         content:
           'Wind speed data for Hurricane Florence from ERA5 reanalysis. This dataset contains 4D wind velocity data (time, height, latitude, longitude) stored in a Zarr v3 format and EPSG:4326 coordinate reference system.',
         params: {
-          urls: {
+          sources: {
             u: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/hurricanes/era5/florence',
             v: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/hurricanes/era5/florence'
           },
@@ -380,7 +385,7 @@ export const layersJson: LayersJsonType = {
         content:
           'Salinity outputs from NEMO NPD-EORCA1 model. This dataset contains 3D data (time, latitude, longitude) stored in a Zarr v2 format and EPSG:4326 coordinate reference system.',
         params: {
-          url: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/nemotest101/T1d/sos_abs.zarr',
+          source: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/nemotest101/T1d/sos_abs.zarr',
           variable: 'sos_abs',
           clim: [30, 37]
         }

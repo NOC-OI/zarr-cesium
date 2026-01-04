@@ -8,3 +8,4 @@ export * from './zarr-cube-provider';
 export * from './zarr-cube-velocity-provider';
 export * from './shaders';
 export * from './decodeCFTime';
+export * from './constants';

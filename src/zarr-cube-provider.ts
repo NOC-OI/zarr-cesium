@@ -42,13 +42,14 @@ import {
   Math
 } from 'cesium';
 import ndarray from 'ndarray';
+
 import {
   DEFAULT_COLORMAP,
-  DEFAULT_OPACITY,
-  DEFAULT_SCALE,
   DEFAULT_VERTICAL_EXAGGERATION,
-  validateBounds
-} from './cesium-utils';
+  DEFAULT_OPACITY,
+  DEFAULT_COLORMAP_LIMITS
+} from './constants';
+import { validateBounds } from './cesium-utils';
 
 /**
  * Provides rendering of volumetric (3D) Zarr datasets as Cesium primitives.
@@ -64,7 +65,7 @@ import {
  * @example
  * ```ts
  * const cubeProvider = new ZarrCubeProvider(viewer, {
- *   url: 'https://example.com/mycube.zarr',
+ *   source: 'https://example.com/mycube.zarr',
  *   variable: 'temperature',
  *   bounds: { west: -20, south: 30, east: 10, north: 60 },
  *   showHorizontalSlices: true,
@@ -101,7 +102,7 @@ export class ZarrCubeProvider {
   private viewer: Viewer;
   private zarrVersion: 2 | 3 | null = null;
   private flipElevation: boolean = false;
-  private url: string;
+  private source: string;
   private variable: string;
   private crs: CRS | null = null;
   private dimensionNames: DimensionNamesProps;
@@ -134,7 +135,7 @@ export class ZarrCubeProvider {
    */
   constructor(viewer: Viewer, options: CubeOptions) {
     this.viewer = viewer;
-    this.url = options.url;
+    this.source = options.source;
     this.variable = options.variable;
     this.bounds = options.bounds;
     this.dimensionNames = options.dimensionNames ?? {};
@@ -148,7 +149,7 @@ export class ZarrCubeProvider {
     this.belowSeaLevel = options.belowSeaLevel ?? false;
     this.zarrVersion = options.zarrVersion ?? null;
     this.flipElevation = options.flipElevation ?? false;
-    const [min, max] = options.scale ?? DEFAULT_SCALE;
+    const [min, max] = options.clim ?? DEFAULT_COLORMAP_LIMITS;
     this.colormap = options.colormap ?? DEFAULT_COLORMAP;
     const colors = colormapBuilder(this.colormap);
     this.colorScale = { min, max, colors };
@@ -161,7 +162,7 @@ export class ZarrCubeProvider {
    * @returns A promise that resolves when the cube data is fully loaded.
    */
   async load(force: boolean = false): Promise<void> {
-    this.store = new zarr.FetchStore(this.url);
+    this.store = new zarr.FetchStore(this.source);
     this.root = zarr.root(this.store);
     const { zarrArray, dimIndices, levelInfos, attrs, multiscaleLevel } = await initZarrDataset(
       this.store,
@@ -341,12 +342,12 @@ export class ZarrCubeProvider {
   updateStyle({
     verticalExaggeration,
     opacity,
-    scale,
+    clim,
     colormap
   }: {
     verticalExaggeration?: number;
     opacity?: number;
-    scale?: [number, number];
+    clim?: [number, number];
     colormap?: ColorMapName;
   }): void {
     if (verticalExaggeration !== undefined) {
@@ -355,8 +356,8 @@ export class ZarrCubeProvider {
     if (opacity !== undefined) {
       this.opacity = opacity;
     }
-    if (scale !== undefined) {
-      const [min, max] = scale;
+    if (clim !== undefined) {
+      const [min, max] = clim;
       this.colorScale.min = min;
       this.colorScale.max = max;
     }

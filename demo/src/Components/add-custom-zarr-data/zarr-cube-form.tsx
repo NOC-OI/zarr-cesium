@@ -15,8 +15,8 @@ export function ZarrCubeForm({ register, control, errors }: ZarrCesiumFormProps)
     <div className="space-y-4 bg-gray bg-opacity-30 p-4 rounded-lg border border-black">
       <p className="text-white font-bold text-lg mb-2">Zarr Cube Parameters</p>
 
-      <FormRow label="URL" error={errors?.params?.url?.message}>
-        <StyledTextField {...register('params.url')} placeholder="Enter URL" />
+      <FormRow label="URL" error={errors?.params?.source?.message}>
+        <StyledTextField {...register('params.source')} placeholder="Enter URL" />
       </FormRow>
       <FormRow label="Variable" error={errors?.params?.variable?.message}>
         <StyledTextField {...register('params.variable')} placeholder="Enter variable name" />

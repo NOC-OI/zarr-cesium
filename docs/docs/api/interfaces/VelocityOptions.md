@@ -10,7 +10,7 @@ Configuration for a vector (velocity) visualization layer.
 optional belowSeaLevel: boolean;
 ```
 
-***
+---
 
 ### bounds
 
@@ -42,7 +42,7 @@ south: number;
 west: number;
 ```
 
-***
+---
 
 ### colormap?
 
@@ -50,7 +50,7 @@ west: number;
 optional colormap: string;
 ```
 
-***
+---
 
 ### crs?
 
@@ -58,7 +58,7 @@ optional colormap: string;
 optional crs: CRS | null;
 ```
 
-***
+---
 
 ### dimensionNames?
 
@@ -66,7 +66,7 @@ optional crs: CRS | null;
 optional dimensionNames: DimensionNamesProps;
 ```
 
-***
+---
 
 ### flipElevation?
 
@@ -74,7 +74,7 @@ optional dimensionNames: DimensionNamesProps;
 optional flipElevation: boolean;
 ```
 
-***
+---
 
 ### multiscaleLevel?
 
@@ -82,7 +82,7 @@ optional flipElevation: boolean;
 optional multiscaleLevel: number;
 ```
 
-***
+---
 
 ### opacity?
 
@@ -90,15 +90,15 @@ optional multiscaleLevel: number;
 optional opacity: number;
 ```
 
-***
+---
 
 ### scale?
 
 ```ts
-optional scale: [number, number];
+optional clim: [number, number];
 ```
 
-***
+---
 
 ### selectors?
 
@@ -112,7 +112,7 @@ optional selectors: object;
 [key: string]: ZarrSelectorsProps
 ```
 
-***
+---
 
 ### sliceSpacing?
 
@@ -120,12 +120,12 @@ optional selectors: object;
 optional sliceSpacing: number;
 ```
 
-***
+---
 
-### urls
+### sources
 
 ```ts
-urls: object;
+sources: object;
 ```
 
 #### u
@@ -140,7 +140,7 @@ u: string;
 v: string;
 ```
 
-***
+---
 
 ### variables
 
@@ -160,7 +160,7 @@ u: string;
 v: string;
 ```
 
-***
+---
 
 ### verticalExaggeration?
 
@@ -168,7 +168,7 @@ v: string;
 optional verticalExaggeration: number;
 ```
 
-***
+---
 
 ### windOptions?
 
@@ -176,7 +176,7 @@ optional verticalExaggeration: number;
 optional windOptions: Partial<WindLayerOptions>;
 ```
 
-***
+---
 
 ### zarrVersion?
 

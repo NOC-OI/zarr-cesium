@@ -38,15 +38,15 @@ If you need:
 
 ```ts
 import { Viewer } from 'cesium';
-import { ZarrLayerProvider } from 'zarr-cesium';
+import { ZarrLayerProvider } from '../../../../dist';
 
 const viewer = new Viewer('cesiumContainer');
 
 const options = {
-  url: 'https://example.com/data.zarr',
+  source: 'https://example.com/data.zarr',
   variable: 'salinity',
   colormap: 'viridis',
-  scale: [30, 40]
+  clim: [30, 40]
 };
 
 const zbLayer = await ZarrLayerProvider.createLayer(viewer, options);
@@ -67,7 +67,7 @@ This method:
 
 ```ts
 export interface LayerOptions {
-  url: string; // Public Zarr store
+  source: string; // Public Zarr store
   variable: string; // Zarr array name
   scale?: [number, number]; // Min/max for color scaling
   colormap?: ColorMapName; // Name from jsColormaps, based on matplotlib colormaps
@@ -203,7 +203,7 @@ The full list of supported colormaps is available in the [Colormaps section](../
 - scale range
 
 ```ts
-zbLayer.updateStyle({ scale: [20, 35] });
+zbLayer.updateStyle({ clim: [20, 35] });
 ```
 
 - opacity

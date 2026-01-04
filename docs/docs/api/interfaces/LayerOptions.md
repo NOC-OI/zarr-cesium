@@ -10,7 +10,7 @@ Configuration for a 2D raster (image) layer visualization.
 optional colormap: string;
 ```
 
-***
+---
 
 ### colorScale?
 
@@ -18,7 +18,7 @@ optional colormap: string;
 optional colorScale: [number, number, number][];
 ```
 
-***
+---
 
 ### crs?
 
@@ -26,7 +26,7 @@ optional colorScale: [number, number, number][];
 optional crs: CRS | null;
 ```
 
-***
+---
 
 ### dimensionNames?
 
@@ -34,7 +34,7 @@ optional crs: CRS | null;
 optional dimensionNames: DimensionNamesProps;
 ```
 
-***
+---
 
 ### maximumLevel?
 
@@ -42,7 +42,7 @@ optional dimensionNames: DimensionNamesProps;
 optional maximumLevel: number;
 ```
 
-***
+---
 
 ### minimumLevel?
 
@@ -50,7 +50,7 @@ optional maximumLevel: number;
 optional minimumLevel: number;
 ```
 
-***
+---
 
 ### noDataMax?
 
@@ -58,7 +58,7 @@ optional minimumLevel: number;
 optional noDataMax: number;
 ```
 
-***
+---
 
 ### noDataMin?
 
@@ -66,7 +66,7 @@ optional noDataMax: number;
 optional noDataMin: number;
 ```
 
-***
+---
 
 ### opacity?
 
@@ -74,15 +74,15 @@ optional noDataMin: number;
 optional opacity: number;
 ```
 
-***
+---
 
 ### scale?
 
 ```ts
-optional scale: [number, number];
+optional clim: [number, number];
 ```
 
-***
+---
 
 ### selectors?
 
@@ -96,7 +96,7 @@ optional selectors: object;
 [key: string]: ZarrSelectorsProps
 ```
 
-***
+---
 
 ### tileHeight?
 
@@ -104,7 +104,7 @@ optional selectors: object;
 optional tileHeight: number;
 ```
 
-***
+---
 
 ### tileWidth?
 
@@ -112,15 +112,15 @@ optional tileHeight: number;
 optional tileWidth: number;
 ```
 
-***
+---
 
-### url
+### source
 
 ```ts
-url: string;
+source: string;
 ```
 
-***
+---
 
 ### variable
 
@@ -128,7 +128,7 @@ url: string;
 variable: string;
 ```
 
-***
+---
 
 ### zarrVersion?
 

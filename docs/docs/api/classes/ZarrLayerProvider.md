@@ -11,9 +11,9 @@ reading, slicing, and WebGL rendering of Zarr-based raster data.
 
 ```ts
 const provider = new ZarrLayerProvider({
-  url: 'https://example.com/my.zarr',
+  source: 'https://example.com/my.zarr',
   variable: 'temperature',
-  scale: [0, 40],
+  clim: [0, 40],
   colormap: 'jet'
 });
 const imageryLayer = new ZarrImageryLayer(provider);
@@ -47,10 +47,10 @@ Credit information for the imagery provider.
 #### Implementation of
 
 ```ts
-ImageryProvider.credit
+ImageryProvider.credit;
 ```
 
-***
+---
 
 ### hasAlphaChannel
 
@@ -69,10 +69,10 @@ Indicates whether the imagery has an alpha channel.
 #### Implementation of
 
 ```ts
-ImageryProvider.hasAlphaChannel
+ImageryProvider.hasAlphaChannel;
 ```
 
-***
+---
 
 ### maximumLevel
 
@@ -91,10 +91,10 @@ Maximum zoom level supported by the provider.
 #### Implementation of
 
 ```ts
-ImageryProvider.maximumLevel
+ImageryProvider.maximumLevel;
 ```
 
-***
+---
 
 ### minimumLevel
 
@@ -113,10 +113,10 @@ Minimum zoom level supported by the provider.
 #### Implementation of
 
 ```ts
-ImageryProvider.minimumLevel
+ImageryProvider.minimumLevel;
 ```
 
-***
+---
 
 ### ready
 
@@ -132,7 +132,7 @@ Indicates whether the provider is fully initialized and ready.
 
 `boolean`
 
-***
+---
 
 ### readyPromise
 
@@ -148,7 +148,7 @@ Promise that resolves when the provider is fully initialized.
 
 `Promise`\<`boolean`\>
 
-***
+---
 
 ### rectangle
 
@@ -167,10 +167,10 @@ Geographic coverage rectangle of the imagery provider.
 #### Implementation of
 
 ```ts
-ImageryProvider.rectangle
+ImageryProvider.rectangle;
 ```
 
-***
+---
 
 ### tileHeight
 
@@ -189,10 +189,10 @@ Height of each tile, in pixels.
 #### Implementation of
 
 ```ts
-ImageryProvider.tileHeight
+ImageryProvider.tileHeight;
 ```
 
-***
+---
 
 ### tileWidth
 
@@ -211,10 +211,10 @@ Width of each tile, in pixels.
 #### Implementation of
 
 ```ts
-ImageryProvider.tileWidth
+ImageryProvider.tileWidth;
 ```
 
-***
+---
 
 ### tilingScheme
 
@@ -233,7 +233,7 @@ Tiling scheme used by the imagery provider.
 #### Implementation of
 
 ```ts
-ImageryProvider.tilingScheme
+ImageryProvider.tilingScheme;
 ```
 
 ## Constructors
@@ -246,8 +246,8 @@ new ZarrLayerProvider(options): ZarrLayerProvider;
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
+| Parameter | Type                                            |
+| --------- | ----------------------------------------------- |
 | `options` | [`LayerOptions`](../interfaces/LayerOptions.md) |
 
 #### Returns
@@ -268,14 +268,14 @@ Cleans up resources used by the imagery provider.
 
 `void`
 
-***
+---
 
 ### getTileCredits()
 
 ```ts
 getTileCredits(
-   x, 
-   y, 
+   x,
+   y,
    level): Credit[];
 ```
 
@@ -283,11 +283,11 @@ Retrieves the credits for a specific tile.
 
 #### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `x` | `number` | Tile x coordinate. |
-| `y` | `number` | Tile y coordinate. |
-| `level` | `number` | Zoom level. |
+| Parameter | Type     | Description        |
+| --------- | -------- | ------------------ |
+| `x`       | `number` | Tile x coordinate. |
+| `y`       | `number` | Tile y coordinate. |
+| `level`   | `number` | Zoom level.        |
 
 #### Returns
 
@@ -298,10 +298,10 @@ An array of credits associated with the tile.
 #### Implementation of
 
 ```ts
-ImageryProvider.getTileCredits
+ImageryProvider.getTileCredits;
 ```
 
-***
+---
 
 ### pickFeatures()
 
@@ -318,17 +318,17 @@ Picks features at a given geographic location.
 #### Implementation of
 
 ```ts
-ImageryProvider.pickFeatures
+ImageryProvider.pickFeatures;
 ```
 
-***
+---
 
 ### requestImage()
 
 ```ts
 requestImage(
-   x, 
-   y, 
+   x,
+   y,
 level): Promise<HTMLCanvasElement | ImageBitmap>;
 ```
 
@@ -336,11 +336,11 @@ Requests a rendered image tile from the Zarr dataset.
 
 #### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `x` | `number` | Tile x coordinate. |
-| `y` | `number` | Tile y coordinate. |
-| `level` | `number` | Zoom level. |
+| Parameter | Type     | Description        |
+| --------- | -------- | ------------------ |
+| `x`       | `number` | Tile x coordinate. |
+| `y`       | `number` | Tile y coordinate. |
+| `level`   | `number` | Zoom level.        |
 
 #### Returns
 
@@ -351,10 +351,10 @@ A rendered tile as an HTMLCanvasElement or ImageBitmap.
 #### Implementation of
 
 ```ts
-ImageryProvider.requestImage
+ImageryProvider.requestImage;
 ```
 
-***
+---
 
 ### updateSelectors()
 
@@ -366,8 +366,8 @@ Updates the selectors for slicing dimensions.
 
 #### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
+| Parameter   | Type                                                                                    | Description                                                                           |
+| ----------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
 | `selectors` | \{ \[`key`: `string`\]: [`ZarrSelectorsProps`](../interfaces/ZarrSelectorsProps.md); \} | New selectors mapping. See [ZarrSelectorsProps](../interfaces/ZarrSelectorsProps.md). |
 
 #### Returns
@@ -376,7 +376,7 @@ Updates the selectors for slicing dimensions.
 
 `true` if any changes were applied, otherwise `false`.
 
-***
+---
 
 ### updateStyle()
 
@@ -388,11 +388,11 @@ Updates the visualization style for the imagery provider.
 
 #### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `options` | \{ `colormap?`: `string`; `scale?`: \[`number`, `number`\]; \} | Parameters to update. |
-| `options.colormap?` | `string` | New colormap name. See [ColorMapName](../type-aliases/ColorMapName.md). |
-| `options.scale?` | \[`number`, `number`\] | New [min, max] scale range. |
+| Parameter           | Type                                                           | Description                                                             |
+| ------------------- | -------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `options`           | \{ `colormap?`: `string`; `scale?`: \[`number`, `number`\]; \} | Parameters to update.                                                   |
+| `options.colormap?` | `string`                                                       | New colormap name. See [ColorMapName](../type-aliases/ColorMapName.md). |
+| `options.scale?`    | \[`number`, `number`\]                                         | New [min, max] scale range.                                             |
 
 #### Returns
 
@@ -400,7 +400,7 @@ Updates the visualization style for the imagery provider.
 
 `true` if any changes were applied, otherwise `false`.
 
-***
+---
 
 ### createLayer()
 
@@ -412,9 +412,9 @@ Creates a Cesium imagery layer from the given viewer and Zarr options.
 
 #### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `viewer` | `Viewer` | Cesium viewer instance. |
+| Parameter | Type                                            | Description                                                        |
+| --------- | ----------------------------------------------- | ------------------------------------------------------------------ |
+| `viewer`  | `Viewer`                                        | Cesium viewer instance.                                            |
 | `options` | [`LayerOptions`](../interfaces/LayerOptions.md) | Layer options (see [LayerOptions](../interfaces/LayerOptions.md)). |
 
 #### Returns
@@ -439,7 +439,7 @@ Values of the data coordinate dimensions (latitude, longitude, elevation, etc.).
 [key: string]: number[] | Float64Array<ArrayBufferLike>
 ```
 
-***
+---
 
 ### errorEvent
 
@@ -447,17 +447,17 @@ Values of the data coordinate dimensions (latitude, longitude, elevation, etc.).
 errorEvent: Event<(...args) => void>;
 ```
 
-Gets an event that is raised when the imagery provider encounters an asynchronous error.  By subscribing
-to the event, you will be notified of the error and can potentially recover from it.  Event listeners
+Gets an event that is raised when the imagery provider encounters an asynchronous error. By subscribing
+to the event, you will be notified of the error and can potentially recover from it. Event listeners
 are passed an instance of [TileProviderError](https://cesium.com/learn/cesiumjs/ref-doc/TileProviderError.html).
 
 #### Implementation of
 
 ```ts
-ImageryProvider.errorEvent
+ImageryProvider.errorEvent;
 ```
 
-***
+---
 
 ### proxy
 
@@ -470,10 +470,10 @@ Gets the proxy used by this provider.
 #### Implementation of
 
 ```ts
-ImageryProvider.proxy
+ImageryProvider.proxy;
 ```
 
-***
+---
 
 ### selectors
 
@@ -489,7 +489,7 @@ User-defined selectors for slicing dimensions.
 [key: string]: ZarrSelectorsProps
 ```
 
-***
+---
 
 ### tileDiscardPolicy
 
@@ -497,12 +497,12 @@ User-defined selectors for slicing dimensions.
 tileDiscardPolicy: NeverTileDiscardPolicy;
 ```
 
-Gets the tile discard policy.  If not undefined, the discard policy is responsible
-for filtering out "missing" tiles via its shouldDiscardImage function.  If this function
+Gets the tile discard policy. If not undefined, the discard policy is responsible
+for filtering out "missing" tiles via its shouldDiscardImage function. If this function
 returns undefined, no tiles are filtered.
 
 #### Implementation of
 
 ```ts
-ImageryProvider.tileDiscardPolicy
+ImageryProvider.tileDiscardPolicy;
 ```

@@ -27,7 +27,7 @@ export interface InfoButtonBoxType {
 }
 
 export interface TitilerOptions {
-  url: string;
+  source: string;
   variable: string;
   clim?: [number, number];
   colormap?: string;

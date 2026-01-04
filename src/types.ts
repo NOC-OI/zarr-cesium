@@ -95,7 +95,7 @@ export interface DimIndicesProps {
  * Configuration for a 3D cube visualization (volumetric rendering).
  */
 export interface CubeOptions {
-  url: string;
+  source: string;
   variable: string;
   bounds: { west: number; south: number; east: number; north: number };
   crs?: CRS | null;
@@ -110,7 +110,7 @@ export interface CubeOptions {
   multiscaleLevel?: number;
   zarrVersion?: 2 | 3;
   flipElevation?: boolean;
-  scale?: [number, number];
+  clim?: [number, number];
   colormap?: ColorMapName;
 }
 
@@ -118,14 +118,14 @@ export interface CubeOptions {
  * Configuration for a 2D raster (image) layer visualization.
  */
 export interface LayerOptions {
-  url: string;
+  source: string;
   variable: string;
   crs?: CRS | null;
   tileWidth?: number;
   tileHeight?: number;
   minimumLevel?: number;
   maximumLevel?: number;
-  scale?: [number, number];
+  clim?: [number, number];
   opacity?: number;
   colormap?: ColorMapName;
   colorScale?: [number, number, number][];
@@ -140,7 +140,7 @@ export interface LayerOptions {
  * Configuration for a vector (velocity) visualization layer.
  */
 export interface VelocityOptions {
-  urls: { u: string; v: string };
+  sources: { u: string; v: string };
   variables: { u: string; v: string };
   bounds: { west: number; south: number; east: number; north: number };
   verticalExaggeration?: number;
@@ -152,7 +152,7 @@ export interface VelocityOptions {
   multiscaleLevel?: number;
   opacity?: number;
   crs?: CRS | null;
-  scale?: [number, number];
+  clim?: [number, number];
   colormap?: ColorMapName;
   zarrVersion?: 2 | 3;
   windOptions?: Partial<WindLayerOptions>;

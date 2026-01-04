@@ -8,19 +8,19 @@ export class GetZarrLayer {
   layerName: SelectedLayer;
   actualLayer: string;
   layer: ImageryLayer | null;
-  url: string;
+  source: string;
   params: TitilerOptions;
   constructor(layerName: SelectedLayer, actualLayer: string) {
     this.layerName = layerName;
     this.params = layerName.params as TitilerOptions;
     this.actualLayer = actualLayer;
     this.layer = null;
-    this.url = this.params.url;
+    this.source = this.params.source;
   }
 
   async getTile() {
     const params: keyable = {
-      url: this.params.url,
+      source: this.params.source,
       variable: this.params.variable,
       reference: false,
       decode_times: true,

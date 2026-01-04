@@ -12,7 +12,7 @@ and creating animated particle layers that visualize flow direction and speed.
 
 ```ts
 const provider = new ZarrCubeVelocityProvider(viewer, {
-  urls: { u: 'uo.zarr', v: 'vo.zarr' },
+  sources: { u: 'uo.zarr', v: 'vo.zarr' },
   variables: { u: 'uo', v: 'vo' },
   bounds: { west: -10, south: 30, east: 10, north: 45 }
 });
@@ -31,9 +31,9 @@ Creates a new ZarrCubeVelocityProvider instance.
 
 #### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `viewer` | `Viewer` | Cesium viewer where the layers will be rendered. |
+| Parameter | Type                                                  | Description                                                                         |
+| --------- | ----------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `viewer`  | `Viewer`                                              | Cesium viewer where the layers will be rendered.                                    |
 | `options` | [`VelocityOptions`](../interfaces/VelocityOptions.md) | Velocity dataset options (see [VelocityOptions](../interfaces/VelocityOptions.md)). |
 
 #### Returns
@@ -54,7 +54,7 @@ Removes all active wind layers from the Cesium scene.
 
 `void`
 
-***
+---
 
 ### load()
 
@@ -70,7 +70,7 @@ Loads both U and V components of the velocity field from their respective Zarr d
 
 Promise resolved when both datasets are loaded and rendered as wind layers.
 
-***
+---
 
 ### updateSelectors()
 
@@ -83,18 +83,18 @@ and reloads the velocity data accordingly.
 
 #### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `options:` | \{ `bounds?`: [`BoundsProps`](../interfaces/BoundsProps.md); `multiscaleLevel?`: `number`; `selectors?`: \{ \[`key`: `string`\]: [`ZarrSelectorsProps`](../interfaces/ZarrSelectorsProps.md); \}; \} | selectors - New dimension selectors. See [ZarrSelectorsProps](../interfaces/ZarrSelectorsProps.md). - multiscaleLevel - New multiscale level to load. - bounds - Updated geographic bounds. See [BoundsProps](../interfaces/BoundsProps.md). |
-| `options:.bounds?` | [`BoundsProps`](../interfaces/BoundsProps.md) | - |
-| `options:.multiscaleLevel?` | `number` | - |
-| `options:.selectors?` | \{ \[`key`: `string`\]: [`ZarrSelectorsProps`](../interfaces/ZarrSelectorsProps.md); \} | - |
+| Parameter                   | Type                                                                                                                                                                                                 | Description                                                                                                                                                                                                                                  |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `options:`                  | \{ `bounds?`: [`BoundsProps`](../interfaces/BoundsProps.md); `multiscaleLevel?`: `number`; `selectors?`: \{ \[`key`: `string`\]: [`ZarrSelectorsProps`](../interfaces/ZarrSelectorsProps.md); \}; \} | selectors - New dimension selectors. See [ZarrSelectorsProps](../interfaces/ZarrSelectorsProps.md). - multiscaleLevel - New multiscale level to load. - bounds - Updated geographic bounds. See [BoundsProps](../interfaces/BoundsProps.md). |
+| `options:.bounds?`          | [`BoundsProps`](../interfaces/BoundsProps.md)                                                                                                                                                        | -                                                                                                                                                                                                                                            |
+| `options:.multiscaleLevel?` | `number`                                                                                                                                                                                             | -                                                                                                                                                                                                                                            |
+| `options:.selectors?`       | \{ \[`key`: `string`\]: [`ZarrSelectorsProps`](../interfaces/ZarrSelectorsProps.md); \}                                                                                                              | -                                                                                                                                                                                                                                            |
 
 #### Returns
 
 `Promise`\<`void`\>
 
-***
+---
 
 ### updateSlices()
 
@@ -106,18 +106,18 @@ Updates the rendered slices (number of vertical layers) based on the spacing or 
 
 #### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `options:` | \{ `belowSeaLevel?`: `boolean`; `sliceSpacing?`: `number`; `verticalExaggeration?`: `number`; \} | sliceSpacing - Distance between rendered elevation slices. - verticalExaggeration - Height exaggeration. - belowSeaLevel - Whether elevations below sea level are considered. |
-| `options:.belowSeaLevel?` | `boolean` | - |
-| `options:.sliceSpacing?` | `number` | - |
-| `options:.verticalExaggeration?` | `number` | - |
+| Parameter                        | Type                                                                                             | Description                                                                                                                                                                   |
+| -------------------------------- | ------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `options:`                       | \{ `belowSeaLevel?`: `boolean`; `sliceSpacing?`: `number`; `verticalExaggeration?`: `number`; \} | sliceSpacing - Distance between rendered elevation slices. - verticalExaggeration - Height exaggeration. - belowSeaLevel - Whether elevations below sea level are considered. |
+| `options:.belowSeaLevel?`        | `boolean`                                                                                        | -                                                                                                                                                                             |
+| `options:.sliceSpacing?`         | `number`                                                                                         | -                                                                                                                                                                             |
+| `options:.verticalExaggeration?` | `number`                                                                                         | -                                                                                                                                                                             |
 
 #### Returns
 
 `Promise`\<`void`\>
 
-***
+---
 
 ### updateStyle()
 
@@ -130,13 +130,13 @@ color scale, or particle simulation parameters.
 
 #### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `options:` | \{ `colormap?`: `string`; `opacity?`: `number`; `scale?`: \[`number`, `number`\]; `windOptions?`: `Partial`\<`WindLayerOptions`\>; \} | opacity - Opacity. - scale - [min, max] scale for coloring. - colormap - Colormap name. See [ColorMapName](../type-aliases/ColorMapName.md). - windOptions - Additional parameters forwarded to the WindLayer (see WindLayerOptions). |
-| `options:.colormap?` | `string` | - |
-| `options:.opacity?` | `number` | - |
-| `options:.scale?` | \[`number`, `number`\] | - |
-| `options:.windOptions?` | `Partial`\<`WindLayerOptions`\> | - |
+| Parameter               | Type                                                                                                                                  | Description                                                                                                                                                                                                                           |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `options:`              | \{ `colormap?`: `string`; `opacity?`: `number`; `scale?`: \[`number`, `number`\]; `windOptions?`: `Partial`\<`WindLayerOptions`\>; \} | opacity - Opacity. - scale - [min, max] scale for coloring. - colormap - Colormap name. See [ColorMapName](../type-aliases/ColorMapName.md). - windOptions - Additional parameters forwarded to the WindLayer (see WindLayerOptions). |
+| `options:.colormap?`    | `string`                                                                                                                              | -                                                                                                                                                                                                                                     |
+| `options:.opacity?`     | `number`                                                                                                                              | -                                                                                                                                                                                                                                     |
+| `options:.clim?`        | \[`number`, `number`\]                                                                                                                | -                                                                                                                                                                                                                                     |
+| `options:.windOptions?` | `Partial`\<`WindLayerOptions`\>                                                                                                       | -                                                                                                                                                                                                                                     |
 
 #### Returns
 
@@ -152,7 +152,7 @@ bounds: BoundsProps;
 
 Configuration defining the geographic bounds of the cube.
 
-***
+---
 
 ### cubeDimensions
 
@@ -162,7 +162,7 @@ cubeDimensions: [number, number, number] | null = null;
 
 Cube dimensions: [longitude, latitude, elevation].
 
-***
+---
 
 ### dimensionValues
 
@@ -178,7 +178,7 @@ Dimension coordinate arrays (e.g. lat, lon, elevation).
 [key: string]: number[] | Float64Array<ArrayBufferLike>
 ```
 
-***
+---
 
 ### elevationShape
 
@@ -188,7 +188,7 @@ elevationShape: number = 0;
 
 Shape (size) of the elevation dimension.
 
-***
+---
 
 ### id
 
@@ -198,7 +198,7 @@ id: string = '';
 
 Unique identifier for the cube provider instance.
 
-***
+---
 
 ### levelInfos
 
@@ -208,7 +208,7 @@ levelInfos: string[] = [];
 
 Information about multiscale levels in the Zarr dataset.
 
-***
+---
 
 ### multiscaleLevel
 
@@ -218,7 +218,7 @@ multiscaleLevel: number = 0;
 
 Current multiscale level to load.
 
-***
+---
 
 ### selectors
 

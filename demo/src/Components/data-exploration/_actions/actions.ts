@@ -182,10 +182,10 @@ export async function handleChangeMapLayerAndAddLegend(
   if (checked) {
     if (['zarr-titiler'].includes(layerInfo.dataInfo.dataType)) {
       const params = layerInfo.dataInfo.params as TitilerOptions;
-      const layerUrl = params.url;
-      const url = `${ZARR_TILE_SERVER_URL}time_values?url=${encodeURIComponent(layerUrl)}`;
+      const layerUrl = params.source;
+      const source = `${ZARR_TILE_SERVER_URL}time_values?url=${encodeURIComponent(layerUrl)}`;
 
-      const response = await fetch(url);
+      const response = await fetch(source);
       const timeValues = await response.json();
       layerInfo.dataInfo.dimensions = {
         time: {

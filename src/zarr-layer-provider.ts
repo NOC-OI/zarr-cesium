@@ -73,12 +73,12 @@ export class ZarrImageryLayer extends ImageryLayer {
    * Update the visual style of the imagery layer.
    * @param opts - Style options to update.
    * @param opts.opacity - Layer opacity.
-   * @param opts.scale - [min, max] range for data scaling.
+   * @param opts.clim - [min, max] range for data scaling.
    * @param opts.colormap - Colormap name.
    */
-  updateStyle(opts: { opacity?: number; scale?: [number, number]; colormap?: ColorMapName }) {
+  updateStyle(opts: { opacity?: number; clim?: [number, number]; colormap?: ColorMapName }) {
     const layerUpdated = this.imageryProvider.updateStyle({
-      scale: opts.scale,
+      clim: opts.clim,
       colormap: opts.colormap
     });
     if (layerUpdated) {
@@ -110,9 +110,9 @@ export class ZarrImageryLayer extends ImageryLayer {
  * @example
  * ```ts
  * const provider = new ZarrLayerProvider({
- *   url: 'https://example.com/my.zarr',
+ *   source: 'https://example.com/my.zarr',
  *   variable: 'temperature',
- *   scale: [0, 40],
+ *   clim: [0, 40],
  *   colormap: 'jet'
  * });
  * const imageryLayer = new ZarrImageryLayer(provider);
@@ -131,7 +131,7 @@ export class ZarrLayerProvider implements ImageryProvider {
     time: { selected: 0, type: 'index' },
     elevation: { selected: 0, type: 'index' }
   };
-  private url: string;
+  private source: string;
   private variable: string;
   private zarrVersion: 2 | 3 | null = null;
   private crs: CRS | null = null;
@@ -168,7 +168,7 @@ export class ZarrLayerProvider implements ImageryProvider {
   private gl: WebGL2RenderingContext | null = null;
   private program: WebGLProgram | null = null;
   private colorTexture: WebGLTexture | null = null;
-  private static readonly concurrencyLimit = 15;
+  private static readonly concurrencyLimit = 32;
   private static activeRequests = 0;
   private static readonly queue: (() => void)[] = [];
   private abortControllers = new Map<string, AbortController>();
@@ -176,7 +176,7 @@ export class ZarrLayerProvider implements ImageryProvider {
   private static supportsImageBitmap: boolean | null = null;
 
   constructor(options: LayerOptions) {
-    this.url = options.url;
+    this.source = options.source;
     this.variable = options.variable;
     this._tilingScheme = new WebMercatorTilingScheme();
     this._coverageRectangle = this._tilingScheme.rectangle;
@@ -189,7 +189,7 @@ export class ZarrLayerProvider implements ImageryProvider {
     this.dimensionNames = options.dimensionNames ?? {};
     this.zarrVersion = options.zarrVersion ?? null;
     this.dimensionValues = {};
-    const [min, max] = options.scale ?? [-3, 3];
+    const [min, max] = options.clim ?? [-3, 3];
     this.colormap = options.colormap ?? 'viridis';
     const colors = colormapBuilder(this.colormap);
     this.colorScale = { min, max, colors: colors as number[][] };
@@ -203,7 +203,7 @@ export class ZarrLayerProvider implements ImageryProvider {
 
   private async initialize(): Promise<boolean> {
     try {
-      this.store = new zarr.FetchStore(this.url);
+      this.store = new zarr.FetchStore(this.source);
       this.root = zarr.root(this.store);
 
       const { zarrArray, levelInfos, dimIndices, attrs } = await initZarrDataset(
@@ -350,15 +350,15 @@ export class ZarrLayerProvider implements ImageryProvider {
   /**
    * Updates the visualization style for the imagery provider.
    * @param options - Parameters to update.
-   * @param options.scale - New [min, max] scale range.
+   * @param options.clim - New [min, max] scale range.
    * @param options.colormap - New colormap name. See {@link ColorMapName}.
    * @returns `true` if any changes were applied, otherwise `false`.
    */
-  public updateStyle(options: { scale?: [number, number]; colormap?: ColorMapName }): boolean {
-    const { scale, colormap } = options;
-    if (!scale && !colormap) return false;
-    const nextMin = scale?.[0] ?? this.colorScale.min;
-    const nextMax = scale?.[1] ?? this.colorScale.max;
+  public updateStyle(options: { clim?: [number, number]; colormap?: ColorMapName }): boolean {
+    const { clim, colormap } = options;
+    if (!clim && !colormap) return false;
+    const nextMin = clim?.[0] ?? this.colorScale.min;
+    const nextMax = clim?.[1] ?? this.colorScale.max;
     const nextColormap = colormap ?? this.colormap;
 
     if (
@@ -368,7 +368,7 @@ export class ZarrLayerProvider implements ImageryProvider {
     ) {
       return false;
     }
-    if (scale) (this.colorScale.min = scale[0]), (this.colorScale.max = scale[1]);
+    if (clim) (this.colorScale.min = clim[0]), (this.colorScale.max = clim[1]);
 
     if (colormap) {
       this.colormap = colormap;

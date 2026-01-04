@@ -24,7 +24,7 @@ const crsSchema = z.enum(['EPSG:4326', 'EPSG:3857']);
 
 const zarrCesiumParams = z
   .object({
-    url: z.string().url(),
+    source: z.string().url(),
     variable: z.string(),
     crs: crsSchema.nullable().optional(),
     tileWidth: z.number().optional(),
@@ -43,7 +43,7 @@ const zarrCesiumParams = z
 
 const zarrCubeParams = z
   .object({
-    url: z.string().url(),
+    source: z.string().url(),
     variable: z.string(),
     bounds: boundsSchema,
     crs: crsSchema.nullable().optional(),
@@ -64,7 +64,7 @@ const zarrCubeParams = z
 
 const zarrCubeVelocityParams = z
   .object({
-    urls: z.object({
+    sources: z.object({
       u: z.string().url(),
       v: z.string().url()
     }),

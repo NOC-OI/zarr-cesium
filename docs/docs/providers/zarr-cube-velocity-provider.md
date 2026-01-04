@@ -52,12 +52,12 @@ If you want:
 
 ```ts
 import { Viewer } from 'cesium';
-import { ZarrCubeVelocityProvider } from 'zarr-cesium';
+import { ZarrCubeVelocityProvider } from '../../../../dist';
 
 const viewer = new Viewer('cesiumContainer');
 
 const options = {
-  urls: {
+  sources: {
     u: 'https://example.com/uo.zarr',
     v: 'https://example.com/vo.zarr'
   },
@@ -77,7 +77,7 @@ This creates a **stack of animated particle layers**, one per elevation slice.
 
 ```ts
 interface VelocityOptions {
-  urls: { u: string; v: string }; // Public Zarr stores for U and V components
+  sources: { u: string; v: string }; // Public Zarr stores for U and V components
   variables: { u: string; v: string }; // Zarr array names for U and V
   bounds: BoundsProps; // geographic rectangle
   dimensionNames?: DimensionNamesProps; // Custom dimension names. If not provided, defaults will be used or identified automatically based on CF conventions.
@@ -294,7 +294,7 @@ Adjust how particles are visualized:
 ```ts
 windCube.updateStyle({
   opacity: 0.4,
-  scale: [-1, 1],
+  clim: [-1, 1],
   colormap: 'plasma',
   windOptions: {
     particleDensity: 5,

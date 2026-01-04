@@ -22,13 +22,8 @@ import {
 import { colormapBuilder } from './jsColormaps';
 
 import ndarray from 'ndarray';
-import {
-  DEFAULT_COLORMAP,
-  DEFAULT_VERTICAL_EXAGGERATION,
-  DEFAULT_WIND_OPTIONS,
-  validateBounds
-} from './cesium-utils';
-
+import { DEFAULT_COLORMAP, DEFAULT_VERTICAL_EXAGGERATION, DEFAULT_WIND_OPTIONS } from './constants';
+import { validateBounds } from './cesium-utils';
 /**
  * Provider responsible for loading and rendering 3D velocity fields (U and V components)
  * from Zarr datasets as animated Cesium `WindLayer`s.
@@ -40,7 +35,7 @@ import {
  * @example
  * ```ts
  * const provider = new ZarrCubeVelocityProvider(viewer, {
- *   urls: { u: 'uo.zarr', v: 'vo.zarr' },
+ *   sources: { u: 'uo.zarr', v: 'vo.zarr' },
  *   variables: { u: 'uo', v: 'vo' },
  *   bounds: { west: -10, south: 30, east: 10, north: 45 }
  * });
@@ -68,8 +63,8 @@ export class ZarrCubeVelocityProvider {
   private zarrVersion: 2 | 3 | null = null;
   private layers: WindLayer[] = [];
   private flipElevation: boolean = false;
-  private uUrl: string;
-  private vUrl: string;
+  private uSource: string;
+  private vSource: string;
   private variables: { u: string; v: string };
   private crs: CRS | null = null;
   private dimensionNames: DimensionNamesProps;
@@ -95,8 +90,8 @@ export class ZarrCubeVelocityProvider {
    */
   constructor(viewer: Viewer, options: VelocityOptions) {
     this.viewer = viewer;
-    this.uUrl = options.urls.u;
-    this.vUrl = options.urls.v;
+    this.uSource = options.sources.u;
+    this.vSource = options.sources.v;
     this.variables = options.variables;
     this.bounds = options.bounds;
     this.crs = options.crs ?? null;
@@ -108,7 +103,7 @@ export class ZarrCubeVelocityProvider {
     this.sliceSpacing = options.sliceSpacing ?? 1;
     this.belowSeaLevel = options.belowSeaLevel ?? false;
     this.zarrVersion = options.zarrVersion ?? null;
-    const [min, max] = options.scale ?? [-3, 3];
+    const [min, max] = options.clim ?? [-3, 3];
     this.colormap = options.colormap || DEFAULT_COLORMAP;
     const colors = colormapBuilder(this.colormap, 'css', 255, this.opacity);
     this.colorScale = { min, max, colors };
@@ -145,8 +140,11 @@ export class ZarrCubeVelocityProvider {
       if (next) next();
     }
   }
-  private async loadZarrVariable(url: string, variable: string): Promise<CubeVelocityProps | null> {
-    const store = new zarr.FetchStore(url);
+  private async loadZarrVariable(
+    source: string,
+    variable: string
+  ): Promise<CubeVelocityProps | null> {
+    const store = new zarr.FetchStore(source);
     const root = zarr.root(store);
 
     const { zarrArray, dimIndices, levelInfos, attrs, multiscaleLevel } = await initZarrDataset(
@@ -232,8 +230,8 @@ export class ZarrCubeVelocityProvider {
    */
   async load(): Promise<void> {
     const [uCube, vCube] = await Promise.all([
-      this.loadZarrVariable(this.uUrl, this.variables.u),
-      this.loadZarrVariable(this.vUrl, this.variables.v)
+      this.loadZarrVariable(this.uSource, this.variables.u),
+      this.loadZarrVariable(this.vSource, this.variables.v)
     ]);
     if (!uCube || !vCube) {
       console.error('Failed to load U or V component data.');
@@ -397,12 +395,12 @@ export class ZarrCubeVelocityProvider {
    */
   updateStyle({
     opacity,
-    scale,
+    clim,
     colormap,
     windOptions
   }: {
     opacity?: number;
-    scale?: [number, number];
+    clim?: [number, number];
     colormap?: ColorMapName;
     windOptions?: Partial<WindLayerOptions>;
   }): void {
@@ -411,8 +409,8 @@ export class ZarrCubeVelocityProvider {
       const colors = colormapBuilder(this.colormap, 'css', 255, this.opacity);
       this.colorScale.colors = colors;
     }
-    if (scale !== undefined) {
-      const [min, max] = scale;
+    if (clim !== undefined) {
+      const [min, max] = clim;
       this.colorScale.min = min;
       this.colorScale.max = max;
     }

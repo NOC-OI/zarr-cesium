@@ -1,0 +1,75 @@
+name: Deploy Docs & Demo
+
+on:
+  push:
+    branches: [dev]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Inject Cesium token
+        run: echo "VITE_CESIUM_TOKEN=${{ secrets.VITE_CESIUM_TOKEN }}" >> $GITHUB_ENV
+
+      - name: Install root dependencies
+        run: npm install
+
+      - name: Install demo dependencies
+        run: |
+          cd demo
+          npm install
+
+      - name: Build demo
+        env:
+          VITE_CESIUM_TOKEN: ${{ secrets.VITE_CESIUM_TOKEN }}
+        run: |
+          cd demo
+          npm run build
+
+      - name: Install docs dependencies
+        run: |
+          cd docs
+          npm install
+
+      - name: Build docs
+        run: |
+          cd docs
+          npm run build
+
+      - name: Prepare deployment folder
+        run: |
+          mkdir -p public/docs
+          cp -r demo/dist/* public/
+          mv public/zarr-cesium/* public/
+          cp -r docs/build/* public/docs/
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

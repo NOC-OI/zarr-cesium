@@ -8,9 +8,9 @@ title: Getting Started
 ## Installation
 
 ```bash
-npm install @noc-oi/zarr-cesium
+npm install zarr-cesium
 # or
-yarn add @noc-oi/zarr-cesium
+yarn add zarr-cesium
 ```
 
 ---
@@ -30,7 +30,7 @@ const viewer = new Viewer('cesiumContainer');
 ## Rendering 2D Scalar Data (ZarrLayerProvider)
 
 ```ts
-import { ZarrLayerProvider } from '@noc-oi/zarr-cesium';
+import { ZarrLayerProvider } from 'zarr-cesium';
 
 const viewer = new Viewer('cesiumContainer');
 
@@ -45,7 +45,17 @@ const layer = await ZarrLayerProvider.createLayer(viewer, options);
 viewer.imageryLayers.add(layer);
 ```
 
-ADD_INFO_HERE
+<div style={{ maxWidth: "800px", margin: "0 auto" }}>
+  <video
+    src="https://github.com/user-attachments/assets/33fc6dd2-38fa-4b20-a346-0a175f90eba1"
+    loop
+    controls
+    muted
+    style={{ width: "100%", borderRadius: "8px" }}
+  />
+</div>
+
+> Example of visualizing a Zarr dataset in a CesiumJS map using Zarr-Cesium. You can easily change the timestamp, colormap, and scale.
 
 More details on this provider can be found in the [ZarrLayerProvider documentation](./providers/zarr-layer-provider.md).
 
@@ -54,7 +64,7 @@ More details on this provider can be found in the [ZarrLayerProvider documentati
 ## Rendering 3D Volumes (ZarrCubeProvider)
 
 ```ts
-import { ZarrCubeProvider } from '@noc-oi/zarr-cesium';
+import { ZarrCubeProvider } from 'zarr-cesium';
 
 const cube = new ZarrCubeProvider(viewer, {
   url: 'https://example.com/ocean_temp.zarr',
@@ -67,7 +77,17 @@ const cube = new ZarrCubeProvider(viewer, {
 await cube.load();
 ```
 
-ADD_INFO_HERE
+<div style={{ maxWidth: "800px", margin: "0 auto" }}>
+  <video
+    src="https://github.com/user-attachments/assets/8b066725-c6c7-4b7a-9fc0-d632b623937c"
+    loop
+    controls
+    muted
+    style={{ width: "100%", borderRadius: "8px" }}
+  />
+</div>
+
+> Example of visualizing a 4D Zarr dataset in a CesiumJS map as a 3D cube using Zarr-Cesium. You can easily change slices and view the cube in different ways, styles, and scales.
 
 More details on this provider can be found in the [ZarrCubeProvider documentation](./providers/zarr-cube-provider.md).
 
@@ -76,7 +96,7 @@ More details on this provider can be found in the [ZarrCubeProvider documentatio
 ## Rendering 3D Vector Fields (ZarrCubeVelocityProvider)
 
 ```ts
-import { ZarrCubeVelocityProvider } from '@noc-oi/zarr-cesium';
+import { ZarrCubeVelocityProvider } from 'zarr-cesium';
 
 const velocity = new ZarrCubeVelocityProvider(viewer, {
   urls: {
@@ -93,7 +113,17 @@ await velocity.load();
 
 This uses [`cesium-wind-layer`](https://github.com/hongfaqiu/cesium-wind-layer) for GPU-accelerated particle flow animations.
 
-ADD_INFO_HERE
+<div style={{ maxWidth: "800px", margin: "0 auto" }}>
+  <video
+    src="https://github.com/user-attachments/assets/a54ddd70-9b00-4a3e-9cb9-41025cceffd0"
+    loop
+    controls
+    muted
+    style={{ width: "100%", borderRadius: "8px" }}
+  />
+</div>
+
+> Example of visualizing wind-speed vector data from Zarr in a CesiumJS map using Zarr-Cesium. This dataset is from Hurricane Florence, which occurred in 2018. You can easily change the timestamp, colormap, and particle speed.
 
 More details on this provider can be found in the [ZarrCubeVelocityProvider documentation](./providers/zarr-cube-velocity-provider.md).
 
@@ -101,5 +131,5 @@ More details on this provider can be found in the [ZarrCubeVelocityProvider docu
 
 ## Next Steps
 
-- Learn about how to prepare and transform data for the browser: **[Data](./data.md)**
 - Explore available providers: **[ZarrLayerProvider](./providers/zarr-layer-provider.md)** | **[ZarrCubeProvider](./providers/zarr-cube-provider.md)** | **[ZarrCubeVelocityProvider](./providers/zarr-cube-velocity-provider.md)**
+- Learn about how to prepare and transform data for the browser: **[Data](./data.md)**

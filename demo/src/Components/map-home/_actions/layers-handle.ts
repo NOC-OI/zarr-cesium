@@ -47,6 +47,9 @@ export function removeLayerFromMap(
     layers?._layers.forEach(function (layer: any) {
       if (actualLayer === layer.id) {
         layers.remove(layer);
+        if (layerInfo.dataType === 'zarr-cesium') {
+          layer.imageryProvider.destroy();
+        }
       }
     });
   }

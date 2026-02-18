@@ -1,14 +1,16 @@
 ---
-sidebar_position: 1
+id: index
 title: Introduction
+sidebar_position: 0
+slug: /
 ---
 
-# Zarr-Cesium Visualization Toolkit
+# Zarr-Cesium
 
 **High-performance CesiumJS providers for interactive 2D and 3D visualization of environmental and atmospheric data stored in Zarr.**
 
-- **Documentation:** https://noc-oi.github.io/zarr-cesium/docs
 - **Demo:** https://noc-oi.github.io/zarr-cesium/
+- **GitHub:** https://github.com/NOC-OI/zarr-cesium
 
 Zarr-Cesium enables **direct, client-side visualization of scientific datasets** stored in the [Zarr](https://zarr.dev) format. No preprocessing. No tile servers. No backend.
 
@@ -23,6 +25,36 @@ Traditional NetCDF/GeoTIFF-based visualization pipelines require:
 - custom server infrastructure.
 
 **Zarr-Cesium removes all of that**, streaming chunked scientific arrays directly into WebGL shaders for real-time exploration.
+
+## Screenshots
+
+<div style={{ maxWidth: "800px", margin: "0 auto" }}>
+  <video
+    src="https://github.com/NOC-OI/zarr-cesium/releases/download/0.1.0/cube_velocitycube.mp4"
+    loop
+    controls
+    muted
+    style={{ width: "100%", borderRadius: "8px" }}
+  />
+</div>
+<div style={{ maxWidth: "800px", margin: "0 auto" }}>
+  <video
+    src="https://github.com/NOC-OI/zarr-cesium/releases/download/0.1.0/layer_provider.mp4"
+    loop
+    controls
+    muted
+    style={{ width: "100%", borderRadius: "8px" }}
+  />
+</div>
+<div style={{ maxWidth: "800px", margin: "0 auto" }}>
+  <video
+    src="https://github.com/NOC-OI/zarr-cesium/releases/download/0.1.0/cube_globe.mp4"
+    loop
+    controls
+    muted
+    style={{ width: "100%", borderRadius: "8px" }}
+  />
+</div>
 
 ---
 
@@ -62,17 +94,6 @@ CesiumJS (WebGL)
 ↓
 2D/3D Interactive Visualization
 
-```
-
----
-
-## Screenshots
-
-ADD_INFO_HERE
-Add screenshots using the `/static/img` folder, e.g.:
-
-```md
-![Example: 2D salinity data](../static/img/sos_abs.png)
 ```
 
 ---

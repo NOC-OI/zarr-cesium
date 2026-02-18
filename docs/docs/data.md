@@ -114,16 +114,12 @@ This ensures compatibility with Zarr-Cesium and efficient loading in the browser
 If you are using **Zarr v3**, ensure your Zarr store is accessible via HTTP(S) and follows the Zarr v3 specification:
 
 ```python
-pyramid_ds.to_zarr("multiscale.zarr",, zarr_version=3)
+pyramid_ds.to_zarr("multiscale.zarr", zarr_version=3)
 ```
 
 ---
 
 # 5. Example Dataset
-
-Here’s a smoother, more polished version:
-
----
 
 This workflow was developed using **approximately 30 GB of NEMO NPD ocean model output** (documentation available at [https://noc-msm.github.io/NOC_Near_Present_Day/](https://noc-msm.github.io/NOC_Near_Present_Day/)). The dataset includes:
 
@@ -134,12 +130,12 @@ This workflow was developed using **approximately 30 GB of NEMO NPD ocean model 
 
 We also provide a sample atmospheric dataset for testing wind-related visualisations. This dataset contains U/V wind components on a regular latitude–longitude grid, processed with the same workflow, and derived from the ERA5 reanalysis of Hurricane Florence.
 
-A full list of available datasets is provided in the **data information file** on GitHub: [https://github.com/NOC-OI/zarr-vis/demo](https://github.com/NOC-OI/zarr-vis/demo). ADD_INFO_HERE
+A full list of available datasets is provided in the **data information file** on [demo/src/application/data/layers-json.tsx](https://github.com/NOC-OI/zarr-cesium/blob/dev/demo/src/application/data/layers-json.tsx).
 
 A full demo is available:
 
-- GitHub: [https://github.com/NOC-OI/zarr-vis/demo](https://github.com/NOC-OI/zarr-vis/demo)
-- Live demo: [https://noc-oi.github.io/zarr-vis/](https://noc-oi.github.io/zarr-vis/)
+- GitHub: [https://github.com/NOC-OI/zarr-cesium/demo](https://github.com/NOC-OI/zarr-cesium/demo)
+- Live demo: [https://noc-oi.github.io/zarr-cesium/](https://noc-oi.github.io/zarr-cesium/)
 
 ---
 
@@ -154,7 +150,7 @@ Rechunk (small spatial chunks)
         ↓
 Build pyramids (ndpyramid)
         ↓
-Write Zarr v2 (consolidated metadata)
+Write Zarr v2/v3
         ↓
 Load in browser (Zarr-Cesium)
 ```

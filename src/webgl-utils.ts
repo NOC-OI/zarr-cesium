@@ -8,7 +8,7 @@
  * to generate color-mapped textures and dynamic shader programs.
  */
 
-import { type ColorScaleProps } from './types';
+import { BrowserName, type ColorScaleProps } from './types';
 
 /**
  * Creates and compiles a WebGL shader from source code.
@@ -189,4 +189,59 @@ function addColor(
   const g = g1 + (g2 - g1) * t;
   const b = b1 + (b2 - b1) * t;
   return [r, g, b, opacity];
+}
+
+let cached: BrowserName | null = null;
+
+/**
+ * Detects the current browser based on the user agent string.
+ *
+ * @returns The detected browser name as a {@link BrowserName} type.
+ *
+ * @example
+ * ```ts
+ * const browser = detectBrowser();
+ * console.log(`Running in browser: ${browser}`);
+ * ```
+ */
+export function detectBrowser(): BrowserName {
+  if (cached) return cached;
+
+  const ua = navigator.userAgent;
+
+  if (ua.includes('Firefox/')) {
+    cached = 'firefox';
+    return cached;
+  }
+
+  if (ua.includes('Edg/')) {
+    cached = 'edge';
+    return cached;
+  }
+
+  if (ua.includes('OPR/')) {
+    cached = 'opera';
+    return cached;
+  }
+
+  const w = window as any;
+  const isChromeLike = !!w.chrome;
+  if (isChromeLike && ua.includes('Chrome/')) {
+    cached = 'chrome';
+    return cached;
+  }
+
+  const isSafari =
+    !ua.includes('Chrome/') &&
+    !ua.includes('Chromium/') &&
+    !ua.includes('Android') &&
+    ua.includes('Safari/');
+
+  if (isSafari) {
+    cached = 'safari';
+    return cached;
+  }
+
+  cached = 'unknown';
+  return cached;
 }

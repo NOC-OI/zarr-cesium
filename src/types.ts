@@ -66,7 +66,7 @@ export interface ZarrLevelMetadata {
  * Mapping of dimension names to their corresponding coordinate arrays.
  */
 export interface DimensionValues {
-  [key: string]: Float64Array | number[];
+  [key: string]: Float64Array | number[] | string[];
 }
 
 /**
@@ -256,3 +256,35 @@ export interface CubeVelocityProps {
   elevation: number;
   dimensionValues: DimensionValues;
 }
+
+/**
+ * Supported browser names for compatibility checks.
+ */
+export type BrowserName = 'chrome' | 'firefox' | 'safari' | 'edge' | 'opera' | 'unknown';
+
+/**
+ * Represents a date in a calendar system.
+ */
+export type CalendarDate = {
+  year: number;
+  month: number;
+  day: number;
+  hour: number;
+  minute: number;
+  second: number;
+  microsecond: number;
+};
+
+/**
+ * Supported CF calendar types.
+ */
+export type CFCalendar =
+  | 'standard'
+  | 'gregorian'
+  | 'proleptic_gregorian'
+  | 'julian'
+  | 'noleap'
+  | '365_day'
+  | 'all_leap'
+  | '366_day'
+  | '360_day';

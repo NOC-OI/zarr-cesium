@@ -256,6 +256,20 @@ new ZarrLayerProvider(options): ZarrLayerProvider;
 
 ## Methods
 
+### destroy()
+
+```ts
+destroy(): void;
+```
+
+Cleans up resources used by the imagery provider.
+
+#### Returns
+
+`void`
+
+***
+
 ### getTileCredits()
 
 ```ts

@@ -4,7 +4,6 @@ import { GetZarrLayer } from '../../../lib/map-layers/addZarrLayer';
 import type { DataInfoType, keyable, SelectedLayersType, ZarrCesiumRefs } from '../../../types';
 import type { CubeOptions, LayerOptions, VelocityOptions } from 'zarr-cesium';
 import type React from 'react';
-// import { updateOpacity } from './layers-handle';
 
 export function viewerMap(viewerRef: React.RefObject<Viewer | null>, dataType: string) {
   const relationship: keyable = {
@@ -76,9 +75,6 @@ export async function generateSelectedLayer(
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'Error adding layer' };
   }
-  // if (map.current) {
-  //   map.current.fitBounds(bounds, { padding: 20, animate: true });
-  // }
 }
 
 export function updateSelectedLayersWithDimensions(

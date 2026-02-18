@@ -194,6 +194,17 @@ selectors = {
 
 And with that, you can build UI controls (sliders, dropdowns) to update the layer dynamically.
 
+### Remove Layer
+
+To remove the layer and free resources:
+
+```ts
+viewer.imageryLayers.remove(zbLayer);
+zbLayer.destroy();
+```
+
+It is important to call `destroy()` after removing the layer from the viewer, because this cleans up all internal resources (abort pending requests, etc.).
+
 ### Supported CRS
 
 Zarr datasets may store coordinate values in:

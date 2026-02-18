@@ -3,8 +3,10 @@ import { createRoot } from 'react-dom/client';
 import './index.css';
 import App from './App.tsx';
 
+const isProd = import.meta.env.MODE === 'production';
+
 createRoot(document.getElementById('root')!).render(
-  import.meta.env.PROD ? (
+  isProd ? (
     <StrictMode>
       <App />
     </StrictMode>

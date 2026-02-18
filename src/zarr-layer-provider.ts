@@ -4,7 +4,7 @@ import { vertexShaderSource, fragmentShaderSource } from './shaders';
 import { colormapBuilder } from './jsColormaps';
 import {
   calculateNearestIndex,
-  calculateSliceArgs,
+  calculateSliceArgsRequestImage,
   detectCRS,
   extractNoDataMetadata,
   getXYLimits,
@@ -13,9 +13,10 @@ import {
   openLevelArray,
   resolveNoDataRange
 } from './zarr-utils';
-import { createColorRampTexture, createProgram, createShader } from './webgl-utils';
+import { createColorRampTexture, createProgram, createShader, detectBrowser } from './webgl-utils';
 import {
   ColorMapName,
+  DimensionValues,
   type CRS,
   type DimensionNamesProps,
   type DimIndicesProps,
@@ -124,7 +125,7 @@ export class ZarrLayerProvider implements ImageryProvider {
   tileDiscardPolicy = new NeverTileDiscardPolicy();
   proxy = new DefaultProxy('');
   /** Values of the data coordinate dimensions (latitude, longitude, elevation, etc.). */
-  public dimensionValues: { [key: string]: Float64Array | number[] } = {};
+  public dimensionValues: DimensionValues = {};
   /** User-defined selectors for slicing dimensions. */
   public selectors: { [key: string]: ZarrSelectorsProps } = {
     time: { selected: 0, type: 'index' },
@@ -149,8 +150,10 @@ export class ZarrLayerProvider implements ImageryProvider {
   private readonly _minimumLevel: number;
   private readonly _maximumLevel: number;
   private readonly _credit: Credit;
+  private readonly browser = detectBrowser();
   private _ready = false;
   private _readyPromise!: Promise<boolean>;
+  private _emptyCanvas: HTMLCanvasElement | null = null;
 
   private colorScale: { min: number; max: number; colors: number[][] };
   private zarrArray: zarr.Array<any> | null = null;
@@ -165,10 +168,11 @@ export class ZarrLayerProvider implements ImageryProvider {
   private gl: WebGL2RenderingContext | null = null;
   private program: WebGLProgram | null = null;
   private colorTexture: WebGLTexture | null = null;
-  private static readonly concurrencyLimit = 4;
+  private static readonly concurrencyLimit = 15;
   private static activeRequests = 0;
   private static readonly queue: (() => void)[] = [];
   private abortControllers = new Map<string, AbortController>();
+  private destroyed = false;
   private static supportsImageBitmap: boolean | null = null;
 
   constructor(options: LayerOptions) {
@@ -408,7 +412,7 @@ export class ZarrLayerProvider implements ImageryProvider {
     canvas.height = this.tileHeight;
 
     this.gl = canvas.getContext('webgl2', {
-      preserveDrawingBuffer: true,
+      preserveDrawingBuffer: false,
       premultipliedAlpha: false
     }) as WebGL2RenderingContext;
 
@@ -473,6 +477,7 @@ export class ZarrLayerProvider implements ImageryProvider {
   private prepareAbortController(key: string): AbortController {
     const prev = this.abortControllers.get(key);
     if (prev) prev.abort();
+
     const controller = new AbortController();
     this.abortControllers.set(key, controller);
     return controller;
@@ -578,10 +583,12 @@ export class ZarrLayerProvider implements ImageryProvider {
   }
 
   private emptyCanvas(): HTMLCanvasElement {
-    const emptyCanvas = document.createElement('canvas');
-    emptyCanvas.width = this._tileWidth;
-    emptyCanvas.height = this._tileHeight;
-    return emptyCanvas;
+    if (!this._emptyCanvas) {
+      this._emptyCanvas = document.createElement('canvas');
+      this._emptyCanvas.width = this._tileWidth;
+      this._emptyCanvas.height = this._tileHeight;
+    }
+    return this._emptyCanvas;
   }
 
   /**
@@ -596,6 +603,9 @@ export class ZarrLayerProvider implements ImageryProvider {
     y: number,
     level: number
   ): Promise<HTMLCanvasElement | ImageBitmap> {
+    if (this.destroyed) {
+      return this.emptyCanvas();
+    }
     const key = `${level}/${x}/${y}`;
 
     const controller = this.prepareAbortController(key);
@@ -633,30 +643,16 @@ export class ZarrLayerProvider implements ImageryProvider {
       if (!bounds) {
         return this.emptyCanvas();
       }
-      const { sliceArgs, dimensionValues, selectors } = await calculateSliceArgs(
+      const sliceArgs = await calculateSliceArgsRequestImage(
         currentArray.shape,
         bounds,
         this.dimIndices,
-        this.selectors,
-        this.dimensionValues,
-        this.root,
-        multiscaleLevel !== null ? multiscaleLevel : null,
-        this.zarrVersion
+        this.selectors
       );
-      this.selectors = selectors;
-      this.dimensionValues = dimensionValues;
-
-      const data = (await ZarrLayerProvider.throttle(() =>
-        zarr.get(currentArray, sliceArgs)
-      )) as any;
-
-      if (controller.signal.aborted) return this.emptyCanvas();
-
-      if (!data || !data.data || data.data.length === 0) {
-        return this.emptyCanvas();
-      }
-
-      const flatData = new Float32Array(data.data.buffer);
+      const data = await ZarrLayerProvider.throttle(() =>
+        zarr.get(currentArray, sliceArgs, { opts: { signal: controller.signal } })
+      );
+      const flatData = new Float32Array((data.data as Float32Array).buffer);
 
       return this.renderWithWebGL(flatData, bounds.width, bounds.height, {
         fracWest,
@@ -676,7 +672,7 @@ export class ZarrLayerProvider implements ImageryProvider {
     width: number,
     height: number,
     frac: { fracWest: number; fracEast: number; fracSouth: number; fracNorth: number }
-  ): Promise<HTMLCanvasElement | ImageBitmap> {
+  ): Promise<any> {
     const gl = this.gl as WebGL2RenderingContext;
     if (!gl || !this.program) throw new Error('WebGL2 not initialized');
 
@@ -684,6 +680,7 @@ export class ZarrLayerProvider implements ImageryProvider {
 
     const dataTexture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, dataTexture);
+
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.R32F, width, height, 0, gl.RED, gl.FLOAT, data);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
@@ -761,10 +758,10 @@ export class ZarrLayerProvider implements ImageryProvider {
 
     gl.deleteTexture(dataTexture);
     gl.deleteBuffer(buffer);
-
-    if (await ZarrLayerProvider.checkImageBitmapSupport()) {
+    if (this.browser === 'chrome' && (await ZarrLayerProvider.checkImageBitmapSupport())) {
       try {
         return await createImageBitmap(gl.canvas as HTMLCanvasElement, {
+          // imageOrientation: 'none',
           imageOrientation: 'flipY',
           premultiplyAlpha: 'premultiply'
         });
@@ -780,6 +777,7 @@ export class ZarrLayerProvider implements ImageryProvider {
     fallback.getContext('2d')!.drawImage(gl.canvas as HTMLCanvasElement, 0, 0);
     return fallback;
   }
+
   /** Indicates whether the imagery has an alpha channel. */
   get hasAlphaChannel() {
     return true;
@@ -818,7 +816,7 @@ export class ZarrLayerProvider implements ImageryProvider {
   }
   /** Indicates whether the provider is fully initialized and ready. */
   get ready() {
-    return this._ready;
+    return this._ready && !this.destroyed;
   }
   /**
    * Promise that resolves when the provider is fully initialized.
@@ -836,5 +834,15 @@ export class ZarrLayerProvider implements ImageryProvider {
    */
   getTileCredits(x: number, y: number, level: number): Credit[] {
     return this._credit ? [this._credit] : [];
+  }
+
+  /** Cleans up resources used by the imagery provider. */
+  destroy() {
+    this.destroyed = true;
+
+    for (const [key, controller] of this.abortControllers.entries()) {
+      controller.abort();
+    }
+    this.abortControllers.clear();
   }
 }

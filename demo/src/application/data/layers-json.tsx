@@ -3,31 +3,6 @@ import type { LayersJsonType } from '../../types';
 export const layersJson: LayersJsonType = {
   'Zarr-cesium': {
     layerNames: {
-      salinity_v2: {
-        dataType: 'zarr-cesium',
-        dataDescription: ['Salinity', ''],
-        content:
-          'Salinity outputs from NEMO NPD-EORCA1 model. This dataset contains 3D data (time, latitude, longitude) stored in a Zarr v2 format and EPSG:4326 coordinate reference system.',
-        params: {
-          url: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/nemotest101/T1d/sos_abs.zarr',
-          variable: 'sos_abs',
-          selectors: {
-            time: {
-              selected: 0
-            }
-          },
-          zarrVersion: 2,
-          colormap: 'viridis',
-          scale: [30, 37],
-          crs: undefined,
-          opacity: undefined,
-          dimensionNames: undefined,
-          tileWidth: undefined,
-          tileHeight: undefined,
-          minimumLevel: undefined,
-          maximumLevel: undefined
-        }
-      },
       salinity_pyramid_v2: {
         dataType: 'zarr-cesium',
         dataDescription: ['Salinity', ''],
@@ -95,7 +70,6 @@ export const layersJson: LayersJsonType = {
           'Surface pressure data for Hurricane Florence from ERA5 reanalysis. This dataset contains 3D surface pressure data (time, latitude, longitude) stored in a Zarr v3 format and EPSG:4326 coordinate reference system.',
         params: {
           url: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/hurricanes/era5/florence',
-          // url: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/hurricanes/era5/florence2',
           variable: 'surface_pressure',
           zarrVersion: 3,
           colormap: 'jet',
@@ -115,37 +89,6 @@ export const layersJson: LayersJsonType = {
   },
   'Zarr-Cesium-Cube': {
     layerNames: {
-      'u-currents_v2': {
-        dataType: 'zarr-cube',
-        dataDescription: ['U-component currents', 'm/s'],
-        content:
-          'U-component of the currents. This is a output from NEMO NPD-EORCA1 model. This dataset contains 4D data (time, depth, latitude, longitude) stored in a Zarr v2 format and EPSG:4326 coordinate reference system.',
-        params: {
-          url: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/nemotest101/currents/uo.zarr',
-          variable: 'uo',
-          flipElevation: true,
-          selectors: {
-            time: {
-              selected: 0,
-              type: 'index'
-            },
-            elevation: {
-              selected: [0, 22]
-            }
-          },
-          zarrVersion: 2,
-          colormap: 'jet',
-          scale: [-1, 1],
-          bounds: { west: -50, south: -20, east: 10, north: 20 },
-          crs: undefined,
-          verticalExaggeration: 4500,
-          opacity: undefined,
-          showHorizontalSlices: undefined,
-          showVerticalSlices: undefined,
-          belowSeaLevel: undefined,
-          dimensionNames: undefined
-        }
-      },
       'salinity-pyramid_v3': {
         dataType: 'zarr-cube',
         dataDescription: ['Salinity', ''],
@@ -165,7 +108,7 @@ export const layersJson: LayersJsonType = {
             }
           },
           zarrVersion: 3,
-          multiscaleLevel: 3,
+          multiscaleLevel: 1,
           colormap: 'jet',
           scale: [30, 37],
           bounds: { west: -50, south: -20, east: 10, north: 20 },
@@ -197,7 +140,7 @@ export const layersJson: LayersJsonType = {
               selected: [0, 10]
             }
           },
-          multiscaleLevel: 3,
+          multiscaleLevel: 1,
           colormap: 'jet',
           scale: [0, 30],
           bounds: { west: -50, south: -20, east: 10, north: 20 },
@@ -225,6 +168,37 @@ export const layersJson: LayersJsonType = {
           bounds: { west: -95, south: 15, east: -40, north: 45 },
           crs: undefined,
           verticalExaggeration: 10,
+          opacity: undefined,
+          showHorizontalSlices: undefined,
+          showVerticalSlices: undefined,
+          belowSeaLevel: undefined,
+          dimensionNames: undefined
+        }
+      },
+      'u-currents_v2': {
+        dataType: 'zarr-cube',
+        dataDescription: ['U-component currents', 'm/s'],
+        content:
+          'U-component of the currents. This is a output from NEMO NPD-EORCA1 model. This dataset contains 4D data (time, depth, latitude, longitude) stored in a Zarr v2 format and EPSG:4326 coordinate reference system.',
+        params: {
+          url: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/nemotest101/currents/uo.zarr',
+          variable: 'uo',
+          flipElevation: true,
+          selectors: {
+            time: {
+              selected: 0,
+              type: 'index'
+            },
+            elevation: {
+              selected: [0, 22]
+            }
+          },
+          zarrVersion: 2,
+          colormap: 'jet',
+          scale: [-1, 1],
+          bounds: { west: -50, south: -20, east: 10, north: 20 },
+          crs: undefined,
+          verticalExaggeration: 4500,
           opacity: undefined,
           showHorizontalSlices: undefined,
           showVerticalSlices: undefined,
@@ -326,6 +300,9 @@ export const layersJson: LayersJsonType = {
           selectors: {
             time: {
               selected: 0
+            },
+            elevation: {
+              selected: [0, 22]
             }
           },
           colormap: 'jet',

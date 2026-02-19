@@ -1,0 +1,603 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE article PUBLIC "-//NLM//DTD JATS (Z39.96) Journal Publishing DTD v1.2 20190208//EN"
+                  "JATS-publishing1.dtd">
+<article xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink" dtd-version="1.2" article-type="other">
+<front>
+<journal-meta>
+<journal-id></journal-id>
+<journal-title-group>
+<journal-title>Journal of Open Source Software</journal-title>
+<abbrev-journal-title>JOSS</abbrev-journal-title>
+</journal-title-group>
+<issn publication-format="electronic">2475-9066</issn>
+<publisher>
+<publisher-name>Open Journals</publisher-name>
+</publisher>
+</journal-meta>
+<article-meta>
+<article-id pub-id-type="publisher-id">0</article-id>
+<article-id pub-id-type="doi">N/A</article-id>
+<title-group>
+<article-title>Zarr-Cesium: Client-side interactive 2D and 3D
+visualization of large multidimensional Zarr datasets in the
+browser</article-title>
+</title-group>
+<contrib-group>
+<contrib contrib-type="author">
+<contrib-id contrib-id-type="orcid">https://orcid.org/0000-0002-0888-9751</contrib-id>
+<name>
+<surname>Ferreira</surname>
+<given-names>Tobias</given-names>
+</name>
+<xref ref-type="aff" rid="aff-1"/>
+</contrib>
+<aff id="aff-1">
+<institution-wrap>
+<institution>National Oceanography Centre, UK</institution>
+</institution-wrap>
+</aff>
+</contrib-group>
+<pub-date date-type="pub" publication-format="electronic" iso-8601-date="2026-02-11">
+<day>11</day>
+<month>2</month>
+<year>2026</year>
+</pub-date>
+<volume>¿VOL?</volume>
+<issue>¿ISSUE?</issue>
+<fpage>¿PAGE?</fpage>
+<permissions>
+<copyright-statement>Authors of papers retain copyright and release the
+work under a Creative Commons Attribution 4.0 International License (CC
+BY 4.0)</copyright-statement>
+<copyright-year>1970</copyright-year>
+<copyright-holder>The article authors</copyright-holder>
+<license license-type="open-access" xlink:href="https://creativecommons.org/licenses/by/4.0/">
+<license-p>Authors of papers retain copyright and release the work under
+a Creative Commons Attribution 4.0 International License (CC BY
+4.0)</license-p>
+</license>
+</permissions>
+<kwd-group kwd-group-type="author">
+<kwd>visualization</kwd>
+<kwd>zarr</kwd>
+<kwd>cesium</kwd>
+<kwd>webgl</kwd>
+<kwd>geospatial</kwd>
+<kwd>multidimensional data</kwd>
+</kwd-group>
+</article-meta>
+</front>
+<body>
+<sec id="summary">
+  <title>Summary</title>
+  <p>Environmental sciences increasingly rely on multidimensional
+  datasets describing oceanic, atmospheric, and terrestrial systems
+  across space, depth, and time. Numerical models and remote sensing
+  products routinely produce terabyte-scale data cubes with dimensions
+  such as longitude, latitude, elevation, and time
+  (<xref alt="Eyring et al., 2016" rid="ref-cmip6" ref-type="bibr">Eyring
+  et al., 2016</xref>;
+  <xref alt="Hersbach et al., 2020" rid="ref-era5" ref-type="bibr">Hersbach
+  et al., 2020</xref>). These datasets are commonly stored in chunked,
+  cloud-optimized formats such as Zarr
+  (<xref alt="Zarr Developers, 2024" rid="ref-zarr" ref-type="bibr">Zarr
+  Developers, 2024</xref>), enabling scalable storage and parallel
+  analysis.</p>
+  <p>Although storage and computational frameworks have evolved to
+  support these multidimensional data structures
+  (<xref alt="Abernathey et al., 2021" rid="ref-abernathey2021cloud" ref-type="bibr">Abernathey
+  et al., 2021</xref>;
+  <xref alt="Zarr Developers, 2024" rid="ref-zarr" ref-type="bibr">Zarr
+  Developers, 2024</xref>), visualization workflows often transform them
+  into two-dimensional raster products for web delivery, separating
+  rendered outputs from the underlying data cube.</p>
+  <p><monospace>Zarr-Cesium</monospace> is a TypeScript library that
+  addresses these limitations. It enables interactive, browser-native
+  visualization of multidimensional Zarr datasets within a 3D geospatial
+  environment using CesiumJS
+  (<xref alt="CesiumGS, 2024" rid="ref-cesiumjs" ref-type="bibr">CesiumGS,
+  2024</xref>). The software streams chunked array data directly from
+  object storage into the browser and renders it using WebGL2, without
+  requiring backend services, tile-generation pipelines, or intermediate
+  raster products.</p>
+  <p>The toolkit supports 2D scalar fields, 3D volumetric slicing, and
+  animated vector fields. It is compatible with Zarr v2 and v3,
+  multiscale pyramids
+  (<xref alt="GeoZarr Developers, 2023" rid="ref-geozarr" ref-type="bibr">GeoZarr
+  Developers, 2023</xref>;
+  <xref alt="NDPyramid Developers, 2023" rid="ref-ndpyramid" ref-type="bibr">NDPyramid
+  Developers, 2023</xref>), and CF-compliant metadata conventions
+  (<xref alt="Eaton et al., 2025" rid="ref-cfconventions" ref-type="bibr">Eaton
+  et al., 2025</xref>). By integrating cloud-native data access with
+  GPU-accelerated rendering, <monospace>Zarr-Cesium</monospace> enables
+  interactive exploration of large scientific datasets directly from
+  their cloud-hosted storage.</p>
+</sec>
+<sec id="statement-of-need">
+  <title>Statement of Need</title>
+  <p>Although storage and computation frameworks have matured,
+  visualization workflows remain fragmented across several partially
+  overlapping ecosystems.</p>
+  <p>Scientific communication frequently relies on static figures or
+  screenshots, which flatten inherently multidimensional systems into
+  fixed two-dimensional views. Server-side tile-generation platforms
+  convert datasets into raster products through Web Map Service (WMS)
+  (<xref alt="Open Geospatial Consortium, 2006" rid="ref-ogcwms" ref-type="bibr">Open
+  Geospatial Consortium, 2006</xref>) or custom APIs, requiring
+  persistent backend infrastructure, preprocessing steps, and
+  operational maintenance. These workflows also duplicate data into
+  derived tile products, increasing storage requirements and separating
+  rendered output from its canonical source.</p>
+  <p>Three-dimensional visualization is frequently essential for
+  scientific interpretation. Many environmental processes exhibit strong
+  vertical structure, including ocean stratification and thermocline
+  variability, mixed-layer dynamics, and large-scale overturning
+  circulation
+  (<xref alt="Pickard &amp; Emery, 1990" rid="ref-pickard1990" ref-type="bibr">Pickard
+  &amp; Emery, 1990</xref>). Atmospheric systems similarly depend on
+  vertical structure, including boundary layer evolution and convection
+  (<xref alt="Stull, 1988" rid="ref-stull1988" ref-type="bibr">Stull,
+  1988</xref>). Horizontal maps alone can obscure depth-dependent
+  gradients, vertical shear, and subsurface anomalies that are central
+  to physical interpretation. Interpretation of velocity fields further
+  requires contextualizing transport pathways and circulation patterns
+  across depth and time
+  (<xref alt="Marshall &amp; Plumb, 1961" rid="ref-marshall1961atmosphere" ref-type="bibr">Marshall
+  &amp; Plumb, 1961</xref>).</p>
+  <p>As multidimensional datasets become standard in operational
+  modeling and reanalysis systems, there is a need for visualization
+  approaches that preserve their native structure rather than flattening
+  or duplicating them into derived products.</p>
+</sec>
+<sec id="statement-of-the-field">
+  <title>Statement of the Field</title>
+  <p>Existing visualization ecosystems address parts of this problem but
+  do not provide a unified client-side solution for multidimensional
+  Zarr datasets.</p>
+  <p>Server-side tile-generation platforms convert multidimensional
+  datasets into raster products exposed through WMS endpoints or custom
+  APIs. Systems such as GeoServer
+  (<xref alt="GeoServer Developers, 2024" rid="ref-geoserver" ref-type="bibr">GeoServer
+  Developers, 2024</xref>) and ncWMS
+  (<xref alt="Blower et al., 2013" rid="ref-blower2013ncwms" ref-type="bibr">Blower
+  et al., 2013</xref>) enable serving NetCDF-based datasets as map
+  layers but require persistent backend infrastructure and preprocessing
+  steps to generate tiles.</p>
+  <p>Cloud-native raster ecosystems based on Cloud-Optimized GeoTIFFs
+  (COGs)
+  (<xref alt="Open Geospatial Consortium, 2023" rid="ref-ogccog2023" ref-type="bibr">Open
+  Geospatial Consortium, 2023</xref>) enable efficient streaming of
+  large two-dimensional imagery products. Tools such as TiTiler
+  (<xref alt="Development Seed, 2023a" rid="ref-titiler" ref-type="bibr">Development
+  Seed, 2023a</xref>) provide scalable server-side generation of map
+  tiles directly from COGs. However, these approaches are fundamentally
+  oriented toward two-dimensional raster data. Extending them to
+  higher-dimensional data cubes typically requires precomputed slicing,
+  separate endpoints for each non-spatial dimension, or additional
+  backend logic to manage depth and time selection.</p>
+  <p>For Zarr datasets, backend tile-generation solutions such as
+  titiler-xarray
+  (<xref alt="Development Seed, 2023b" rid="ref-titilerxarray" ref-type="bibr">Development
+  Seed, 2023b</xref>) and xpublish-tiles
+  (<xref alt="Earthmover, 2025" rid="ref-xpublishtiles" ref-type="bibr">Earthmover,
+  2025</xref>) expose Zarr-backed arrays through tile APIs. While these
+  tools allow dynamic slicing of multidimensional data, they still
+  depend on server-side infrastructure to perform array access,
+  rasterization, and tile generation. Visualization therefore remains
+  mediated by backend services, and rendered products are transmitted as
+  image tiles rather than structured array subsets.</p>
+  <p>Client-side geospatial engines such as CesiumJS
+  (<xref alt="CesiumGS, 2024" rid="ref-cesiumjs" ref-type="bibr">CesiumGS,
+  2024</xref>) provide powerful 3D globe visualization but do not
+  natively support streaming and slicing of multidimensional chunked
+  array formats such as Zarr. Conversely, browser-based Zarr libraries
+  such as Zarrita
+  (<xref alt="Zarrita Developers, 2025" rid="ref-zarrita" ref-type="bibr">Zarrita
+  Developers, 2025</xref>) enable direct access to chunked arrays in
+  JavaScript but do not provide geospatial integration, volumetric
+  slicing, or GPU-based colormapping pipelines.</p>
+  <p>Consequently, no general-purpose framework currently supports
+  direct streaming of multidimensional Zarr arrays from object storage,
+  automatic interpretation of CF-compliant metadata, dynamic slice
+  computation in the browser, GPU-based rendering of scalar and vector
+  fields, and fully static deployment without backend services.
+  <monospace>Zarr-Cesium</monospace> fills this gap by integrating these
+  capabilities into a coherent client-side architecture.</p>
+</sec>
+<sec id="software-design">
+  <title>Software Design</title>
+  <p><monospace>Zarr-Cesium</monospace> is implemented in TypeScript and
+  organized around three primary provider classes:
+  <monospace>ZarrLayerProvider</monospace> for 2D scalar fields,
+  <monospace>ZarrCubeProvider</monospace> for 3D volumetric slicing, and
+  <monospace>ZarrCubeVelocityProvider</monospace> for animated vector
+  fields. These providers encapsulate data access, multidimensional
+  slicing logic, and rendering integration.</p>
+  <p>All providers access Zarr datasets via a browser-based
+  <monospace>FetchStore</monospace>, supporting HTTP range requests,
+  consolidated metadata, and both Zarr v2 and v3 specifications.
+  Multiscale pyramid datasets are detected through
+  <monospace>multiscales</monospace> metadata, and resolution levels are
+  selected dynamically based on view scale. A lightweight in-memory
+  cache maintains recently accessed multiscale levels.</p>
+  <p>Dimension identification is performed automatically using CF
+  <monospace>standard_name</monospace> attributes
+  (<xref alt="Eaton et al., 2025" rid="ref-cfconventions" ref-type="bibr">Eaton
+  et al., 2025</xref>) and configurable alias mappings. Geographic
+  bounds from Cesium tiles or camera extents are translated into array
+  index ranges, with automatic CRS detection between EPSG:4326 and
+  EPSG:3857. Zarr slice arguments are constructed dynamically, and
+  value-based selectors (e.g., timestamps or depths) are converted to
+  nearest-index selections.</p>
+  <p>To maintain interactivity, the system limits concurrent chunk
+  requests and uses <monospace>AbortController</monospace> instances to
+  cancel stale requests during rapid navigation. Only visible spatial
+  subsets are requested, and multiscale level selection reduces
+  resolution at broader zoom levels.</p>
+  <p>Rendering is performed using WebGL2. For scalar fields, float32
+  array subsets are uploaded as <monospace>R32F</monospace> textures and
+  processed in fragment shaders that apply scale-factor correction,
+  normalization, no-data masking, and dynamic colormapping. Because
+  scaling and colormapping occur on the GPU, visual parameters can be
+  adjusted without re-fetching data.</p>
+  <p>For volumetric cubes, array subsets are reshaped into ndarray
+  structures and horizontal or vertical slices are generated
+  dynamically. Textured Cesium <monospace>Primitive</monospace>
+  geometries are constructed, and elevation values are converted into
+  globe-compatible heights with optional vertical exaggeration or
+  subsurface offsets. Slices are regenerated when dimension selectors or
+  styling parameters change.</p>
+  <p>Velocity fields are handled by loading U and V components from
+  separate Zarr stores, extracting elevation slices, and passing the
+  data to the <monospace>cesium-wind-layer</monospace> library
+  (<xref alt="Cesium Wind Layer Developers, 2024" rid="ref-cesiumwindlayer" ref-type="bibr">Cesium
+  Wind Layer Developers, 2024</xref>) for particle-based animation.
+  Multiple elevation layers can be rendered simultaneously, enabling
+  stacked three-dimensional flow visualizations.</p>
+  <p>By combining selective chunk loading, multiscale resolution
+  management, GPU-based rendering, and minimal data duplication, the
+  architecture enables interactive exploration of datasets significantly
+  larger than browser memory limits. Performance is constrained
+  primarily by chunk size and network bandwidth rather than total
+  dataset size.</p>
+  <fig>
+    <caption><p>Representation of the workflow of the Zarr-Cesium
+    package, from tile request to WebGL layer generation on the
+    map.</p></caption>
+    <graphic mimetype="image" mime-subtype="png" xlink:href="package_workflow.png" />
+  </fig>
+</sec>
+<sec id="conclusion">
+  <title>Conclusion</title>
+  <p><monospace>Zarr-Cesium</monospace> integrates cloud-native chunked
+  storage access, CF-aware dimension resolution, multiscale pyramid
+  handling, and GPU-based rendering into a unified client-side
+  architecture.</p>
+  <p>The software does not introduce new rendering algorithms; rather,
+  it formalizes a reusable and deployment-friendly approach for
+  connecting multidimensional Zarr data directly to browser-based 3D
+  environments. By rendering array subsets in the browser without
+  intermediate rasterization or server-side preprocessing,
+  <monospace>Zarr-Cesium</monospace> preserves fidelity to the canonical
+  dataset stored in object storage and reduces ambiguity between
+  analysis products and visualization artifacts.</p>
+  <p>Beyond infrastructure considerations, this architecture supports
+  more transparent and exploratory analysis of inherently
+  multidimensional environmental systems. Interactive slicing and
+  dynamic rendering allow datasets to be examined in their full spatial
+  and temporal structure rather than as predefined two-dimensional
+  views. As cloud-native formats increasingly replace file-based
+  distribution models, coupling scalable storage with browser-native
+  visualization becomes an essential component of modern scientific
+  infrastructure. <monospace>Zarr-Cesium</monospace> contributes such a
+  component, supporting reproducible, interactive publication and
+  communication of environmental data.</p>
+</sec>
+<sec id="acknowledgements">
+  <title>Acknowledgements</title>
+  <p>This work builds upon the open-source efforts of the CesiumJS,
+  Zarrita, and cesium-wind-layer communities. Storage and testing
+  infrastructure were supported by JASMIN, the UK’s environmental data
+  analysis facility. The project forms part of the AtlantiS initiative
+  led by the National Oceanography Centre.</p>
+</sec>
+</body>
+<back>
+<ref-list>
+  <title></title>
+  <ref id="ref-era5">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Hersbach</surname><given-names>Hans</given-names></name>
+        <name><surname>Bell</surname><given-names>Bill</given-names></name>
+        <name><surname>Berrisford</surname><given-names>Paul</given-names></name>
+        <name><surname>Hirahara</surname><given-names>Shoji</given-names></name>
+        <name><surname>Horanyi</surname><given-names>Andras</given-names></name>
+        <name><surname>Munoz-Sabater</surname><given-names>Joaquin</given-names></name>
+        <name><surname>Nicolas</surname><given-names>Julien</given-names></name>
+        <name><surname>Peubey</surname><given-names>Caroline</given-names></name>
+        <name><surname>Radu</surname><given-names>Raluca</given-names></name>
+        <name><surname>Schepers</surname><given-names>Dinand</given-names></name>
+        <name><surname>others</surname></name>
+      </person-group>
+      <article-title>The ERA5 global reanalysis</article-title>
+      <source>Quarterly Journal of the Royal Meteorological Society</source>
+      <year iso-8601-date="2020">2020</year>
+      <volume>146</volume>
+      <issue>730</issue>
+      <pub-id pub-id-type="doi">10.1002/qj.3803</pub-id>
+      <fpage>1999</fpage>
+      <lpage>2049</lpage>
+    </element-citation>
+  </ref>
+  <ref id="ref-cmip6">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Eyring</surname><given-names>Veronika</given-names></name>
+        <name><surname>Bony</surname><given-names>Sandrine</given-names></name>
+        <name><surname>Meehl</surname><given-names>Gerald A.</given-names></name>
+        <name><surname>Senior</surname><given-names>Catherine A.</given-names></name>
+        <name><surname>Stevens</surname><given-names>Bjorn</given-names></name>
+        <name><surname>Stouffer</surname><given-names>Ronald J.</given-names></name>
+        <name><surname>Taylor</surname><given-names>Karl E.</given-names></name>
+      </person-group>
+      <article-title>Overview of the coupled model intercomparison project phase 6 (CMIP6)</article-title>
+      <source>Geoscientific Model Development</source>
+      <year iso-8601-date="2016">2016</year>
+      <volume>9</volume>
+      <pub-id pub-id-type="doi">10.5194/gmd-9-1937-2016</pub-id>
+      <fpage>1937</fpage>
+      <lpage>1958</lpage>
+    </element-citation>
+  </ref>
+  <ref id="ref-zarr">
+    <element-citation>
+      <person-group person-group-type="author">
+        <string-name>Zarr Developers</string-name>
+      </person-group>
+      <article-title>Zarr: Open standard for chunked, compressed n-dimensional arrays</article-title>
+      <year iso-8601-date="2024">2024</year>
+      <uri>https://zarr.dev/</uri>
+    </element-citation>
+  </ref>
+  <ref id="ref-abernathey2021cloud">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Abernathey</surname><given-names>Ryan</given-names></name>
+        <name><surname>Hamman</surname><given-names>Joe</given-names></name>
+        <name><surname>Lepore</surname><given-names>Chiara</given-names></name>
+        <name><surname>others</surname></name>
+      </person-group>
+      <article-title>Cloud-native repositories for big scientific data</article-title>
+      <source>Computing in Science &amp; Engineering</source>
+      <year iso-8601-date="2021">2021</year>
+      <volume>23</volume>
+      <issue>2</issue>
+      <pub-id pub-id-type="doi">10.1109/MCSE.2021.3059437</pub-id>
+      <fpage>26</fpage>
+      <lpage>35</lpage>
+    </element-citation>
+  </ref>
+  <ref id="ref-cesiumjs">
+    <element-citation>
+      <person-group person-group-type="author">
+        <string-name>CesiumGS</string-name>
+      </person-group>
+      <article-title>CesiumJS</article-title>
+      <year iso-8601-date="2024">2024</year>
+      <uri>https://cesium.com/platform/cesiumjs/</uri>
+    </element-citation>
+  </ref>
+  <ref id="ref-geozarr">
+    <element-citation>
+      <person-group person-group-type="author">
+        <string-name>GeoZarr Developers</string-name>
+      </person-group>
+      <article-title>GeoZarr specification</article-title>
+      <year iso-8601-date="2023">2023</year>
+      <uri>https://github.com/zarr-developers/geozarr-spec</uri>
+    </element-citation>
+  </ref>
+  <ref id="ref-ndpyramid">
+    <element-citation>
+      <person-group person-group-type="author">
+        <string-name>NDPyramid Developers</string-name>
+      </person-group>
+      <article-title>Ndpyramid: Multiscale pyramids for multidimensional arrays</article-title>
+      <year iso-8601-date="2023">2023</year>
+      <uri>https://github.com/carbonplan/ndpyramid</uri>
+    </element-citation>
+  </ref>
+  <ref id="ref-cfconventions">
+    <element-citation>
+      <person-group person-group-type="author">
+        <name><surname>Eaton</surname><given-names>Brian</given-names></name>
+        <name><surname>Gregory</surname><given-names>Jonathan</given-names></name>
+        <name><surname>Drach</surname><given-names>Bob</given-names></name>
+        <name><surname>Taylor</surname><given-names>Karl</given-names></name>
+        <name><surname>Hankin</surname><given-names>Steve</given-names></name>
+        <name><surname>Caron</surname><given-names>John</given-names></name>
+        <name><surname>Signell</surname><given-names>Rich</given-names></name>
+        <name><surname>Bentley</surname><given-names>Phil</given-names></name>
+        <name><surname>Rappa</surname><given-names>Greg</given-names></name>
+        <name><surname>Höck</surname><given-names>Heinke</given-names></name>
+        <name><surname>Pamment</surname><given-names>Alison</given-names></name>
+        <name><surname>Juckes</surname><given-names>Martin</given-names></name>
+        <name><surname>Raspaud</surname><given-names>Martin</given-names></name>
+        <name><surname>Blower</surname><given-names>Jon</given-names></name>
+        <name><surname>Horne</surname><given-names>Randy</given-names></name>
+        <name><surname>Whiteaker</surname><given-names>Timothy</given-names></name>
+        <name><surname>Blodgett</surname><given-names>David</given-names></name>
+        <name><surname>Zender</surname><given-names>Charlie</given-names></name>
+        <name><surname>Lee</surname><given-names>Daniel</given-names></name>
+        <name><surname>Hassell</surname><given-names>David</given-names></name>
+        <name><surname>Snow</surname><given-names>Alan D.</given-names></name>
+        <name><surname>Kölling</surname><given-names>Tobias</given-names></name>
+        <name><surname>Allured</surname><given-names>Dave</given-names></name>
+        <name><surname>Jelenak</surname><given-names>Aleksandar</given-names></name>
+        <name><surname>Soerensen</surname><given-names>Anders Meier</given-names></name>
+        <name><surname>Gaultier</surname><given-names>Lucile</given-names></name>
+        <name><surname>Herlédan</surname><given-names>Sylvain</given-names></name>
+        <name><surname>Manzano</surname><given-names>Fernando</given-names></name>
+        <name><surname>Bärring</surname><given-names>Lars</given-names></name>
+        <name><surname>Barker</surname><given-names>Christopher</given-names></name>
+        <name><surname>Bartholomew</surname><given-names>Sadie L.</given-names></name>
+        <name><surname>Lavergne</surname><given-names>Thomas</given-names></name>
+        <name><surname>Lawrence</surname><given-names>Bryan</given-names></name>
+        <name><surname>Massey</surname><given-names>Neil</given-names></name>
+        <name><surname>Cofiño</surname><given-names>Antonio S.</given-names></name>
+        <name><surname>McGinnis</surname><given-names>Seth</given-names></name>
+        <name><surname>Laake</surname><given-names>Patrick Van</given-names></name>
+      </person-group>
+      <article-title>NetCDF climate and forecast (CF) metadata conventions</article-title>
+      <publisher-name>CF Community</publisher-name>
+      <year iso-8601-date="2025-12">2025</year><month>12</month>
+      <uri>https://doi.org/10.5281/zenodo.17801666</uri>
+      <pub-id pub-id-type="doi">10.5281/zenodo.17801666</pub-id>
+    </element-citation>
+  </ref>
+  <ref id="ref-ogcwms">
+    <element-citation>
+      <person-group person-group-type="author">
+        <string-name>Open Geospatial Consortium</string-name>
+      </person-group>
+      <article-title>Web map service (WMS) implementation specification</article-title>
+      <year iso-8601-date="2006">2006</year>
+      <uri>https://www.ogc.org/standards/wms</uri>
+    </element-citation>
+  </ref>
+  <ref id="ref-pickard1990">
+    <element-citation publication-type="chapter">
+      <person-group person-group-type="author">
+        <name><surname>Pickard</surname><given-names>George L</given-names></name>
+        <name><surname>Emery</surname><given-names>William</given-names></name>
+      </person-group>
+      <article-title>Descriptive physical oceanography: An introduction</article-title>
+      <year iso-8601-date="1990-01">1990</year><month>01</month>
+      <isbn>075062759X</isbn>
+      <fpage>320</fpage>
+      <lpage></lpage>
+    </element-citation>
+  </ref>
+  <ref id="ref-stull1988">
+    <element-citation publication-type="book">
+      <person-group person-group-type="author">
+        <name><surname>Stull</surname><given-names>Roland B.</given-names></name>
+      </person-group>
+      <source>An introduction to boundary layer meteorology</source>
+      <publisher-name>Kluwer Academic Publishers</publisher-name>
+      <publisher-loc>Dordrecht</publisher-loc>
+      <year iso-8601-date="1988">1988</year>
+      <isbn>978-90-277-2768-8</isbn>
+      <pub-id pub-id-type="doi">10.1007/978-94-009-3027-8</pub-id>
+    </element-citation>
+  </ref>
+  <ref id="ref-marshall1961atmosphere">
+    <element-citation publication-type="book">
+      <person-group person-group-type="author">
+        <name><surname>Marshall</surname><given-names>John</given-names></name>
+        <name><surname>Plumb</surname><given-names>R Alan</given-names></name>
+      </person-group>
+      <source>Atmosphere, ocean and climate dynamics: An introductory text</source>
+      <publisher-name>Academic Press</publisher-name>
+      <year iso-8601-date="1961">1961</year>
+      <volume>2</volume>
+    </element-citation>
+  </ref>
+  <ref id="ref-geoserver">
+    <element-citation>
+      <person-group person-group-type="author">
+        <string-name>GeoServer Developers</string-name>
+      </person-group>
+      <article-title>GeoServer</article-title>
+      <year iso-8601-date="2024">2024</year>
+      <uri>https://geoserver.org</uri>
+    </element-citation>
+  </ref>
+  <ref id="ref-blower2013ncwms">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Blower</surname><given-names>J. D.</given-names></name>
+        <name><surname>Gemmell</surname><given-names>A. L.</given-names></name>
+        <name><surname>Griffiths</surname><given-names>G. H.</given-names></name>
+        <name><surname>Haines</surname><given-names>K.</given-names></name>
+        <name><surname>Santokhee</surname><given-names>A.</given-names></name>
+        <name><surname>Yang</surname><given-names>X.</given-names></name>
+      </person-group>
+      <article-title>A web map service implementation for the visualization of multidimensional gridded environmental data</article-title>
+      <source>Environmental Modelling &amp; Software</source>
+      <year iso-8601-date="2013">2013</year>
+      <volume>47</volume>
+      <issn>1364-8152</issn>
+      <pub-id pub-id-type="doi">https://doi.org/10.1016/j.envsoft.2013.04.002</pub-id>
+      <fpage>218</fpage>
+      <lpage>224</lpage>
+    </element-citation>
+  </ref>
+  <ref id="ref-ogccog2023">
+    <element-citation publication-type="report">
+      <person-group person-group-type="author">
+        <string-name>Open Geospatial Consortium</string-name>
+      </person-group>
+      <article-title>OGC Cloud Optimized GeoTIFF Standard</article-title>
+      <person-group person-group-type="editor">
+        <name><surname>Masó</surname><given-names>Joan</given-names></name>
+      </person-group>
+      <publisher-name>Open Geospatial Consortium</publisher-name>
+      <year iso-8601-date="2023">2023</year>
+      <uri>https://docs.ogc.org/is/21-026/21-026.html</uri>
+    </element-citation>
+  </ref>
+  <ref id="ref-titiler">
+    <element-citation>
+      <person-group person-group-type="author">
+        <string-name>Development Seed</string-name>
+      </person-group>
+      <article-title>TiTiler: A modern dynamic tile server for raster data</article-title>
+      <year iso-8601-date="2023">2023</year>
+      <uri>https://github.com/developmentseed/titiler</uri>
+    </element-citation>
+  </ref>
+  <ref id="ref-titilerxarray">
+    <element-citation>
+      <person-group person-group-type="author">
+        <string-name>Development Seed</string-name>
+      </person-group>
+      <article-title>Titiler-xarray</article-title>
+      <year iso-8601-date="2023">2023</year>
+      <uri>https://github.com/developmentseed/titiler-xarray</uri>
+    </element-citation>
+  </ref>
+  <ref id="ref-xpublishtiles">
+    <element-citation>
+      <person-group person-group-type="author">
+        <string-name>Earthmover</string-name>
+      </person-group>
+      <article-title>Xpublish-tiles</article-title>
+      <year iso-8601-date="2025">2025</year>
+      <uri>https://github.com/earth-mover/xpublish-tiles</uri>
+    </element-citation>
+  </ref>
+  <ref id="ref-zarrita">
+    <element-citation>
+      <person-group person-group-type="author">
+        <string-name>Zarrita Developers</string-name>
+      </person-group>
+      <article-title>Zarrita: A minimal &amp; modular zarr implementation in TypeScript</article-title>
+      <year iso-8601-date="2025">2025</year>
+      <uri>https://github.com/manzt/zarrita.js</uri>
+    </element-citation>
+  </ref>
+  <ref id="ref-cesiumwindlayer">
+    <element-citation>
+      <person-group person-group-type="author">
+        <string-name>Cesium Wind Layer Developers</string-name>
+      </person-group>
+      <article-title>Cesium-wind-layer</article-title>
+      <year iso-8601-date="2024">2024</year>
+      <uri>https://github.com/hongfaqiu/cesium-wind-layer</uri>
+    </element-citation>
+  </ref>
+</ref-list>
+</back>
+</article>

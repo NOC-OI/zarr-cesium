@@ -71,9 +71,8 @@ Velocity fields are handled by loading U and V components from separate Zarr sto
 
 By combining selective chunk loading, multiscale resolution management, GPU-based rendering, and minimal data duplication, the architecture enables interactive exploration of datasets significantly larger than browser memory limits. Performance is constrained primarily by chunk size and network bandwidth rather than total dataset size.
 
-![Representation of the package workflow](docs/assets/package_workflow.png)
-
-> Representation of the workflow of the `Zarr-Cesium` package, from tile request to WebGL layer generation on the map.
+![Representation of the workflow of the Zarr-Cesium package, from tile request to
+WebGL layer generation on the map.](assets/package_workflow.png)
 
 # Conclusion
 

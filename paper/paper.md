@@ -74,13 +74,15 @@ By combining selective chunk loading, multiscale resolution management, GPU-base
 ![Representation of the workflow of the Zarr-Cesium package, from tile request to
 WebGL layer generation on the map.](assets/package_workflow.png)
 
-# Conclusion
+# Research Impact Statement
 
-`Zarr-Cesium` integrates cloud-native chunked storage access, CF-aware dimension resolution, multiscale pyramid handling, and GPU-based rendering into a unified client-side architecture.
+`Zarr-Cesium` integrates cloud-native chunked storage access, CF-aware dimension resolution, multiscale pyramid handling, and GPU-based rendering into a unified client-side architecture. The software was developed to meet an operational need for interactive visualization of multidimensional Zarr datasets stored in object storage without server-side infrastructure. It serves as the core rendering engine of the AtlantiS visualisation tool at the National Oceanography Centre, enabling browser-based exploration of multidimensional oceanographic datasets in a 3D geospatial environment through fully client-side streaming and rendering. It has been released as an open-source TypeScript library to enable broader adoption across the environmental sciences and related domains.
 
-The software does not introduce new rendering algorithms; rather, it formalizes a reusable and deployment-friendly approach for connecting multidimensional Zarr data directly to browser-based 3D environments. By rendering array subsets in the browser without intermediate rasterization or server-side preprocessing, `Zarr-Cesium` preserves fidelity to the canonical dataset stored in object storage and reduces ambiguity between analysis products and visualization artifacts.
+`Zarr-Cesium` fills a clear gap in the ecosystem. No existing framework integrates client-side multidimensional slicing, CF-aware metadata interpretation, WebGL2-based GPU rendering, and CesiumJS 3D geospatial visualization into a unified, backend-free system. Beyond reducing infrastructure complexity, this architecture supports more transparent and exploratory analysis of inherently multidimensional environmental systems. Interactive slicing and dynamic rendering allow datasets to be examined in their full spatial and temporal structure rather than as predefined two-dimensional views. As cloud-native storage formats such as Zarr v3 and GeoZarr gain adoption, coupling scalable object storage with browser-native visualization becomes an essential component of modern scientific data dissemination. `Zarr-Cesium` provides such a component, lowering barriers to interactive publication and enabling reproducible, infrastructure-light access to large environmental datasets.
 
-Beyond infrastructure considerations, this architecture supports more transparent and exploratory analysis of inherently multidimensional environmental systems. Interactive slicing and dynamic rendering allow datasets to be examined in their full spatial and temporal structure rather than as predefined two-dimensional views. As cloud-native formats increasingly replace file-based distribution models, coupling scalable storage with browser-native visualization becomes an essential component of modern scientific infrastructure. `Zarr-Cesium` contributes such a component, supporting reproducible, interactive publication and communication of environmental data.
+# AI usage disclosure
+
+Portions of this manuscript were edited with the assistance of a large language model for clarity and structure. All technical content, software design decisions, and scientific claims were written and verified by the author. No AI-generated code was included in the software without manual review and testing.
 
 # Acknowledgements
 

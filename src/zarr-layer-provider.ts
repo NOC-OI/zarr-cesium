@@ -132,6 +132,7 @@ export class ZarrLayerProvider implements ImageryProvider {
     elevation: { selected: 0, type: 'index' }
   };
   private url: string;
+  private requestOverrides?: RequestInit;
   private variable: string;
   private zarrVersion: 2 | 3 | null = null;
   private crs: CRS | null = null;
@@ -177,6 +178,7 @@ export class ZarrLayerProvider implements ImageryProvider {
 
   constructor(options: LayerOptions) {
     this.url = options.url;
+    this.requestOverrides = options.requestOverrides;
     this.variable = options.variable;
     this._tilingScheme = new WebMercatorTilingScheme();
     this._coverageRectangle = this._tilingScheme.rectangle;
@@ -203,7 +205,9 @@ export class ZarrLayerProvider implements ImageryProvider {
 
   private async initialize(): Promise<boolean> {
     try {
-      this.store = new zarr.FetchStore(this.url);
+      this.store = new zarr.FetchStore(this.url, {
+        overrides: this.requestOverrides
+      });
       this.root = zarr.root(this.store);
 
       const { zarrArray, levelInfos, dimIndices, attrs } = await initZarrDataset(
@@ -368,7 +372,7 @@ export class ZarrLayerProvider implements ImageryProvider {
     ) {
       return false;
     }
-    if (scale) (this.colorScale.min = scale[0]), (this.colorScale.max = scale[1]);
+    if (scale) ((this.colorScale.min = scale[0]), (this.colorScale.max = scale[1]));
 
     if (colormap) {
       this.colormap = colormap;
@@ -632,9 +636,8 @@ export class ZarrLayerProvider implements ImageryProvider {
       const fracSouth = (intersection.south - tileRect.south) / (tileRect.north - tileRect.south);
       const fracNorth = (intersection.north - tileRect.south) / (tileRect.north - tileRect.south);
 
-      const { dataWidth, dataHeight, currentArray, multiscaleLevel } = await this.getArrayForLevel(
-        level
-      );
+      const { dataWidth, dataHeight, currentArray, multiscaleLevel } =
+        await this.getArrayForLevel(level);
 
       const { u0, u1, v0, v1 } = this.computeTileUVs(tileRect);
 

@@ -134,6 +134,7 @@ export interface LayerOptions {
   dimensionNames?: DimensionNamesProps;
   noDataMin?: number;
   noDataMax?: number;
+  requestOverrides?: RequestInit;
 }
 
 /**

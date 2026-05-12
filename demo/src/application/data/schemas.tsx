@@ -3,7 +3,7 @@ import { z } from 'zod';
 
 export interface ZarrCesiumFormProps {
   register: UseFormRegister<LayerFormType>;
-  control: Control<LayerFormType>;
+  control: Control<any>;
   errors?: any;
 }
 

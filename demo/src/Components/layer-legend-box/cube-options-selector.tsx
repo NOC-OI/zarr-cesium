@@ -189,7 +189,10 @@ export function CubeOptionsSelector({ layerLegendName }: LayerLegendBoxProps) {
               max={params.scale ? params.scale[1] + 10 : DEFAULT_SCALE[1] + 10}
               disableSwap
               step={0.1}
-              onChange={(_, v) => handleUpdateParams({ scale: v as [number, number] })}
+              onChange={(_, v) => {
+                if (!Array.isArray(v)) return;
+                handleUpdateParams({ scale: [v[0], v[1]] });
+              }}
               className="clickable"
               color="success"
             />

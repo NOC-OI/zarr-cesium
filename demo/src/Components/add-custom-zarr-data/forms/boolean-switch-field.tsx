@@ -3,7 +3,7 @@ import Switch from '@mui/material/Switch';
 import { FormRow } from '../../ui/form-row';
 
 interface BooleanSwitchFieldProps {
-  control: Control<any>;
+  control: Control;
   name: string;
   label: string;
   enabledLabel?: string;

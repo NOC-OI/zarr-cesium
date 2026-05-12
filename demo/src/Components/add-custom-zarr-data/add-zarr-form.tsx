@@ -110,14 +110,14 @@ export function AddZarrForm() {
 
         {/* Type-specific forms */}
         {dataType === 'zarr-cesium' && (
-          <ZarrCesiumForm register={register} control={control} errors={errors} />
+          <ZarrCesiumForm register={register} control={control as any} errors={errors} />
         )}
         {dataType === 'zarr-cube' && (
-          <ZarrCubeForm register={register} control={control} errors={errors} />
+          <ZarrCubeForm register={register} control={control as any} errors={errors} />
         )}
 
         {dataType === 'zarr-cube-velocity' && (
-          <ZarrCubeVelocityForm register={register} control={control} errors={errors} />
+          <ZarrCubeVelocityForm register={register} control={control as any} errors={errors} />
         )}
         <Button
           className="w-full text-white bg-black rounded-lg opacity-100 hover:opacity-80 flex justify-center items-center py-2! gap-2 clickable"

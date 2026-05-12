@@ -3,7 +3,7 @@ export function TextInput({
   label,
   value,
   name,
-  onInput,
+  onChange,
   placeholder,
   className,
   type = 'text'
@@ -12,7 +12,7 @@ export function TextInput({
   label?: string;
   value: string;
   name: string;
-  onInput: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
   type?: string;
   className?: string;
@@ -25,7 +25,7 @@ export function TextInput({
         name={name}
         type={type}
         value={value}
-        onInput={onInput}
+        onChange={onChange}
         placeholder={placeholder}
         className="w-full bg-transparent border-b border-white text-white placeholder-gray-300 focus:outline-none focus:border-yellow-400 transition duration-200"
       />

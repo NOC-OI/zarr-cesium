@@ -53,7 +53,8 @@ export function MapHome() {
           navigationHelpButton: false,
           baseLayer: Cesium.ImageryLayer.fromProviderAsync(
             Cesium.ArcGisMapServerImageryProvider.fromUrl(
-              'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer'
+              'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer',
+              {}
             )
           )
         });

@@ -118,7 +118,10 @@ export function CubeVelocityOptionsSelector({ layerLegendName }: LayerLegendBoxP
               max={params.scale ? params.scale[1] + 4 : DEFAULT_SCALE[1] + 4}
               disableSwap
               step={0.1}
-              onChange={(_, v) => handleUpdateParams({ scale: v as [number, number] })}
+              onChange={(_, v) => {
+                if (!Array.isArray(v)) return;
+                handleUpdateParams({ scale: [v[0], v[1]] });
+              }}
               className="clickable"
               color="success"
             />
@@ -147,9 +150,10 @@ export function CubeVelocityOptionsSelector({ layerLegendName }: LayerLegendBoxP
               min={0}
               max={20}
               disableSwap
-              onChange={(_, v) =>
-                updateWindOptions({ lineWidth: { min: v[0] as number, max: v[1] as number } })
-              }
+              onChange={(_, v) => {
+                if (!Array.isArray(v)) return;
+                updateWindOptions({ lineWidth: { min: v[0], max: v[1] } });
+              }}
               valueLabelDisplay="auto"
               valueLabelFormat={idx => idx}
               className="clickable"
@@ -174,9 +178,10 @@ export function CubeVelocityOptionsSelector({ layerLegendName }: LayerLegendBoxP
               min={0}
               max={1000}
               disableSwap
-              onChange={(_, v) =>
-                updateWindOptions({ lineLength: { min: v[0] as number, max: v[1] as number } })
-              }
+              onChange={(_, v) => {
+                if (!Array.isArray(v)) return;
+                updateWindOptions({ lineLength: { min: v[0], max: v[1] } });
+              }}
               valueLabelDisplay="auto"
               valueLabelFormat={idx => idx}
               className="clickable"

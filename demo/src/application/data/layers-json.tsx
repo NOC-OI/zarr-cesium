@@ -364,6 +364,18 @@ export const layersJson: LayersJsonType = {
           variable: 'sos_abs',
           scale: [30, 37]
         }
+      },
+      ts_mean: {
+        dataType: 'zarr-titiler',
+        dataDescription: ['Temperature', 'DegC'],
+        content:
+          'DCENT-I: A Globally Infilled Extension of the Dynamically Consistent ENsemble of Temperature Dataset',
+        params: {
+          url: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/dcenti-17/DCENT_I_1.0.0.0_mean_spread/ts_mean',
+          variable: 'ts_mean',
+          colormap: 'jet',
+          scale: [-5, 5]
+        }
       }
     }
   }

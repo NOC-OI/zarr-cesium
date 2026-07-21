@@ -69,6 +69,7 @@ This method:
 export interface LayerOptions {
   url: string; // Public Zarr store
   variable: string; // Zarr array name
+  latIsAscending?: boolean; // Optional override for latitude ordering (south->north if true)
   scale?: [number, number]; // Min/max for color scaling
   colormap?: ColorMapName; // Name from jsColormaps, based on matplotlib colormaps
   opacity?: number; // Imagery opacity (0–1)
@@ -84,6 +85,8 @@ export interface LayerOptions {
   noDataMax?: number; // Custom no-data maximum value. Overrides _FillValue/missing_value.
 }
 ```
+
+`latIsAscending` is optional. If omitted, the provider infers latitude orientation from the coordinate values loaded at startup.
 
 ---
 

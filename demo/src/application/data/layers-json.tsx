@@ -3,6 +3,78 @@ import type { LayersJsonType } from '../../types';
 export const layersJson: LayersJsonType = {
   'Zarr-cesium': {
     layerNames: {
+      sos_abs: {
+        dataType: 'zarr-cesium',
+        dataDescription: ['Salinity', ''],
+        content:
+          'Salinity outputs from NEMO NPD-EORCA1 model. This dataset contains 3D data (time, latitude, longitude) stored in a Zarr v2 format and EPSG:4326 coordinate reference system.',
+        params: {
+          url: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/noc-npd-era5-demov2/prod8/eorca025_T/T1m_3d/sos_abs',
+          variable: 'sos_abs',
+          scale: [30, 37],
+          crs: 'EPSG:4326',
+          zarrVersion: 3,
+          colormap: 'inferno',
+          multiscaleFormat: 'geozarr',
+          latIsAscending: true,
+        }
+      },
+      so_abs: {
+        dataType: 'zarr-cesium',
+        dataDescription: ['Salinity', ''],
+        content:
+          'Salinity outputs from NEMO NPD-EORCA1 model. This dataset contains 3D data (time, latitude, longitude) stored in a Zarr v2 format and EPSG:4326 coordinate reference system.',
+        params: {
+          url: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/noc-npd-era5-demov2/prod9/eorca1_T/T1m/so_abs',
+          variable: 'so_abs',
+          scale: [30, 37],
+          crs: 'EPSG:4326',
+          zarrVersion: 3,
+          colormap: 'inferno',
+          multiscaleFormat: 'geozarr',
+          latIsAscending: true,
+        }
+      },
+      ssh: {
+        dataType: 'zarr-cesium',
+        dataDescription: ['Salinity', ''],
+        content:
+          'Salinity outputs from NEMO NPD-EORCA1 model. This dataset contains 3D data (time, latitude, longitude) stored in a Zarr v2 format with a multiscale pyramid structure and EPSG:3857 coordinate reference system.',
+        params: {
+          url: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/nemotest101/ssh_25.zarr',
+          variable: 'ssh',
+          zarrVersion: 3,
+          colormap: 'inferno',
+          scale: [-0.1, 0.2],
+          crs: 'EPSG:4326',
+          opacity: undefined,
+          dimensionNames: undefined,
+          tileWidth: undefined,
+          tileHeight: undefined,
+          minimumLevel: undefined,
+          maximumLevel: undefined
+        }
+      },
+      ssh1: {
+        dataType: 'zarr-cesium',
+        dataDescription: ['Salinity', ''],
+        content:
+          'Salinity outputs from NEMO NPD-EORCA1 model. This dataset contains 3D data (time, latitude, longitude) stored in a Zarr v2 format with a multiscale pyramid structure and EPSG:3857 coordinate reference system.',
+        params: {
+          url: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/nemotest101/ndpyramid_ssh_8.zarr',
+          variable: 'ssh',
+          zarrVersion: 3,
+          colormap: 'inferno',
+          scale: [-0.1, 0.2],
+          crs: 'EPSG:3857',
+          opacity: undefined,
+          dimensionNames: undefined,
+          tileWidth: undefined,
+          tileHeight: undefined,
+          minimumLevel: undefined,
+          maximumLevel: undefined
+        }
+      },
       salinity_pyramid_v2: {
         dataType: 'zarr-cesium',
         dataDescription: ['Salinity', ''],
@@ -364,7 +436,22 @@ export const layersJson: LayersJsonType = {
           variable: 'sos_abs',
           scale: [30, 37]
         }
-      }
+      },
+      ts_mean: {
+        dataType: 'zarr-titiler',
+        dataDescription: ['Temperature', 'DegC'],
+        content:
+          'DCENT-I: A Globally Infilled Extension of the Dynamically Consistent ENsemble of Temperature Dataset',
+        params: {
+          url: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/dcenti-17/DCENT_I_1.0.0.0_mean_spread/ts_mean',
+          variable: 'ts_mean',
+          colormap: 'jet',
+          scale: [-5, 5]
+        }
+      },
     }
+  },
+  stac: {
+    layerNames: {}
   }
 };

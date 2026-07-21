@@ -36,6 +36,14 @@ optional dimensionNames: DimensionNamesProps;
 
 ***
 
+### latIsAscending?
+
+```ts
+optional latIsAscending: boolean;
+```
+
+***
+
 ### maximumLevel?
 
 ```ts

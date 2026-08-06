@@ -169,6 +169,7 @@ export class ZarrLayerProvider implements ImageryProvider {
   private levelCache = new Map();
   private levelMetadata: Map<number, ZarrLevelMetadata> = new Map();
   private xyLimits: XYLimits | null = null;
+  private geographicLonOffset360: { west: number; span: number } | null = null;
   private colormap: ColorMapName;
   private gl: WebGL2RenderingContext | null = null;
   private program: WebGLProgram | null = null;
@@ -256,6 +257,24 @@ export class ZarrLayerProvider implements ImageryProvider {
       this.scaleFactor = attrs.scale_factor ?? 1;
       this.offset = attrs.add_offset ?? 0;
       this.crs = this.crs || (await detectCRS(attrs, zarrArray));
+
+      if (this.crs === 'EPSG:4326' && this.xyLimits) {
+        const lonCount = zarrArray.shape[dimIndices.lon.index];
+        const lonSpan = this.xyLimits.xMax - this.xyLimits.xMin;
+        const lonStep = lonCount > 1 ? lonSpan / (lonCount - 1) : 0;
+        const globalTolerance = Math.max(lonStep * 1.5, 1e-3);
+        const wrapsZeroTo360 =
+          this.xyLimits.xMin >= -globalTolerance &&
+          this.xyLimits.xMax <= 360 + globalTolerance &&
+          this.xyLimits.xMax >= 180 - globalTolerance;
+        const isGlobal = lonStep > 0 && lonSpan >= 360 - lonStep - globalTolerance;
+
+        if (wrapsZeroTo360 && isGlobal) {
+          const west = this.xyLimits.xMin - lonStep / 2;
+          const span = lonSpan + lonStep;
+          this.geographicLonOffset360 = { west, span };
+        }
+      }
 
       const { rectangle, tilingScheme } = deriveRectangleAndScheme(
         this.crs,
@@ -590,6 +609,28 @@ export class ZarrLayerProvider implements ImageryProvider {
     const tEast = toDeg(tileRect.east);
     const tSouth = toDeg(tileRect.south);
     const tNorth = toDeg(tileRect.north);
+
+    if (this.crs === 'EPSG:4326' && this.geographicLonOffset360) {
+      const normalizeLon360 = (lon: number) => ((lon % 360) + 360) % 360;
+      const { west: dataWest, span: dataSpan } = this.geographicLonOffset360;
+
+      let lonWest = normalizeLon360(tWest);
+      let lonEast = normalizeLon360(tEast);
+      if (lonWest < dataWest) lonWest += 360;
+      if (lonEast < dataWest) lonEast += 360;
+      if (lonEast <= lonWest) lonEast += 360;
+
+      return {
+        u0: clamp((lonWest - dataWest) / dataSpan),
+        u1: clamp((lonEast - dataWest) / dataSpan),
+        v0: this.latAscending
+          ? clamp((tSouth - south) / (north - south))
+          : clamp((north - tNorth) / (north - south)),
+        v1: this.latAscending
+          ? clamp((tNorth - south) / (north - south))
+          : clamp((north - tSouth) / (north - south))
+      };
+    }
 
     return {
       u0: clamp((tWest - west) / (east - west)),

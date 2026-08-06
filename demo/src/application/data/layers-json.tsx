@@ -450,8 +450,5 @@ export const layersJson: LayersJsonType = {
         }
       },
     }
-  },
-  stac: {
-    layerNames: {}
   }
 };

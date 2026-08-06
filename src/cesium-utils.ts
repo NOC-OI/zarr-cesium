@@ -137,6 +137,13 @@ export function latDegToMercY(latDeg: number) {
 }
 
 /**
+ * Normalizes longitude to the [-180, 180) interval.
+ */
+function normalizeLongitudeTo180(lonDeg: number): number {
+  return ((((lonDeg + 180) % 360) + 360) % 360) - 180;
+}
+
+/**
  * Computes a Cesium {@link Rectangle} and {@link TilingScheme} for a Zarr dataset.
  *
  * @remarks
@@ -180,9 +187,19 @@ export function deriveRectangleAndScheme(
       (yMax - yMin) / (levelMetadata.get(0)?.height ?? zarrArray.shape[dimIndices.lat.index] - 1);
 
     if (crs === 'EPSG:4326') {
-      if (xMin > 180 || xMax > 180) {
-        xMin = ((xMin + 180) % 360) - 180;
-        xMax = ((xMax + 180) % 360) - 180;
+      const span = xMax - xMin;
+      const globalSpanTolerance = 1e-3;
+      const wrapsZeroTo360 = xMin >= -globalSpanTolerance && xMax <= 360 + globalSpanTolerance;
+      const touchesPrimeWrap =
+        xMin <= dx + globalSpanTolerance && xMax >= 360 - dx - globalSpanTolerance;
+
+      // Treat wrapped global domains (e.g. 0..360 or center-sampled 0..359) as full-world coverage.
+      if (span >= 360 - globalSpanTolerance || (wrapsZeroTo360 && touchesPrimeWrap)) {
+        xMin = -180;
+        xMax = 180;
+      } else if (xMin > 180 || xMax > 180) {
+        xMin = normalizeLongitudeTo180(xMin);
+        xMax = normalizeLongitudeTo180(xMax);
         if (xMin > xMax) {
           const temp = xMin;
           xMin = xMax;

@@ -261,7 +261,7 @@ const imageryLayer = Cesium.ImageryLayer.fromProviderAsync(Cesium.IonImageryProv
 viewer.imageryLayers.add(imageryLayer);
 
 imageryLayer.readyEvent.addEventListener(provider => {
-  imageryLayer.provider.errorEvent.addEventListener(error => {
+  imageryLayer.imageryProvider.errorEvent.addEventListener(error => {
     alert(`Encountered an error while loading imagery tiles! ${error}`);
   });
 });
@@ -316,7 +316,7 @@ const imageryLayer = Cesium.ImageryLayer.fromWorldImagery();
 viewer.imageryLayers.add(imageryLayer);
 
 imageryLayer.readyEvent.addEventListener(provider => {
-  imageryLayer.provider.errorEvent.addEventListener(error => {
+  imageryLayer.imageryProvider.errorEvent.addEventListener(error => {
     alert(`Encountered an error while loading imagery tiles! ${error}`);
   });
 });
@@ -453,6 +453,24 @@ The alpha blending value of this layer on the day side of the globe, with 0.0 re
 
 ```ts
 ImageryLayer.dayAlpha
+```
+
+***
+
+### errorEvent
+
+```ts
+readonly errorEvent: Event<ErrorEventCallback>;
+```
+
+Gets an event that is raised when the imagery provider encounters an asynchronous error.  By subscribing
+to the event, you will be notified of the error and can potentially recover from it.  Event listeners
+are passed an instance of the thrown error.
+
+#### Inherited from
+
+```ts
+ImageryLayer.errorEvent
 ```
 
 ***

@@ -22,7 +22,7 @@
     "dev": "tsup src/index.ts --format cjs,esm --dts --sourcemap --watch",
     "build": "tsup src/index.ts --format esm --dts --sourcemap --external cesium",
     "clean": "rm -rf dist",
-    "docs": "typedoc",
+    "docs": "npm --prefix docs run build",
     "start:demo": "cd demo && npm run dev"
   },
   "peerDependencies": {

@@ -10,8 +10,8 @@ Finds the index of the value in `values` nearest to `target`.
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `values` | `number`[] \| `Float64Array`\<`ArrayBufferLike`\> | Array of numeric values. |
-| `target` | `number` | Target value to find. |
+| `values` | `number`[] \| `string`[] \| `Float64Array`\<`ArrayBufferLike`\> | Array of numeric values. |
+| `target` | `string` \| `number` | Target value to find. |
 
 ## Returns
 

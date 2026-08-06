@@ -262,6 +262,13 @@ export interface CubeVelocityProps {
   dimensionValues: DimensionValues;
 }
 
+/**
+ * Supported multiscale metadata layouts.
+ *
+ * - `auto` detects the layout from the dataset metadata.
+ * - `legacy` uses the original ndpyramid-style level ordering.
+ * - `geozarr` and `topozarr` use GeoZarr-style level ordering.
+ */
 export type MultiscaleFormat = 'auto' | 'legacy' | 'geozarr' | 'topozarr';
 
 /**

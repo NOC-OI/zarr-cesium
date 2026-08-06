@@ -58,11 +58,6 @@ export function MapHome() {
             )
           )
         });
-        // // fly the camera to the rectangle x 2.345713906411712 2.6005139064117113 and y 6.344039449758865 6.540439449758864
-        // const rectangle = Cesium.Rectangle.fromDegrees(2.345713906411712, 6.344039449758865, 2.6005139064117113, 6.540439449758864);
-        // viewerRef.current.camera.flyTo({
-        //   destination: rectangle
-        // });
         setLoading(false);
       }
     },

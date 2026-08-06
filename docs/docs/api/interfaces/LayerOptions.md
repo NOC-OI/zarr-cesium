@@ -60,6 +60,14 @@ optional minimumLevel: number;
 
 ***
 
+### multiscaleFormat?
+
+```ts
+optional multiscaleFormat: MultiscaleFormat;
+```
+
+***
+
 ### noDataMax?
 
 ```ts
@@ -80,6 +88,14 @@ optional noDataMin: number;
 
 ```ts
 optional opacity: number;
+```
+
+***
+
+### requestOverrides?
+
+```ts
+optional requestOverrides: RequestInit;
 ```
 
 ***

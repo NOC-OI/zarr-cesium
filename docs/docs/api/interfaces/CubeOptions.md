@@ -84,6 +84,14 @@ optional flipElevation: boolean;
 
 ***
 
+### multiscaleFormat?
+
+```ts
+optional multiscaleFormat: MultiscaleFormat;
+```
+
+***
+
 ### multiscaleLevel?
 
 ```ts

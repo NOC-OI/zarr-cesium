@@ -95,6 +95,5 @@ Built with:
 - [CesiumJS](https://cesium.com/platform/cesiumjs/)
 - [zarrita.js](https://zarrita.dev/)
 - [cesium-wind-layer](https://github.com/hongfaqiu/cesium-wind-layer)
-- [ndpyramid](https://github.com/carbonplan/ndpyramid)
 
 **Developed at the `National Oceanography Centre (NOC)` as part of the `Atlantis` project.**

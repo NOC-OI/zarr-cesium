@@ -44,7 +44,9 @@
 | [createColorRampTexture](functions/createColorRampTexture.md) | Creates a flexible 1D color-ramp texture supporting either normalized (0–1) or integer (0–255) color definitions. |
 | [createProgram](functions/createProgram.md) | Creates and links a WebGL program using the specified vertex and fragment shaders. |
 | [createShader](functions/createShader.md) | Creates and compiles a WebGL shader from source code. |
+| [decodeCFTime](functions/decodeCFTime.md) | Decodes CF-compliant time coordinate values into ISO date strings. |
 | [deriveRectangleAndScheme](functions/deriveRectangleAndScheme.md) | Computes a Cesium [Rectangle](https://cesium.com/learn/cesiumjs/ref-doc/Rectangle.html) and [TilingScheme](https://cesium.com/learn/cesiumjs/ref-doc/TilingScheme.html) for a Zarr dataset. |
+| [detectBrowser](functions/detectBrowser.md) | Detects the current browser based on the user agent string. |
 | [detectCRS](functions/detectCRS.md) | Detects the coordinate reference system (CRS) of a Zarr dataset based on metadata or coordinate range. Defaults to EPSG:4326 (WGS84) if uncertain. |
 | [extractNoDataMetadata](functions/extractNoDataMetadata.md) | Extracts no-data related metadata from a Zarr array's attributes. |
 | [getCubeDimensions](functions/getCubeDimensions.md) | Computes cube dimension ordering and strides based on dimension indices. Useful for reshaping 3D Zarr arrays into Cesium-renderable layouts. |
@@ -55,6 +57,7 @@
 | [loadDimensionValues](functions/loadDimensionValues.md) | Loads the coordinate values for a specific dimension. |
 | [lonDegToMercX](functions/lonDegToMercX.md) | Converts a longitude in degrees into a Web Mercator X coordinate (meters). |
 | [openLevelArray](functions/openLevelArray.md) | Opens and caches a specific multiscale level array. Keeps a small LRU-style cache of up to three levels. |
+| [parseCFUnits](functions/parseCFUnits.md) | Parses a CF-compliant units string into its components. |
 | [resolveNoDataRange](functions/resolveNoDataRange.md) | Resolves the no-data value range for masking dataset values. |
 | [updateImgData](functions/updateImgData.md) | Updates an [ImageData](https://developer.mozilla.org/en-US/docs/Web/API/ImageData) object with a new pixel color derived from a numeric value and a [ColorScaleProps](interfaces/ColorScaleProps.md) colormap. |
 | [validateBounds](functions/validateBounds.md) | Validates whether geographic bounds are logically consistent. |
@@ -63,6 +66,10 @@
 
 | Type Alias | Description |
 | ------ | ------ |
+| [BrowserName](type-aliases/BrowserName.md) | Supported browser names for compatibility checks. |
+| [CalendarDate](type-aliases/CalendarDate.md) | Represents a date in a calendar system. |
+| [CFCalendar](type-aliases/CFCalendar.md) | Supported CF calendar types. |
 | [ColorMapName](type-aliases/ColorMapName.md) | Type representing valid color map names. The values are derived from the `allColorScales` array imported from the `jsColormaps` module and are based on matplotlib colormap (https://matplotlib.org/stable/users/explain/colors/colormaps.html). |
 | [CRS](type-aliases/CRS.md) | Supported Coordinate Reference Systems. |
+| [MultiscaleFormat](type-aliases/MultiscaleFormat.md) | Supported multiscale metadata layouts. |
 | [SliceArgs](type-aliases/SliceArgs.md) | Represents a multidimensional slice argument for Zarr array indexing. |

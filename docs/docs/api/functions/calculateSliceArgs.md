@@ -11,9 +11,7 @@ function calculateSliceArgs(
    levelInfo, 
    zarrVersion, 
    updateDimensionValues): Promise<{
-  dimensionValues: {
-   [key: string]: number[] | Float64Array<ArrayBufferLike>;
-  };
+  dimensionValues: DimensionValues;
   selectors: {
    [key: string]: ZarrSelectorsProps;
   };
@@ -37,7 +35,7 @@ This function:
 | `dataSlice` | [`DataSliceProps`](../interfaces/DataSliceProps.md) | `undefined` | Pixel-space slice ranges `{ startX, endX, startY, endY, startElevation?, endElevation? }` (see [DataSliceProps](../interfaces/DataSliceProps.md)). |
 | `dimIndices` | [`DimIndicesProps`](../interfaces/DimIndicesProps.md) | `undefined` | Mapping of dimension names → indices as returned by `identifyDimensionIndices` (see [DimIndicesProps](../interfaces/DimIndicesProps.md)). |
 | `selectors` | \{ \[`key`: `string`\]: [`ZarrSelectorsProps`](../interfaces/ZarrSelectorsProps.md); \} | `undefined` | User-provided selection map (lat/lon/elevation/time/etc.). See [ZarrSelectorsProps](../interfaces/ZarrSelectorsProps.md). |
-| `dimensionValues` | \{ \[`key`: `string`\]: `number`[] \| `Float64Array`\<`ArrayBufferLike`\>; \} | `undefined` | Cache of already-loaded coordinate arrays (mutated by this function). |
+| `dimensionValues` | [`DimensionValues`](../interfaces/DimensionValues.md) | `undefined` | Cache of already-loaded coordinate arrays (mutated by this function). |
 | `root` | `Location`\<`FetchStore`\> | `undefined` | Root Zarr group location. |
 | `levelInfo` | `string` \| `null` | `undefined` | Optional multiscale subpath. |
 | `zarrVersion` | `2` \| `3` \| `null` | `undefined` | Zarr version (2 or 3). |
@@ -46,9 +44,7 @@ This function:
 ## Returns
 
 `Promise`\<\{
-  `dimensionValues`: \{
-   \[`key`: `string`\]: `number`[] \| `Float64Array`\<`ArrayBufferLike`\>;
-  \};
+  `dimensionValues`: [`DimensionValues`](../interfaces/DimensionValues.md);
   `selectors`: \{
    \[`key`: `string`\]: [`ZarrSelectorsProps`](../interfaces/ZarrSelectorsProps.md);
   \};

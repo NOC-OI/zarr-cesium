@@ -175,7 +175,7 @@ Dimension coordinate arrays (e.g. lat, lon, elevation).
 #### Index Signature
 
 ```ts
-[key: string]: number[] | Float64Array<ArrayBufferLike>
+[key: string]: number[] | string[] | Float64Array<ArrayBufferLike>
 ```
 
 ***

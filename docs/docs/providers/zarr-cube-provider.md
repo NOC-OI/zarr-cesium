@@ -352,30 +352,3 @@ Destroy and free resources:
 ```ts
 cube.destroy();
 ```
-
----
-
-# Summary
-
-| Feature                   | Supported |
-| ------------------------- | --------- |
-| 3D Zarr volume            | ✔️        |
-| Zarr v2 and v3            | ✔️        |
-| Horizontal slices         | ✔️        |
-| Vertical latitude slices  | ✔️        |
-| Vertical longitude slices | ✔️        |
-| Multiscale pyramids       | ✔️        |
-| GeoZarr / TopoZarr        | ✔️        |
-| CF time decoding          | ✔️        |
-| Dynamic dimension slicing | ✔️        |
-| GPU colormap rendering    | ✔️        |
-| Vertical exaggeration     | ✔️        |
-| Below-sea-level display   | ✔️        |
-
----
-
-## Next Steps
-
-- **[ZarrLayerProvider](./zarr-layer-provider.md)** – 2D raster rendering
-- **[ZarrCubeVelocityProvider](./zarr-cube-velocity-provider.md)** – 3D vector fields
-- **[Data Preparation](../data.md)** – Preparing Zarr datasets for browser visualization

@@ -96,4 +96,4 @@ Built with:
 - [zarrita.js](https://zarrita.dev/)
 - [cesium-wind-layer](https://github.com/hongfaqiu/cesium-wind-layer)
 
-**Developed at the `National Oceanography Centre (NOC)` as part of the `Atlantis` project.**
+**Developed at the [National Oceanography Centre (NOC)](https://www.noc.ac.uk/) as part of the [Atlantis](https://atlantis.ac.uk/) project.**

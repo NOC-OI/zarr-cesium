@@ -326,36 +326,3 @@ zbLayer.destroy();
 ```
 
 It is important to call `destroy()` after removing the layer from the viewer, because this cleans up all internal resources (abort pending requests, etc.).
-
----
-
-## Summary
-
-| Feature             | Supported |
-| ------------------- | --------- |
-| 2D raster Zarr      | ✔️        |
-| Zarr v2 & v3        | ✔️        |
-| Time dimension      | ✔️        |
-| Elevation/depth     | ✔️        |
-| Multiscale pyramids | ✔️        |
-| GeoZarr / TopoZarr  | ✔️        |
-| CF time decoding    | ✔️        |
-| Ascending latitude  | ✔️        |
-| Global 0…360 grids  | ✔️        |
-| Protected stores    | ✔️        |
-| WebGL GPU shading   | ✔️        |
-| Colormap updates    | ✔️        |
-| Dynamic slicing     | ✔️        |
-| CRS auto-detection  | ✔️        |
-
----
-
-## Next Steps
-
-- **[ZarrCubeProvider](./zarr-cube-provider.md)** – render 3D volumes
-- **[ZarrCubeVelocityProvider](./zarr-cube-velocity-provider.md)** – render vector fields
-- **[Data Preparation](../data.md)** – Prepare Zarr datasets for the browser
-
-```
-
-```

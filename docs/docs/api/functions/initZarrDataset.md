@@ -9,7 +9,7 @@ function initZarrDataset(
    levelMetadata, 
    levelCache, 
    zarrVersion, 
-   multiscaleLevel?,
+   multiscaleLevel?, 
    multiscaleFormat?): Promise<{
   attrs: Record<string, any>;
   dimIndices: DimIndicesProps;

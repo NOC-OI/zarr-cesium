@@ -9,10 +9,14 @@ The **ZarrLayerProvider** allows you to render **2D raster data from Zarr datase
 It handles:
 
 - Reading Zarr metadata and multiscale pyramids
+- Legacy ndpyramid, GeoZarr, and TopoZarr multiscale layouts
 - WebGL rendering of tiles (fast GPU-based color mapping)
 - Dynamic slicing of dimensions (e.g., time, elevation)
+- CF-compliant time decoding
 - Runtime style updates (colormap, scale, opacity)
 - CRS detection (`EPSG:4326` / `EPSG:3857`)
+- Ascending or descending latitude axes and wrapped `0…360` longitude grids
+- Custom fetch options for authenticated or protected stores
 - Smooth integration with Cesium’s `ImageryLayer` collection
 
 This provider works as a drop-in replacement for Cesium imagery layers, enabling you to visualize 2D scalar fields (e.g., temperature, salinity, chlorophyll) stored in Zarr format, without any server-side preprocessing or conversion.
@@ -69,6 +73,7 @@ This method:
 export interface LayerOptions {
   url: string; // Public Zarr store
   variable: string; // Zarr array name
+  latIsAscending?: boolean; // Optional override for latitude ordering (south->north if true)
   scale?: [number, number]; // Min/max for color scaling
   colormap?: ColorMapName; // Name from jsColormaps, based on matplotlib colormaps
   opacity?: number; // Imagery opacity (0–1)
@@ -82,8 +87,16 @@ export interface LayerOptions {
   crs?: 'EPSG:4326' | 'EPSG:3857'; // Force CRS (auto-detected if not set)
   noDataMin?: number; // Custom no-data minimum value. Overrides _FillValue/missing_value.
   noDataMax?: number; // Custom no-data maximum value. Overrides _FillValue/missing_value.
+  requestOverrides?: RequestInit; // Fetch options for protected stores, headers, credentials, etc.
+  multiscaleFormat?: MultiscaleFormat; // Metadata layout; defaults to 'auto'.
 }
 ```
+
+`latIsAscending` is optional. If omitted, the provider infers latitude orientation from the coordinate values loaded at startup.
+
+Time coordinates with CF units such as `hours since 2000-01-01 00:00:00`
+are exposed as ISO date strings in `dimensionValues`. This allows a time
+selector to use either an index or a decoded value.
 
 ---
 
@@ -135,6 +148,12 @@ For example, you can set the CRS explicitly:
 crs: 'EPSG:3857';
 ```
 
+Regular global `EPSG:4326` grids using either `-180…180` or `0…360`
+longitudes are supported. A global `0…360` domain is exposed to Cesium as
+full-world coverage and tile requests are mapped back to the wrapped source
+coordinates. Latitude orientation is inferred automatically; use
+`latIsAscending` only when the coordinate metadata is missing or incorrect.
+
 ---
 
 ## Multiscale Support
@@ -158,7 +177,53 @@ The provider automatically:
 - correctly slices each level
 - uses metadata-supported shapes for accurate scaling
 
-No extra configuration is required.
+By default, `multiscaleFormat: 'auto'` detects level paths from either the
+original ndpyramid-style metadata or GeoZarr metadata. Set the format
+explicitly for GeoZarr/TopoZarr pyramids so automatic zoom selection also uses
+their full-to-coarse level ordering:
+
+```ts
+const options = {
+  // ...
+  multiscaleFormat: 'geozarr' // 'auto' | 'legacy' | 'geozarr' | 'topozarr'
+};
+```
+
+GeoZarr and TopoZarr use a `layout` array with `asset` paths instead of the
+legacy `datasets` array with `path` values. They also commonly place full
+resolution at level `0`, the opposite of the legacy layout. With
+`multiscaleFormat: 'geozarr'` or `'topozarr'`, the provider maps that ordering
+correctly when selecting a level for a Cesium zoom.
+
+For example, GeoZarr-style metadata is shaped like:
+
+```json
+{
+  "multiscales": {
+    "layout": [
+      { "asset": "0" },
+      { "asset": "1" },
+      { "asset": "2" }
+    ]
+  }
+}
+```
+
+## Protected Stores and Request Options
+
+Use `requestOverrides` to pass standard `RequestInit` options to requests made
+for the Zarr store. This is useful for credentials or authorization headers:
+
+```ts
+const options = {
+  url: 'https://example.com/protected.zarr',
+  variable: 'temperature',
+  requestOverrides: {
+    credentials: 'include',
+    headers: { Authorization: `Bearer ${token}` }
+  }
+};
+```
 
 ---
 
@@ -261,31 +326,3 @@ zbLayer.destroy();
 ```
 
 It is important to call `destroy()` after removing the layer from the viewer, because this cleans up all internal resources (abort pending requests, etc.).
-
----
-
-## Summary
-
-| Feature             | Supported |
-| ------------------- | --------- |
-| 2D raster Zarr      | ✔️        |
-| Zarr v2 & v3        | ✔️        |
-| Time dimension      | ✔️        |
-| Elevation/depth     | ✔️        |
-| Multiscale pyramids | ✔️        |
-| WebGL GPU shading   | ✔️        |
-| Colormap updates    | ✔️        |
-| Dynamic slicing     | ✔️        |
-| CRS auto-detection  | ✔️        |
-
----
-
-## Next Steps
-
-- **[ZarrCubeProvider](./zarr-cube-provider.md)** – render 3D volumes
-- **[ZarrCubeVelocityProvider](./zarr-cube-velocity-provider.md)** – render vector fields
-- **[Data Preparation](../data.md)** – Prepare Zarr datasets for the browser
-
-```
-
-```

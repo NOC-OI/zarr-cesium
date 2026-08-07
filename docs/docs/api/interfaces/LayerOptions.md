@@ -36,6 +36,14 @@ optional dimensionNames: DimensionNamesProps;
 
 ***
 
+### latIsAscending?
+
+```ts
+optional latIsAscending: boolean;
+```
+
+***
+
 ### maximumLevel?
 
 ```ts
@@ -48,6 +56,14 @@ optional maximumLevel: number;
 
 ```ts
 optional minimumLevel: number;
+```
+
+***
+
+### multiscaleFormat?
+
+```ts
+optional multiscaleFormat: MultiscaleFormat;
 ```
 
 ***
@@ -72,6 +88,14 @@ optional noDataMin: number;
 
 ```ts
 optional opacity: number;
+```
+
+***
+
+### requestOverrides?
+
+```ts
+optional requestOverrides: RequestInit;
 ```
 
 ***

@@ -24,7 +24,8 @@ import {
   type DataSliceProps,
   type DimIndicesProps,
   type SliceArgs,
-  DimensionValues
+  DimensionValues,
+  type MultiscaleFormat
 } from './types';
 import { decodeCFTime } from './decodeCFTime';
 
@@ -41,6 +42,33 @@ const CF_MAPPINGS: { [key in keyof DimensionNamesProps]: string[] } = {
   time: ['time'],
   elevation: ['height', 'depth', 'altitude', 'air_pressure', 'pressure', 'geopotential_height']
 };
+
+function getMultiscaleLevelPaths(
+  attrs: Record<string, any>,
+  multiscaleFormat: MultiscaleFormat = 'auto'
+): string[] {
+  const multiscale = Array.isArray(attrs.multiscales)
+    ? attrs.multiscales[0]
+    : attrs.multiscales ?? null;
+  if (!multiscale) return [];
+
+  const legacyLevelPaths = Array.isArray(multiscale.datasets)
+    ? multiscale.datasets
+        .map((dataset: { path?: string }) => dataset?.path)
+        .filter((path: string | undefined): path is string => typeof path === 'string' && path.length > 0)
+    : [];
+
+  const geozarrLevelPaths = Array.isArray(multiscale.layout)
+    ? multiscale.layout
+        .map((level: { asset?: string }) => level?.asset)
+        .filter((path: string | undefined): path is string => typeof path === 'string' && path.length > 0)
+    : [];
+
+  if (multiscaleFormat === 'legacy') return legacyLevelPaths;
+  if (multiscaleFormat === 'geozarr' || multiscaleFormat === 'topozarr') return geozarrLevelPaths;
+
+  return geozarrLevelPaths.length > 0 ? geozarrLevelPaths : legacyLevelPaths;
+}
 
 /**
  * Identify the indices of common dimensions (lat, lon, time, elevation)
@@ -494,7 +522,8 @@ export async function initZarrDataset(
   levelMetadata: Map<number, ZarrLevelMetadata>,
   levelCache: Map<number, any>,
   zarrVersion: 2 | 3 | null,
-  multiscaleLevel?: number
+  multiscaleLevel?: number,
+  multiscaleFormat: MultiscaleFormat = 'auto'
 ): Promise<{
   zarrArray: zarr.Array<any>;
   levelInfos: string[];
@@ -513,15 +542,18 @@ export async function initZarrDataset(
   let zarrArray: zarr.Array<any> | null = null;
   let levelInfos: string[] = [];
   let coordinates: Record<string, any> = {};
-  let datasets;
+  let levelPaths: string[] = [];
   let pyramidMode = false;
-  if (attrs.multiscales && attrs.multiscales[0]?.datasets?.length) {
+  if (attrs.multiscales) {
+    levelPaths = getMultiscaleLevelPaths(attrs, multiscaleFormat);
+  }
+  if (levelPaths.length > 0) {
     pyramidMode = true;
-    datasets = attrs.multiscales[0].datasets;
-    if (multiscaleLevel) datasets = [datasets[multiscaleLevel]];
+    let selectedLevelPaths = levelPaths;
+    if (multiscaleLevel !== undefined) selectedLevelPaths = [levelPaths[multiscaleLevel]];
 
-    for (let i = 0; i < datasets.length; i++) {
-      const levelPath = datasets[i].path;
+    for (let i = 0; i < selectedLevelPaths.length; i++) {
+      const levelPath = selectedLevelPaths[i];
       levelInfos.push(levelPath);
       const levelArr = await openLevelArray(root, levelPath, variable, levelCache);
 
@@ -543,14 +575,13 @@ export async function initZarrDataset(
 
       levelMetadata.set(i, { width, height });
     }
-    if (multiscaleLevel) {
-      datasets = attrs.multiscales[0].datasets;
+    if (multiscaleLevel !== undefined) {
       levelInfos = [];
-      for (let i = 0; i < datasets.length; i++) {
-        levelInfos.push(datasets[i].path);
+      for (let i = 0; i < levelPaths.length; i++) {
+        levelInfos.push(levelPaths[i]);
       }
     }
-    let levelInfo = levelInfos[multiscaleLevel || 0];
+    let levelInfo = levelInfos[multiscaleLevel ?? 0];
     if (!levelInfo) {
       console.error(
         'No level info found for multiscale level:',
@@ -825,7 +856,13 @@ export async function detectCRS(
   arr: zarr.Array<any> | null,
   xyLimits?: XYLimitsProps
 ): Promise<CRS> {
-  const attrCRS = attrs?.multiscales?.[0]?.datasets?.[0]?.crs ?? arr?.attrs?.crs;
+  const multiscale = Array.isArray(attrs.multiscales) ? attrs.multiscales[0] : attrs.multiscales;
+  const attrCRS =
+    attrs?.['proj:code'] ??
+    attrs?.proj?.code ??
+    multiscale?.datasets?.[0]?.crs ??
+    multiscale?.layout?.[0]?.crs ??
+    arr?.attrs?.crs;
   if (attrCRS) {
     return attrCRS;
   }

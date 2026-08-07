@@ -18,8 +18,10 @@ It supports:
 
 - Zarr v2 and v3
 - Multiscale pyramids
+- Legacy ndpyramid, GeoZarr, and TopoZarr multiscale layouts
 - GPU-accelerated particle animations
 - Dynamic elevation slicing
+- CF-compliant time decoding for selectors
 - Vertical exaggeration
 - Colormap-based speed visualization
 - Flexible WindLayer configuration
@@ -82,7 +84,7 @@ interface VelocityOptions {
   bounds: BoundsProps; // geographic rectangle
   dimensionNames?: DimensionNamesProps; // Custom dimension names. If not provided, defaults will be used or identified automatically based on CF conventions.
   selectors?: Record<string, ZarrSelectorsProps>; // Initial dimension slices
-  multiscaleLevel?: number; // If the dataset is multiscale, which level to load. Default is the lowest resolution (0)
+  multiscaleLevel?: number; // Index in the metadata's level list; defaults to 0
   zarrVersion?: 2 | 3; // Zarr version (auto-detected if not set)
   sliceSpacing?: number; // Vertical sampling interval
   verticalExaggeration?: number; // Vertical exaggeration factor
@@ -93,6 +95,7 @@ interface VelocityOptions {
   scale?: [number, number]; // Min/max for color scaling
   windOptions?: Partial<WindLayerOptions>; // Additional WindLayer configuration
   crs?: CRS; // Force CRS (auto-detected if not set)
+  multiscaleFormat?: MultiscaleFormat; // 'auto' (default), 'legacy', 'geozarr', or 'topozarr'
 }
 ```
 
@@ -199,15 +202,23 @@ If the dataset defines Zarr multiscale pyramids, e.g.:
 Then:
 
 - The provider loads the requested `multiscaleLevel`
+- `multiscaleFormat: 'auto'` detects legacy and GeoZarr-style level paths
+- Set `multiscaleFormat` explicitly if the metadata does not identify its layout
+- `multiscaleLevel` follows the order stored in the metadata
 - Resolution, W×H×Z, and bounding box adapt
 - Switching levels triggers a reload
 
-For example, you can set the desired level (default is `0`, the lowest resolution):
+For a TopoZarr store, whose level `0` is normally full resolution:
 
 ```ts
-// set multiscale level in CubeOptions
-multiscaleLevel: 1; // loads level "1"
+multiscaleFormat: 'topozarr',
+multiscaleLevel: 0 // loads TopoZarr's full-resolution level
 ```
+
+Legacy ndpyramid stores commonly use the opposite order, with level `0` as the
+coarsest resolution. Inspect `windCube.levelInfos` when choosing a level.
+GeoZarr/TopoZarr metadata supplies levels through `multiscales.layout[].asset`,
+whereas legacy metadata uses `multiscales[0].datasets[].path`.
 
 ---
 
@@ -224,6 +235,10 @@ await windCube.updateSelectors({
 ```
 
 This **reloads U and V cubes**, destroys old wind layers, and creates new ones.
+
+CF time coordinates are decoded to ISO strings in `windCube.dimensionValues`.
+Selectors may therefore use either an array index or a decoded time value, for
+example `{ type: 'value', selected: '2020-01-01T00:00:00.000Z' }`.
 
 All the parameters are optional. If not provided, the current value is retained.
 
@@ -327,32 +342,3 @@ Used internally when:
 - Slice spacing changes
 - Elevation selectors change
 - Vertical exaggeration changes
-
----
-
-# Summary
-
-| Feature                      | Supported |
-| ---------------------------- | --------- |
-| 3D U/V cube rendering        | ✔️        |
-| Zarr v2 and v3               | ✔️        |
-| Animated WindLayer particles | ✔️        |
-| Multiscale pyramids          | ✔️        |
-| Vertical slicing             | ✔️        |
-| Time dimension               | ✔️        |
-| Colormap styling             | ✔️        |
-| Vertical exaggeration        | ✔️        |
-| Below sea level              | ✔️        |
-| Dynamic bounds               | ✔️        |
-
----
-
-# Next Steps
-
-- **[ZarrLayerProvider](./zarr-layer-provider.md)** – 2D rasters
-- **[ZarrCubeProvider](./zarr-cube-provider.md)** – 3D scalar fields
-- **[Data Preparation](../data.md)** – preparing Zarr stores for GPU rendering
-
-```
-
-```

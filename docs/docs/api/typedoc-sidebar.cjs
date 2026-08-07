@@ -170,8 +170,18 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "api/functions/decodeCFTime",
+          label: "decodeCFTime"
+        },
+        {
+          type: "doc",
           id: "api/functions/deriveRectangleAndScheme",
           label: "deriveRectangleAndScheme"
+        },
+        {
+          type: "doc",
+          id: "api/functions/detectBrowser",
+          label: "detectBrowser"
         },
         {
           type: "doc",
@@ -225,6 +235,11 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "api/functions/parseCFUnits",
+          label: "parseCFUnits"
+        },
+        {
+          type: "doc",
           id: "api/functions/resolveNoDataRange",
           label: "resolveNoDataRange"
         },
@@ -246,6 +261,21 @@ const typedocSidebar = {
       items: [
         {
           type: "doc",
+          id: "api/type-aliases/BrowserName",
+          label: "BrowserName"
+        },
+        {
+          type: "doc",
+          id: "api/type-aliases/CalendarDate",
+          label: "CalendarDate"
+        },
+        {
+          type: "doc",
+          id: "api/type-aliases/CFCalendar",
+          label: "CFCalendar"
+        },
+        {
+          type: "doc",
           id: "api/type-aliases/ColorMapName",
           label: "ColorMapName"
         },
@@ -253,6 +283,11 @@ const typedocSidebar = {
           type: "doc",
           id: "api/type-aliases/CRS",
           label: "CRS"
+        },
+        {
+          type: "doc",
+          id: "api/type-aliases/MultiscaleFormat",
+          label: "MultiscaleFormat"
         },
         {
           type: "doc",

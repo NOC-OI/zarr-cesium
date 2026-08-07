@@ -48,7 +48,7 @@ export const TILE_SERVER_URL: string =
   import.meta.env.NEXT_PUBLIC_TILE_SERVER_URL || 'https://imfe-pilot-tileserver.noc.ac.uk/';
 
 export const ZARR_TILE_SERVER_URL: string =
-  import.meta.env.NEXT_PUBLIC_ZARR_TILE_SERVER_URL || 'https://atlantis44.xyz/';
+  import.meta.env.NEXT_PUBLIC_ZARR_TILE_SERVER_URL || 'https://titiler-xarray.atlantis-viz.online/';
 
 export const defaultView: [number, number] = [54, 0];
 export const defaultZoom = 6;

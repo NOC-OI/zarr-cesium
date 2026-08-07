@@ -18,6 +18,7 @@ import {
   type CubeOptions,
   type DimensionNamesProps,
   type DimIndicesProps,
+  type MultiscaleFormat,
   type ZarrLevelMetadata,
   type ZarrSelectorsProps
 } from './types';
@@ -105,6 +106,7 @@ export class ZarrCubeProvider {
   private variable: string;
   private crs: CRS | null = null;
   private dimensionNames: DimensionNamesProps;
+  private multiscaleFormat: MultiscaleFormat = 'auto';
   private verticalExaggeration: number;
   private opacity: number;
   private showHorizontalSlices: boolean;
@@ -139,6 +141,7 @@ export class ZarrCubeProvider {
     this.bounds = options.bounds;
     this.dimensionNames = options.dimensionNames ?? {};
     this.crs = options.crs || null;
+    this.multiscaleFormat = options.multiscaleFormat ?? 'auto';
     this.multiscaleLevel = options.multiscaleLevel ?? 0;
     this.selectors = options.selectors ?? {};
     this.verticalExaggeration = options.verticalExaggeration ?? DEFAULT_VERTICAL_EXAGGERATION;
@@ -171,7 +174,8 @@ export class ZarrCubeProvider {
       this.levelMetadata,
       this.levelCache,
       this.zarrVersion,
-      this.multiscaleLevel
+      this.multiscaleLevel,
+      this.multiscaleFormat
     );
     if (multiscaleLevel !== undefined) {
       this.multiscaleLevel = multiscaleLevel;

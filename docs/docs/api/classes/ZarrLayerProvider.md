@@ -428,16 +428,10 @@ A promise that resolves to a [ZarrImageryLayer](ZarrImageryLayer.md).
 ### dimensionValues
 
 ```ts
-dimensionValues: object = {};
+dimensionValues: DimensionValues = {};
 ```
 
 Values of the data coordinate dimensions (latitude, longitude, elevation, etc.).
-
-#### Index Signature
-
-```ts
-[key: string]: number[] | Float64Array<ArrayBufferLike>
-```
 
 ***
 

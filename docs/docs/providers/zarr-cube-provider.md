@@ -17,8 +17,10 @@ Each slice is rendered using a **GPU-accelerated colormap shader** and draped as
 This provider supports:
 
 - Multiscale Zarr pyramids
+- Legacy ndpyramid, GeoZarr, and TopoZarr multiscale layouts
 - CRS detection (EPSG:4326 / EPSG:3857)
 - Dynamic dimension slicing
+- CF-compliant time decoding for selectors
 - Vertical exaggeration
 - Below-sea-level rendering
 - Interactive styling (opacity, scale, colormap)
@@ -94,7 +96,7 @@ interface CubeOptions {
   bounds: BoundsProps; // geographic rectangle
   selectors?: { [key: string]: ZarrSelectorsProps }; // Initial dimension slices
   dimensionNames?: DimensionNamesProps; // Custom dimension names. If not provided, defaults will be used or identified automatically based on CF conventions.
-  multiscaleLevel?: number; // If the dataset is multiscale, which level to load. Default is the lowest resolution (0)
+  multiscaleLevel?: number; // Index in the metadata's level list; defaults to 0
   zarrVersion?: 2 | 3; // Zarr version (auto-detected if not set)
   colormap?: ColorMapName; // Name from jsColormaps, based on matplotlib colormaps
   scale?: [number, number]; // Min/max for color scaling
@@ -105,6 +107,7 @@ interface CubeOptions {
   belowSeaLevel?: boolean; // If true, allows rendering below sea level
   flipElevation?: boolean; // If true, flips the elevation axis
   crs?: CRS; // Force CRS (auto-detected if not set)
+  multiscaleFormat?: MultiscaleFormat; // 'auto' (default), 'legacy', 'geozarr', or 'topozarr'
 }
 ```
 
@@ -195,15 +198,23 @@ If the dataset defines Zarr multiscale pyramids, e.g.:
 Then:
 
 - The provider loads the requested `multiscaleLevel`
+- `multiscaleFormat: 'auto'` detects legacy and GeoZarr-style level paths
+- Set `multiscaleFormat` explicitly if the metadata does not identify its layout
+- `multiscaleLevel` follows the order stored in the metadata
 - Resolution, W×H×Z, and bounding box adapt
 - Switching levels triggers a reload
 
-For example, you can set the desired level (default is `0`, the lowest resolution):
+For a TopoZarr store, whose level `0` is normally full resolution:
 
 ```ts
-// set multiscale level in CubeOptions
-multiscaleLevel: 1; // loads level "1"
+multiscaleFormat: 'topozarr',
+multiscaleLevel: 0 // loads TopoZarr's full-resolution level
 ```
+
+Legacy ndpyramid stores commonly use the opposite order, with level `0` as the
+coarsest resolution. Inspect `cube.levelInfos` when choosing a level.
+GeoZarr/TopoZarr metadata supplies levels through `multiscales.layout[].asset`,
+whereas legacy metadata uses `multiscales[0].datasets[].path`.
 
 ---
 
@@ -264,6 +275,10 @@ cube.updateSelectors({
 ```
 
 This triggers a full reload of the cube.
+
+CF time coordinates are decoded to ISO strings in `cube.dimensionValues`.
+Selectors may therefore use either an array index or a decoded time value, for
+example `{ type: 'value', selected: '2020-01-01T00:00:00.000Z' }`.
 
 All the parameters are optional. If not provided, the current value is retained.
 
@@ -337,28 +352,3 @@ Destroy and free resources:
 ```ts
 cube.destroy();
 ```
-
----
-
-# Summary
-
-| Feature                   | Supported |
-| ------------------------- | --------- |
-| 3D Zarr volume            | ✔️        |
-| Zarr v2 and v3            | ✔️        |
-| Horizontal slices         | ✔️        |
-| Vertical latitude slices  | ✔️        |
-| Vertical longitude slices | ✔️        |
-| Multiscale pyramids       | ✔️        |
-| Dynamic dimension slicing | ✔️        |
-| GPU colormap rendering    | ✔️        |
-| Vertical exaggeration     | ✔️        |
-| Below-sea-level display   | ✔️        |
-
----
-
-## Next Steps
-
-- **[ZarrLayerProvider](./zarr-layer-provider.md)** – 2D raster rendering
-- **[ZarrCubeVelocityProvider](./zarr-cube-velocity-provider.md)** – 3D vector fields
-- **[Data Preparation](../data.md)** – Preparing Zarr datasets for browser visualization

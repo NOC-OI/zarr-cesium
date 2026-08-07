@@ -2,8 +2,8 @@ name: Publish to npm
 
 on:
   push:
-    # tags:
-    #   - "v*" # v1.0.0, v1.2.3 etc.
+    tags:
+      - "v*" # v1.0.0, v1.2.3 etc.
 
 permissions:
   contents: read
@@ -28,7 +28,7 @@ jobs:
       - name: Build package
         run: npm run build
 
-      # - name: Publish to npm
-      #   run: npm publish --access public
-      #   env:
-      #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Publish to npm
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

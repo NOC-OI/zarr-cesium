@@ -17,8 +17,10 @@ Each slice is rendered using a **GPU-accelerated colormap shader** and draped as
 This provider supports:
 
 - Multiscale Zarr pyramids
+- Legacy ndpyramid, GeoZarr, and TopoZarr multiscale layouts
 - CRS detection (EPSG:4326 / EPSG:3857)
 - Dynamic dimension slicing
+- CF-compliant time decoding for selectors
 - Vertical exaggeration
 - Below-sea-level rendering
 - Interactive styling (opacity, scale, colormap)
@@ -55,7 +57,7 @@ If your need is:
 
 ```ts
 import { Viewer } from 'cesium';
-import { ZarrCubeProvider } from '@noc-oi/zarr-cesium';
+import { ZarrCubeProvider } from 'zarr-cesium';
 
 const viewer = new Viewer('cesiumContainer');
 
@@ -81,6 +83,8 @@ cube.updateSlices({
 });
 ```
 
+This creates a **stack of slice primitives**: horizontal, vertical longitude, and vertical latitude.
+
 ---
 
 ## Options
@@ -92,7 +96,7 @@ interface CubeOptions {
   bounds: BoundsProps; // geographic rectangle
   selectors?: { [key: string]: ZarrSelectorsProps }; // Initial dimension slices
   dimensionNames?: DimensionNamesProps; // Custom dimension names. If not provided, defaults will be used or identified automatically based on CF conventions.
-  multiscaleLevel?: number; // If the dataset is multiscale, which level to load. Default is the lowest resolution (0)
+  multiscaleLevel?: number; // Index in the metadata's level list; defaults to 0
   zarrVersion?: 2 | 3; // Zarr version (auto-detected if not set)
   colormap?: ColorMapName; // Name from jsColormaps, based on matplotlib colormaps
   scale?: [number, number]; // Min/max for color scaling
@@ -103,6 +107,7 @@ interface CubeOptions {
   belowSeaLevel?: boolean; // If true, allows rendering below sea level
   flipElevation?: boolean; // If true, flips the elevation axis
   crs?: CRS; // Force CRS (auto-detected if not set)
+  multiscaleFormat?: MultiscaleFormat; // 'auto' (default), 'legacy', 'geozarr', or 'topozarr'
 }
 ```
 
@@ -140,7 +145,7 @@ Rendered as a textured Cesium `RectangleGeometry`:
 - Height computed from elevation coordinate values
 
 ```ts
-// Cube options
+// set the following Cube options to true
 showHorizontalSlices: true;
 ```
 
@@ -152,9 +157,64 @@ A vertical wall following a **constant latitude** or **constant longitude**.
 - Surface extrudes between bottom and top
 
 ```ts
-// Cube options
+// set the following Cube options to true
 showVerticalSlices: true;
 ```
+
+---
+
+## Supported CRS
+
+Zarr datasets may store coordinate values in:
+
+- `EPSG:4326` (lat, lon degrees)
+- `EPSG:3857` (Web Mercator meters)
+
+The provider detects the CRS automatically using:
+
+- Zarr metadata
+- consolidated metadata
+- coordinate ranges (West/East > 360 → Web Mercator)
+
+For example, you can set the CRS explicitly:
+
+```ts
+// set CRS to Web Mercator in LayerOptions
+crs: 'EPSG:3857';
+```
+
+---
+
+## Multiscale Support
+
+If the dataset defines Zarr multiscale pyramids, e.g.:
+
+```json
+"multiscales": [
+  { "datasets": [ {"path": "0"}, {"path": "1"}, {"path": "2"} ] }
+]
+```
+
+Then:
+
+- The provider loads the requested `multiscaleLevel`
+- `multiscaleFormat: 'auto'` detects legacy and GeoZarr-style level paths
+- Set `multiscaleFormat` explicitly if the metadata does not identify its layout
+- `multiscaleLevel` follows the order stored in the metadata
+- Resolution, W×H×Z, and bounding box adapt
+- Switching levels triggers a reload
+
+For a TopoZarr store, whose level `0` is normally full resolution:
+
+```ts
+multiscaleFormat: 'topozarr',
+multiscaleLevel: 0 // loads TopoZarr's full-resolution level
+```
+
+Legacy ndpyramid stores commonly use the opposite order, with level `0` as the
+coarsest resolution. Inspect `cube.levelInfos` when choosing a level.
+GeoZarr/TopoZarr metadata supplies levels through `multiscales.layout[].asset`,
+whereas legacy metadata uses `multiscales[0].datasets[].path`.
 
 ---
 
@@ -172,11 +232,7 @@ cube.updateSlices({
 });
 ```
 
-All parameters are optional:
-
-```ts
-cube.updateSlices({ elevationIndex: 20 });
-```
+All the parameters are optional. If not provided, the current value is retained.
 
 Internally this updates:
 
@@ -219,6 +275,10 @@ cube.updateSelectors({
 ```
 
 This triggers a full reload of the cube.
+
+CF time coordinates are decoded to ISO strings in `cube.dimensionValues`.
+Selectors may therefore use either an array index or a decoded time value, for
+example `{ type: 'value', selected: '2020-01-01T00:00:00.000Z' }`.
 
 All the parameters are optional. If not provided, the current value is retained.
 
@@ -275,54 +335,11 @@ cube.updateStyle({
 
 The provider automatically re-renders all slice primitives, but without reloading data.
 
----
-
-### Remove Layers
-
-To remove all slice primitives from the scene:
-
-```ts
-cube.destroy();
-```
-
-This frees all resources.
+The full list of supported colormaps is available in the [Colormaps section](../api/type-aliases/ColorMapName.md).
 
 ---
 
-### Multiscale Support
-
-If the dataset defines Zarr multiscale pyramids, e.g.:
-
-```json
-"multiscales": [
-  { "datasets": [ {"path": "0"}, {"path": "1"}, {"path": "2"} ] }
-]
-```
-
-Then:
-
-- The provider loads the requested `multiscaleLevel`
-- Resolution, W×H×Z, and bounding box adapt
-- Switching levels triggers a reload
-
----
-
-### Supported CRS
-
-Zarr datasets may store coordinate values in:
-
-- `EPSG:4326` (lat, lon degrees)
-- `EPSG:3857` (Web Mercator meters)
-
-The provider detects the CRS automatically using:
-
-- Zarr metadata
-- consolidated metadata
-- coordinate ranges (West/East > 360 → Web Mercator)
-
----
-
-### Clearing & Destroying
+### Remove Layers, Clearing & Destroying
 
 Remove all slice primitives:
 
@@ -335,39 +352,3 @@ Destroy and free resources:
 ```ts
 cube.destroy();
 ```
-
----
-
-## Performance Features
-
-- GPU-accelerated pixel shading
-- Concurrency throttling (4 parallel Zarr reads)
-- Windowed 3D slicing based on bounds
-- Efficient `ndarray` stride-based lookup
-- Reuse of Cesium textures
-- Only changed slices rerender
-
----
-
-# Summary
-
-| Feature                   | Supported |
-| ------------------------- | --------- |
-| 3D Zarr volume            | ✔️        |
-| Zarr v2 and v3            | ✔️        |
-| Horizontal slices         | ✔️        |
-| Vertical latitude slices  | ✔️        |
-| Vertical longitude slices | ✔️        |
-| Multiscale pyramids       | ✔️        |
-| Dynamic dimension slicing | ✔️        |
-| GPU colormap rendering    | ✔️        |
-| Vertical exaggeration     | ✔️        |
-| Below-sea-level display   | ✔️        |
-
----
-
-## Next Steps
-
-- **[ZarrLayerProvider](./zarr-layer-provider.md)** – 2D raster rendering
-- **[ZarrCubeVelocityProvider](./zarr-cube-velocity-provider.md)** – 3D vector fields
-- **[Data Preparation](../data.md)** – Preparing Zarr datasets for browser visualization

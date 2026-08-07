@@ -168,18 +168,17 @@ export function removeMapLayer(
 }
 
 export async function handleChangeMapLayerAndAddLegend(
-  e: React.ChangeEvent<HTMLInputElement>,
+  checked: boolean,
+  layerInfo: any,
   setActualLayer: React.Dispatch<React.SetStateAction<string>>,
-  setOpacityIsClicked: React.Dispatch<React.SetStateAction<boolean>>,
   setLayerAction: React.Dispatch<React.SetStateAction<string>>,
   setSelectedLayers: React.Dispatch<React.SetStateAction<SelectedLayersType>>,
   subLayer: string,
   setLayerLegend: React.Dispatch<React.SetStateAction<LayersLegendType>>,
   layerLegend: LayersLegendType,
-  content: string
+  content: string,
+  setOpacityIsClicked?: React.Dispatch<React.SetStateAction<boolean>>
 ) {
-  const checked = e.target.checked;
-  const layerInfo = JSON.parse(e.target.value);
   if (checked) {
     if (['zarr-titiler'].includes(layerInfo.dataInfo.dataType)) {
       const params = layerInfo.dataInfo.params as TitilerOptions;
@@ -212,24 +211,26 @@ export async function handleChangeMapLayerAndAddLegend(
     checked,
     layerInfo,
     setActualLayer,
-    setOpacityIsClicked,
     setLayerAction,
-    setSelectedLayers
+    setSelectedLayers,
+    setOpacityIsClicked
   );
 }
 export async function handleChangeMapLayer(
   checked: boolean,
   layerInfo: { subLayer: string; dataInfo: DataInfoType },
   setActualLayer: React.Dispatch<React.SetStateAction<string>>,
-  setOpacityIsClicked: React.Dispatch<React.SetStateAction<boolean>>,
   setLayerAction: React.Dispatch<React.SetStateAction<string>>,
-  setSelectedLayers: React.Dispatch<React.SetStateAction<SelectedLayersType>>
+  setSelectedLayers: React.Dispatch<React.SetStateAction<SelectedLayersType>>,
+  setOpacityIsClicked?: React.Dispatch<React.SetStateAction<boolean>>
 ) {
   setActualLayer(layerInfo.subLayer);
   if (checked) {
     await addMapLayer(layerInfo, setLayerAction, setSelectedLayers);
   } else {
-    setOpacityIsClicked(false);
+    if (setOpacityIsClicked) {
+      setOpacityIsClicked(false);
+    }
     removeMapLayer(layerInfo, setLayerAction, setSelectedLayers);
   }
 }

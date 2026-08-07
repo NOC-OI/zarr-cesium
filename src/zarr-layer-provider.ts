@@ -20,6 +20,7 @@ import {
   type CRS,
   type DimensionNamesProps,
   type DimIndicesProps,
+  type MultiscaleFormat,
   type LayerOptions,
   type XYLimits,
   type ZarrLevelMetadata,
@@ -132,11 +133,15 @@ export class ZarrLayerProvider implements ImageryProvider {
     elevation: { selected: 0, type: 'index' }
   };
   private url: string;
+  private requestOverrides?: RequestInit;
   private variable: string;
   private zarrVersion: 2 | 3 | null = null;
+  private multiscaleFormat: MultiscaleFormat = 'auto';
   private crs: CRS | null = null;
   private dimensionNames: DimensionNamesProps;
   private uniforms: { [key: string]: WebGLUniformLocation | null } = {};
+  private latIsAscendingOverride: boolean | undefined;
+  private latAscending = false;
   private noDataMin: number | undefined;
   private noDataMax: number | undefined;
   private fillValue: number | undefined;
@@ -164,6 +169,7 @@ export class ZarrLayerProvider implements ImageryProvider {
   private levelCache = new Map();
   private levelMetadata: Map<number, ZarrLevelMetadata> = new Map();
   private xyLimits: XYLimits | null = null;
+  private geographicLonOffset360: { west: number; span: number } | null = null;
   private colormap: ColorMapName;
   private gl: WebGL2RenderingContext | null = null;
   private program: WebGLProgram | null = null;
@@ -177,10 +183,12 @@ export class ZarrLayerProvider implements ImageryProvider {
 
   constructor(options: LayerOptions) {
     this.url = options.url;
+    this.requestOverrides = options.requestOverrides;
     this.variable = options.variable;
     this._tilingScheme = new WebMercatorTilingScheme();
     this._coverageRectangle = this._tilingScheme.rectangle;
     this.crs = options.crs || null;
+    this.latIsAscendingOverride = options.latIsAscending;
     this._tileWidth = options.tileWidth ?? 256;
     this._tileHeight = options.tileHeight ?? 256;
     this._minimumLevel = options.minimumLevel ?? 0;
@@ -188,6 +196,7 @@ export class ZarrLayerProvider implements ImageryProvider {
     this._credit = new Credit('Zarr Data');
     this.dimensionNames = options.dimensionNames ?? {};
     this.zarrVersion = options.zarrVersion ?? null;
+    this.multiscaleFormat = options.multiscaleFormat ?? 'auto';
     this.dimensionValues = {};
     const [min, max] = options.scale ?? [-3, 3];
     this.colormap = options.colormap ?? 'viridis';
@@ -203,7 +212,9 @@ export class ZarrLayerProvider implements ImageryProvider {
 
   private async initialize(): Promise<boolean> {
     try {
-      this.store = new zarr.FetchStore(this.url);
+      this.store = new zarr.FetchStore(this.url, {
+        overrides: this.requestOverrides
+      });
       this.root = zarr.root(this.store);
 
       const { zarrArray, levelInfos, dimIndices, attrs } = await initZarrDataset(
@@ -213,7 +224,9 @@ export class ZarrLayerProvider implements ImageryProvider {
         this.dimensionNames,
         this.levelMetadata,
         this.levelCache,
-        this.zarrVersion
+        this.zarrVersion,
+        undefined,
+        this.multiscaleFormat
       );
       this.zarrArray = zarrArray;
       this.levelInfos = levelInfos;
@@ -245,6 +258,24 @@ export class ZarrLayerProvider implements ImageryProvider {
       this.offset = attrs.add_offset ?? 0;
       this.crs = this.crs || (await detectCRS(attrs, zarrArray));
 
+      if (this.crs === 'EPSG:4326' && this.xyLimits) {
+        const lonCount = zarrArray.shape[dimIndices.lon.index];
+        const lonSpan = this.xyLimits.xMax - this.xyLimits.xMin;
+        const lonStep = lonCount > 1 ? lonSpan / (lonCount - 1) : 0;
+        const globalTolerance = Math.max(lonStep * 1.5, 1e-3);
+        const wrapsZeroTo360 =
+          this.xyLimits.xMin >= -globalTolerance &&
+          this.xyLimits.xMax <= 360 + globalTolerance &&
+          this.xyLimits.xMax >= 180 - globalTolerance;
+        const isGlobal = lonStep > 0 && lonSpan >= 360 - lonStep - globalTolerance;
+
+        if (wrapsZeroTo360 && isGlobal) {
+          const west = this.xyLimits.xMin - lonStep / 2;
+          const span = lonSpan + lonStep;
+          this.geographicLonOffset360 = { west, span };
+        }
+      }
+
       const { rectangle, tilingScheme } = deriveRectangleAndScheme(
         this.crs,
         this.xyLimits,
@@ -256,6 +287,7 @@ export class ZarrLayerProvider implements ImageryProvider {
       this._coverageRectangle = rectangle;
       this._tilingScheme = tilingScheme;
       await this.loadInitialDimensionValues();
+      this.resolveLatitudeOrientation();
 
       this._ready = true;
       return true;
@@ -269,29 +301,48 @@ export class ZarrLayerProvider implements ImageryProvider {
     const multiscaleLevel = this.levelInfos.length > 0 ? this.levelInfos[0] : null;
 
     for (const dimName of Object.keys(this.dimIndices)) {
-      if (dimName !== 'lon' && dimName !== 'lat') {
-        try {
-          this.dimensionValues[dimName] = await loadDimensionValues(
-            this.dimensionValues,
-            multiscaleLevel,
-            this.dimIndices[dimName],
-            this.root,
-            this.zarrVersion
-          );
+      try {
+        this.dimensionValues[dimName] = await loadDimensionValues(
+          this.dimensionValues,
+          multiscaleLevel,
+          this.dimIndices[dimName],
+          this.root,
+          this.zarrVersion
+        );
 
-          if (!this.selectors[dimName]) {
-            this.selectors[dimName] = { selected: 0, type: 'index' };
-          } else if (this.selectors[dimName].type === 'value') {
-            this.selectors[dimName].selected = calculateNearestIndex(
-              this.dimensionValues[dimName],
-              this.selectors[dimName].selected as number
-            );
-          }
-        } catch (err) {
-          console.warn(`Failed to load dimension values for ${dimName}:`, err);
+        if (dimName === 'lon' || dimName === 'lat') continue;
+
+        if (!this.selectors[dimName]) {
+          this.selectors[dimName] = { selected: 0, type: 'index' };
+        } else if (this.selectors[dimName].type === 'value') {
+          this.selectors[dimName].selected = calculateNearestIndex(
+            this.dimensionValues[dimName],
+            this.selectors[dimName].selected as number
+          );
         }
+      } catch (err) {
+        console.warn(`Failed to load dimension values for ${dimName}:`, err);
       }
     }
+  }
+
+  private resolveLatitudeOrientation(): void {
+    if (this.latIsAscendingOverride !== undefined) {
+      this.latAscending = this.latIsAscendingOverride;
+      return;
+    }
+
+    const latDimName = this.dimIndices.lat?.name;
+    const latValues = (latDimName
+      ? this.dimensionValues[latDimName] || this.dimensionValues.lat
+      : this.dimensionValues.lat) as ArrayLike<number> | undefined;
+
+    if (latValues && latValues.length > 1) {
+      this.latAscending = Number(latValues[0]) < Number(latValues[latValues.length - 1]);
+      return;
+    }
+
+    console.warn('Failed to infer latitude ordering. Falling back to descending latitude.');
   }
 
   /**
@@ -368,7 +419,7 @@ export class ZarrLayerProvider implements ImageryProvider {
     ) {
       return false;
     }
-    if (scale) (this.colorScale.min = scale[0]), (this.colorScale.max = scale[1]);
+    if (scale) ((this.colorScale.min = scale[0]), (this.colorScale.max = scale[1]));
 
     if (colormap) {
       this.colormap = colormap;
@@ -460,6 +511,7 @@ export class ZarrLayerProvider implements ImageryProvider {
       u_noDataMax: gl.getUniformLocation(this.program, 'u_noDataMax'),
       u_fillValue: gl.getUniformLocation(this.program, 'u_fillValue'),
       u_useFillValue: gl.getUniformLocation(this.program, 'u_useFillValue'),
+      u_flipY: gl.getUniformLocation(this.program, 'u_flipY'),
       u_scaleFactor: gl.getUniformLocation(this.program, 'u_scaleFactor'),
       u_addOffset: gl.getUniformLocation(this.program, 'u_addOffset')
     };
@@ -470,7 +522,11 @@ export class ZarrLayerProvider implements ImageryProvider {
 
     const maxCesium = this.maximumLevel;
     const normalized = cesiumLevel / maxCesium;
-    const index = Math.floor(normalized * (this.levelInfos.length - 1));
+    const forwardIndex = Math.floor(normalized * (this.levelInfos.length - 1));
+    const reverseOrder = this.multiscaleFormat === 'geozarr' || this.multiscaleFormat === 'topozarr';
+    const index = reverseOrder
+      ? this.levelInfos.length - 1 - forwardIndex
+      : forwardIndex;
     return this.levelInfos[index];
   }
 
@@ -536,8 +592,12 @@ export class ZarrLayerProvider implements ImageryProvider {
       return {
         u0: clamp((XW - RXW) / (RXE - RXW)),
         u1: clamp((XE - RXW) / (RXE - RXW)),
-        v0: clamp((RYN - YN) / (RYN - RYS)),
-        v1: clamp((RYN - YS) / (RYN - RYS))
+        v0: this.latAscending
+          ? clamp((YS - RYS) / (RYN - RYS))
+          : clamp((RYN - YN) / (RYN - RYS)),
+        v1: this.latAscending
+          ? clamp((YN - RYS) / (RYN - RYS))
+          : clamp((RYN - YS) / (RYN - RYS))
       };
     }
 
@@ -550,11 +610,37 @@ export class ZarrLayerProvider implements ImageryProvider {
     const tSouth = toDeg(tileRect.south);
     const tNorth = toDeg(tileRect.north);
 
+    if (this.crs === 'EPSG:4326' && this.geographicLonOffset360) {
+      const normalizeLon360 = (lon: number) => ((lon % 360) + 360) % 360;
+      const { west: dataWest, span: dataSpan } = this.geographicLonOffset360;
+
+      let lonWest = normalizeLon360(tWest);
+      let lonEast = normalizeLon360(tEast);
+      if (lonWest < dataWest) lonWest += 360;
+      if (lonEast < dataWest) lonEast += 360;
+      if (lonEast <= lonWest) lonEast += 360;
+
+      return {
+        u0: clamp((lonWest - dataWest) / dataSpan),
+        u1: clamp((lonEast - dataWest) / dataSpan),
+        v0: this.latAscending
+          ? clamp((tSouth - south) / (north - south))
+          : clamp((north - tNorth) / (north - south)),
+        v1: this.latAscending
+          ? clamp((tNorth - south) / (north - south))
+          : clamp((north - tSouth) / (north - south))
+      };
+    }
+
     return {
       u0: clamp((tWest - west) / (east - west)),
       u1: clamp((tEast - west) / (east - west)),
-      v0: clamp((north - tNorth) / (north - south)),
-      v1: clamp((north - tSouth) / (north - south))
+      v0: this.latAscending
+        ? clamp((tSouth - south) / (north - south))
+        : clamp((north - tNorth) / (north - south)),
+      v1: this.latAscending
+        ? clamp((tNorth - south) / (north - south))
+        : clamp((north - tSouth) / (north - south))
     };
   }
 
@@ -632,9 +718,8 @@ export class ZarrLayerProvider implements ImageryProvider {
       const fracSouth = (intersection.south - tileRect.south) / (tileRect.north - tileRect.south);
       const fracNorth = (intersection.north - tileRect.south) / (tileRect.north - tileRect.south);
 
-      const { dataWidth, dataHeight, currentArray, multiscaleLevel } = await this.getArrayForLevel(
-        level
-      );
+      const { dataWidth, dataHeight, currentArray, multiscaleLevel } =
+        await this.getArrayForLevel(level);
 
       const { u0, u1, v0, v1 } = this.computeTileUVs(tileRect);
 
@@ -751,6 +836,7 @@ export class ZarrLayerProvider implements ImageryProvider {
     gl.uniform1f(this.uniforms.u_noDataMax, this.noDataMax as number);
     gl.uniform1f(this.uniforms.u_fillValue, this.fillValue as number);
     gl.uniform1i(this.uniforms.u_useFillValue, this.useFillValue ? 1 : 0);
+    gl.uniform1i(this.uniforms.u_flipY, this.latAscending ? 0 : 1);
     gl.uniform1f(this.uniforms.u_scaleFactor, this.scaleFactor);
     gl.uniform1f(this.uniforms.u_addOffset, this.offset);
 

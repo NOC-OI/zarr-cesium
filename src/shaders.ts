@@ -27,6 +27,7 @@ export const fragmentShaderSource = `#version 300 es
 
   uniform bool  u_useFillValue;
   uniform float u_fillValue;
+  uniform bool  u_flipY;
 
   uniform float u_scaleFactor;
   uniform float u_addOffset;
@@ -34,8 +35,8 @@ export const fragmentShaderSource = `#version 300 es
   out vec4 fragColor;
 
   void main() {
-      float raw = texture(u_dataTexture, vec2(v_texCoord.x, 1.0 - v_texCoord.y)).r;
-      // float raw = texture(u_dataTexture, v_texCoord).r;
+      vec2 sampleCoord = u_flipY ? vec2(v_texCoord.x, 1.0 - v_texCoord.y) : v_texCoord;
+      float raw = texture(u_dataTexture, sampleCoord).r;
 
       float value = raw * u_scaleFactor + u_addOffset;
 

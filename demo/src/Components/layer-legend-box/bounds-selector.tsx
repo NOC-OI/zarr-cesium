@@ -59,10 +59,11 @@ export default function BoundsSelector({
             max={180}
             disableSwap
             onChange={(_, newValue) => {
+              if (!Array.isArray(newValue)) return;
               setPendingBounds(prev => ({
                 ...prev,
-                west: (newValue as [number, number])[0],
-                east: (newValue as [number, number])[1]
+                west: newValue[0],
+                east: newValue[1]
               }));
             }}
             className="clickable"
@@ -83,10 +84,11 @@ export default function BoundsSelector({
             max={85}
             disableSwap
             onChange={(_, newValue) => {
+              if (!Array.isArray(newValue)) return;
               setPendingBounds(prev => ({
                 ...prev,
-                south: (newValue as [number, number])[0],
-                north: (newValue as [number, number])[1]
+                south: newValue[0],
+                north: newValue[1]
               }));
             }}
             className="clickable"

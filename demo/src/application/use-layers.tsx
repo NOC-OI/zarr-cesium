@@ -1,6 +1,6 @@
 'use client';
 import { createContext, useContext } from 'react';
-import type { LayersLegendType, SelectedLayersType } from '../types';
+import type { LayersJsonType, LayersLegendType, SelectedLayersType } from '../types';
 
 interface LayersManagementHandleContextType {
   selectedLayers: SelectedLayersType;
@@ -13,6 +13,8 @@ interface LayersManagementHandleContextType {
   setLayerLegend: React.Dispatch<React.SetStateAction<LayersLegendType>>;
   gebcoTerrainEnabled: boolean;
   setGebcoTerrainEnabled: React.Dispatch<React.SetStateAction<boolean>>;
+  listLayers: LayersJsonType;
+  setListLayers: React.Dispatch<React.SetStateAction<LayersJsonType>>;
 }
 
 export const LayersManagementHandleContext = createContext<

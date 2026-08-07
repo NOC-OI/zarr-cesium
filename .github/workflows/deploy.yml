@@ -29,6 +29,9 @@ jobs:
       - name: Install root dependencies
         run: npm install
 
+      - name: Build library package
+        run: npm run build
+
       - name: Install demo dependencies
         run: |
           cd demo

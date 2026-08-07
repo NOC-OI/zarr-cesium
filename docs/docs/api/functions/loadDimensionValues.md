@@ -7,7 +7,7 @@ function loadDimensionValues(
    dimIndices, 
    root, 
    zarrVersion, 
-slice?): Promise<number[] | Float64Array<ArrayBufferLike>>;
+slice?): Promise<number[] | string[] | Float64Array<ArrayBufferLike>>;
 ```
 
 Loads the coordinate values for a specific dimension.
@@ -23,7 +23,7 @@ Behavior:
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `dimensionValues` | `Record`\<`string`, `Float64Array` \| `number`[]\> | Cache of already-loaded coordinate arrays. |
+| `dimensionValues` | [`DimensionValues`](../interfaces/DimensionValues.md) | Cache of already-loaded coordinate arrays. |
 | `levelInfo` | `string` \| `null` | Optional multiscale subpath. |
 | `dimIndices` | \{ `array`: `Array`\<`any`, `Readable`\> \| `null`; `index`: `number`; `name`: `string`; \} | Dimension index info. See [DimIndicesProps](../interfaces/DimIndicesProps.md). |
 | `dimIndices.array` | `Array`\<`any`, `Readable`\> \| `null` | - |
@@ -35,6 +35,6 @@ Behavior:
 
 ## Returns
 
-`Promise`\<`number`[] \| `Float64Array`\<`ArrayBufferLike`\>\>
+`Promise`\<`number`[] \| `string`[] \| `Float64Array`\<`ArrayBufferLike`\>\>
 
 The loaded coordinate array for the dimension.

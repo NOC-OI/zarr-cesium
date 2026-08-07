@@ -82,7 +82,10 @@ export function EditColors({ layerLegendName }: { layerLegendName: string }) {
               max={scaleLimits[1] + 10}
               disableSwap
               step={0.1}
-              onChange={(_, v) => setScaleLimits(v as [number, number])}
+              onChange={(_, v) => {
+                if (!Array.isArray(v)) return;
+                setScaleLimits([v[0], v[1]]);
+              }}
               className="clickable"
               color="success"
             />

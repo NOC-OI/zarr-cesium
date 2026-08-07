@@ -9,7 +9,8 @@ function initZarrDataset(
    levelMetadata, 
    levelCache, 
    zarrVersion, 
-   multiscaleLevel?): Promise<{
+   multiscaleLevel?, 
+   multiscaleFormat?): Promise<{
   attrs: Record<string, any>;
   dimIndices: DimIndicesProps;
   levelInfos: string[];
@@ -27,16 +28,17 @@ Opens a Zarr variable (single-scale or multiscale pyramid) and prepares its meta
 
 ## Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `store` | `FetchStore` | Zarr store (e.g., `FetchStore`). |
-| `root` | `Location`\<`FetchStore`\> | Root Zarr group location. |
-| `variable` | `string` | Variable name within the Zarr group. |
-| `dimensions` | [`DimensionNamesProps`](../interfaces/DimensionNamesProps.md) | Optional explicit dimension name mapping. See [DimensionNamesProps](../interfaces/DimensionNamesProps.md). |
-| `levelMetadata` | `Map`\<`number`, [`ZarrLevelMetadata`](../interfaces/ZarrLevelMetadata.md)\> | Map to populate with per-level metadata (width/height). |
-| `levelCache` | `Map`\<`number`, `any`\> | Cache for opened multiscale level arrays. |
-| `zarrVersion` | `2` \| `3` \| `null` | Zarr version (2 or 3). |
-| `multiscaleLevel?` | `number` | Optional initial multiscale level to open. |
+| Parameter | Type | Default value | Description |
+| ------ | ------ | ------ | ------ |
+| `store` | `FetchStore` | `undefined` | Zarr store (e.g., `FetchStore`). |
+| `root` | `Location`\<`FetchStore`\> | `undefined` | Root Zarr group location. |
+| `variable` | `string` | `undefined` | Variable name within the Zarr group. |
+| `dimensions` | [`DimensionNamesProps`](../interfaces/DimensionNamesProps.md) | `undefined` | Optional explicit dimension name mapping. See [DimensionNamesProps](../interfaces/DimensionNamesProps.md). |
+| `levelMetadata` | `Map`\<`number`, [`ZarrLevelMetadata`](../interfaces/ZarrLevelMetadata.md)\> | `undefined` | Map to populate with per-level metadata (width/height). |
+| `levelCache` | `Map`\<`number`, `any`\> | `undefined` | Cache for opened multiscale level arrays. |
+| `zarrVersion` | `2` \| `3` \| `null` | `undefined` | Zarr version (2 or 3). |
+| `multiscaleLevel?` | `number` | `undefined` | Optional initial multiscale level to open. |
+| `multiscaleFormat?` | [`MultiscaleFormat`](../type-aliases/MultiscaleFormat.md) | `'auto'` | - |
 
 ## Returns
 

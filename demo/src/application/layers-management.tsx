@@ -2,6 +2,7 @@
 import { type ReactNode, useState } from 'react';
 import type { LayersLegendType, SelectedLayersType } from '../types';
 import { LayersManagementHandleContext } from './use-layers';
+import { layersJson } from './data/layers-json';
 
 interface LayersManagementHandleProviderProps {
   children: ReactNode;
@@ -16,6 +17,7 @@ export const LayersManagementHandleProvider: React.FC<LayersManagementHandleProv
 
   const [layerAction, setLayerAction] = useState('');
   const [gebcoTerrainEnabled, setGebcoTerrainEnabled] = useState(false);
+  const [listLayers, setListLayers] = useState<any>(layersJson);
 
   const [layerLegend, setLayerLegend] = useState<LayersLegendType>({});
 
@@ -31,7 +33,9 @@ export const LayersManagementHandleProvider: React.FC<LayersManagementHandleProv
         layerLegend,
         setLayerLegend,
         gebcoTerrainEnabled,
-        setGebcoTerrainEnabled
+        setGebcoTerrainEnabled,
+        listLayers,
+        setListLayers
       }}
     >
       {children}

@@ -1,11 +1,12 @@
+import { useLayersManagementHandle } from '../../application/use-layers';
 import type { DataExplorationSelectionProps } from '../../types';
 import { DataExplorationType } from './data-exploration-type';
 
 export function DataExplorationSelection({
-  listLayers,
   display,
   setInfoButtonBox
 }: DataExplorationSelectionProps) {
+  const { listLayers } = useLayersManagementHandle();
   if (!display) {
     return null;
   }

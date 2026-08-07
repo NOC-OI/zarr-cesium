@@ -7,3 +7,4 @@ export * from './zarr-layer-provider';
 export * from './zarr-cube-provider';
 export * from './zarr-cube-velocity-provider';
 export * from './shaders';
+export * from './decodeCFTime';

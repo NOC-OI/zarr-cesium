@@ -42,15 +42,16 @@ export function DataExplorationTypeOptions({
           <input
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               handleChangeMapLayerAndAddLegend(
-                e,
+                e.target.checked,
+                JSON.parse(e.target.value),
                 setActualLayer,
-                setOpacityIsClicked,
                 setLayerAction,
                 setSelectedLayers,
                 subLayer,
                 setLayerLegend,
                 layerLegend,
-                content
+                content,
+                setOpacityIsClicked
               )
             }
             value={JSON.stringify({

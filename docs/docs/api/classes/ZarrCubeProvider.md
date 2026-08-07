@@ -194,16 +194,10 @@ Size of the cube in [longitude, latitude, elevation].
 ### dimensionValues
 
 ```ts
-dimensionValues: object = {};
+dimensionValues: DimensionValues = {};
 ```
 
 Values of the cube’s coordinate dimensions (latitude, longitude, elevation, etc.).
-
-#### Index Signature
-
-```ts
-[key: string]: number[] | Float64Array<ArrayBufferLike>
-```
 
 ***
 

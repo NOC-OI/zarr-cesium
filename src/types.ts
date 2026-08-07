@@ -112,6 +112,7 @@ export interface CubeOptions {
   flipElevation?: boolean;
   scale?: [number, number];
   colormap?: ColorMapName;
+  multiscaleFormat?: MultiscaleFormat;
 }
 
 /**
@@ -121,6 +122,7 @@ export interface LayerOptions {
   url: string;
   variable: string;
   crs?: CRS | null;
+  latIsAscending?: boolean;
   tileWidth?: number;
   tileHeight?: number;
   minimumLevel?: number;
@@ -134,6 +136,8 @@ export interface LayerOptions {
   dimensionNames?: DimensionNamesProps;
   noDataMin?: number;
   noDataMax?: number;
+  requestOverrides?: RequestInit;
+  multiscaleFormat?: MultiscaleFormat;
 }
 
 /**
@@ -156,6 +160,7 @@ export interface VelocityOptions {
   colormap?: ColorMapName;
   zarrVersion?: 2 | 3;
   windOptions?: Partial<WindLayerOptions>;
+  multiscaleFormat?: MultiscaleFormat;
 }
 
 /**
@@ -256,6 +261,15 @@ export interface CubeVelocityProps {
   elevation: number;
   dimensionValues: DimensionValues;
 }
+
+/**
+ * Supported multiscale metadata layouts.
+ *
+ * - `auto` detects the layout from the dataset metadata.
+ * - `legacy` uses the original ndpyramid-style level ordering.
+ * - `geozarr` and `topozarr` use GeoZarr-style level ordering.
+ */
+export type MultiscaleFormat = 'auto' | 'legacy' | 'geozarr' | 'topozarr';
 
 /**
  * Supported browser names for compatibility checks.

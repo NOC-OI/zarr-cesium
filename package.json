@@ -1,6 +1,6 @@
 {
   "name": "zarr-cesium",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "A Cesium integration library for visualizing Zarr datasets in 2D and 3D.",
   "author": "Tobias <tobias.ferreira@noc.ac.uk>",
   "license": "MIT",
@@ -41,10 +41,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/noc-oi/zarr-cesium.git"
+    "url": "git+https://github.com/NOC-OI/zarr-cesium.git"
   },
   "bugs": {
-    "url": "https://github.com/noc-oi/zarr-cesium/issues"
+    "url": "https://github.com/NOC-OI/zarr-cesium/issues"
   },
   "homepage": "https://noc-oi.github.io/zarr-cesium",
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"

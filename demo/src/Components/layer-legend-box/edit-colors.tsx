@@ -1,13 +1,16 @@
 import { allColorScales, DEFAULT_COLORMAP, DEFAULT_SCALE, type ColorMapName } from 'zarr-cesium';
-import { useLayersManagementHandle } from '../../application/use-layers';
-import type { LayersLegendType } from '../../types';
+import { useAppDispatch, useAppSelector } from '../../application/use-layers';
+import { layersActions } from '../../application/store';
 import Slider from '@mui/material/Slider';
 import { useState } from 'react';
 import { Button } from '../ui/button';
 
 export function EditColors({ layerLegendName }: { layerLegendName: string }) {
-  const { setLayerLegend, setSelectedLayers, setActualLayer, setLayerAction, layerLegend } =
-    useLayersManagementHandle();
+  const { layerLegend, selectedLayer } = useAppSelector(state => ({
+    layerLegend: state.layers.layerLegend,
+    selectedLayer: state.layers.selectedLayers[layerLegendName]
+  }));
+  const dispatch = useAppDispatch();
 
   const [scaleLimits, setScaleLimits] = useState<[number, number]>(
     layerLegend[layerLegendName]?.scale || DEFAULT_SCALE
@@ -16,28 +19,31 @@ export function EditColors({ layerLegendName }: { layerLegendName: string }) {
     layerLegend[layerLegendName]?.colormap || DEFAULT_COLORMAP
   );
   const handleSubmit = () => {
-    setLayerAction('update-colors');
-    setActualLayer(layerLegendName);
-    setLayerLegend((layerLegend: LayersLegendType) => {
-      const newLayerLegend = { ...layerLegend };
-      newLayerLegend[layerLegendName] = {
-        ...newLayerLegend[layerLegendName],
-        scale: scaleLimits,
-        colormap: colormap
-      };
-      return newLayerLegend;
-    });
-    setSelectedLayers(prev => {
-      const updatedLayer = {
-        ...prev[layerLegendName],
-        params: {
-          ...prev[layerLegendName].params,
-          colormap: colormap,
-          scale: scaleLimits
+    dispatch(layersActions.setLayerAction('update-colors'));
+    dispatch(layersActions.setActualLayer(layerLegendName));
+    dispatch(
+      layersActions.upsertLayerLegend({
+        name: layerLegendName,
+        legend: {
+          ...layerLegend[layerLegendName],
+          scale: scaleLimits,
+          colormap: colormap
         }
-      };
-      return { ...prev, [layerLegendName]: updatedLayer };
-    });
+      })
+    );
+    dispatch(
+      layersActions.updateSelectedLayer({
+        name: layerLegendName,
+        layer: {
+          ...selectedLayer,
+          params: {
+            ...selectedLayer.params,
+            colormap: colormap,
+            scale: scaleLimits
+          }
+        }
+      })
+    );
   };
 
   return (

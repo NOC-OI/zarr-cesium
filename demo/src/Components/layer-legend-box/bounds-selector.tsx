@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { useLayersManagementHandle } from '../../application/use-layers';
+import { useAppDispatch, useAppSelector } from '../../application/use-layers';
+import { layersActions } from '../../application/store';
 import Slider from '@mui/material/Slider';
 import type { BoundsProps } from 'zarr-cesium';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -13,33 +14,28 @@ export default function BoundsSelector({
 }) {
   const [pendingBounds, setPendingBounds] = useState<BoundsProps>(bounds);
 
-  const { setSelectedLayers, setLayerAction, setActualLayer } = useLayersManagementHandle();
+  const layer = useAppSelector(state => state.layers.selectedLayers[layerLegendName]);
+  const dispatch = useAppDispatch();
   const handleChangeDimension = async (value: BoundsProps) => {
-    setActualLayer(layerLegendName);
-    setLayerAction('update-bounds');
-
-    setSelectedLayers(prev => {
-      const layer = prev[layerLegendName];
-      const updatedParams = {
-        ...layer.params,
-        bounds: { ...value }
-      };
-
-      const updatedLayer = {
-        ...layer,
-        params: updatedParams,
-        slices: {
-          latIndex: 0,
-          lonIndex: 0,
-          elevationIndex: 0
+    dispatch(layersActions.setActualLayer(layerLegendName));
+    dispatch(layersActions.setLayerAction('update-bounds'));
+    dispatch(
+      layersActions.updateSelectedLayer({
+        name: layerLegendName,
+        layer: {
+          ...layer,
+          params: {
+            ...layer.params,
+            bounds: { ...value }
+          },
+          slices: {
+            latIndex: 0,
+            lonIndex: 0,
+            elevationIndex: 0
+          }
         }
-      };
-
-      return {
-        ...prev,
-        [layerLegendName]: updatedLayer
-      };
-    });
+      })
+    );
   };
 
   return (

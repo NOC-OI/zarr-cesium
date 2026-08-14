@@ -3,7 +3,8 @@ import { useEffect, useRef, useCallback } from 'react';
 import * as Cesium from 'cesium';
 import { useContextHandle } from '../../application/use-context';
 import type { keyable } from '../../types';
-import { useLayersManagementHandle } from '../../application/use-layers';
+import { useAppDispatch, useAppSelector } from '../../application/use-layers';
+import { layersActions } from '../../application/store';
 import { generateSelectedLayer, viewerMap } from './_actions/get-layers';
 import {
   changeMapBounds,
@@ -23,19 +24,15 @@ import { CESIUM_START_COORDINATES, VERTICAL_EXAGGERATION } from '../../lib/map-l
 Ion.defaultAccessToken = import.meta.env.VITE_CESIUM_TOKEN;
 
 export function MapHome() {
-  const {
-    selectedLayers,
-    setSelectedLayers,
-    actualLayer,
-    layerAction,
-    setLayerAction,
-    gebcoTerrainEnabled,
-    listLayers
-  } = useLayersManagementHandle();
+  const { selectedLayers, actualLayer, layerAction, gebcoTerrainEnabled, listLayers } =
+    useAppSelector(state => state.layers);
+  const dispatch = useAppDispatch();
   const viewerRef = useRef<Viewer | null>(null);
   const velocityCubeRef = useRef<ZarrCubeVelocityProvider | null>(null);
   const cubeRef = useRef<ZarrCubeProvider | null>(null);
   const velocityRef = useRef<ZarrCubeVelocityProvider | null>(null);
+  const sharedLayersRef = useRef(selectedLayers);
+  const sharedLayersRestoredRef = useRef(false);
 
   const { setFlashMessage, setLoading } = useContextHandle();
   Cesium.Camera.DEFAULT_VIEW_RECTANGLE = CESIUM_START_COORDINATES;
@@ -58,16 +55,46 @@ export function MapHome() {
             )
           )
         });
-        setLoading(false);
+        if (!sharedLayersRestoredRef.current) {
+          sharedLayersRestoredRef.current = true;
+          const sharedLayers = sharedLayersRef.current;
+          void (async () => {
+            for (const layerName of Object.keys(sharedLayers).reverse()) {
+              const layers = viewerMap(viewerRef, sharedLayers[layerName].dataType) || null;
+              const result = await generateSelectedLayer(
+                layerName,
+                sharedLayers,
+                viewerRef as React.RefObject<Viewer>,
+                layers,
+                { velocityRef, cubeRef, velocityCubeRef },
+                gebcoTerrainEnabled
+              );
+              if (result?.selectedLayer) {
+                dispatch(
+                  layersActions.updateSelectedLayer({
+                    name: layerName,
+                    layer: result.selectedLayer
+                  })
+                );
+              }
+              if (result?.error) {
+                setFlashMessage({ messageType: 'error', content: result.error });
+              }
+            }
+            setLoading(false);
+          })();
+        } else {
+          setLoading(false);
+        }
       }
     },
-    [setLoading]
+    [dispatch, gebcoTerrainEnabled, setFlashMessage, setLoading]
   );
 
   async function addLayerIntoMap() {
     if (!viewerRef.current) return;
     const layers = viewerMap(viewerRef, selectedLayers[actualLayer].dataType) || null;
-    const error = await generateSelectedLayer(
+    const result = await generateSelectedLayer(
       actualLayer,
       selectedLayers,
       viewerRef as React.RefObject<Viewer>,
@@ -77,24 +104,31 @@ export function MapHome() {
         cubeRef,
         velocityCubeRef
       },
-      gebcoTerrainEnabled,
-      setSelectedLayers
+      gebcoTerrainEnabled
     );
-    if (error) {
+    if (result?.selectedLayer) {
+      dispatch(
+        layersActions.updateSelectedLayer({ name: actualLayer, layer: result.selectedLayer })
+      );
+    }
+    if (result?.error) {
       setFlashMessage({
         messageType: 'error',
-        content: error.error
+        content: result.error
       });
     }
-    setLayerAction('');
+    dispatch(layersActions.setLayerAction(''));
     setLoading(false);
   }
 
   async function handleLayerAction(actionMap: keyable, action: string) {
     setLoading(true);
-    await actionMap[action].function(...actionMap[action].args);
+    const selectedLayer = await actionMap[action].function(...actionMap[action].args);
+    if (selectedLayer) {
+      dispatch(layersActions.updateSelectedLayer({ name: actualLayer, layer: selectedLayer }));
+    }
     setLoading(false);
-    setLayerAction('');
+    dispatch(layersActions.setLayerAction(''));
   }
 
   useEffect(() => {
@@ -110,13 +144,16 @@ export function MapHome() {
       viewerRef.current.scene.verticalExaggerationRelativeHeight = 0.0;
       viewerRef.current.scene.verticalExaggeration = 1.0;
     }
-    updateSeaLevelLayerReference(
+    const updatedLayers = updateSeaLevelLayerReference(
       cubeRef,
       velocityCubeRef,
       gebcoTerrainEnabled,
-      selectedLayers,
-      setSelectedLayers
+      selectedLayers
     );
+    updatedLayers.forEach(update => {
+      if (update.layer)
+        dispatch(layersActions.updateSelectedLayer({ name: update.name, layer: update.layer }));
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gebcoTerrainEnabled]);
 
@@ -143,19 +180,19 @@ export function MapHome() {
       },
       'update-pyramid-levels': {
         function: changeMapPyramidLevels,
-        args: [actualLayer, selectedLayers, setSelectedLayers, zarrCesiumRefs]
+        args: [actualLayer, selectedLayers, zarrCesiumRefs]
       },
       'update-dimensions': {
         function: changeMapDimensions,
-        args: [actualLayer, selectedLayers, setSelectedLayers, viewerRef, zarrCesiumRefs]
+        args: [actualLayer, selectedLayers, viewerRef, zarrCesiumRefs]
       },
       'update-bounds': {
         function: changeMapBounds,
-        args: [actualLayer, selectedLayers, setSelectedLayers, zarrCesiumRefs]
+        args: [actualLayer, selectedLayers, zarrCesiumRefs]
       },
       'update-cube-slices': {
         function: changeMapCubeSlices,
-        args: [actualLayer, selectedLayers, setSelectedLayers, zarrCesiumRefs.cubeRef]
+        args: [actualLayer, selectedLayers, zarrCesiumRefs.cubeRef]
       },
       'update-velocity-slices': {
         function: changeMapVelocitySlices,

@@ -1,21 +1,19 @@
 import { useRef } from 'react';
 import { ColorBar } from './colorbar';
-import { useLayersManagementHandle } from '../../application/use-layers';
+import { useAppDispatch, useAppSelector } from '../../application/use-layers';
+import { layersActions } from '../../application/store';
 import Draggable from 'react-draggable';
-import type { LayerLegendBoxProps, LayersLegendType } from '../../types';
+import type { LayerLegendBoxProps } from '../../types';
 import { EditSelectors } from './edit-selectors';
 import CancelIcon from '@mui/icons-material/Cancel';
 import { EditStyle } from './edit-style';
 
 export function LayerLegendBox({ layerLegendName }: LayerLegendBoxProps) {
-  const { layerLegend, setLayerLegend } = useLayersManagementHandle();
+  const layerLegend = useAppSelector(state => state.layers.layerLegend);
+  const dispatch = useAppDispatch();
 
   function handleClose() {
-    setLayerLegend((layerLegend: LayersLegendType) => {
-      const newLayerLegend = { ...layerLegend };
-      delete newLayerLegend[layerLegendName];
-      return newLayerLegend;
-    });
+    dispatch(layersActions.removeLayerLegend(layerLegendName));
   }
 
   const nodeRef = useRef<HTMLDivElement>(null);

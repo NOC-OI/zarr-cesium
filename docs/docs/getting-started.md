@@ -13,6 +13,8 @@ npm install zarr-cesium
 yarn add zarr-cesium
 ```
 
+`zarr-cesium` supports CesiumJS 1.119 and newer, including CesiumJS 1.142+.
+
 ---
 
 ## Basic Usage

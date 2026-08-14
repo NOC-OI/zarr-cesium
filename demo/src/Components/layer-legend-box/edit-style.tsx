@@ -1,11 +1,11 @@
-import { useLayersManagementHandle } from '../../application/use-layers';
+import { useAppSelector } from '../../application/use-layers';
 import { CubeOptionsSelector } from './cube-options-selector';
 import { CubeVelocityOptionsSelector } from './cube-velocity-options-selector';
 import { EditColors } from './edit-colors';
 import type { EditSelectorsProps } from './edit-selectors';
 
 export function EditStyle({ layerLegendName }: EditSelectorsProps) {
-  const { selectedLayers } = useLayersManagementHandle();
+  const selectedLayers = useAppSelector(state => state.layers.selectedLayers);
 
   return (
     <div className="">

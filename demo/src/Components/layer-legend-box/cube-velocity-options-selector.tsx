@@ -1,4 +1,5 @@
-import { useLayersManagementHandle } from '../../application/use-layers';
+import { useAppDispatch, useAppSelector } from '../../application/use-layers';
+import { layersActions } from '../../application/store';
 import type { LayerLegendBoxProps, SelectedLayer } from '../../types';
 import Slider from '@mui/material/Slider';
 import {
@@ -15,8 +16,8 @@ import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 
 export function CubeVelocityOptionsSelector({ layerLegendName }: LayerLegendBoxProps) {
-  const { selectedLayers, setSelectedLayers, setLayerAction, setActualLayer } =
-    useLayersManagementHandle();
+  const selectedLayers = useAppSelector(state => state.layers.selectedLayers);
+  const dispatch = useAppDispatch();
 
   const selectedLayer = selectedLayers[layerLegendName] as SelectedLayer;
   const params = selectedLayer.params as VelocityOptions;
@@ -26,30 +27,32 @@ export function CubeVelocityOptionsSelector({ layerLegendName }: LayerLegendBoxP
   };
 
   const handleUpdateParams = (newParams: Partial<VelocityOptions>) => {
-    setLayerAction('update-cube-params');
-    setActualLayer(layerLegendName);
+    dispatch(layersActions.setLayerAction('update-cube-params'));
+    dispatch(layersActions.setActualLayer(layerLegendName));
 
     const selectedLayer = selectedLayers[layerLegendName] as SelectedLayer;
     const params = selectedLayer.params as VelocityOptions;
     const updatedParams = { ...params, ...newParams };
 
-    selectedLayer.params = updatedParams;
-    setSelectedLayers(prev => ({
-      ...prev,
-      [layerLegendName]: selectedLayer
-    }));
+    dispatch(
+      layersActions.updateSelectedLayer({
+        name: layerLegendName,
+        layer: { ...selectedLayer, params: updatedParams }
+      })
+    );
   };
   const handleUpdateSlice = (newParams: Partial<{ verticalExaggeration: number }>) => {
-    setLayerAction('update-velocity-slices');
-    setActualLayer(layerLegendName);
+    dispatch(layersActions.setLayerAction('update-velocity-slices'));
+    dispatch(layersActions.setActualLayer(layerLegendName));
     const selectedLayer = selectedLayers[layerLegendName] as SelectedLayer;
     const params = selectedLayer.params as VelocityOptions;
     const updatedParams = { ...params, ...newParams };
-    selectedLayer.params = updatedParams;
-    setSelectedLayers(prev => ({
-      ...prev,
-      [layerLegendName]: selectedLayer
-    }));
+    dispatch(
+      layersActions.updateSelectedLayer({
+        name: layerLegendName,
+        layer: { ...selectedLayer, params: updatedParams }
+      })
+    );
   };
 
   const updateWindOptions = (newWind: Partial<VelocityOptions['windOptions']>) => {

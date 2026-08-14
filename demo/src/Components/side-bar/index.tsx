@@ -5,8 +5,9 @@ import { InfoButtonBox } from '../info-button-box';
 import { LayerLegendBox } from '../layer-legend-box';
 import { SideBarLink } from './side-bar-link';
 import { DimensionsToggle } from '../dimensions-toggle';
-import { useLayersManagementHandle } from '../../application/use-layers';
-import type { InfoButtonBoxType, LayersLegendType } from '../../types';
+import { useAppDispatch, useAppSelector } from '../../application/use-layers';
+import { layersActions } from '../../application/store';
+import type { InfoButtonBoxType } from '../../types';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import DescriptionIcon from '@mui/icons-material/Description';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
@@ -16,19 +17,16 @@ export function SideBar() {
   const [sideBarOption, setSideBarOption] = useState('');
   const [infoButtonBox, setInfoButtonBox] = useState<InfoButtonBoxType>({});
 
-  const { selectedLayers, layerLegend, setLayerLegend } = useLayersManagementHandle();
+  const { selectedLayers, layerLegend } = useAppSelector(state => state.layers);
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     Object.keys(layerLegend).forEach((legend: string) => {
       if (!Object.keys(selectedLayers).includes(legend)) {
-        setLayerLegend((layerLegend: LayersLegendType) => {
-          const newLayerLegend = { ...layerLegend };
-          delete newLayerLegend[legend];
-          return newLayerLegend;
-        });
+        dispatch(layersActions.removeLayerLegend(legend));
       }
     });
-  }, [layerLegend, selectedLayers, setLayerLegend]);
+  }, [dispatch, layerLegend, selectedLayers]);
 
   async function handleShowSelection(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
     const oldSelectedSidebarOption = sideBarOption;

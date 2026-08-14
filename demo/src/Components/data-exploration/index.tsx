@@ -1,4 +1,4 @@
-import { useLayersManagementHandle } from '../../application/use-layers';
+import { useAppSelector } from '../../application/use-layers';
 import type { DataExplorationSelectionProps } from '../../types';
 import { DataExplorationType } from './data-exploration-type';
 
@@ -6,7 +6,7 @@ export function DataExplorationSelection({
   display,
   setInfoButtonBox
 }: DataExplorationSelectionProps) {
-  const { listLayers } = useLayersManagementHandle();
+  const listLayers = useAppSelector(state => state.layers.listLayers);
   if (!display) {
     return null;
   }

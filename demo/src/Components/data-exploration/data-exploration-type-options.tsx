@@ -8,7 +8,7 @@ import {
   handleClickSlider,
   verifyIfWasSelectedBefore
 } from './_actions/actions';
-import { useLayersManagementHandle } from '../../application/use-layers';
+import { useAppDispatch, useAppSelector } from '../../application/use-layers';
 import type { DataExplorationTypeOptionsProps } from '../../types';
 import InfoIcon from '@mui/icons-material/Info';
 import TuneIcon from '@mui/icons-material/Tune';
@@ -19,14 +19,8 @@ export function DataExplorationTypeOptions({
   subLayers,
   setInfoButtonBox
 }: DataExplorationTypeOptionsProps) {
-  const {
-    setActualLayer,
-    setLayerAction,
-    selectedLayers,
-    setSelectedLayers,
-    layerLegend,
-    setLayerLegend
-  } = useLayersManagementHandle();
+  const { selectedLayers, layerLegend } = useAppSelector(state => state.layers);
+  const dispatch = useAppDispatch();
   const [opacityIsClicked, setOpacityIsClicked] = useState(false);
   return (
     <div className="text-xs">
@@ -44,11 +38,8 @@ export function DataExplorationTypeOptions({
               handleChangeMapLayerAndAddLegend(
                 e.target.checked,
                 JSON.parse(e.target.value),
-                setActualLayer,
-                setLayerAction,
-                setSelectedLayers,
+                dispatch,
                 subLayer,
-                setLayerLegend,
                 layerLegend,
                 content,
                 setOpacityIsClicked
@@ -80,13 +71,7 @@ export function DataExplorationTypeOptions({
             />
             <TuneIcon
               onClick={() =>
-                handleClickLegend(
-                  subLayers[subLayer],
-                  subLayer,
-                  setLayerLegend,
-                  content,
-                  selectedLayers
-                )
+                handleClickLegend(subLayers[subLayer], subLayer, dispatch, content, selectedLayers)
               }
               fontSize="small"
               className="cursor-pointer hover:text-yellow-700"
@@ -108,15 +93,7 @@ export function DataExplorationTypeOptions({
           max={1}
           value={getPreviousOpacityValue(`${content}_${subLayer}`, selectedLayers)}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            handleChangeOpacity(
-              e,
-              setLayerAction,
-              setSelectedLayers,
-              content,
-              subLayer,
-              subLayers,
-              setActualLayer
-            )
+            handleChangeOpacity(e, dispatch, content, subLayer, subLayers, selectedLayers)
           }
         />
       )}

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useLayersManagementHandle } from '../../application/use-layers';
+import { useAppDispatch, useAppSelector } from '../../application/use-layers';
+import { layersActions } from '../../application/store';
 import type { LayerLegendBoxProps, SelectedLayer } from '../../types';
 import Slider from '@mui/material/Slider';
 import {
@@ -15,8 +16,8 @@ import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 
 export function CubeOptionsSelector({ layerLegendName }: LayerLegendBoxProps) {
-  const { selectedLayers, setSelectedLayers, setLayerAction, setActualLayer } =
-    useLayersManagementHandle();
+  const selectedLayers = useAppSelector(state => state.layers.selectedLayers);
+  const dispatch = useAppDispatch();
   const [latSlice, setLatSlice] = useState<number>(
     selectedLayers[layerLegendName]?.slices?.latIndex || 0
   );
@@ -41,31 +42,32 @@ export function CubeOptionsSelector({ layerLegendName }: LayerLegendBoxProps) {
   }, [selectedLayer]);
 
   const handleUpdateParams = (newParams: Partial<CubeOptions>) => {
-    setLayerAction('update-cube-params');
-    setActualLayer(layerLegendName);
+    dispatch(layersActions.setLayerAction('update-cube-params'));
+    dispatch(layersActions.setActualLayer(layerLegendName));
     const updatedParams = { ...params, ...newParams };
-    setSelectedLayers(prev => {
-      const updatedLayer = {
-        ...prev[layerLegendName],
-        params: updatedParams
-      };
-      return { ...prev, [layerLegendName]: updatedLayer };
-    });
+    dispatch(
+      layersActions.updateSelectedLayer({
+        name: layerLegendName,
+        layer: { ...selectedLayers[layerLegendName], params: updatedParams }
+      })
+    );
   };
   useEffect(() => {
-    setLayerAction('update-cube-slices');
-    setActualLayer(layerLegendName);
-    setSelectedLayers(prev => {
-      const slices = {
-        latIndex: latSlice,
-        lonIndex: lonSlice,
-        elevationIndex: elevationSlice
-      };
-      const updatedLayer = { ...selectedLayer, slices };
-      const updated = { ...prev };
-      updated[layerLegendName] = updatedLayer;
-      return updated;
-    });
+    dispatch(layersActions.setLayerAction('update-cube-slices'));
+    dispatch(layersActions.setActualLayer(layerLegendName));
+    dispatch(
+      layersActions.updateSelectedLayer({
+        name: layerLegendName,
+        layer: {
+          ...selectedLayer,
+          slices: {
+            latIndex: latSlice,
+            lonIndex: lonSlice,
+            elevationIndex: elevationSlice
+          }
+        }
+      })
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [latSlice, lonSlice, elevationSlice]);
 

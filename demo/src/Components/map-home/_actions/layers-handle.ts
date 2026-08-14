@@ -1,7 +1,7 @@
 import type React from 'react';
 import { DEFAULT_BOUNDS } from '../../../lib/map-layers/utils';
 import type { LayersJsonType, SelectedLayersType, ZarrCesiumRefs } from '../../../types';
-import { generateSelectedLayer, updateSelectedLayersWithDimensions, viewerMap } from './get-layers';
+import { generateSelectedLayer, getSelectedLayerWithDimensions, viewerMap } from './get-layers';
 import { type Viewer } from 'cesium';
 import {
   DEFAULT_OPACITY,
@@ -65,12 +65,10 @@ export async function changeMapOpacity(
 
   const layerInfo = selectedLayers[actualLayer];
   if (!layerInfo) return;
-  if (typeof layerInfo.params.opacity !== 'number') {
-    layerInfo.params.opacity = layerInfo.params.opacity
-      ? parseFloat(layerInfo.params.opacity)
-      : DEFAULT_OPACITY;
+  let opacity = layerInfo.params.opacity;
+  if (typeof opacity !== 'number') {
+    opacity = opacity ? parseFloat(opacity) : DEFAULT_OPACITY;
   }
-  const opacity = layerInfo.params.opacity;
   if (layerInfo.dataType === 'zarr-cube') {
     zarrCesiumRefs.cubeRef.current?.updateStyle({ opacity: opacity });
   } else if (layerInfo.dataType === 'zarr-cube-velocity') {
@@ -114,7 +112,6 @@ export async function changeMapColors(
 export async function changeMapPyramidLevels(
   actualLayer: string,
   selectedLayers: SelectedLayersType,
-  setSelectedLayers: React.Dispatch<React.SetStateAction<SelectedLayersType>>,
   zarrCesiumRefs: ZarrCesiumRefs
 ) {
   const layerInfo = selectedLayers[actualLayer];
@@ -124,13 +121,12 @@ export async function changeMapPyramidLevels(
       ? zarrCesiumRefs.cubeRef.current
       : zarrCesiumRefs.velocityCubeRef.current;
   ref?.updateSelectors({ multiscaleLevel: params.multiscaleLevel });
-  updateSelectedLayersWithDimensions(ref, actualLayer, selectedLayers, setSelectedLayers, true);
+  return getSelectedLayerWithDimensions(ref, actualLayer, selectedLayers, true);
 }
 
 export async function changeMapBounds(
   actualLayer: string,
   selectedLayers: SelectedLayersType,
-  setSelectedLayers: React.Dispatch<React.SetStateAction<SelectedLayersType>>,
   zarrCesiumRefs: ZarrCesiumRefs
 ) {
   const layerInfo = selectedLayers[actualLayer];
@@ -140,42 +136,46 @@ export async function changeMapBounds(
       ? zarrCesiumRefs.cubeRef.current
       : zarrCesiumRefs.velocityCubeRef.current;
   ref?.updateSelectors({ bounds: params.bounds });
-  updateSelectedLayersWithDimensions(ref, actualLayer, selectedLayers, setSelectedLayers, true);
+  return getSelectedLayerWithDimensions(ref, actualLayer, selectedLayers, true);
 }
 
 export function updateSeaLevelLayerReference(
   cubeRef: React.RefObject<ZarrCubeProvider | null>,
   velocityCubeRef: React.RefObject<ZarrCubeVelocityProvider | null>,
   gebcoTerrainEnabled: boolean,
-  selectedLayers: SelectedLayersType,
-  setSelectedLayers?: React.Dispatch<React.SetStateAction<SelectedLayersType>>
+  selectedLayers: SelectedLayersType
 ) {
+  const updates = [];
   if (cubeRef.current) {
     cubeRef.current.updateSlices({ belowSeaLevel: gebcoTerrainEnabled });
-    updateSelectedLayersWithDimensions(
-      cubeRef.current,
-      cubeRef.current.id,
-      selectedLayers,
-      setSelectedLayers,
-      true
-    );
+    updates.push({
+      name: cubeRef.current.id,
+      layer: getSelectedLayerWithDimensions(
+        cubeRef.current,
+        cubeRef.current.id,
+        selectedLayers,
+        true
+      )
+    });
   }
   if (velocityCubeRef.current) {
     velocityCubeRef.current.updateSlices({ belowSeaLevel: gebcoTerrainEnabled });
-    updateSelectedLayersWithDimensions(
-      velocityCubeRef.current,
-      velocityCubeRef.current.id,
-      selectedLayers,
-      setSelectedLayers,
-      true
-    );
+    updates.push({
+      name: velocityCubeRef.current.id,
+      layer: getSelectedLayerWithDimensions(
+        velocityCubeRef.current,
+        velocityCubeRef.current.id,
+        selectedLayers,
+        true
+      )
+    });
   }
+  return updates.filter(update => update.layer);
 }
 
 export async function changeMapDimensions(
   actualLayer: string,
   selectedLayers: SelectedLayersType,
-  setSelectedLayers: React.Dispatch<React.SetStateAction<SelectedLayersType>>,
   viewerRef: React.RefObject<Viewer>,
   zarrCesiumRefs: ZarrCesiumRefs
 ) {
@@ -183,36 +183,28 @@ export async function changeMapDimensions(
   const layers = viewerMap(viewerRef, layerInfo.dataType) || null;
   if (layerInfo.dataType === 'zarr-cube') {
     zarrCesiumRefs.cubeRef.current?.updateSelectors({ selectors: layerInfo.params.selectors });
-    updateSelectedLayersWithDimensions(
+    return getSelectedLayerWithDimensions(
       zarrCesiumRefs.cubeRef.current,
       actualLayer,
       selectedLayers,
-      setSelectedLayers,
       true
     );
   } else if (layerInfo.dataType === 'zarr-cube-velocity') {
     await zarrCesiumRefs.velocityCubeRef.current?.updateSelectors({
       selectors: layerInfo.params.selectors
     });
-    updateSelectedLayersWithDimensions(
+    return getSelectedLayerWithDimensions(
       zarrCesiumRefs.velocityCubeRef.current,
       actualLayer,
       selectedLayers,
-      setSelectedLayers,
       true
     );
   } else if (layerInfo.dataType === 'zarr-cesium') {
-    layers?._layers.forEach(function (layer: any) {
-      if (actualLayer === layer.id) {
-        layer.updateSelectors(layerInfo.params.selectors);
-        updateSelectedLayersWithDimensions(
-          layer.imageryProvider,
-          actualLayer,
-          selectedLayers,
-          setSelectedLayers
-        );
-      }
-    });
+    const layer = layers?._layers.find((candidate: any) => actualLayer === candidate.id);
+    if (layer) {
+      layer.updateSelectors(layerInfo.params.selectors);
+      return getSelectedLayerWithDimensions(layer.imageryProvider, actualLayer, selectedLayers);
+    }
   } else {
     layers?._layers.forEach(function (layer: any) {
       if (actualLayer === layer.id) {
@@ -226,19 +218,12 @@ export async function changeMapDimensions(
 export async function changeMapCubeSlices(
   actualLayer: string,
   selectedLayers: SelectedLayersType,
-  setSelectedLayers: React.Dispatch<React.SetStateAction<SelectedLayersType>>,
   cubeRef: React.RefObject<ZarrCubeProvider>
 ) {
   const layerInfo = selectedLayers[actualLayer];
   if (layerInfo.dataType === 'zarr-cube') {
     cubeRef.current?.updateSlices(layerInfo.slices!);
-    updateSelectedLayersWithDimensions(
-      cubeRef.current,
-      actualLayer,
-      selectedLayers,
-      setSelectedLayers,
-      true
-    );
+    return getSelectedLayerWithDimensions(cubeRef.current, actualLayer, selectedLayers, true);
   }
 }
 export async function changeMapVelocitySlices(

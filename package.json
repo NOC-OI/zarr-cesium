@@ -26,10 +26,11 @@
     "start:demo": "cd demo && npm run dev"
   },
   "peerDependencies": {
-    "cesium": "*"
+    "cesium": ">=1.119.0"
   },
   "devDependencies": {
     "@zarrita/ndarray": "^0.1.5",
+    "cesium": "1.142.0",
     "cesium-wind-layer": "^0.10.0",
     "ndarray": "^1.0.19",
     "proj4": "^2.19.10",

@@ -12,7 +12,8 @@ import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import { Button } from '../ui/button';
-import { useLayersManagementHandle } from '../../application/use-layers';
+import { useAppDispatch, useAppSelector } from '../../application/use-layers';
+import { layersActions } from '../../application/store';
 import { handleChangeMapLayerAndAddLegend } from '../data-exploration/_actions/actions';
 
 export function AddZarrForm() {
@@ -20,15 +21,8 @@ export function AddZarrForm() {
     resolver: zodResolver(layerFormSchema),
     defaultValues: getDefaultLayerValues('zarr-cesium')
   });
-  const {
-    listLayers,
-    setListLayers,
-    setActualLayer,
-    setSelectedLayers,
-    setLayerAction,
-    setLayerLegend,
-    layerLegend
-  } = useLayersManagementHandle();
+  const layerLegend = useAppSelector(state => state.layers.layerLegend);
+  const dispatch = useAppDispatch();
   // const { setFlashMessage } = useContextHandle();
   const {
     register,
@@ -52,30 +46,20 @@ export function AddZarrForm() {
           ? data.params.variables.u + '-' + data.params.variables.v
           : 'layer';
     const newLayerName = variableName + '-' + Math.random().toString(36).substring(2, 6);
-    const updatedLayers = listLayers['Updated Layers'] || { layerNames: {} };
-    updatedLayers.layerNames[newLayerName] = data;
-
-    setListLayers(prev => {
-      return {
-        ...prev,
-        'Updated Layers': updatedLayers
-      };
-    });
+    dispatch(
+      layersActions.addListLayer({ group: 'Updated Layers', name: newLayerName, layer: data })
+    );
     handleChangeMapLayerAndAddLegend(
       true,
       { subLayer: 'Updated Layers_' + newLayerName, dataInfo: data },
-      setActualLayer,
-      setLayerAction,
-      setSelectedLayers,
+      dispatch,
       newLayerName,
-      setLayerLegend,
       layerLegend,
       'Updated Layers'
     );
 
     reset(getDefaultLayerValues(data.dataType));
   };
-  console.log('listLayers in AddZarrForm:', listLayers);
   return (
     <FormProvider {...form}>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 p-6 ...">

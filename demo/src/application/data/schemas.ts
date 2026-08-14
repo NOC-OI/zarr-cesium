@@ -24,7 +24,7 @@ const crsSchema = z.enum(['EPSG:4326', 'EPSG:3857']);
 
 const zarrCesiumParams = z
   .object({
-    url: z.string().url(),
+    url: z.url(),
     variable: z.string(),
     crs: crsSchema.nullable().optional(),
     tileWidth: z.number().optional(),

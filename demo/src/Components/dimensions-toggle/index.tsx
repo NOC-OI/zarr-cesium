@@ -1,11 +1,13 @@
-import { useLayersManagementHandle } from '../../application/use-layers';
+import { useAppDispatch, useAppSelector } from '../../application/use-layers';
+import { layersActions } from '../../application/store';
 import styles from './DimensionsToogle.module.css';
 
 export function DimensionsToggle() {
-  const { gebcoTerrainEnabled, setGebcoTerrainEnabled } = useLayersManagementHandle();
+  const gebcoTerrainEnabled = useAppSelector(state => state.layers.gebcoTerrainEnabled);
+  const dispatch = useAppDispatch();
 
   function handleChangeDimensions() {
-    setGebcoTerrainEnabled(!gebcoTerrainEnabled);
+    dispatch(layersActions.setGebcoTerrainEnabled(!gebcoTerrainEnabled));
   }
   return (
     <div

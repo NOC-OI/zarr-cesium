@@ -58,6 +58,8 @@ The toolkit provides **three Cesium provider classes**, each specialized for a d
 npm install zarr-cesium
 ```
 
+`zarr-cesium` supports CesiumJS 1.119 and newer, including CesiumJS 1.142+.
+
 ## Run the demo website locally
 
 To run the demo website locally, clone the repository:

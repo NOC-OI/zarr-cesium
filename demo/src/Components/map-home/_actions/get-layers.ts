@@ -19,8 +19,7 @@ export async function generateSelectedLayer(
   viewerRef: React.RefObject<Viewer>,
   layers: any,
   zarrCesiumRefs: ZarrCesiumRefs,
-  gebcoTerrainEnabled?: boolean,
-  setSelectedLayers?: React.Dispatch<React.SetStateAction<SelectedLayersType>>
+  gebcoTerrainEnabled?: boolean
 ) {
   const layerName = selectedLayers[actualLayer];
   layers?._layers.forEach(function (layer: any) {
@@ -31,13 +30,13 @@ export async function generateSelectedLayer(
   try {
     if (layerName.dataType === 'zarr-cesium') {
       const layer = await getZarrCesiumLayer(layerName, actualLayer, viewerRef);
-      updateSelectedLayersWithDimensions(
+      const selectedLayer = getSelectedLayerWithDimensions(
         layer.imageryProvider,
         actualLayer,
-        selectedLayers,
-        setSelectedLayers
+        selectedLayers
       );
       layers.add(layer);
+      return { selectedLayer };
     } else if (layerName.dataType === 'zarr-cube') {
       const layer = await getZarrCube(
         layerName,
@@ -46,13 +45,9 @@ export async function generateSelectedLayer(
         zarrCesiumRefs.cubeRef,
         gebcoTerrainEnabled
       );
-      updateSelectedLayersWithDimensions(
-        layer,
-        actualLayer,
-        selectedLayers,
-        setSelectedLayers,
-        true
-      );
+      return {
+        selectedLayer: getSelectedLayerWithDimensions(layer, actualLayer, selectedLayers, true)
+      };
     } else if (layerName.dataType === 'zarr-cube-velocity') {
       const layer = await getZarrCubeVelocity(
         layerName,
@@ -61,13 +56,9 @@ export async function generateSelectedLayer(
         zarrCesiumRefs.velocityCubeRef,
         gebcoTerrainEnabled
       );
-      updateSelectedLayersWithDimensions(
-        layer,
-        actualLayer,
-        selectedLayers,
-        setSelectedLayers,
-        true
-      );
+      return {
+        selectedLayer: getSelectedLayerWithDimensions(layer, actualLayer, selectedLayers, true)
+      };
     } else if (layerName.dataType === 'zarr-titiler') {
       const layer = await getZarrLayer(layerName, actualLayer);
       layers.add(layer);
@@ -77,15 +68,14 @@ export async function generateSelectedLayer(
   }
 }
 
-export function updateSelectedLayersWithDimensions(
+export function getSelectedLayerWithDimensions(
   layer: any,
   actualLayer: string,
   selectedLayers: SelectedLayersType,
-  setSelectedLayers?: React.Dispatch<React.SetStateAction<SelectedLayersType>>,
   cube?: boolean
 ) {
-  if (!setSelectedLayers) return;
-  const selected = selectedLayers[actualLayer];
+  const selected = structuredClone(selectedLayers[actualLayer]);
+  if (!selected || !layer) return;
   const dimensions: Record<string, { values: any; selected: any; indices?: number[] }> = {};
   Object.keys(layer.dimensionValues).forEach((dimKey: string) => {
     if (dimKey === 'lat' || dimKey === 'lon') {
@@ -120,10 +110,7 @@ export function updateSelectedLayersWithDimensions(
     selected.pyramidLevels = layer.levelInfos || [];
   }
   selected.dimensions = dimensions;
-  setSelectedLayers(prev => ({
-    ...prev,
-    [actualLayer]: selected
-  }));
+  return selected;
 }
 
 export async function getZarrCesiumLayer(
@@ -131,7 +118,7 @@ export async function getZarrCesiumLayer(
   actualLayer: string,
   viewerRef: React.RefObject<Viewer>
 ) {
-  const options = layerName.params as LayerOptions;
+  const options = structuredClone(layerName.params) as LayerOptions;
   const imageryLayer = (await ZarrLayerProvider.createLayer(viewerRef.current, options)) as any;
   imageryLayer.id = actualLayer;
   return imageryLayer;
@@ -144,7 +131,7 @@ export async function getZarrCube(
   cubeRef: React.RefObject<ZarrCubeProvider | null>,
   gebcoTerrainEnabled?: boolean
 ) {
-  const options = layerName.params as CubeOptions;
+  const options = structuredClone(layerName.params) as CubeOptions;
   if (gebcoTerrainEnabled !== undefined && options.flipElevation !== true) {
     options.belowSeaLevel = gebcoTerrainEnabled;
   }
@@ -162,7 +149,7 @@ export async function getZarrCubeVelocity(
   velocityCubeRef: React.RefObject<ZarrCubeVelocityProvider | null>,
   gebcoTerrainEnabled?: boolean
 ) {
-  const options = layerName.params as VelocityOptions;
+  const options = structuredClone(layerName.params) as VelocityOptions;
   if (gebcoTerrainEnabled !== undefined && options.flipElevation !== true) {
     options.belowSeaLevel = gebcoTerrainEnabled;
   }

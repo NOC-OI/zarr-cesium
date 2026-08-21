@@ -2,12 +2,12 @@
 
 ```ts
 function loadDimensionValues(
-   dimensionValues, 
-   levelInfo, 
-   dimIndices, 
-   root, 
-   zarrVersion, 
-slice?): Promise<number[] | string[] | Float64Array<ArrayBufferLike>>;
+   dimensionValues,
+   levelInfo,
+   dimIndices,
+   root,
+   zarrVersion,
+slice?): Promise<string[] | number[] | Float64Array<ArrayBufferLike>>;
 ```
 
 Loads the coordinate values for a specific dimension.
@@ -29,12 +29,12 @@ Behavior:
 | `dimIndices.array` | `Array`\<`any`, `Readable`\> \| `null` | - |
 | `dimIndices.index` | `number` | - |
 | `dimIndices.name` | `string` | - |
-| `root?` | `Location`\<`FetchStore`\> | Root Zarr group location. |
-| `zarrVersion?` | `2` \| `3` \| `null` | Zarr version (2 or 3). |
+| `root?` | `Location`\<`Readable`\> | Root Zarr group location. |
+| `zarrVersion?` | `3` \| `2` \| `null` | Zarr version (2 or 3). |
 | `slice?` | \[`number`, `number`\] | Optional index range `[start, end]` to slice the loaded values. |
 
 ## Returns
 
-`Promise`\<`number`[] \| `string`[] \| `Float64Array`\<`ArrayBufferLike`\>\>
+`Promise`\<`string`[] \| `number`[] \| `Float64Array`\<`ArrayBufferLike`\>\>
 
 The loaded coordinate array for the dimension.

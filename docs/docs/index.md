@@ -52,11 +52,15 @@ It provides a set of **CesiumJS data providers** that stream and render multidim
 
 - **Zarr v2 and v3 support**
 - **Single-scale and multiscale datasets** (following the format generated using [ndpyramid](https://github.com/carbonplan/ndpyramid))
+- **Legacy ndpyramid and GeoZarr pyramid layouts**
+- **Icechunk and custom Zarrita-readable stores** across the 2D, cube, and velocity providers
+- **Private-store requests** with static options or per-object URL/header transformation
 - **2D scalar, 3D volumetric, and 3D vector field visualization**
 - **Automatic resolution selection** for multiscale datasets
 - **CRS-aware** (EPSG:4326 & EPSG:3857)
 - **WebGL-accelerated rendering**
 - **Dynamic styling** (colormap, opacity, scaling, slices, animation)
+- **Point, time-series, vertical-profile, and transect queries**
 
 ---
 
@@ -74,11 +78,13 @@ It provides a set of **CesiumJS data providers** that stream and render multidim
 
 ```
 
-Zarr Store (HTTP / S3 / GCS)
+Zarr or Icechunk Store (HTTP / S3 / GCS / custom Readable)
 ↓
 zarrita.js (Zarr client)
 ↓
-Zarr-Cesium Providers
+zarr-maps-tiling + zarr-maps-colormap
+↓
+Zarr-Cesium Providers and query APIs
 ↓
 CesiumJS (WebGL)
 ↓
@@ -94,6 +100,6 @@ Built with:
 
 - [CesiumJS](https://cesium.com/platform/cesiumjs/)
 - [zarrita.js](https://zarrita.dev/)
-- [cesium-wind-layer](https://github.com/hongfaqiu/cesium-wind-layer)
+- [NOC-OI/cesium-wind-layer](https://github.com/NOC-OI/cesium-wind-layer)
 
 **Developed at the [National Oceanography Centre (NOC)](https://www.noc.ac.uk/) as part of the [Atlantis](https://atlantis.ac.uk/) project.**

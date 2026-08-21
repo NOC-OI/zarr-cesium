@@ -2,10 +2,10 @@
 
 ```ts
 function getXYLimits(
-   root, 
-   dimIndices, 
-   levelInfos, 
-   multiscale, 
+   root,
+   dimIndices,
+   levelInfos,
+   multiscale,
 zarrVersion): Promise<XYLimitsProps>;
 ```
 
@@ -15,11 +15,11 @@ Retrieve the geographic coordinate limits (min/max latitude/longitude) for a Zar
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `root` | `Location`\<`FetchStore`\> | Zarr group root. |
+| `root` | `Location`\<`Readable`\> | Zarr group root. |
 | `dimIndices` | [`DimIndicesProps`](../interfaces/DimIndicesProps.md) | Dimension mapping. See [DimIndicesProps](../interfaces/DimIndicesProps.md). |
 | `levelInfos` | `string`[] | Multiscale level paths. |
 | `multiscale` | `boolean` | Whether the dataset is multiscale. |
-| `zarrVersion` | `2` \| `3` \| `null` | Zarr version (2 or 3). |
+| `zarrVersion` | `3` \| `2` \| `null` | Zarr version (2 or 3). |
 
 ## Returns
 

@@ -1,5 +1,6 @@
 import React, { type ReactNode, useEffect, useState } from 'react';
 import { ContextHandleContext } from './use-context';
+import type { InfoButtonBoxType } from '../types';
 
 interface ContextHandleProviderProps {
   children: ReactNode;
@@ -13,6 +14,8 @@ export const ContextHandleProvider: React.FC<ContextHandleProviderProps> = ({ ch
     messageType: '',
     content: ''
   });
+  const [infoButtonBox, setInfoButtonBox] = useState<InfoButtonBoxType>({});
+  const [transectLayerName, setTransectLayerName] = useState('');
 
   useEffect(() => {
     if (flashMessage.messageType) {
@@ -28,7 +31,11 @@ export const ContextHandleProvider: React.FC<ContextHandleProviderProps> = ({ ch
         showFlash,
         setShowFlash,
         flashMessage,
-        setFlashMessage
+        setFlashMessage,
+        infoButtonBox,
+        setInfoButtonBox,
+        transectLayerName,
+        setTransectLayerName
       }}
     >
       {children}

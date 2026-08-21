@@ -49,10 +49,6 @@ export const mercProj = new WebMercatorProjection();
  * @param lonDeg - Longitude in degrees.
  * @returns Web Mercator X in meters.
  */
-export function lonDegToMercX(lonDeg: number) {
-  return mercProj.project(new Cartographic(Math.toRadians(lonDeg), 0)).x;
-}
-
 /**
  * Validates whether geographic bounds are logically consistent.
  *
@@ -85,18 +81,6 @@ export const DEFAULT_VERTICAL_EXAGGERATION = 5000;
 /**
  * Default colormap for data visualization.
  */
-export const DEFAULT_COLORMAP = 'viridis';
-
-/**
- * Default data scale range for visualization.
- */
-export const DEFAULT_SCALE: [number, number] = [0, 1];
-
-/**
- * Default opacity for layer visualization.
- */
-export const DEFAULT_OPACITY = 1;
-
 /**
  * Default configuration for `WindLayer` rendering.
  *
@@ -104,6 +88,8 @@ export const DEFAULT_OPACITY = 1;
  * particle animations for typical 1 km – 5 km atmospheric grid spacing.
  *
  * Users may override any property when constructing a `WindLayer`.
+ * `minVisibleRatio` is provided by the NOC-OI fork: lower values allow more
+ * camera-driven scaling, while `1` preserves the overview particle scale.
  *
  * @see WindLayerOptions
  */
@@ -112,6 +98,9 @@ export const DEFAULT_WIND_OPTIONS: Partial<WindLayerOptions> = {
   lineWidth: { min: 1, max: 3 },
   lineLength: { min: 0, max: 400 },
   particlesTextureSize: 50,
+  dropRate: 0.003,
+  dropRateBump: 0.001,
+  minVisibleRatio: 0.6,
   useViewerBounds: true,
   dynamic: true,
   flipY: true
@@ -131,11 +120,6 @@ export const DEFAULT_WIND_OPTIONS: Partial<WindLayerOptions> = {
  * const y = latDegToMercY(51.5);
  * ```
  */
-export function latDegToMercY(latDeg: number) {
-  const clamped = Math.clamp(latDeg, -85.05112878, 85.05112878);
-  return mercProj.project(new Cartographic(0, Math.toRadians(clamped))).y;
-}
-
 /**
  * Normalizes longitude to the [-180, 180) interval.
  */

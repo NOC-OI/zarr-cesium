@@ -3,6 +3,20 @@ import type { LayersJsonType } from '../../types';
 export const layersJson: LayersJsonType = {
   'Zarr-cesium': {
     layerNames: {
+      icechunk_precipitation: {
+        dataType: 'zarr-cesium',
+        dataDescription: ['Precipitation', 'mm/hr'],
+        content:
+          'Virtualized NASA IMERG precipitation stored in Icechunk with native multiscales.',
+        params: {
+          url: 'https://carbonplan-share.s3.us-west-2.amazonaws.com/zarr-layer-examples/pipeline/multi_level_virtual_hybrid_icechunk.icechunk',
+          variable: 'IMERG_PRECTOT',
+          scale: [0, 10],
+          colormap: 'cool',
+          zarrVersion: 3,
+          crs: 'EPSG:4326'
+        }
+      },
       salinity_pyramid_geozarr: {
         dataType: 'zarr-cesium',
         dataDescription: ['Salinity', ''],
@@ -105,6 +119,40 @@ export const layersJson: LayersJsonType = {
   },
   'Zarr-Cesium-Cube': {
     layerNames: {
+      'salinity_pyramid_geozarr': {
+        dataType: 'zarr-cube',
+        dataDescription: ['Salinity', ''],
+        content:
+          'Salinity outputs from NEMO NPD-EORCA1 model. This dataset contains 4D data (time, depth, latitude, longitude) stored in a Zarr v3 format with a multiscale pyramid structure and EPSG:3857 coordinate reference system.',
+        params: {
+          url: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/noc-npd-era5-demov2/prod10/eorca1_T/T1m/so_abs',
+          variable: 'so_abs',
+          flipElevation: true,
+          selectors: {
+            time: {
+              selected: 0,
+              type: 'index'
+            },
+            elevation: {
+              selected: [0, 10]
+            }
+          },
+          zarrVersion: 3,
+          multiscaleLevel: 1,
+          colormap: 'jet',
+          scale: [30, 37],
+          bounds: { west: -50, south: -20, east: 10, north: 20 },
+          crs: undefined,
+          verticalExaggeration: 10000,
+          opacity: undefined,
+          showHorizontalSlices: undefined,
+          showVerticalSlices: undefined,
+          belowSeaLevel: undefined,
+          dimensionNames: undefined,
+          multiscaleFormat: 'geozarr',
+          latIsAscending: true
+        }
+      },
       'salinity-pyramid_v3': {
         dataType: 'zarr-cube',
         dataDescription: ['Salinity', ''],
@@ -237,7 +285,12 @@ export const layersJson: LayersJsonType = {
             v: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/nemotest101/currents/vo.zarr'
           },
           variables: { u: 'uo', v: 'vo' },
-          bounds: { west: -50, south: -20, east: 10, north: 20 },
+          bounds: {
+            west: -180,
+            south: -89.72809667673717,
+            east: 180,
+            north: 89.72809667673717
+          },
           flipElevation: true,
           zarrVersion: 2,
           selectors: {
@@ -251,7 +304,7 @@ export const layersJson: LayersJsonType = {
             }
           },
           colormap: 'jet',
-          scale: [0, 1],
+          scale: [0, 0.7],
           verticalExaggeration: undefined,
           sliceSpacing: undefined,
           belowSeaLevel: undefined,
@@ -259,7 +312,18 @@ export const layersJson: LayersJsonType = {
           multiscaleLevel: undefined,
           opacity: undefined,
           crs: undefined,
-          windOptions: undefined
+          windOptions: {
+            particlesTextureSize: 400,
+            lineWidth: { min: 1.5, max: 8 },
+            lineLength: { min: 0, max: 1000 },
+            speedFactor: 12,
+            dropRate: 0.002,
+            dropRateBump: 0.01,
+            minVisibleRatio: 0.6,
+            flipY: true,
+            useViewerBounds: false,
+            dynamic: true
+          }
         }
       },
       currents_3d_v2: {
@@ -308,6 +372,40 @@ export const layersJson: LayersJsonType = {
           urls: {
             u: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/noc-npd-era5-demo/npd-eorca1-era5v1/gn/U1y/uo2',
             v: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/noc-npd-era5-demo/npd-eorca1-era5v1/gn/V1y/vo'
+          },
+          variables: { u: 'uo', v: 'vo' },
+          bounds: { west: -50, south: -20, east: 10, north: 20 },
+          flipElevation: true,
+          zarrVersion: 3,
+          selectors: {
+            time: {
+              selected: 0
+            },
+            elevation: {
+              selected: [0, 22]
+            }
+          },
+          colormap: 'jet',
+          scale: [0, 0.5],
+          verticalExaggeration: undefined,
+          sliceSpacing: undefined,
+          belowSeaLevel: undefined,
+          dimensionNames: undefined,
+          multiscaleLevel: undefined,
+          opacity: undefined,
+          crs: undefined,
+          windOptions: undefined
+        }
+      },
+      currents_3d_pyramid_geozarr: {
+        dataType: 'zarr-cube-velocity',
+        dataDescription: ['Currents', 'm/s'],
+        content:
+          'Currents outputs from NEMO NPD-EORCA1 model. This dataset contains 4D velocity data (time, depth, latitude, longitude) stored in a Zarr v3 format with a multiscale pyramid structure and EPSG:3857 coordinate reference system.',
+        params: {
+          urls: {
+            u: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/noc-npd-era5-demov2/prod10/eorca1_U/U1y/uo',
+            v: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/noc-npd-era5-demov2/prod10/eorca1_V/V1y/vo'
           },
           variables: { u: 'uo', v: 'vo' },
           bounds: { west: -50, south: -20, east: 10, north: 20 },

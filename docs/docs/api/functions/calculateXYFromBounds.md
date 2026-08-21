@@ -2,9 +2,9 @@
 
 ```ts
 function calculateXYFromBounds(
-   bounds, 
-   width, 
-   height, 
+   bounds,
+   width,
+   height,
    crs): object;
 ```
 

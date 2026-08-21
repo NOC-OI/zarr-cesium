@@ -37,7 +37,13 @@ const zarrCesiumParams = z
     zarrVersion: zarrVersionSchema.optional(),
     dimensionNames: z.record(z.string(), z.string()).optional(),
     noDataMin: z.number().optional(),
-    noDataMax: z.number().optional()
+    noDataMax: z.number().optional(),
+    requestOverrides: z.object({
+      headers: z.record(z.string(), z.string()).optional(),
+      credentials: z.enum(['omit', 'same-origin', 'include']).optional(),
+      mode: z.enum(['cors', 'no-cors', 'same-origin', 'navigate']).optional(),
+      cache: z.enum(['default', 'no-store', 'reload', 'no-cache', 'force-cache', 'only-if-cached']).optional()
+    }).optional()
   })
   .strict();
 
@@ -47,6 +53,7 @@ const zarrCubeParams = z
     variable: z.string(),
     bounds: boundsSchema,
     crs: crsSchema.nullable().optional(),
+    latIsAscending: z.boolean().optional(),
     verticalExaggeration: z.number().optional(),
     opacity: z.number().optional(),
     showHorizontalSlices: z.boolean().optional(),
@@ -73,6 +80,7 @@ const zarrCubeVelocityParams = z
       v: z.string()
     }),
     bounds: boundsSchema,
+    latIsAscending: z.boolean().optional(),
     verticalExaggeration: z.number().optional(),
     flipElevation: z.boolean().optional(),
     sliceSpacing: z.number().optional(),

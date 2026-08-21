@@ -1,19 +1,6 @@
 # ZarrImageryLayer
 
-Custom Cesium imagery layer for Zarr datasets.
-
-## Remarks
-
-Extends Cesium's `ImageryLayer` to support real-time updates to
-visualization style (opacity, color map, scale) from Zarr-based data.
-
-## Param
-
-Instance of [ZarrLayerProvider](ZarrLayerProvider.md).
-
-## Param
-
-Cesium viewer instance.
+Cesium imagery layer backed by a shared [ZarrTileProvider](ZarrTileProvider.md).
 
 ## Extends
 
@@ -167,11 +154,16 @@ ImageryLayer.isDestroyed
 softRefreshCurrentView(): void;
 ```
 
-Forces a re-render of the current view to reflect updated imagery.
+Invalidates the imagery currently visible without destroying the provider.
 
 #### Returns
 
 `void`
+
+#### Remarks
+
+The layer is removed and reinserted at the same collection index. Callers
+normally use [updateStyle](#updatestyle) or [updateSelectors](#updateselectors) instead.
 
 ***
 
@@ -181,13 +173,13 @@ Forces a re-render of the current view to reflect updated imagery.
 updateSelectors(selectors): void;
 ```
 
-Update the selectors used for slicing the Zarr dataset.
+Replaces dimension selections and refreshes visible tiles when they change.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `selectors` | \{ \[`key`: `string`\]: [`ZarrSelectorsProps`](../interfaces/ZarrSelectorsProps.md); \} | New selectors to apply. |
+| `selectors` | `Record`\<`string`, [`ZarrSelectorsProps`](../interfaces/ZarrSelectorsProps.md)\> | Selectors keyed by normalized dimension name. |
 
 #### Returns
 
@@ -198,19 +190,19 @@ Update the selectors used for slicing the Zarr dataset.
 ### updateStyle()
 
 ```ts
-updateStyle(opts): void;
+updateStyle(options): void;
 ```
 
-Update the visual style of the imagery layer.
+Updates rendering style and refreshes visible tiles when pixel colors change.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `opts` | \{ `colormap?`: `string`; `opacity?`: `number`; `scale?`: \[`number`, `number`\]; \} | Style options to update. |
-| `opts.colormap?` | `string` | Colormap name. |
-| `opts.opacity?` | `number` | Layer opacity. |
-| `opts.scale?` | \[`number`, `number`\] | [min, max] range for data scaling. |
+| `options` | \{ `colormap?`: `string`; `opacity?`: `number`; `scale?`: \[`number`, `number`\]; \} | Partial style update. `opacity` updates Cesium layer alpha; `scale` and `colormap` update the shared tile renderer. |
+| `options.colormap?` | `string` | - |
+| `options.opacity?` | `number` | - |
+| `options.scale?` | \[`number`, `number`\] | - |
 
 #### Returns
 
@@ -513,7 +505,7 @@ ImageryLayer.hue
 id: string = '';
 ```
 
-Unique identifier for the cube provider instance.
+Application-defined identifier; Cesium does not assign this automatically.
 
 ***
 
@@ -523,7 +515,7 @@ Unique identifier for the cube provider instance.
 imageryProvider: ZarrLayerProvider;
 ```
 
-Gets the imagery provider for this layer. This should not be called before [ImageryLayer#ready](#ready) returns true.
+Strongly typed Zarr imagery provider associated with this layer.
 
 #### Overrides
 
@@ -694,8 +686,10 @@ ImageryLayer.splitDirection
 ### viewer?
 
 ```ts
-optional viewer: Viewer;
+optional viewer: CesiumHost;
 ```
+
+Viewer or widget used to request a render after runtime updates.
 
 ***
 

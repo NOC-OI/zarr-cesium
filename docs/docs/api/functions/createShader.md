@@ -2,9 +2,9 @@
 
 ```ts
 function createShader(
-   gl, 
-   type, 
-   source): 
+   gl,
+   type,
+   source):
   | WebGLShader
   | null;
 ```

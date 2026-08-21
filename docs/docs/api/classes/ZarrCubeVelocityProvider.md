@@ -5,8 +5,11 @@ from Zarr datasets as animated Cesium `WindLayer`s.
 
 ## Remarks
 
-This class supports loading 3D vector field data (u, v components), slicing them by elevation,
-and creating animated particle layers that visualize flow direction and speed.
+This provider targets the NOC-OI fork of `cesium-wind-layer` v0.11.0. The
+fork adds bounded camera-driven particle scaling through `minVisibleRatio`
+and restores overview styling after zooming back out. The provider loads 3D
+vector data, slices it by elevation, and creates animated particle layers
+that visualize flow direction and speed.
 
 ## Example
 
@@ -18,6 +21,24 @@ const provider = new ZarrCubeVelocityProvider(viewer, {
 });
 await provider.load();
 ```
+
+## Accessors
+
+### queryIndexOffsets
+
+#### Get Signature
+
+```ts
+get queryIndexOffsets(): Record<string, number>;
+```
+
+Global coordinate offsets represented by index zero of the in-memory subset.
+
+##### Returns
+
+`Record`\<`string`, `number`\>
+
+Elevation offset used by shared profile query helpers.
 
 ## Constructors
 
@@ -33,12 +54,16 @@ Creates a new ZarrCubeVelocityProvider instance.
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `viewer` | `Viewer` | Cesium viewer where the layers will be rendered. |
+| `viewer` | [`CesiumHost`](../type-aliases/CesiumHost.md) | Cesium viewer or widget where the layers will be rendered. |
 | `options` | [`VelocityOptions`](../interfaces/VelocityOptions.md) | Velocity dataset options (see [VelocityOptions](../interfaces/VelocityOptions.md)). |
 
 #### Returns
 
 `ZarrCubeVelocityProvider`
+
+#### Throws
+
+If either U or V has neither a URL nor a custom store.
 
 ## Methods
 
@@ -54,6 +79,65 @@ Removes all active wind layers from the Cesium scene.
 
 `void`
 
+#### Remarks
+
+Loaded U/V arrays and selectors remain in memory. Call
+[updateSlices](#updateslices) or [load](#load) to render layers again.
+
+***
+
+### getTimeSeries()
+
+```ts
+getTimeSeries(
+   position,
+   selectors?,
+options?): Promise<QueryResult>;
+```
+
+Queries all time values and vector components at one position.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `position` | [`QueryPosition`](../type-aliases/QueryPosition.md) | `[longitude, latitude]` in WGS84 degrees. |
+| `selectors?` | [`ZarrSelectors`](../interfaces/ZarrSelectors.md) | Fixed selectors for dimensions other than time. |
+| `options?` | [`QueryOptions`](../interfaces/QueryOptions.md) | Query cancellation and coordinate-output controls. |
+
+#### Returns
+
+`Promise`\<[`QueryResult`](../interfaces/QueryResult.md)\>
+
+Speed and component values ordered by time.
+
+***
+
+### getVerticalProfile()
+
+```ts
+getVerticalProfile(
+   position,
+   selectors?,
+options?): Promise<QueryResult>;
+```
+
+Queries all loaded elevation values and vector components at one position.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `position` | [`QueryPosition`](../type-aliases/QueryPosition.md) | `[longitude, latitude]` in WGS84 degrees. |
+| `selectors?` | [`ZarrSelectors`](../interfaces/ZarrSelectors.md) | Fixed selectors for dimensions other than elevation. |
+| `options?` | [`QueryOptions`](../interfaces/QueryOptions.md) | Query cancellation and coordinate-output controls. |
+
+#### Returns
+
+`Promise`\<[`QueryResult`](../interfaces/QueryResult.md)\>
+
+Speed and component values ordered by elevation.
+
 ***
 
 ### load()
@@ -68,14 +152,59 @@ Loads both U and V components of the velocity field from their respective Zarr d
 
 `Promise`\<`void`\>
 
-Promise resolved when both datasets are loaded and rendered as wind layers.
+A promise resolved after both components, coordinates, selected
+subsets, and all elevation wind layers have loaded.
+
+#### Throws
+
+When either custom or URL-backed store, selected array, dimensions, or data chunks cannot be read.
+
+#### Remarks
+
+U and V are loaded concurrently and must describe compatible grids.
+
+***
+
+### queryData()
+
+```ts
+queryData(
+   geometry,
+   selectors,
+options): Promise<VelocityQueryResult>;
+```
+
+Queries velocity components and derived speed at a WGS84 point.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `geometry` | [`QueryGeometry`](../type-aliases/QueryGeometry.md) | Point geometry in `[longitude, latitude]` degrees. |
+| `selectors` | [`ZarrSelectors`](../interfaces/ZarrSelectors.md) | Optional time/elevation selectors for this query. |
+| `options` | [`QueryOptions`](../interfaces/QueryOptions.md) | Cancellation and coordinate-output controls. |
+
+#### Returns
+
+`Promise`\<[`VelocityQueryResult`](../interfaces/VelocityQueryResult.md)\>
+
+Speed values plus aligned U and V component arrays.
+
+#### Throws
+
+For unsupported geometries, invalid selectors, or failed reads.
+
+#### Remarks
+
+A ranged elevation selector returns a vertical profile; a ranged
+time selector reads the source arrays instead of only the rendered layers.
 
 ***
 
 ### updateSelectors()
 
 ```ts
-updateSelectors(options:): Promise<void>;
+updateSelectors(options): Promise<void>;
 ```
 
 Updates the dimension selectors, multiscale level, or geographic bounds,
@@ -85,21 +214,28 @@ and reloads the velocity data accordingly.
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `options:` | \{ `bounds?`: [`BoundsProps`](../interfaces/BoundsProps.md); `multiscaleLevel?`: `number`; `selectors?`: \{ \[`key`: `string`\]: [`ZarrSelectorsProps`](../interfaces/ZarrSelectorsProps.md); \}; \} | selectors - New dimension selectors. See [ZarrSelectorsProps](../interfaces/ZarrSelectorsProps.md). - multiscaleLevel - New multiscale level to load. - bounds - Updated geographic bounds. See [BoundsProps](../interfaces/BoundsProps.md). |
-| `options:.bounds?` | [`BoundsProps`](../interfaces/BoundsProps.md) | - |
-| `options:.multiscaleLevel?` | `number` | - |
-| `options:.selectors?` | \{ \[`key`: `string`\]: [`ZarrSelectorsProps`](../interfaces/ZarrSelectorsProps.md); \} | - |
+| `options` | \{ `bounds?`: [`BoundsProps`](../interfaces/BoundsProps.md); `multiscaleLevel?`: `number`; `selectors?`: \{ \[`key`: `string`\]: [`ZarrSelectorsProps`](../interfaces/ZarrSelectorsProps.md); \}; \} | Partial data-selection update. Changed selectors, level, or bounds destroy the existing wind layers and reload both components. |
+| `options.bounds?` | [`BoundsProps`](../interfaces/BoundsProps.md) | - |
+| `options.multiscaleLevel?` | `number` | - |
+| `options.selectors?` | \{ \[`key`: `string`\]: [`ZarrSelectorsProps`](../interfaces/ZarrSelectorsProps.md); \} | - |
 
 #### Returns
 
 `Promise`\<`void`\>
+
+A promise that resolves after the change is scheduled. If no value
+changed, it resolves without rebuilding layers.
+
+#### Remarks
+
+Latitude bounds are clamped to the Web Mercator limit.
 
 ***
 
 ### updateSlices()
 
 ```ts
-updateSlices(options:): Promise<void>;
+updateSlices(options): Promise<void>;
 ```
 
 Updates the rendered slices (number of vertical layers) based on the spacing or exaggeration.
@@ -108,21 +244,28 @@ Updates the rendered slices (number of vertical layers) based on the spacing or 
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `options:` | \{ `belowSeaLevel?`: `boolean`; `sliceSpacing?`: `number`; `verticalExaggeration?`: `number`; \} | sliceSpacing - Distance between rendered elevation slices. - verticalExaggeration - Height exaggeration. - belowSeaLevel - Whether elevations below sea level are considered. |
-| `options:.belowSeaLevel?` | `boolean` | - |
-| `options:.sliceSpacing?` | `number` | - |
-| `options:.verticalExaggeration?` | `number` | - |
+| `options` | \{ `belowSeaLevel?`: `boolean`; `sliceSpacing?`: `number`; `verticalExaggeration?`: `number`; \} | Partial slice-layout update. `sliceSpacing` is an elevation index interval; `verticalExaggeration` scales height; `belowSeaLevel` controls whether depth is placed beneath the ellipsoid. |
+| `options.belowSeaLevel?` | `boolean` | - |
+| `options.sliceSpacing?` | `number` | - |
+| `options.verticalExaggeration?` | `number` | - |
 
 #### Returns
 
 `Promise`\<`void`\>
+
+A promise resolved after replacement wind layers are created.
+
+#### Remarks
+
+Non-positive spacing/exaggeration and spacing beyond the elevation
+dimension are rejected with a warning.
 
 ***
 
 ### updateStyle()
 
 ```ts
-updateStyle(options:): void;
+updateStyle(options): void;
 ```
 
 Updates the visual style of the velocity layers, such as opacity,
@@ -132,15 +275,19 @@ color scale, or particle simulation parameters.
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `options:` | \{ `colormap?`: `string`; `opacity?`: `number`; `scale?`: \[`number`, `number`\]; `windOptions?`: `Partial`\<`WindLayerOptions`\>; \} | opacity - Opacity. - scale - [min, max] scale for coloring. - colormap - Colormap name. See [ColorMapName](../type-aliases/ColorMapName.md). - windOptions - Additional parameters forwarded to the WindLayer (see WindLayerOptions). |
-| `options:.colormap?` | `string` | - |
-| `options:.opacity?` | `number` | - |
-| `options:.scale?` | \[`number`, `number`\] | - |
-| `options:.windOptions?` | `Partial`\<`WindLayerOptions`\> | - |
+| `options` | \{ `colormap?`: `string`; `opacity?`: `number`; `scale?`: \[`number`, `number`\]; `windOptions?`: [`VelocityWindOptions`](../type-aliases/VelocityWindOptions.md); \} | Partial style update. `windOptions` are forwarded to each WindLayer except `particleHeight`, which remains derived from Zarr elevation. |
+| `options.colormap?` | `string` | - |
+| `options.opacity?` | `number` | - |
+| `options.scale?` | \[`number`, `number`\] | - |
+| `options.windOptions?` | [`VelocityWindOptions`](../type-aliases/VelocityWindOptions.md) | - |
 
 #### Returns
 
 `void`
+
+#### Remarks
+
+Existing layers are updated in place; source data is not reloaded.
 
 ## Properties
 
@@ -175,7 +322,7 @@ Dimension coordinate arrays (e.g. lat, lon, elevation).
 #### Index Signature
 
 ```ts
-[key: string]: number[] | string[] | Float64Array<ArrayBufferLike>
+[key: string]: string[] | number[] | Float64Array<ArrayBufferLike>
 ```
 
 ***

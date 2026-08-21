@@ -17,7 +17,7 @@ Each slice is rendered using a **GPU-accelerated colormap shader** and draped as
 This provider supports:
 
 - Multiscale Zarr pyramids
-- Legacy ndpyramid, GeoZarr, and TopoZarr multiscale layouts
+- Legacy ndpyramid and GeoZarr multiscale layouts
 - CRS detection (EPSG:4326 / EPSG:3857)
 - Dynamic dimension slicing
 - CF-compliant time decoding for selectors
@@ -91,7 +91,8 @@ This creates a **stack of slice primitives**: horizontal, vertical longitude, an
 
 ```ts
 interface CubeOptions {
-  url: string; // Public Zarr store
+  url?: string; // Zarr URL; required unless store is supplied
+  store?: Readable; // Custom Zarrita-compatible store, including IcechunkStore
   variable: string; // Zarr array name
   bounds: BoundsProps; // geographic rectangle
   selectors?: { [key: string]: ZarrSelectorsProps }; // Initial dimension slices
@@ -107,9 +108,56 @@ interface CubeOptions {
   belowSeaLevel?: boolean; // If true, allows rendering below sea level
   flipElevation?: boolean; // If true, flips the elevation axis
   crs?: CRS; // Force CRS (auto-detected if not set)
-  multiscaleFormat?: MultiscaleFormat; // 'auto' (default), 'legacy', 'geozarr', or 'topozarr'
+  multiscaleFormat?: MultiscaleFormat; // 'auto' (default), 'legacy', or 'geozarr'
+  requestOverrides?: RequestOverrides; // Static fetch credentials, headers, and options
+  transformRequest?: TransformRequest; // Per-request auth, proxy, or signed URL transform
+  onAuthError?: OnAuthError; // Called once for HTTP 400/401 responses
 }
 ```
+
+---
+
+## Icechunk and Custom Stores
+
+Pass a Zarrita-compatible `Readable` store instead of `url`. This keeps the cube provider independent of a particular Icechunk client:
+
+```ts
+import { IcechunkStore } from 'icechunk-js';
+import { ZarrCubeProvider } from 'zarr-cesium';
+
+const store = await IcechunkStore.open(repositoryUrl, {
+  branch: 'main',
+  formatVersion: 'v1'
+});
+
+const cube = new ZarrCubeProvider(viewer, {
+  store,
+  variable: 'temperature',
+  bounds: { west: -20, south: 30, east: 10, north: 60 }
+});
+
+await cube.load();
+```
+
+## Private HTTP Stores
+
+Use `requestOverrides` for fixed request settings. Use `transformRequest` when headers or signed URLs must be produced for every Zarr object:
+
+```ts
+const cube = new ZarrCubeProvider(viewer, {
+  url: 'https://data.example.com/private-cube.zarr',
+  variable: 'temperature',
+  bounds,
+  transformRequest: async url => ({
+    url,
+    credentials: 'include',
+    headers: { Authorization: `Bearer ${await getAccessToken()}` }
+  }),
+  onAuthError: status => refreshSession(status)
+});
+```
+
+`onAuthError` is invoked once when a transformed request returns HTTP 400 or 401.
 
 ---
 
@@ -204,16 +252,16 @@ Then:
 - Resolution, W×H×Z, and bounding box adapt
 - Switching levels triggers a reload
 
-For a TopoZarr store, whose level `0` is normally full resolution:
+For a GeoZarr store whose level `0` is full resolution:
 
 ```ts
-multiscaleFormat: 'topozarr',
-multiscaleLevel: 0 // loads TopoZarr's full-resolution level
+multiscaleFormat: 'geozarr',
+multiscaleLevel: 0 // loads the GeoZarr full-resolution level
 ```
 
 Legacy ndpyramid stores commonly use the opposite order, with level `0` as the
 coarsest resolution. Inspect `cube.levelInfos` when choosing a level.
-GeoZarr/TopoZarr metadata supplies levels through `multiscales.layout[].asset`,
+GeoZarr metadata supplies levels through `multiscales.layout[].asset`,
 whereas legacy metadata uses `multiscales[0].datasets[].path`.
 
 ---
@@ -336,6 +384,32 @@ cube.updateStyle({
 The provider automatically re-renders all slice primitives, but without reloading data.
 
 The full list of supported colormaps is available in the [Colormaps section](../api/type-aliases/ColorMapName.md).
+
+---
+
+### Query Data
+
+Point, profile, time-series, and transect queries operate on the currently
+loaded geographic subset:
+
+```ts
+const point = await cube.queryData({
+  type: 'Point',
+  coordinates: [-4.2, 50.1]
+});
+
+const profile = await cube.getVerticalProfile([-4.2, 50.1]);
+const series = await cube.getTimeSeries([-4.2, 50.1]);
+const transect = await cube.getTransect([-5, 50], [-3, 51], undefined, {
+  samples: 100
+});
+const section = await cube.getFullTransect([-5, 50], [-3, 51]);
+```
+
+Queries outside `cube.bounds` return an empty result. Point input is always
+WGS84 longitude/latitude, even when the source cube uses EPSG:3857. Use
+`queryIndexOffsets` when correlating local subset indices with the original
+global elevation dimension.
 
 ---
 

@@ -18,8 +18,11 @@ import {
   removeLayerFromMap,
   updateSeaLevelLayerReference
 } from './_actions/layers-handle';
-import type { ZarrCubeProvider, ZarrCubeVelocityProvider } from 'zarr-cesium';
+import { ZarrCubeProvider, ZarrCubeVelocityProvider, ZarrLayerProvider } from 'zarr-cesium';
 import { CESIUM_START_COORDINATES, VERTICAL_EXAGGERATION } from '../../lib/map-layers/utils';
+import { PointQueryInfo } from '../point-query-info';
+import { TransectQueryInfo } from '../transect-query-info';
+import type { QueryPosition } from 'zarr-cesium';
 
 Ion.defaultAccessToken = import.meta.env.VITE_CESIUM_TOKEN;
 
@@ -33,9 +36,46 @@ export function MapHome() {
   const velocityRef = useRef<ZarrCubeVelocityProvider | null>(null);
   const sharedLayersRef = useRef(selectedLayers);
   const sharedLayersRestoredRef = useRef(false);
+  const queryHandlerRef = useRef<Cesium.ScreenSpaceEventHandler | null>(null);
+  const queryMarkerRef = useRef<Cesium.Entity | null>(null);
+  const queryMarkerLayerRef = useRef('');
+  const transectCaptureRef = useRef<((position: QueryPosition) => void) | null>(null);
+  const transectEntitiesRef = useRef<Cesium.Entity[]>([]);
+  const transectPositionsRef = useRef<QueryPosition[]>([]);
+  const transectLayerRef = useRef('');
 
-  const { setFlashMessage, setLoading } = useContextHandle();
+  const { setFlashMessage, setInfoButtonBox, setLoading, transectLayerName, setTransectLayerName } =
+    useContextHandle();
   Cesium.Camera.DEFAULT_VIEW_RECTANGLE = CESIUM_START_COORDINATES;
+
+  const clearTransect = useCallback(() => {
+    const viewer = viewerRef.current;
+    if (viewer) {
+      transectEntitiesRef.current.forEach(entity => viewer.entities.remove(entity));
+    }
+    transectEntitiesRef.current = [];
+    transectPositionsRef.current = [];
+    transectCaptureRef.current = null;
+    transectLayerRef.current = '';
+  }, []);
+
+  const clearQueryMarker = useCallback(() => {
+    const viewer = viewerRef.current;
+    if (viewer && queryMarkerRef.current) viewer.entities.remove(queryMarkerRef.current);
+    queryMarkerRef.current = null;
+    queryMarkerLayerRef.current = '';
+  }, []);
+
+  const registerTransectCapture = useCallback(
+    (handler: ((position: QueryPosition) => void) | null) => {
+      transectCaptureRef.current = handler;
+      if (handler) {
+        clearTransect();
+        transectCaptureRef.current = handler;
+      }
+    },
+    [clearTransect]
+  );
 
   const ref = useCallback(
     (node: HTMLDivElement | null) => {
@@ -48,6 +88,8 @@ export function MapHome() {
           homeButton: false,
           sceneModePicker: false,
           navigationHelpButton: false,
+          infoBox: false,
+          selectionIndicator: false,
           baseLayer: Cesium.ImageryLayer.fromProviderAsync(
             Cesium.ArcGisMapServerImageryProvider.fromUrl(
               'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer',
@@ -55,6 +97,120 @@ export function MapHome() {
             )
           )
         });
+        queryHandlerRef.current?.destroy();
+        queryHandlerRef.current = new Cesium.ScreenSpaceEventHandler(
+          viewerRef.current.scene.canvas
+        );
+        queryHandlerRef.current.setInputAction((click: { position: Cesium.Cartesian2 }) => {
+          const viewer = viewerRef.current;
+          if (!viewer) return;
+
+          const ray = viewer.camera.getPickRay(click.position);
+          const cartesian = ray ? viewer.scene.globe.pick(ray, viewer.scene) : undefined;
+          if (!cartesian) return;
+          const position = Cesium.Cartographic.fromCartesian(cartesian);
+          const longitude = Cesium.Math.toDegrees(position.longitude);
+          const latitude = Cesium.Math.toDegrees(position.latitude);
+          if (transectCaptureRef.current) {
+            const queryPosition: QueryPosition = [longitude, latitude];
+            transectPositionsRef.current.push(queryPosition);
+            transectEntitiesRef.current.push(
+              viewer.entities.add({
+                position: cartesian,
+                point: {
+                  pixelSize: 11,
+                  color: Cesium.Color.CYAN,
+                  outlineColor: Cesium.Color.BLACK,
+                  outlineWidth: 2,
+                  disableDepthTestDistance: Number.POSITIVE_INFINITY
+                }
+              })
+            );
+            if (transectPositionsRef.current.length === 2) {
+              transectEntitiesRef.current.push(
+                viewer.entities.add({
+                  polyline: {
+                    positions: transectPositionsRef.current.map(([lon, lat]) =>
+                      Cesium.Cartesian3.fromDegrees(lon, lat)
+                    ),
+                    width: 3,
+                    material: Cesium.Color.CYAN,
+                    clampToGround: true
+                  }
+                })
+              );
+            }
+            transectCaptureRef.current(queryPosition);
+            return;
+          }
+
+          let queryLayer: Cesium.ImageryLayer | undefined;
+          for (let index = viewer.imageryLayers.length - 1; index >= 0; index--) {
+            const candidate = viewer.imageryLayers.get(index);
+            if (candidate.show && candidate.imageryProvider instanceof ZarrLayerProvider) {
+              queryLayer = candidate;
+              break;
+            }
+          }
+          if (!queryLayer && !cubeRef.current && !velocityCubeRef.current) return;
+          if (queryMarkerRef.current) {
+            viewer.entities.remove(queryMarkerRef.current);
+            queryMarkerRef.current = null;
+            queryMarkerLayerRef.current = '';
+          }
+          const cube = cubeRef.current;
+          const velocityCube = velocityCubeRef.current;
+          const velocityContainsPoint = velocityCube
+            ? longitude >= velocityCube.bounds.west &&
+              longitude <= velocityCube.bounds.east &&
+              latitude >= velocityCube.bounds.south &&
+              latitude <= velocityCube.bounds.north
+            : false;
+          const cubeContainsPoint = cube
+            ? longitude >= cube.bounds.west &&
+              longitude <= cube.bounds.east &&
+              latitude >= cube.bounds.south &&
+              latitude <= cube.bounds.north
+            : false;
+          const provider = velocityContainsPoint
+            ? velocityCube!
+            : cubeContainsPoint
+              ? cube!
+              : (queryLayer?.imageryProvider as ZarrLayerProvider | undefined);
+          if (!provider) return;
+          const layerName =
+            provider instanceof ZarrCubeProvider || provider instanceof ZarrCubeVelocityProvider
+              ? provider.id || (provider instanceof ZarrCubeProvider ? 'Zarr cube' : 'Zarr velocity cube')
+              : ((queryLayer as Cesium.ImageryLayer & { id?: string }).id ?? 'Zarr layer');
+          queryMarkerRef.current = viewer.entities.add({
+            position: cartesian,
+            point: {
+              pixelSize: 12,
+              color: Cesium.Color.YELLOW,
+              outlineColor: Cesium.Color.BLACK,
+              outlineWidth: 2,
+              disableDepthTestDistance: Number.POSITIVE_INFINITY
+            }
+          });
+          queryMarkerLayerRef.current = layerName;
+          setInfoButtonBox({
+            title:
+              provider instanceof ZarrCubeProvider || provider instanceof ZarrCubeVelocityProvider
+                ? `${provider.constructor.name} query`
+                : 'ZarrLayerProvider query',
+            layerName,
+            onClose: clearQueryMarker,
+            content: (
+              <PointQueryInfo
+                key={`${layerName}/${longitude}/${latitude}`}
+                provider={provider}
+                layerName={layerName}
+                longitude={longitude}
+                latitude={latitude}
+              />
+            )
+          });
+        }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
         if (!sharedLayersRestoredRef.current) {
           sharedLayersRestoredRef.current = true;
           const sharedLayers = sharedLayersRef.current;
@@ -88,8 +244,67 @@ export function MapHome() {
         }
       }
     },
-    [dispatch, gebcoTerrainEnabled, setFlashMessage, setLoading]
+    [clearQueryMarker, dispatch, gebcoTerrainEnabled, setFlashMessage, setInfoButtonBox, setLoading]
   );
+
+  useEffect(() => {
+    return () => {
+      queryHandlerRef.current?.destroy();
+      queryHandlerRef.current = null;
+      clearQueryMarker();
+      clearTransect();
+    };
+  }, [clearQueryMarker, clearTransect]);
+
+  useEffect(() => {
+    if (!transectLayerName || !viewerRef.current) return;
+    const selected = selectedLayers[transectLayerName];
+    let provider: ZarrLayerProvider | ZarrCubeProvider | undefined;
+    if (selected?.dataType === 'zarr-cube' && cubeRef.current?.id === transectLayerName) {
+      provider = cubeRef.current;
+    } else if (selected?.dataType === 'zarr-cesium') {
+      const viewer = viewerRef.current;
+      for (let index = 0; index < viewer.imageryLayers.length; index++) {
+        const layer = viewer.imageryLayers.get(index) as Cesium.ImageryLayer & { id?: string };
+        if (layer.id === transectLayerName && layer.imageryProvider instanceof ZarrLayerProvider) {
+          provider = layer.imageryProvider;
+          break;
+        }
+      }
+    }
+    if (provider) {
+      const display = selected.params as { colormap?: string; scale?: [number, number] };
+      clearTransect();
+      transectLayerRef.current = transectLayerName;
+      setInfoButtonBox({
+        title: 'Transect query',
+        layerName: transectLayerName,
+        onClose: clearTransect,
+        content: (
+          <TransectQueryInfo
+            key={transectLayerName}
+            provider={provider}
+            layerName={transectLayerName}
+            registerCapture={handler => {
+              registerTransectCapture(handler);
+              if (handler) transectLayerRef.current = transectLayerName;
+            }}
+            clearCapture={clearTransect}
+            colormap={display.colormap}
+            scale={display.scale}
+          />
+        )
+      });
+    }
+    setTransectLayerName('');
+  }, [
+    clearTransect,
+    registerTransectCapture,
+    selectedLayers,
+    setInfoButtonBox,
+    setTransectLayerName,
+    transectLayerName
+  ]);
 
   async function addLayerIntoMap() {
     if (!viewerRef.current) return;
@@ -159,6 +374,18 @@ export function MapHome() {
 
   useEffect(() => {
     if (!viewerRef.current) return;
+    if (
+      queryMarkerRef.current &&
+      queryMarkerLayerRef.current &&
+      !selectedLayers[queryMarkerLayerRef.current]
+    ) {
+      viewerRef.current.entities.remove(queryMarkerRef.current);
+      queryMarkerRef.current = null;
+      queryMarkerLayerRef.current = '';
+    }
+    if (transectLayerRef.current && !selectedLayers[transectLayerRef.current]) {
+      clearTransect();
+    }
     const zarrCesiumRefs = {
       velocityRef,
       cubeRef,

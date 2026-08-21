@@ -2,10 +2,10 @@
 
 ```ts
 function deriveRectangleAndScheme(
-   crs, 
-   xyLimits, 
-   levelMetadata, 
-   zarrArray, 
+   crs,
+   xyLimits,
+   levelMetadata,
+   zarrArray,
    dimIndices): object;
 ```
 

@@ -4,13 +4,12 @@ import { layersActions } from '../../application/store';
 import type { LayerLegendBoxProps, SelectedLayer } from '../../types';
 import Slider from '@mui/material/Slider';
 import {
-  allColorScales,
   DEFAULT_COLORMAP,
   DEFAULT_SCALE,
   DEFAULT_VERTICAL_EXAGGERATION,
-  type ColorMapName,
   type CubeOptions
 } from 'zarr-cesium';
+import { allColorScales, type ColorMapName } from 'zarr-maps-colormap';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';

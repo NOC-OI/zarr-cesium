@@ -26,6 +26,24 @@ const cubeProvider = new ZarrCubeProvider(viewer, {
 await cubeProvider.load();
 ```
 
+## Accessors
+
+### queryIndexOffsets
+
+#### Get Signature
+
+```ts
+get queryIndexOffsets(): Record<string, number>;
+```
+
+Global coordinate offsets represented by index zero of the in-memory subset.
+
+##### Returns
+
+`Record`\<`string`, `number`\>
+
+Offsets used by shared profile and transect query helpers.
+
 ## Constructors
 
 ### Constructor
@@ -40,12 +58,16 @@ Creates a new instance of ZarrCubeProvider.
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `viewer` | `Viewer` | Cesium viewer instance to which primitives will be added. |
+| `viewer` | [`CesiumHost`](../type-aliases/CesiumHost.md) | Cesium viewer or widget instance to which primitives will be added. |
 | `options` | [`CubeOptions`](../interfaces/CubeOptions.md) | Configuration for the cube visualization (see [CubeOptions](../interfaces/CubeOptions.md)). |
 
 #### Returns
 
 `ZarrCubeProvider`
+
+#### Throws
+
+If neither `options.url` nor `options.store` is provided.
 
 ## Methods
 
@@ -61,6 +83,11 @@ Removes all currently rendered slice primitives from the scene.
 
 `void`
 
+#### Remarks
+
+Loaded Zarr data and current selectors remain available, so slices
+can be recreated with [updateSlices](#updateslices).
+
 ***
 
 ### destroy()
@@ -69,11 +96,128 @@ Removes all currently rendered slice primitives from the scene.
 destroy(): void;
 ```
 
-Destroys all allocated Cesium primitives and clears resources.
+Removes all Cesium primitives owned by this provider.
 
 #### Returns
 
 `void`
+
+#### Remarks
+
+The currently loaded array remains in memory. Call [load](#load) or
+[updateSelectors](#updateselectors) to render it again.
+
+***
+
+### getFullTransect()
+
+```ts
+getFullTransect(
+   start,
+   end,
+   selectors?,
+options?): Promise<FullTransectResult>;
+```
+
+Samples every loaded elevation along a WGS84 line.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `start` | [`QueryPosition`](../type-aliases/QueryPosition.md) | Starting `[longitude, latitude]` coordinate in degrees. |
+| `end` | [`QueryPosition`](../type-aliases/QueryPosition.md) | Ending `[longitude, latitude]` coordinate in degrees. |
+| `selectors?` | [`ZarrSelectors`](../interfaces/ZarrSelectors.md) | Fixed selectors for dimensions other than elevation. |
+| `options?` | [`TransectQueryOptions`](../interfaces/TransectQueryOptions.md) | Sample count, concurrency, and cancellation controls. |
+
+#### Returns
+
+`Promise`\<[`FullTransectResult`](../interfaces/FullTransectResult.md)\>
+
+A distance-by-elevation value matrix.
+
+***
+
+### getTimeSeries()
+
+```ts
+getTimeSeries(
+   position,
+   selectors?,
+options?): Promise<QueryResult>;
+```
+
+Queries all available time coordinates at one WGS84 position.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `position` | [`QueryPosition`](../type-aliases/QueryPosition.md) | `[longitude, latitude]` in degrees. |
+| `selectors?` | [`ZarrSelectors`](../interfaces/ZarrSelectors.md) | Fixed selectors for dimensions other than time. |
+| `options?` | [`QueryOptions`](../interfaces/QueryOptions.md) | Query cancellation and coordinate-output controls. |
+
+#### Returns
+
+`Promise`\<[`QueryResult`](../interfaces/QueryResult.md)\>
+
+A result ordered by the time coordinate.
+
+***
+
+### getTransect()
+
+```ts
+getTransect(
+   start,
+   end,
+   selectors?,
+options?): Promise<TransectResult>;
+```
+
+Samples one selected elevation along a WGS84 line.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `start` | [`QueryPosition`](../type-aliases/QueryPosition.md) | Starting `[longitude, latitude]` coordinate in degrees. |
+| `end` | [`QueryPosition`](../type-aliases/QueryPosition.md) | Ending `[longitude, latitude]` coordinate in degrees. |
+| `selectors?` | [`ZarrSelectors`](../interfaces/ZarrSelectors.md) | Dimension selectors applied to every sample. |
+| `options?` | [`TransectQueryOptions`](../interfaces/TransectQueryOptions.md) | Sample count, concurrency, and cancellation controls. |
+
+#### Returns
+
+`Promise`\<[`TransectResult`](../interfaces/TransectResult.md)\>
+
+Positions, distances, and values along the transect.
+
+***
+
+### getVerticalProfile()
+
+```ts
+getVerticalProfile(
+   position,
+   selectors?,
+options?): Promise<QueryResult>;
+```
+
+Queries all loaded elevation coordinates at one WGS84 position.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `position` | [`QueryPosition`](../type-aliases/QueryPosition.md) | `[longitude, latitude]` in degrees. |
+| `selectors?` | [`ZarrSelectors`](../interfaces/ZarrSelectors.md) | Fixed selectors for dimensions other than elevation. |
+| `options?` | [`QueryOptions`](../interfaces/QueryOptions.md) | Query cancellation and coordinate-output controls. |
+
+#### Returns
+
+`Promise`\<[`QueryResult`](../interfaces/QueryResult.md)\>
+
+A result ordered by elevation.
 
 ***
 
@@ -89,20 +233,63 @@ Loads the Zarr dataset and initializes the cube data and metadata.
 
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
-| `force` | `boolean` | `false` | If true, forces reloading of the dataset even if already loaded. |
+| `force` | `boolean` | `false` | Recreate slice primitives even when their indices did not change. |
 
 #### Returns
 
 `Promise`\<`void`\>
 
-A promise that resolves when the cube data is fully loaded.
+A promise that resolves after metadata, coordinates, the selected
+subset, and its Cesium primitives have loaded.
+
+#### Throws
+
+When the custom or URL-backed store, selected array, dimensions, or data chunks cannot be read.
+
+#### Remarks
+
+Calling `load` again replaces the in-memory subset. Use
+[updateSelectors](#updateselectors) for normal runtime changes.
+
+***
+
+### queryData()
+
+```ts
+queryData(
+   geometry,
+   selectors?,
+options?): Promise<QueryResult>;
+```
+
+Queries a voxel or vertical profile from the cube subset currently held in memory.
+A scalar elevation selector returns one voxel; an elevation range returns a profile.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `geometry` | [`QueryGeometry`](../type-aliases/QueryGeometry.md) | WGS84 point geometry in `[longitude, latitude]` degrees. |
+| `selectors?` | `Record`\<`string`, [`ZarrSelectorsProps`](../interfaces/ZarrSelectorsProps.md)\> | Optional time/elevation overrides for this query. |
+| `options?` | [`QueryOptions`](../interfaces/QueryOptions.md) | Cancellation and coordinate-output controls. |
+
+#### Returns
+
+`Promise`\<[`QueryResult`](../interfaces/QueryResult.md)\>
+
+Queried values with coordinates expressed using dataset dimension names.
+
+#### Throws
+
+If called before [load](#load), for unsupported geometries, or for
+selector indices outside the loaded subset.
 
 ***
 
 ### updateSelectors()
 
 ```ts
-updateSelectors(options:): void;
+updateSelectors(options): void;
 ```
 
 Updates the dimension selectors, multiscale level, and bounds.
@@ -111,21 +298,27 @@ Updates the dimension selectors, multiscale level, and bounds.
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `options:` | \{ `bounds?`: [`BoundsProps`](../interfaces/BoundsProps.md); `multiscaleLevel?`: `number`; `selectors?`: \{ \[`key`: `string`\]: [`ZarrSelectorsProps`](../interfaces/ZarrSelectorsProps.md); \}; \} | selectors - New selectors mapping. See [ZarrSelectorsProps](../interfaces/ZarrSelectorsProps.md). - multiscaleLevel - Multiscale level to switch to. - bounds - Updated geographic bounds. See [BoundsProps](../interfaces/BoundsProps.md). |
-| `options:.bounds?` | [`BoundsProps`](../interfaces/BoundsProps.md) | - |
-| `options:.multiscaleLevel?` | `number` | - |
-| `options:.selectors?` | \{ \[`key`: `string`\]: [`ZarrSelectorsProps`](../interfaces/ZarrSelectorsProps.md); \} | - |
+| `options` | \{ `bounds?`: [`BoundsProps`](../interfaces/BoundsProps.md); `multiscaleLevel?`: `number`; `selectors?`: \{ \[`key`: `string`\]: [`ZarrSelectorsProps`](../interfaces/ZarrSelectorsProps.md); \}; \} | Partial data-selection update. Changed selectors, level, or bounds cause the current primitives to be destroyed and reloaded. |
+| `options.bounds?` | [`BoundsProps`](../interfaces/BoundsProps.md) | - |
+| `options.multiscaleLevel?` | `number` | - |
+| `options.selectors?` | \{ \[`key`: `string`\]: [`ZarrSelectorsProps`](../interfaces/ZarrSelectorsProps.md); \} | - |
 
 #### Returns
 
 `void`
+
+Nothing. Reloading continues asynchronously after a change.
+
+#### Remarks
+
+Latitude bounds are clamped to the Web Mercator limit.
 
 ***
 
 ### updateSlices()
 
 ```ts
-updateSlices(options:): void;
+updateSlices(options): void;
 ```
 
 Updates the rendered slices based on the provided indices.
@@ -134,40 +327,48 @@ Updates the rendered slices based on the provided indices.
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `options:` | \{ `belowSeaLevel?`: `boolean`; `elevationIndex?`: `number`; `force?`: `boolean`; `latIndex?`: `number`; `lonIndex?`: `number`; \} | latIndex: Latitude slice index. - lonIndex: Longitude slice index. - elevationIndex: Elevation slice index. - force: Force re-render. - belowSeaLevel: Toggle below-sea-level height model. |
-| `options:.belowSeaLevel?` | `boolean` | - |
-| `options:.elevationIndex?` | `number` | - |
-| `options:.force?` | `boolean` | - |
-| `options:.latIndex?` | `number` | - |
-| `options:.lonIndex?` | `number` | - |
+| `options` | \{ `belowSeaLevel?`: `boolean`; `elevationIndex?`: `number`; `force?`: `boolean`; `latIndex?`: `number`; `lonIndex?`: `number`; \} | Slice update options. `latIndex`, `lonIndex`, and `elevationIndex` are local indices within the loaded subset. `force` recreates unchanged primitives; `belowSeaLevel` changes height placement. |
+| `options.belowSeaLevel?` | `boolean` | - |
+| `options.elevationIndex?` | `number` | - |
+| `options.force?` | `boolean` | - |
+| `options.latIndex?` | `number` | - |
+| `options.lonIndex?` | `number` | - |
 
 #### Returns
 
 `void`
+
+#### Remarks
+
+Has no effect until [load](#load) has completed.
 
 ***
 
 ### updateStyle()
 
 ```ts
-updateStyle(options:): void;
+updateStyle(options): void;
 ```
 
-Updates style parameters.
+Updates cube styling and immediately recreates the visible slices.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `options:` | \{ `colormap?`: `string`; `opacity?`: `number`; `scale?`: \[`number`, `number`\]; `verticalExaggeration?`: `number`; \} | verticalExaggeration - Vertical exaggeration factor. - opacity - Opacity. - scale - [min,max] data scaling range. - colormap - Colormap name. See [ColorMapName](../type-aliases/ColorMapName.md). |
-| `options:.colormap?` | `string` | - |
-| `options:.opacity?` | `number` | - |
-| `options:.scale?` | \[`number`, `number`\] | - |
-| `options:.verticalExaggeration?` | `number` | - |
+| `options` | \{ `colormap?`: `string`; `opacity?`: `number`; `scale?`: \[`number`, `number`\]; `verticalExaggeration?`: `number`; \} | Partial style update: vertical exaggeration, opacity, numeric color range, and/or colormap. |
+| `options.colormap?` | `string` | - |
+| `options.opacity?` | `number` | - |
+| `options.scale?` | \[`number`, `number`\] | - |
+| `options.verticalExaggeration?` | `number` | - |
 
 #### Returns
 
 `void`
+
+#### Remarks
+
+This reuses the loaded data and does not refetch Zarr chunks.
 
 ## Properties
 

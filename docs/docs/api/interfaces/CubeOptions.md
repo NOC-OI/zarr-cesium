@@ -1,7 +1,5 @@
 # CubeOptions
 
-Configuration for a 3D cube visualization (volumetric rendering).
-
 ## Properties
 
 ### belowSeaLevel?
@@ -15,31 +13,7 @@ optional belowSeaLevel: boolean;
 ### bounds
 
 ```ts
-bounds: object;
-```
-
-#### east
-
-```ts
-east: number;
-```
-
-#### north
-
-```ts
-north: number;
-```
-
-#### south
-
-```ts
-south: number;
-```
-
-#### west
-
-```ts
-west: number;
+bounds: BoundsProps;
 ```
 
 ***
@@ -84,6 +58,16 @@ optional flipElevation: boolean;
 
 ***
 
+### latIsAscending?
+
+```ts
+optional latIsAscending: boolean;
+```
+
+Whether latitude coordinate values increase with their array index.
+
+***
+
 ### multiscaleFormat?
 
 ```ts
@@ -100,11 +84,31 @@ optional multiscaleLevel: number;
 
 ***
 
+### onAuthError?
+
+```ts
+optional onAuthError: OnAuthError;
+```
+
+Called once when a transformed request returns HTTP 400 or 401.
+
+***
+
 ### opacity?
 
 ```ts
 optional opacity: number;
 ```
+
+***
+
+### requestOverrides?
+
+```ts
+optional requestOverrides: RequestOverrides;
+```
+
+Static fetch options for URL-backed stores.
 
 ***
 
@@ -119,13 +123,7 @@ optional scale: [number, number];
 ### selectors?
 
 ```ts
-optional selectors: object;
-```
-
-#### Index Signature
-
-```ts
-[key: string]: ZarrSelectorsProps
+optional selectors: Record<string, ZarrSelectorsProps>;
 ```
 
 ***
@@ -146,11 +144,33 @@ optional showVerticalSlices: boolean;
 
 ***
 
-### url
+### store?
 
 ```ts
-url: string;
+optional store: Readable;
 ```
+
+Custom Zarrita-compatible store, including an IcechunkStore.
+
+***
+
+### transformRequest?
+
+```ts
+optional transformRequest: TransformRequest;
+```
+
+Dynamically transform requests for authentication, proxies, or signed URLs.
+
+***
+
+### url?
+
+```ts
+optional url: string;
+```
+
+URL to a Zarr store. Required unless `store` is provided.
 
 ***
 
@@ -173,5 +193,5 @@ optional verticalExaggeration: number;
 ### zarrVersion?
 
 ```ts
-optional zarrVersion: 2 | 3;
+optional zarrVersion: 3 | 2;
 ```

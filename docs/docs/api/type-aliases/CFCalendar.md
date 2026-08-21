@@ -1,7 +1,7 @@
 # CFCalendar
 
 ```ts
-type CFCalendar = 
+type CFCalendar =
   | "standard"
   | "gregorian"
   | "proleptic_gregorian"

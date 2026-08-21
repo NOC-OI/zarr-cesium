@@ -23,7 +23,11 @@ export interface ZarrCesiumRefs {
 
 export interface InfoButtonBoxType {
   title?: string;
-  content?: string;
+  content?: React.ReactNode;
+  /** Runtime layer associated with interactive content such as map queries. */
+  layerName?: string;
+  /** Cleanup invoked when the popup close button is used. */
+  onClose?: () => void;
 }
 
 export interface TitilerOptions {

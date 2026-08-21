@@ -1,28 +1,8 @@
 # ZarrLayerProvider
 
-Imagery provider for rendering Zarr datasets as Cesium imagery tiles.
-
-## Remarks
-
-This class implements the Cesium `ImageryProvider` interface and manages
-reading, slicing, and WebGL rendering of Zarr-based raster data.
-
-## Example
-
-```ts
-const provider = new ZarrLayerProvider({
-  url: 'https://example.com/my.zarr',
-  variable: 'temperature',
-  scale: [0, 40],
-  colormap: 'jet'
-});
-const imageryLayer = new ZarrImageryLayer(provider);
-viewer.imageryLayers.add(imageryLayer);
-```
-
-## See
-
-[ZarrImageryLayer](ZarrImageryLayer.md)
+Thin Cesium adapter around the framework-independent Zarr tile renderer.
+Dataset loading, slicing, styling, caching, and WebGL rendering live in
+`zarr-maps-tiling`; this class only translates Cesium tile requests.
 
 ## Implements
 
@@ -38,7 +18,7 @@ viewer.imageryLayers.add(imageryLayer);
 get credit(): Credit;
 ```
 
-Credit information for the imagery provider.
+Dataset attribution exposed to Cesium.
 
 ##### Returns
 
@@ -52,6 +32,44 @@ ImageryProvider.credit
 
 ***
 
+### dimensionValues
+
+#### Get Signature
+
+```ts
+get dimensionValues(): DimensionValues;
+```
+
+Coordinate values keyed by normalized dimension name.
+
+##### Returns
+
+[`DimensionValues`](../interfaces/DimensionValues.md)
+
+***
+
+### errorEvent
+
+#### Get Signature
+
+```ts
+get errorEvent(): Event;
+```
+
+Cesium imagery-provider error event.
+
+##### Returns
+
+`Event`
+
+#### Implementation of
+
+```ts
+ImageryProvider.errorEvent
+```
+
+***
+
 ### hasAlphaChannel
 
 #### Get Signature
@@ -60,7 +78,7 @@ ImageryProvider.credit
 get hasAlphaChannel(): boolean;
 ```
 
-Indicates whether the imagery has an alpha channel.
+Whether rendered tiles contain alpha values. Always `true`.
 
 ##### Returns
 
@@ -82,7 +100,7 @@ ImageryProvider.hasAlphaChannel
 get maximumLevel(): number;
 ```
 
-Maximum zoom level supported by the provider.
+Maximum imagery level requested by Cesium.
 
 ##### Returns
 
@@ -104,7 +122,7 @@ ImageryProvider.maximumLevel
 get minimumLevel(): number;
 ```
 
-Minimum zoom level supported by the provider.
+Minimum imagery level requested by Cesium.
 
 ##### Returns
 
@@ -126,7 +144,7 @@ ImageryProvider.minimumLevel
 get ready(): boolean;
 ```
 
-Indicates whether the provider is fully initialized and ready.
+Whether metadata initialization completed and the provider is usable.
 
 ##### Returns
 
@@ -142,7 +160,7 @@ Indicates whether the provider is fully initialized and ready.
 get readyPromise(): Promise<boolean>;
 ```
 
-Promise that resolves when the provider is fully initialized.
+Promise resolving to the provider readiness state.
 
 ##### Returns
 
@@ -158,7 +176,7 @@ Promise that resolves when the provider is fully initialized.
 get rectangle(): Rectangle;
 ```
 
-Geographic coverage rectangle of the imagery provider.
+Geographic coverage of the dataset.
 
 ##### Returns
 
@@ -172,6 +190,22 @@ ImageryProvider.rectangle
 
 ***
 
+### selectors
+
+#### Get Signature
+
+```ts
+get selectors(): Record<string, ZarrSelectorsProps>;
+```
+
+Current index-based selectors used for tile rendering and queries.
+
+##### Returns
+
+`Record`\<`string`, [`ZarrSelectorsProps`](../interfaces/ZarrSelectorsProps.md)\>
+
+***
+
 ### tileHeight
 
 #### Get Signature
@@ -180,7 +214,7 @@ ImageryProvider.rectangle
 get tileHeight(): number;
 ```
 
-Height of each tile, in pixels.
+Height of rendered imagery tiles in pixels.
 
 ##### Returns
 
@@ -202,7 +236,7 @@ ImageryProvider.tileHeight
 get tileWidth(): number;
 ```
 
-Width of each tile, in pixels.
+Width of rendered imagery tiles in pixels.
 
 ##### Returns
 
@@ -224,7 +258,7 @@ ImageryProvider.tileWidth
 get tilingScheme(): TilingScheme;
 ```
 
-Tiling scheme used by the imagery provider.
+Cesium tiling scheme selected from the detected dataset CRS.
 
 ##### Returns
 
@@ -244,15 +278,21 @@ ImageryProvider.tilingScheme
 new ZarrLayerProvider(options): ZarrLayerProvider;
 ```
 
+Creates a Cesium imagery provider backed by a URL or custom Zarrita store.
+
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `options` | [`LayerOptions`](../interfaces/LayerOptions.md) |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `options` | [`LayerOptions`](../interfaces/LayerOptions.md) | Dataset, tiling, selection, style, and request options. |
 
 #### Returns
 
 `ZarrLayerProvider`
+
+#### Remarks
+
+Prefer [createLayer](#createlayer) when adding the result to a viewer.
 
 ## Methods
 
@@ -262,7 +302,7 @@ new ZarrLayerProvider(options): ZarrLayerProvider;
 destroy(): void;
 ```
 
-Cleans up resources used by the imagery provider.
+Aborts pending reads and releases tile-renderer resources.
 
 #### Returns
 
@@ -270,30 +310,46 @@ Cleans up resources used by the imagery provider.
 
 ***
 
-### getTileCredits()
+### getFullTransect()
 
 ```ts
-getTileCredits(
-   x, 
-   y, 
-   level): Credit[];
+getFullTransect(
+   start,
+   end,
+   selectors?,
+options?): Promise<FullTransectResult>;
 ```
 
-Retrieves the credits for a specific tile.
+Samples all elevation levels along a line between two WGS84 positions.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `x` | `number` | Tile x coordinate. |
-| `y` | `number` | Tile y coordinate. |
-| `level` | `number` | Zoom level. |
+| `start` | [`QueryPosition`](../type-aliases/QueryPosition.md) | Starting `[longitude, latitude]` coordinate in degrees. |
+| `end` | [`QueryPosition`](../type-aliases/QueryPosition.md) | Ending `[longitude, latitude]` coordinate in degrees. |
+| `selectors?` | [`ZarrSelectors`](../interfaces/ZarrSelectors.md) | Fixed selectors for dimensions other than elevation. |
+| `options?` | [`TransectQueryOptions`](../interfaces/TransectQueryOptions.md) | Sample count, concurrency, cancellation, and resolution controls. |
+
+#### Returns
+
+`Promise`\<[`FullTransectResult`](../interfaces/FullTransectResult.md)\>
+
+A distance-by-elevation value matrix.
+
+***
+
+### getTileCredits()
+
+```ts
+getTileCredits(): Credit[];
+```
 
 #### Returns
 
 `Credit`[]
 
-An array of credits associated with the tile.
+Credit entries associated with every rendered tile.
 
 #### Implementation of
 
@@ -303,17 +359,117 @@ ImageryProvider.getTileCredits
 
 ***
 
-### pickFeatures()
+### getTimeSeries()
 
 ```ts
-pickFeatures(): undefined;
+getTimeSeries(
+   position,
+   selectors?,
+options?): Promise<QueryResult>;
 ```
 
-Picks features at a given geographic location.
+Reads every time value at one WGS84 position.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `position` | [`QueryPosition`](../type-aliases/QueryPosition.md) | `[longitude, latitude]` in degrees. |
+| `selectors?` | [`ZarrSelectors`](../interfaces/ZarrSelectors.md) | Fixed selectors for dimensions other than time. |
+| `options?` | [`QueryOptions`](../interfaces/QueryOptions.md) | Query controls, including cancellation and resolution. |
 
 #### Returns
 
-`undefined`
+`Promise`\<[`QueryResult`](../interfaces/QueryResult.md)\>
+
+A query result ordered by the time coordinate.
+
+***
+
+### getTransect()
+
+```ts
+getTransect(
+   start,
+   end,
+   selectors?,
+options?): Promise<TransectResult>;
+```
+
+Samples one selected level along a line between two WGS84 positions.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `start` | [`QueryPosition`](../type-aliases/QueryPosition.md) | Starting `[longitude, latitude]` coordinate in degrees. |
+| `end` | [`QueryPosition`](../type-aliases/QueryPosition.md) | Ending `[longitude, latitude]` coordinate in degrees. |
+| `selectors?` | [`ZarrSelectors`](../interfaces/ZarrSelectors.md) | Dimension selectors applied to every sample. |
+| `options?` | [`TransectQueryOptions`](../interfaces/TransectQueryOptions.md) | Sample count, concurrency, cancellation, and resolution controls. |
+
+#### Returns
+
+`Promise`\<[`TransectResult`](../interfaces/TransectResult.md)\>
+
+Distances, positions, and scalar values along the transect.
+
+***
+
+### getVerticalProfile()
+
+```ts
+getVerticalProfile(
+   position,
+   selectors?,
+options?): Promise<QueryResult>;
+```
+
+Reads every elevation value at one WGS84 position.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `position` | [`QueryPosition`](../type-aliases/QueryPosition.md) | `[longitude, latitude]` in degrees. |
+| `selectors?` | [`ZarrSelectors`](../interfaces/ZarrSelectors.md) | Fixed selectors for dimensions other than elevation. |
+| `options?` | [`QueryOptions`](../interfaces/QueryOptions.md) | Query controls, including cancellation and resolution. |
+
+#### Returns
+
+`Promise`\<[`QueryResult`](../interfaces/QueryResult.md)\>
+
+A query result ordered by the elevation coordinate.
+
+***
+
+### pickFeatures()
+
+```ts
+pickFeatures(
+   _x,
+   _y,
+   level,
+   longitude,
+latitude): Promise<ImageryLayerFeatureInfo[]>;
+```
+
+Queries the feature underneath a Cesium imagery pick position.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `_x` | `number` | Tile column; the point query uses the supplied longitude instead. |
+| `_y` | `number` | Tile row; the point query uses the supplied latitude instead. |
+| `level` | `number` | Resolution level used by the query. |
+| `longitude` | `number` | Longitude in radians. |
+| `latitude` | `number` | Latitude in radians. |
+
+#### Returns
+
+`Promise`\<[`ImageryLayerFeatureInfo`](https://cesium.com/learn/cesiumjs/ref-doc/ImageryLayerFeatureInfo.html)[]\>
+
+Zero or one feature containing the queried value and coordinates.
 
 #### Implementation of
 
@@ -323,30 +479,63 @@ ImageryProvider.pickFeatures
 
 ***
 
-### requestImage()
+### queryData()
 
 ```ts
-requestImage(
-   x, 
-   y, 
-level): Promise<HTMLCanvasElement | ImageBitmap>;
+queryData(
+   geometry,
+   selectors?,
+options?): Promise<QueryResult>;
 ```
 
-Requests a rendered image tile from the Zarr dataset.
+Queries the nearest raster cell for a WGS84 GeoJSON point.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `x` | `number` | Tile x coordinate. |
-| `y` | `number` | Tile y coordinate. |
-| `level` | `number` | Zoom level. |
+| `geometry` | [`QueryGeometry`](../type-aliases/QueryGeometry.md) | Point geometry in `[longitude, latitude]` degrees. |
+| `selectors?` | `Record`\<`string`, [`ZarrSelectorsProps`](../interfaces/ZarrSelectorsProps.md)\> | Optional selector overrides for this query only. |
+| `options?` | [`QueryOptions`](../interfaces/QueryOptions.md) | Abort, resolution-level, and coordinate-output controls. |
+
+#### Returns
+
+`Promise`\<[`QueryResult`](../interfaces/QueryResult.md)\>
+
+Values and coordinate labels for the selected cell or profile.
+
+#### Throws
+
+For unsupported geometries, invalid selectors, or failed reads.
+
+***
+
+### requestImage()
+
+```ts
+requestImage(
+   x,
+   y,
+   level,
+_request?): Promise<HTMLCanvasElement | ImageBitmap>;
+```
+
+Renders one Cesium imagery tile.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `x` | `number` | Tile column. |
+| `y` | `number` | Tile row. |
+| `level` | `number` | Cesium imagery level. |
+| `_request?` | `Request` | Cesium request metadata; currently unused. |
 
 #### Returns
 
 `Promise`\<`HTMLCanvasElement` \| `ImageBitmap`\>
 
-A rendered tile as an HTMLCanvasElement or ImageBitmap.
+A vertically oriented canvas or image bitmap suitable for Cesium.
 
 #### Implementation of
 
@@ -362,19 +551,19 @@ ImageryProvider.requestImage
 updateSelectors(selectors): boolean;
 ```
 
-Updates the selectors for slicing dimensions.
+Updates dimension selectors used for subsequent renders and queries.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `selectors` | \{ \[`key`: `string`\]: [`ZarrSelectorsProps`](../interfaces/ZarrSelectorsProps.md); \} | New selectors mapping. See [ZarrSelectorsProps](../interfaces/ZarrSelectorsProps.md). |
+| `selectors` | `Record`\<`string`, [`ZarrSelectorsProps`](../interfaces/ZarrSelectorsProps.md)\> | Selectors keyed by normalized dimension name. |
 
 #### Returns
 
 `boolean`
 
-`true` if any changes were applied, otherwise `false`.
+`true` when at least one selector changed.
 
 ***
 
@@ -384,21 +573,21 @@ Updates the selectors for slicing dimensions.
 updateStyle(options): boolean;
 ```
 
-Updates the visualization style for the imagery provider.
+Updates tile color mapping without recreating the provider.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `options` | \{ `colormap?`: `string`; `scale?`: \[`number`, `number`\]; \} | Parameters to update. |
-| `options.colormap?` | `string` | New colormap name. See [ColorMapName](../type-aliases/ColorMapName.md). |
-| `options.scale?` | \[`number`, `number`\] | New [min, max] scale range. |
+| `options` | \{ `colormap?`: `string`; `scale?`: \[`number`, `number`\]; \} | New scale and/or colormap. |
+| `options.colormap?` | `string` | - |
+| `options.scale?` | \[`number`, `number`\] | - |
 
 #### Returns
 
 `boolean`
 
-`true` if any changes were applied, otherwise `false`.
+`true` when the rendered tile output changed.
 
 ***
 
@@ -408,55 +597,43 @@ Updates the visualization style for the imagery provider.
 static createLayer(viewer, options): Promise<ZarrImageryLayer>;
 ```
 
-Creates a Cesium imagery layer from the given viewer and Zarr options.
+Creates and initializes a [ZarrImageryLayer](ZarrImageryLayer.md) ready to add to Cesium.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `viewer` | `Viewer` | Cesium viewer instance. |
-| `options` | [`LayerOptions`](../interfaces/LayerOptions.md) | Layer options (see [LayerOptions](../interfaces/LayerOptions.md)). |
+| `viewer` | [`CesiumHost`](../type-aliases/CesiumHost.md) | Viewer or widget that will host the layer. |
+| `options` | [`LayerOptions`](../interfaces/LayerOptions.md) | Zarr dataset and visualization options. |
 
 #### Returns
 
 `Promise`\<[`ZarrImageryLayer`](ZarrImageryLayer.md)\>
 
-A promise that resolves to a [ZarrImageryLayer](ZarrImageryLayer.md).
+A fully initialized imagery layer. Its provider is available as
+`layer.imageryProvider`.
+
+#### Throws
+
+If metadata, dimensions, CRS, or coverage cannot be initialized.
+
+#### Example
+
+```ts
+const layer = await ZarrLayerProvider.createLayer(viewer, {
+  url: 'https://example.com/data.zarr',
+  variable: 'temperature',
+  scale: [0, 30]
+});
+viewer.imageryLayers.add(layer);
+```
 
 ## Properties
-
-### dimensionValues
-
-```ts
-dimensionValues: DimensionValues = {};
-```
-
-Values of the data coordinate dimensions (latitude, longitude, elevation, etc.).
-
-***
-
-### errorEvent
-
-```ts
-errorEvent: Event<(...args) => void>;
-```
-
-Gets an event that is raised when the imagery provider encounters an asynchronous error.  By subscribing
-to the event, you will be notified of the error and can potentially recover from it.  Event listeners
-are passed an instance of [TileProviderError](https://cesium.com/learn/cesiumjs/ref-doc/TileProviderError.html).
-
-#### Implementation of
-
-```ts
-ImageryProvider.errorEvent
-```
-
-***
 
 ### proxy
 
 ```ts
-proxy: DefaultProxy;
+readonly proxy: DefaultProxy;
 ```
 
 Gets the proxy used by this provider.
@@ -469,26 +646,10 @@ ImageryProvider.proxy
 
 ***
 
-### selectors
-
-```ts
-selectors: object;
-```
-
-User-defined selectors for slicing dimensions.
-
-#### Index Signature
-
-```ts
-[key: string]: ZarrSelectorsProps
-```
-
-***
-
 ### tileDiscardPolicy
 
 ```ts
-tileDiscardPolicy: NeverTileDiscardPolicy;
+readonly tileDiscardPolicy: NeverTileDiscardPolicy;
 ```
 
 Gets the tile discard policy.  If not undefined, the discard policy is responsible

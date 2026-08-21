@@ -3,7 +3,8 @@ import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import { FormRow } from '../../ui/form-row';
-import { allColorScales, DEFAULT_COLORMAP } from 'zarr-cesium';
+import { allColorScales } from 'zarr-maps-colormap';
+import { DEFAULT_COLORMAP } from 'zarr-cesium';
 
 interface ColormapFieldProps {
   control: Control<any>;

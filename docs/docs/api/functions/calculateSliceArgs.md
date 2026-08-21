@@ -2,15 +2,15 @@
 
 ```ts
 function calculateSliceArgs(
-   shape, 
-   dataSlice, 
-   dimIndices, 
-   selectors, 
-   dimensionValues, 
-   root, 
-   levelInfo, 
-   zarrVersion, 
-   updateDimensionValues): Promise<{
+   shape,
+   dataSlice,
+   dimIndices,
+   selectors,
+   dimensionValues,
+   root,
+   levelInfo,
+   zarrVersion,
+   updateDimensionValues?): Promise<{
   dimensionValues: DimensionValues;
   selectors: {
    [key: string]: ZarrSelectorsProps;
@@ -29,17 +29,17 @@ This function:
 
 ## Parameters
 
-| Parameter | Type | Default value | Description |
-| ------ | ------ | ------ | ------ |
-| `shape` | `number`[] | `undefined` | Full array shape. |
-| `dataSlice` | [`DataSliceProps`](../interfaces/DataSliceProps.md) | `undefined` | Pixel-space slice ranges `{ startX, endX, startY, endY, startElevation?, endElevation? }` (see [DataSliceProps](../interfaces/DataSliceProps.md)). |
-| `dimIndices` | [`DimIndicesProps`](../interfaces/DimIndicesProps.md) | `undefined` | Mapping of dimension names → indices as returned by `identifyDimensionIndices` (see [DimIndicesProps](../interfaces/DimIndicesProps.md)). |
-| `selectors` | \{ \[`key`: `string`\]: [`ZarrSelectorsProps`](../interfaces/ZarrSelectorsProps.md); \} | `undefined` | User-provided selection map (lat/lon/elevation/time/etc.). See [ZarrSelectorsProps](../interfaces/ZarrSelectorsProps.md). |
-| `dimensionValues` | [`DimensionValues`](../interfaces/DimensionValues.md) | `undefined` | Cache of already-loaded coordinate arrays (mutated by this function). |
-| `root` | `Location`\<`FetchStore`\> | `undefined` | Root Zarr group location. |
-| `levelInfo` | `string` \| `null` | `undefined` | Optional multiscale subpath. |
-| `zarrVersion` | `2` \| `3` \| `null` | `undefined` | Zarr version (2 or 3). |
-| `updateDimensionValues` | `boolean` | `false` | If true, rewrites dimensionValues only for the selected ranges. |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `shape` | `number`[] | Full array shape. |
+| `dataSlice` | [`DataSliceProps`](../interfaces/DataSliceProps.md) | Pixel-space slice ranges `{ startX, endX, startY, endY, startElevation?, endElevation? }` (see [DataSliceProps](../interfaces/DataSliceProps.md)). |
+| `dimIndices` | [`DimIndicesProps`](../interfaces/DimIndicesProps.md) | Mapping of dimension names → indices as returned by `identifyDimensionIndices` (see [DimIndicesProps](../interfaces/DimIndicesProps.md)). |
+| `selectors` | \{ \[`key`: `string`\]: [`ZarrSelectorsProps`](../interfaces/ZarrSelectorsProps.md); \} | User-provided selection map (lat/lon/elevation/time/etc.). See [ZarrSelectorsProps](../interfaces/ZarrSelectorsProps.md). |
+| `dimensionValues` | [`DimensionValues`](../interfaces/DimensionValues.md) | Cache of already-loaded coordinate arrays (mutated by this function). |
+| `root` | `Location`\<`Readable`\> | Root Zarr group location. |
+| `levelInfo` | `string` \| `null` | Optional multiscale subpath. |
+| `zarrVersion` | `3` \| `2` \| `null` | Zarr version (2 or 3). |
+| `updateDimensionValues?` | `boolean` | If true, rewrites dimensionValues only for the selected ranges. |
 
 ## Returns
 

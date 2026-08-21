@@ -2,9 +2,9 @@
 
 ```ts
 function calculateSliceArgsRequestImage(
-   shape, 
-   dataSlice, 
-   dimIndices, 
+   shape,
+   dataSlice,
+   dimIndices,
    selectors): SliceArgs;
 ```
 

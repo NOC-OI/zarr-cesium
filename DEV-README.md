@@ -229,3 +229,104 @@ Run:
 cd docs
 npm install
 ```
+
+---
+
+# 8. Releasing zarr-cesium to npm
+
+`zarr-cesium` is published as a single npm package. Its `zarr-maps-colormap` and `zarr-maps-tiling` dependencies must be available on npm before publishing a release that depends on them.
+
+The following example prepares `zarr-cesium` version `0.2.0`, using version `0.2.0` of both Zarr Maps dependencies. Run all commands from the repository root.
+
+## 8.1. Update the release branch
+
+Start with an up-to-date branch and a clean understanding of any local changes:
+
+```bash
+git status
+git pull --ff-only origin dev
+```
+
+If the pull reports local changes or diverging history, resolve that branch state before creating a release tag.
+
+## 8.2. Confirm the Zarr Maps dependencies
+
+Publish `zarr-maps-colormap@0.2.0` and `zarr-maps-tiling@0.2.0` from the `zarr-maps` repository first. Confirm that npm can resolve them:
+
+```bash
+npm view zarr-maps-colormap@0.2.0 version
+npm view zarr-maps-tiling@0.2.0 version
+```
+
+Both commands must print `0.2.0`. Do not tag the Cesium release until these dependencies are available from npm.
+
+## 8.3. Update the package version and dependencies
+
+Set the Cesium package version and its Zarr Maps dependency ranges:
+
+```bash
+npm pkg set version=0.2.0
+npm pkg set dependencies.zarr-maps-colormap="^0.2.0"
+npm pkg set dependencies.zarr-maps-tiling="^0.2.0"
+```
+
+The demo imports the colormap package directly, so update it as well:
+
+```bash
+npm pkg set dependencies.zarr-maps-colormap="^0.2.0" --prefix demo
+```
+
+Regenerate both lockfiles:
+
+```bash
+npm install
+npm install --prefix demo
+```
+
+For later releases, replace `0.2.0` with the intended versions in every command.
+
+## 8.4. Validate the release
+
+Build the library, demo, and documentation:
+
+```bash
+npm run build
+npm run build --prefix demo
+npm run build --prefix docs
+```
+
+Inspect the package that npm will publish:
+
+```bash
+npm pack --dry-run
+```
+
+Confirm that the package uses npm version ranges rather than local `file:` dependencies:
+
+```bash
+npm pkg get version dependencies
+```
+
+## 8.5. Commit and tag the release
+
+Review the package manifest and lockfiles before committing:
+
+```bash
+git diff -- package.json package-lock.json demo/package.json demo/package-lock.json
+git add package.json package-lock.json demo/package.json demo/package-lock.json
+git commit -m "Release v0.2.0"
+git tag -a v0.2.0 -m "Release v0.2.0"
+git push origin dev
+git push origin v0.2.0
+```
+
+Pushing the tag triggers `.github/workflows/publish-npm.yml`. The workflow verifies that the tag, `package.json`, and both root version entries in `package-lock.json` match before building and publishing the package. It then creates the corresponding GitHub release.
+
+The publishing workflow installs development dependencies required by TypeScript and `tsup` with:
+
+```yaml
+- name: Install dependencies
+  run: npm ci --include=dev
+```
+
+The npm package should be configured as a trusted publisher for this GitHub repository because the workflow uses GitHub's OIDC permission (`id-token: write`).

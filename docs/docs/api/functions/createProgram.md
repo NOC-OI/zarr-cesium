@@ -2,9 +2,9 @@
 
 ```ts
 function createProgram(
-   gl, 
-   vertexShader, 
-   fragmentShader): 
+   gl,
+   vertexShader,
+   fragmentShader):
   | WebGLProgram
   | null;
 ```

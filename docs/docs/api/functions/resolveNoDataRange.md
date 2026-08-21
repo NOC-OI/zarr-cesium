@@ -2,9 +2,9 @@
 
 ```ts
 function resolveNoDataRange(
-   userMin, 
-   userMax, 
-   metadataMin, 
+   userMin,
+   userMax,
+   metadataMin,
    metadataMax): object;
 ```
 

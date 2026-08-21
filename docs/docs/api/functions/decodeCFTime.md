@@ -2,20 +2,20 @@
 
 ```ts
 function decodeCFTime(
-   values, 
-   units, 
-   calendar): string[];
+   values,
+   units,
+   calendar?): string[];
 ```
 
 Decodes CF-compliant time coordinate values into ISO date strings.
 
 ## Parameters
 
-| Parameter | Type | Default value | Description |
-| ------ | ------ | ------ | ------ |
-| `values` | `number`[] | `undefined` | Array of numeric time values to decode. |
-| `units` | `string` | `undefined` | CF time units string (e.g., "days since 2000-01-01"). |
-| `calendar` | [`CFCalendar`](../type-aliases/CFCalendar.md) | `'standard'` | CF calendar type (default is "standard"). |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `values` | `number`[] | Array of numeric time values to decode. |
+| `units` | `string` | CF time units string (e.g., "days since 2000-01-01"). |
+| `calendar?` | [`CFCalendar`](../type-aliases/CFCalendar.md) | CF calendar type (default is "standard"). |
 
 ## Returns
 

@@ -9,6 +9,7 @@ interface InfoButtonBoxProps {
 
 export function InfoButtonBox({ infoButtonBox, setInfoButtonBox }: InfoButtonBoxProps) {
   function handleClose() {
+    infoButtonBox.onClose?.();
     setInfoButtonBox({});
   }
   const nodeRef = useRef<HTMLDivElement>(null);
@@ -27,7 +28,7 @@ export function InfoButtonBox({ infoButtonBox, setInfoButtonBox }: InfoButtonBox
         </div>
         <div className="text-sm text-center pb-1.5 font-bold">{infoButtonBox.title}</div>
         <div className="markdown-content content-center pb-2 pt-3 max-h-[85vh] overflow-y-auto overflow-x-hidden">
-          <p>{infoButtonBox.content}</p>
+          <div>{infoButtonBox.content}</div>
         </div>
       </div>
     </Draggable>

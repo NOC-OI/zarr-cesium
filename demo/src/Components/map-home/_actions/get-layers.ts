@@ -1,5 +1,6 @@
 import type { Viewer } from 'cesium';
 import { ZarrCubeProvider, ZarrCubeVelocityProvider, ZarrLayerProvider } from 'zarr-cesium';
+import { IcechunkStore } from 'icechunk-js';
 import { GetZarrLayer } from '../../../lib/map-layers/addZarrLayer';
 import type { DataInfoType, keyable, SelectedLayersType, ZarrCesiumRefs } from '../../../types';
 import type { CubeOptions, LayerOptions, VelocityOptions } from 'zarr-cesium';
@@ -119,6 +120,9 @@ export async function getZarrCesiumLayer(
   viewerRef: React.RefObject<Viewer>
 ) {
   const options = structuredClone(layerName.params) as LayerOptions;
+  if (options.url?.endsWith('.icechunk')) {
+    options.store = await IcechunkStore.open(options.url, { branch: 'main', formatVersion: 'v1' });
+  }
   const imageryLayer = (await ZarrLayerProvider.createLayer(viewerRef.current, options)) as any;
   imageryLayer.id = actualLayer;
   return imageryLayer;

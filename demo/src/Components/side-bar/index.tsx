@@ -7,15 +7,15 @@ import { SideBarLink } from './side-bar-link';
 import { DimensionsToggle } from '../dimensions-toggle';
 import { useAppDispatch, useAppSelector } from '../../application/use-layers';
 import { layersActions } from '../../application/store';
-import type { InfoButtonBoxType } from '../../types';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import DescriptionIcon from '@mui/icons-material/Description';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { AddCustomZarrData } from '../add-custom-zarr-data';
+import { useContextHandle } from '../../application/use-context';
 
 export function SideBar() {
   const [sideBarOption, setSideBarOption] = useState('');
-  const [infoButtonBox, setInfoButtonBox] = useState<InfoButtonBoxType>({});
+  const { infoButtonBox, setInfoButtonBox } = useContextHandle();
 
   const { selectedLayers, layerLegend } = useAppSelector(state => state.layers);
   const dispatch = useAppDispatch();
@@ -27,6 +27,12 @@ export function SideBar() {
       }
     });
   }, [dispatch, layerLegend, selectedLayers]);
+
+  useEffect(() => {
+    if (infoButtonBox.layerName && !selectedLayers[infoButtonBox.layerName]) {
+      setInfoButtonBox({});
+    }
+  }, [infoButtonBox.layerName, selectedLayers, setInfoButtonBox]);
 
   async function handleShowSelection(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
     const oldSelectedSidebarOption = sideBarOption;

@@ -2,12 +2,12 @@
 
 ```ts
 function calculateElevationSlice(
-   shapeElevation, 
-   dimInfo, 
-   selectorsElevation, 
-   dimensionValuesWithElevation, 
-   root, 
-   levelInfo, 
+   shapeElevation,
+   dimInfo,
+   selectorsElevation,
+   dimensionValuesWithElevation,
+   root,
+   levelInfo,
    zarrVersion): Promise<{
   dimensionValuesWithElevation: DimensionValues;
   elevationSlice: [number, number];
@@ -38,9 +38,9 @@ Behavior:
 | `dimInfo.name` | `string` | - |
 | `selectorsElevation` | [`ZarrSelectorsProps`](../interfaces/ZarrSelectorsProps.md) \| `undefined` | User-provided elevation selector. See [ZarrSelectorsProps](../interfaces/ZarrSelectorsProps.md). |
 | `dimensionValuesWithElevation` | [`DimensionValues`](../interfaces/DimensionValues.md) | Cache of already-loaded coordinate arrays (mutated by this function). |
-| `root` | `Location`\<`FetchStore`\> | Root Zarr group location. |
+| `root` | `Location`\<`Readable`\> | Root Zarr group location. |
 | `levelInfo` | `string` \| `null` | Optional multiscale subpath. |
-| `zarrVersion` | `2` \| `3` \| `null` | Zarr version (2 or 3). |
+| `zarrVersion` | `3` \| `2` \| `null` | Zarr version (2 or 3). |
 
 ## Returns
 

@@ -1,5 +1,5 @@
 import proj4 from 'proj4';
-import { colormapBuilder } from 'zarr-cesium';
+import { colormapBuilder } from 'zarr-maps-colormap';
 import { Rectangle } from 'cesium';
 
 export function parseRangeString(rangeStr: string): number[] | string[] {

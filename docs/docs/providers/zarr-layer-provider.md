@@ -9,7 +9,7 @@ The **ZarrLayerProvider** allows you to render **2D raster data from Zarr datase
 It handles:
 
 - Reading Zarr metadata and multiscale pyramids
-- Legacy ndpyramid, GeoZarr, and TopoZarr multiscale layouts
+- Legacy ndpyramid and GeoZarr multiscale layouts
 - WebGL rendering of tiles (fast GPU-based color mapping)
 - Dynamic slicing of dimensions (e.g., time, elevation)
 - CF-compliant time decoding
@@ -71,11 +71,12 @@ This method:
 
 ```ts
 export interface LayerOptions {
-  url: string; // Public Zarr store
+  url?: string; // Zarr URL; required unless store is provided
+  store?: Readable; // Custom Zarrita store, e.g. IcechunkStore
   variable: string; // Zarr array name
   latIsAscending?: boolean; // Optional override for latitude ordering (south->north if true)
   scale?: [number, number]; // Min/max for color scaling
-  colormap?: ColorMapName; // Name from jsColormaps, based on matplotlib colormaps
+  colormap?: ColorMapName; // Name provided by zarr-maps-colormap
   opacity?: number; // Imagery opacity (0–1)
   tileWidth?: number; // Cesium tile size (default 256)
   tileHeight?: number; // Cesium tile size (default 256)
@@ -87,7 +88,9 @@ export interface LayerOptions {
   crs?: 'EPSG:4326' | 'EPSG:3857'; // Force CRS (auto-detected if not set)
   noDataMin?: number; // Custom no-data minimum value. Overrides _FillValue/missing_value.
   noDataMax?: number; // Custom no-data maximum value. Overrides _FillValue/missing_value.
-  requestOverrides?: RequestInit; // Fetch options for protected stores, headers, credentials, etc.
+  requestOverrides?: RequestOverrides; // Serializable static fetch options
+  transformRequest?: TransformRequest; // Per-object URL/header transformation
+  onAuthError?: (status: number) => void; // Called once for HTTP 400/401
   multiscaleFormat?: MultiscaleFormat; // Metadata layout; defaults to 'auto'.
 }
 ```
@@ -179,20 +182,20 @@ The provider automatically:
 
 By default, `multiscaleFormat: 'auto'` detects level paths from either the
 original ndpyramid-style metadata or GeoZarr metadata. Set the format
-explicitly for GeoZarr/TopoZarr pyramids so automatic zoom selection also uses
+explicitly for GeoZarr pyramids so automatic zoom selection also uses
 their full-to-coarse level ordering:
 
 ```ts
 const options = {
   // ...
-  multiscaleFormat: 'geozarr' // 'auto' | 'legacy' | 'geozarr' | 'topozarr'
+  multiscaleFormat: 'geozarr' // 'auto' | 'legacy' | 'geozarr'
 };
 ```
 
-GeoZarr and TopoZarr use a `layout` array with `asset` paths instead of the
+GeoZarr uses a `layout` array with `asset` paths instead of the
 legacy `datasets` array with `path` values. They also commonly place full
 resolution at level `0`, the opposite of the legacy layout. With
-`multiscaleFormat: 'geozarr'` or `'topozarr'`, the provider maps that ordering
+`multiscaleFormat: 'geozarr'`, the provider maps that ordering
 correctly when selecting a level for a Cesium zoom.
 
 For example, GeoZarr-style metadata is shaped like:
@@ -224,6 +227,43 @@ const options = {
   }
 };
 ```
+
+For credentials that must be generated per object, use `transformRequest`:
+
+```ts
+const options = {
+  url: 'https://example.com/private.zarr',
+  variable: 'temperature',
+  transformRequest: async url => ({
+    url: await createSignedUrl(url),
+    headers: { 'X-Application': 'ocean-viewer' }
+  }),
+  onAuthError: status => refreshCredentials(status)
+};
+```
+
+### Icechunk
+
+Open Icechunk with its client and pass the resulting Zarrita-compatible store:
+
+```ts
+import { IcechunkStore } from 'icechunk-js';
+
+const store = await IcechunkStore.open(icechunkUrl, {
+  branch: 'main',
+  formatVersion: 'v1'
+});
+
+const layer = await ZarrLayerProvider.createLayer(viewer, {
+  store,
+  variable: 'IMERG_PRECTOT',
+  zarrVersion: 3,
+  scale: [0, 10]
+});
+```
+
+Coordinate values are resolved per pyramid level, including Icechunk stores
+without consolidated root metadata.
 
 ---
 
@@ -315,6 +355,25 @@ selectors = {
 ```
 
 And with that, you can build UI controls (sliders, dropdowns) to update the layer dynamically.
+
+### Query API
+
+Query methods operate directly on Zarr data and return values with their
+coordinate labels:
+
+```ts
+const provider = zbLayer.imageryProvider;
+
+await provider.queryData({ type: 'Point', coordinates: [-4.2, 50.1] });
+await provider.getTimeSeries([-4.2, 50.1]);
+await provider.getVerticalProfile([-4.2, 50.1]);
+await provider.getTransect([-5, 50], [-3, 51], undefined, { samples: 100 });
+await provider.getFullTransect([-5, 50], [-3, 51], undefined, { samples: 100 });
+```
+
+Queries use the finest level by default. Supply `{ level: number }` to query a
+coarser level, `{ includeSpatialCoordinates: false }` for smaller results, or
+`{ signal }` to support cancellation.
 
 ### Remove Layer
 

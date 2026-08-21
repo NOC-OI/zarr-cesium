@@ -5,7 +5,9 @@ title: ZarrCubeVelocityProvider
 
 # ZarrCubeVelocityProvider
 
-The **ZarrCubeVelocityProvider** loads and visualizes **3D vector fields** (U, V components) from Zarr datasets as animated particle layers in Cesium using the `WindLayer` from [`cesium-wind-layer`](https://github.com/hongfaqiu/cesium-wind-layer)
+The **ZarrCubeVelocityProvider** loads and visualizes **3D vector fields** (U, V components) from Zarr datasets as animated particle layers in Cesium using the `WindLayer` from the [NOC-OI `cesium-wind-layer` fork](https://github.com/NOC-OI/cesium-wind-layer).
+
+Zarr-Cesium targets fork release v0.11.0. Compared with the upstream release, this version adds `minVisibleRatio`, which clamps camera-driven particle width, trail-length, and speed scaling (`0.6` by default, or `1` to retain the overview scale at every zoom). It also resets the visible longitude/latitude ranges and pixel scale when zooming back to a globe overview, preventing regional-view styling from becoming stuck. Tagged releases include an installable package tarball, allowing Zarr-Cesium to use a fixed fork build.
 
 This provider enables real-time visualization of:
 
@@ -18,7 +20,7 @@ It supports:
 
 - Zarr v2 and v3
 - Multiscale pyramids
-- Legacy ndpyramid, GeoZarr, and TopoZarr multiscale layouts
+- Legacy ndpyramid and GeoZarr multiscale layouts
 - GPU-accelerated particle animations
 - Dynamic elevation slicing
 - CF-compliant time decoding for selectors
@@ -79,7 +81,8 @@ This creates a **stack of animated particle layers**, one per elevation slice.
 
 ```ts
 interface VelocityOptions {
-  urls: { u: string; v: string }; // Public Zarr stores for U and V components
+  urls?: { u?: string; v?: string }; // URLs; each is required unless its store is supplied
+  stores?: { u?: Readable; v?: Readable }; // Custom U/V stores, including IcechunkStore
   variables: { u: string; v: string }; // Zarr array names for U and V
   bounds: BoundsProps; // geographic rectangle
   dimensionNames?: DimensionNamesProps; // Custom dimension names. If not provided, defaults will be used or identified automatically based on CF conventions.
@@ -95,9 +98,60 @@ interface VelocityOptions {
   scale?: [number, number]; // Min/max for color scaling
   windOptions?: Partial<WindLayerOptions>; // Additional WindLayer configuration
   crs?: CRS; // Force CRS (auto-detected if not set)
-  multiscaleFormat?: MultiscaleFormat; // 'auto' (default), 'legacy', 'geozarr', or 'topozarr'
+  multiscaleFormat?: MultiscaleFormat; // 'auto' (default), 'legacy', or 'geozarr'
+  requestOverrides?: RequestOverrides; // Static options shared by URL-backed U/V stores
+  transformRequest?: TransformRequest; // Per-request auth, proxy, or signed URL transform
+  onAuthError?: OnAuthError; // Called once for HTTP 400/401 responses
 }
 ```
+
+---
+
+## Icechunk and Custom Stores
+
+Supply one Zarrita-compatible `Readable` store for each component. When U and V are arrays in the same Icechunk repository, the same store can be used for both:
+
+```ts
+import { IcechunkStore } from 'icechunk-js';
+import { ZarrCubeVelocityProvider } from 'zarr-cesium';
+
+const store = await IcechunkStore.open(repositoryUrl, {
+  branch: 'main',
+  formatVersion: 'v1'
+});
+
+const velocity = new ZarrCubeVelocityProvider(viewer, {
+  stores: { u: store, v: store },
+  variables: { u: 'uo', v: 'vo' },
+  bounds: { west: -50, south: -20, east: 10, north: 20 }
+});
+
+await velocity.load();
+```
+
+You can mix sources, for example `urls.u` with `stores.v`, provided both components have a source.
+
+## Private HTTP Stores
+
+URL-backed U and V stores share request configuration. The transformed fetch and its one-shot authentication callback are reused across both components:
+
+```ts
+const velocity = new ZarrCubeVelocityProvider(viewer, {
+  urls: {
+    u: 'https://data.example.com/private-u.zarr',
+    v: 'https://data.example.com/private-v.zarr'
+  },
+  variables: { u: 'uo', v: 'vo' },
+  bounds,
+  transformRequest: async url => ({
+    url,
+    headers: { Authorization: `Bearer ${await getAccessToken()}` }
+  }),
+  onAuthError: status => refreshSession(status)
+});
+```
+
+Use `requestOverrides` instead when credentials and headers are static.
 
 ---
 
@@ -160,6 +214,7 @@ Plus user-configurable **particle system settings**:
   lineWidth,
   lineLength,
   particlesTextureSize,
+  minVisibleRatio,
   flipY
   ...
 }
@@ -208,16 +263,16 @@ Then:
 - Resolution, W×H×Z, and bounding box adapt
 - Switching levels triggers a reload
 
-For a TopoZarr store, whose level `0` is normally full resolution:
+For a GeoZarr store whose level `0` is full resolution:
 
 ```ts
-multiscaleFormat: 'topozarr',
-multiscaleLevel: 0 // loads TopoZarr's full-resolution level
+multiscaleFormat: 'geozarr',
+multiscaleLevel: 0 // loads the GeoZarr full-resolution level
 ```
 
 Legacy ndpyramid stores commonly use the opposite order, with level `0` as the
 coarsest resolution. Inspect `windCube.levelInfos` when choosing a level.
-GeoZarr/TopoZarr metadata supplies levels through `multiscales.layout[].asset`,
+GeoZarr metadata supplies levels through `multiscales.layout[].asset`,
 whereas legacy metadata uses `multiscales[0].datasets[].path`.
 
 ---
@@ -323,7 +378,31 @@ This applies instantly to all existing layers.
 
 The full list of supported colormaps is available in the [Colormaps section](../api/type-aliases/ColorMapName.md).
 
-The `windOptions` allows fine-tuning of particle system parameters. For more info, see the [`WindLayerOptions` information on cesium-wind-layer github repo](https://github.com/hongfaqiu/cesium-wind-layer)
+The `windOptions` allows fine-tuning of particle system parameters. For more information, see the [`WindLayerOptions` documentation in the NOC-OI fork](https://github.com/NOC-OI/cesium-wind-layer/tree/v0.11.0/packages/cesium-wind-layer).
+
+---
+
+### Query Velocity Data
+
+Velocity queries return derived speed alongside aligned U and V components:
+
+```ts
+const point = await windCube.queryData({
+  type: 'Point',
+  coordinates: [-4.2, 50.1]
+});
+
+console.log(point.values);       // speed
+console.log(point.components.u); // U component
+console.log(point.components.v); // V component
+
+const profile = await windCube.getVerticalProfile([-4.2, 50.1]);
+const series = await windCube.getTimeSeries([-4.2, 50.1]);
+```
+
+Input positions use WGS84 longitude/latitude. A ranged time selector reads the
+source arrays, while an elevation range returns values across the loaded
+vertical subset. Pass `{ signal }` to cancel a query.
 
 ---
 

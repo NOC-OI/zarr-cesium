@@ -2,8 +2,8 @@
 
 ```ts
 function detectCRS(
-   attrs, 
-   arr, 
+   attrs,
+   arr,
 xyLimits?): Promise<CRS>;
 ```
 

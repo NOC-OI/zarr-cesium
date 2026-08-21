@@ -3,14 +3,13 @@ import { layersActions } from '../../application/store';
 import type { LayerLegendBoxProps, SelectedLayer } from '../../types';
 import Slider from '@mui/material/Slider';
 import {
-  allColorScales,
   DEFAULT_COLORMAP,
   DEFAULT_SCALE,
   DEFAULT_VERTICAL_EXAGGERATION,
   DEFAULT_WIND_OPTIONS,
-  type ColorMapName,
   type VelocityOptions
 } from 'zarr-cesium';
+import { allColorScales, type ColorMapName } from 'zarr-maps-colormap';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
@@ -179,7 +178,7 @@ export function CubeVelocityOptionsSelector({ layerLegendName }: LayerLegendBoxP
             <Slider
               value={[windOptions.lineLength!.min, windOptions.lineLength!.max]}
               min={0}
-              max={1000}
+              max={10000}
               disableSwap
               onChange={(_, v) => {
                 if (!Array.isArray(v)) return;
@@ -191,6 +190,42 @@ export function CubeVelocityOptionsSelector({ layerLegendName }: LayerLegendBoxP
               color="success"
             />
           </div>
+        </div>
+        <div className="flex flex-col gap-1">
+          <p className="text-[11px] font-bold">Drop Rate</p>
+          <input
+            type="number"
+            min={0}
+            max={1}
+            step={0.001}
+            className="w-full rounded-lg px-2 py-1 bg-black bg-opacity-30 text-white text-[12px] clickable"
+            value={windOptions.dropRate}
+            onChange={e => updateWindOptions({ dropRate: Number(e.target.value) })}
+          />
+        </div>
+        <div className="flex flex-col gap-1">
+          <p className="text-[11px] font-bold">Drop Rate Bump</p>
+          <input
+            type="number"
+            min={0}
+            max={1}
+            step={0.001}
+            className="w-full rounded-lg px-2 py-1 bg-black bg-opacity-30 text-white text-[12px] clickable"
+            value={windOptions.dropRateBump}
+            onChange={e => updateWindOptions({ dropRateBump: Number(e.target.value) })}
+          />
+        </div>
+        <div className="flex flex-col gap-1">
+          <p className="text-[11px] font-bold">Minimum Visible Ratio</p>
+          <input
+            type="number"
+            min={0}
+            max={1}
+            step={0.05}
+            className="w-full rounded-lg px-2 py-1 bg-black bg-opacity-30 text-white text-[12px] clickable"
+            value={windOptions.minVisibleRatio}
+            onChange={e => updateWindOptions({ minVisibleRatio: Number(e.target.value) })}
+          />
         </div>
         <div className="grid grid-cols-3 gap-2">
           <label className="flex items-center gap-1 text-[11px]">

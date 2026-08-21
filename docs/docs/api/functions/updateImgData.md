@@ -2,10 +2,10 @@
 
 ```ts
 function updateImgData(
-   value, 
-   pixelIdx, 
-   imgData, 
-   colorScale, 
+   value,
+   pixelIdx,
+   imgData,
+   colorScale,
    opacity): ImageData;
 ```
 

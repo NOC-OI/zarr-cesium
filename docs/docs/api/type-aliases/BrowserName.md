@@ -4,4 +4,4 @@
 type BrowserName = "chrome" | "firefox" | "safari" | "edge" | "opera" | "unknown";
 ```
 
-Supported browser names for compatibility checks.
+Browser names used for WebGL compatibility handling.

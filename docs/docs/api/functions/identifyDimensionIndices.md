@@ -2,8 +2,8 @@
 
 ```ts
 function identifyDimensionIndices(
-   dimNames, 
-   dimensionNames?, 
+   dimNames,
+   dimensionNames?,
    coordinates?): DimIndicesProps;
 ```
 

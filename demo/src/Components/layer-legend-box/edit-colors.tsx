@@ -1,4 +1,5 @@
-import { allColorScales, DEFAULT_COLORMAP, DEFAULT_SCALE, type ColorMapName } from 'zarr-cesium';
+import { allColorScales, type ColorMapName } from 'zarr-maps-colormap';
+import { DEFAULT_COLORMAP, DEFAULT_SCALE } from 'zarr-cesium';
 import { useAppDispatch, useAppSelector } from '../../application/use-layers';
 import { layersActions } from '../../application/store';
 import Slider from '@mui/material/Slider';

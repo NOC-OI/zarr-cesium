@@ -1,934 +1,410 @@
-import * as zarr from 'zarrita';
-import { deriveRectangleAndScheme, latDegToMercY, lonDegToMercX } from './cesium-utils';
-import { vertexShaderSource, fragmentShaderSource } from './shaders';
-import { colormapBuilder } from './jsColormaps';
 import {
-  calculateNearestIndex,
-  calculateSliceArgsRequestImage,
-  detectCRS,
-  extractNoDataMetadata,
-  getXYLimits,
-  initZarrDataset,
-  loadDimensionValues,
-  openLevelArray,
-  resolveNoDataRange
-} from './zarr-utils';
-import { createColorRampTexture, createProgram, createShader, detectBrowser } from './webgl-utils';
-import {
-  ColorMapName,
-  DimensionValues,
-  type CRS,
-  type DimensionNamesProps,
-  type DimIndicesProps,
-  type MultiscaleFormat,
-  type LayerOptions,
-  type XYLimits,
-  type ZarrLevelMetadata,
-  type ZarrSelectorsProps
-} from './types';
-import {
-  ImageryProvider,
-  ImageryLayer,
-  TilingScheme,
+  Cartographic,
   Credit,
   DefaultProxy,
-  NeverTileDiscardPolicy,
-  Viewer,
-  Math as CesiumMath,
-  Rectangle,
   Event,
+  GeographicTilingScheme,
+  ImageryLayerFeatureInfo,
+  ImageryLayer,
+  NeverTileDiscardPolicy,
+  type ImageryProvider,
+  Rectangle,
+  type Request,
+  type TilingScheme,
   WebMercatorTilingScheme
 } from 'cesium';
+import {
+  ZarrTileProvider,
+  type DimensionValues,
+  type FullTransectResult,
+  type QueryGeometry,
+  type QueryOptions,
+  type QueryPosition,
+  type QueryResult,
+  type TransectQueryOptions,
+  type TransectResult,
+  type ZarrSelectors,
+  type ZarrSelectorsProps
+} from 'zarr-maps-tiling';
+import type { ColorMapName } from 'zarr-maps-colormap';
+import type { CesiumHost, LayerOptions } from './types';
 
-/**
- * Custom Cesium imagery layer for Zarr datasets.
- *
- * @remarks
- * Extends Cesium's `ImageryLayer` to support real-time updates to
- * visualization style (opacity, color map, scale) from Zarr-based data.
- *
- * @param imageryProvider - Instance of {@link ZarrLayerProvider}.
- * @param viewer - Cesium viewer instance.
- */
+/** Cesium imagery layer backed by a shared {@link ZarrTileProvider}. */
 export class ZarrImageryLayer extends ImageryLayer {
-  /** Unique identifier for the cube provider instance. */
-  public id: string = '';
+  /** Application-defined identifier; Cesium does not assign this automatically. */
+  public id = '';
+  /** Strongly typed Zarr imagery provider associated with this layer. */
   declare imageryProvider: ZarrLayerProvider;
-  viewer?: Viewer;
+  /** Viewer or widget used to request a render after runtime updates. */
+  viewer?: CesiumHost;
 
   /**
-   * Forces a re-render of the current view to reflect updated imagery.
+   * Invalidates the imagery currently visible without destroying the provider.
+   *
+   * @remarks
+   * The layer is removed and reinserted at the same collection index. Callers
+   * normally use {@link updateStyle} or {@link updateSelectors} instead.
    */
-  softRefreshCurrentView() {
+  softRefreshCurrentView(): void {
     const scene = this.viewer?.scene;
     const collection = this.viewer?.imageryLayers;
     if (!collection || !scene) return;
 
-    const idx = collection.indexOf(this);
+    const index = collection.indexOf(this);
     collection.remove(this, false);
-    collection.add(this, idx);
+    collection.add(this, index);
     scene.requestRender();
   }
 
   /**
-   * Update the visual style of the imagery layer.
-   * @param opts - Style options to update.
-   * @param opts.opacity - Layer opacity.
-   * @param opts.scale - [min, max] range for data scaling.
-   * @param opts.colormap - Colormap name.
+   * Updates rendering style and refreshes visible tiles when pixel colors change.
+   *
+   * @param options - Partial style update. `opacity` updates Cesium layer alpha;
+   * `scale` and `colormap` update the shared tile renderer.
    */
-  updateStyle(opts: { opacity?: number; scale?: [number, number]; colormap?: ColorMapName }) {
-    const layerUpdated = this.imageryProvider.updateStyle({
-      scale: opts.scale,
-      colormap: opts.colormap
-    });
-    if (layerUpdated) {
-      this.softRefreshCurrentView();
-    }
-
-    this.alpha = opts.opacity ?? this.alpha;
+  updateStyle(options: {
+    opacity?: number;
+    scale?: [number, number];
+    colormap?: ColorMapName;
+  }): void {
+    const changed = this.imageryProvider.updateStyle(options);
+    this.alpha = options.opacity ?? this.alpha;
+    if (changed) this.softRefreshCurrentView();
   }
 
   /**
-   * Update the selectors used for slicing the Zarr dataset.
-   * @param selectors - New selectors to apply.
+   * Replaces dimension selections and refreshes visible tiles when they change.
+   *
+   * @param selectors - Selectors keyed by normalized dimension name.
    */
-  updateSelectors(selectors: { [key: string]: ZarrSelectorsProps }) {
-    const layerUpdated = this.imageryProvider.updateSelectors(selectors);
-    if (layerUpdated) {
-      this.softRefreshCurrentView();
-    }
+  updateSelectors(selectors: Record<string, ZarrSelectorsProps>): void {
+    if (this.imageryProvider.updateSelectors(selectors)) this.softRefreshCurrentView();
   }
 }
 
 /**
- * Imagery provider for rendering Zarr datasets as Cesium imagery tiles.
- *
- * @remarks
- * This class implements the Cesium `ImageryProvider` interface and manages
- * reading, slicing, and WebGL rendering of Zarr-based raster data.
- *
- * @example
- * ```ts
- * const provider = new ZarrLayerProvider({
- *   url: 'https://example.com/my.zarr',
- *   variable: 'temperature',
- *   scale: [0, 40],
- *   colormap: 'jet'
- * });
- * const imageryLayer = new ZarrImageryLayer(provider);
- * viewer.imageryLayers.add(imageryLayer);
- * ```
- * @see {@link ZarrImageryLayer}
+ * Thin Cesium adapter around the framework-independent Zarr tile renderer.
+ * Dataset loading, slicing, styling, caching, and WebGL rendering live in
+ * `zarr-maps-tiling`; this class only translates Cesium tile requests.
  */
 export class ZarrLayerProvider implements ImageryProvider {
-  errorEvent = new Event();
-  tileDiscardPolicy = new NeverTileDiscardPolicy();
-  proxy = new DefaultProxy('');
-  /** Values of the data coordinate dimensions (latitude, longitude, elevation, etc.). */
-  public dimensionValues: DimensionValues = {};
-  /** User-defined selectors for slicing dimensions. */
-  public selectors: { [key: string]: ZarrSelectorsProps } = {
-    time: { selected: 0, type: 'index' },
-    elevation: { selected: 0, type: 'index' }
-  };
-  private url: string;
-  private requestOverrides?: RequestInit;
-  private variable: string;
-  private zarrVersion: 2 | 3 | null = null;
-  private multiscaleFormat: MultiscaleFormat = 'auto';
-  private crs: CRS | null = null;
-  private dimensionNames: DimensionNamesProps;
-  private uniforms: { [key: string]: WebGLUniformLocation | null } = {};
-  private latIsAscendingOverride: boolean | undefined;
-  private latAscending = false;
-  private noDataMin: number | undefined;
-  private noDataMax: number | undefined;
-  private fillValue: number | undefined;
-  private useFillValue: boolean = false;
-  private scaleFactor: number = 1;
-  private offset: number = 0;
-  private _tilingScheme!: TilingScheme;
-  private _coverageRectangle!: Rectangle;
+  readonly proxy = new DefaultProxy('');
+  readonly tileDiscardPolicy = new NeverTileDiscardPolicy();
+  private readonly source: ZarrTileProvider;
   private readonly _tileWidth: number;
   private readonly _tileHeight: number;
   private readonly _minimumLevel: number;
   private readonly _maximumLevel: number;
-  private readonly _credit: Credit;
-  private readonly browser = detectBrowser();
+  private readonly _credit = new Credit('Rendered from Zarr');
+  private readonly _errorEvent = new Event();
+  private _tilingScheme: TilingScheme = new GeographicTilingScheme();
+  private _rectangle = Rectangle.MAX_VALUE;
   private _ready = false;
-  private _readyPromise!: Promise<boolean>;
-  private _emptyCanvas: HTMLCanvasElement | null = null;
+  private readonly _readyPromise: Promise<boolean>;
 
-  private colorScale: { min: number; max: number; colors: number[][] };
-  private zarrArray: zarr.Array<any> | null = null;
-  private dimIndices: DimIndicesProps = {};
-  private store!: zarr.FetchStore;
-  private root!: zarr.Location<zarr.FetchStore>;
-  private levelInfos: string[] = [];
-  private levelCache = new Map();
-  private levelMetadata: Map<number, ZarrLevelMetadata> = new Map();
-  private xyLimits: XYLimits | null = null;
-  private geographicLonOffset360: { west: number; span: number } | null = null;
-  private colormap: ColorMapName;
-  private gl: WebGL2RenderingContext | null = null;
-  private program: WebGLProgram | null = null;
-  private colorTexture: WebGLTexture | null = null;
-  private static readonly concurrencyLimit = 15;
-  private static activeRequests = 0;
-  private static readonly queue: (() => void)[] = [];
-  private abortControllers = new Map<string, AbortController>();
-  private destroyed = false;
-  private static supportsImageBitmap: boolean | null = null;
-
+  /**
+   * Creates a Cesium imagery provider backed by a URL or custom Zarrita store.
+   *
+   * @param options - Dataset, tiling, selection, style, and request options.
+   * @remarks Prefer {@link createLayer} when adding the result to a viewer.
+   */
   constructor(options: LayerOptions) {
-    this.url = options.url;
-    this.requestOverrides = options.requestOverrides;
-    this.variable = options.variable;
-    this._tilingScheme = new WebMercatorTilingScheme();
-    this._coverageRectangle = this._tilingScheme.rectangle;
-    this.crs = options.crs || null;
-    this.latIsAscendingOverride = options.latIsAscending;
     this._tileWidth = options.tileWidth ?? 256;
     this._tileHeight = options.tileHeight ?? 256;
     this._minimumLevel = options.minimumLevel ?? 0;
-    this._maximumLevel = options.maximumLevel ?? 8;
-    this._credit = new Credit('Zarr Data');
-    this.dimensionNames = options.dimensionNames ?? {};
-    this.zarrVersion = options.zarrVersion ?? null;
-    this.multiscaleFormat = options.multiscaleFormat ?? 'auto';
-    this.dimensionValues = {};
-    const [min, max] = options.scale ?? [-3, 3];
-    this.colormap = options.colormap ?? 'viridis';
-    const colors = colormapBuilder(this.colormap);
-    this.colorScale = { min, max, colors: colors as number[][] };
-    this.selectors = options.selectors || {};
-    this.noDataMin = options.noDataMin;
-    this.noDataMax = options.noDataMax;
+    // Cesium may continue subdividing imagery beyond the source's native
+    // resolution. Zarr pyramid selection is handled independently by resolution.
+    this._maximumLevel = options.maximumLevel ?? 12;
 
-    this.initWebGL();
-    this._readyPromise = this.initialize().then(ok => ((this._ready = ok), ok));
+    this.source = new ZarrTileProvider({
+      url: options.url,
+      store: options.store,
+      variable: options.variable,
+      crs: options.crs,
+      tileSize: this._tileWidth,
+      maxZoom: this._maximumLevel,
+      scale: options.scale,
+      colormap: options.colormap,
+      selectors: options.selectors,
+      zarrVersion: options.zarrVersion,
+      dimensionNames: options.dimensionNames,
+      noDataMin: options.noDataMin,
+      noDataMax: options.noDataMax,
+      requestOverrides: options.requestOverrides,
+      transformRequest: options.transformRequest,
+      onAuthError: options.onAuthError,
+      multiscaleFormat: options.multiscaleFormat,
+      latIsAscending: options.latIsAscending,
+      renderTarget: 'cesium'
+    });
+
+    this._readyPromise = this.initialize();
   }
 
   private async initialize(): Promise<boolean> {
-    try {
-      this.store = new zarr.FetchStore(this.url, {
-        overrides: this.requestOverrides
-      });
-      this.root = zarr.root(this.store);
+    const ready = await this.source.readyPromise;
+    if (!ready || !this.source.coverageBoundsDeg) return false;
 
-      const { zarrArray, levelInfos, dimIndices, attrs } = await initZarrDataset(
-        this.store,
-        this.root,
-        this.variable,
-        this.dimensionNames,
-        this.levelMetadata,
-        this.levelCache,
-        this.zarrVersion,
-        undefined,
-        this.multiscaleFormat
-      );
-      this.zarrArray = zarrArray;
-      this.levelInfos = levelInfos;
-      this.dimIndices = dimIndices;
-      this.xyLimits = await getXYLimits(
-        this.root,
-        this.dimIndices,
-        this.levelInfos,
-        this.levelInfos.length > 0,
-        this.zarrVersion
-      );
+    this._tilingScheme =
+      this.source.crs === 'EPSG:3857'
+        ? new WebMercatorTilingScheme()
+        : new GeographicTilingScheme();
 
-      const meta = extractNoDataMetadata(zarrArray);
-
-      const range = resolveNoDataRange(
-        this.noDataMin,
-        this.noDataMax,
-        meta.metadataMin,
-        meta.metadataMax
-      );
-
-      this.noDataMin = range.noDataMin;
-      this.noDataMax = range.noDataMax;
-
-      this.fillValue = meta.useFillValue ? meta.fillValue : 0;
-      this.useFillValue = meta.useFillValue;
-
-      this.scaleFactor = attrs.scale_factor ?? 1;
-      this.offset = attrs.add_offset ?? 0;
-      this.crs = this.crs || (await detectCRS(attrs, zarrArray));
-
-      if (this.crs === 'EPSG:4326' && this.xyLimits) {
-        const lonCount = zarrArray.shape[dimIndices.lon.index];
-        const lonSpan = this.xyLimits.xMax - this.xyLimits.xMin;
-        const lonStep = lonCount > 1 ? lonSpan / (lonCount - 1) : 0;
-        const globalTolerance = Math.max(lonStep * 1.5, 1e-3);
-        const wrapsZeroTo360 =
-          this.xyLimits.xMin >= -globalTolerance &&
-          this.xyLimits.xMax <= 360 + globalTolerance &&
-          this.xyLimits.xMax >= 180 - globalTolerance;
-        const isGlobal = lonStep > 0 && lonSpan >= 360 - lonStep - globalTolerance;
-
-        if (wrapsZeroTo360 && isGlobal) {
-          const west = this.xyLimits.xMin - lonStep / 2;
-          const span = lonSpan + lonStep;
-          this.geographicLonOffset360 = { west, span };
-        }
-      }
-
-      const { rectangle, tilingScheme } = deriveRectangleAndScheme(
-        this.crs,
-        this.xyLimits,
-        this.levelMetadata,
-        zarrArray,
-        dimIndices
-      );
-
-      this._coverageRectangle = rectangle;
-      this._tilingScheme = tilingScheme;
-      await this.loadInitialDimensionValues();
-      this.resolveLatitudeOrientation();
-
-      this._ready = true;
-      return true;
-    } catch (err) {
-      console.error('Failed to initialize Zarr provider:', err);
-      return false;
-    }
-  }
-
-  private async loadInitialDimensionValues(): Promise<void> {
-    const multiscaleLevel = this.levelInfos.length > 0 ? this.levelInfos[0] : null;
-
-    for (const dimName of Object.keys(this.dimIndices)) {
-      try {
-        this.dimensionValues[dimName] = await loadDimensionValues(
-          this.dimensionValues,
-          multiscaleLevel,
-          this.dimIndices[dimName],
-          this.root,
-          this.zarrVersion
-        );
-
-        if (dimName === 'lon' || dimName === 'lat') continue;
-
-        if (!this.selectors[dimName]) {
-          this.selectors[dimName] = { selected: 0, type: 'index' };
-        } else if (this.selectors[dimName].type === 'value') {
-          this.selectors[dimName].selected = calculateNearestIndex(
-            this.dimensionValues[dimName],
-            this.selectors[dimName].selected as number
-          );
-        }
-      } catch (err) {
-        console.warn(`Failed to load dimension values for ${dimName}:`, err);
-      }
-    }
-  }
-
-  private resolveLatitudeOrientation(): void {
-    if (this.latIsAscendingOverride !== undefined) {
-      this.latAscending = this.latIsAscendingOverride;
-      return;
-    }
-
-    const latDimName = this.dimIndices.lat?.name;
-    const latValues = (latDimName
-      ? this.dimensionValues[latDimName] || this.dimensionValues.lat
-      : this.dimensionValues.lat) as ArrayLike<number> | undefined;
-
-    if (latValues && latValues.length > 1) {
-      this.latAscending = Number(latValues[0]) < Number(latValues[latValues.length - 1]);
-      return;
-    }
-
-    console.warn('Failed to infer latitude ordering. Falling back to descending latitude.');
-  }
-
-  /**
-   * Creates a Cesium imagery layer from the given viewer and Zarr options.
-   * @param viewer - Cesium viewer instance.
-   * @param options - Layer options (see {@link LayerOptions}).
-   * @returns A promise that resolves to a {@link ZarrImageryLayer}.
-   */
-  static async createLayer(viewer: Viewer, options: LayerOptions): Promise<ZarrImageryLayer> {
-    const provider = new ZarrLayerProvider(options);
-    const ready = await provider.readyPromise;
-    if (!ready) throw new Error('Failed to initialize ZarrLayerProvider');
-
-    const imageryLayer = new ZarrImageryLayer(provider);
-    imageryLayer.alpha = options.opacity ?? 1.0;
-    imageryLayer.viewer = viewer;
-
-    return imageryLayer;
-  }
-
-  private static async throttle<T>(fn: () => Promise<T>): Promise<T> {
-    if (this.activeRequests >= this.concurrencyLimit) {
-      await new Promise<void>(resolve => this.queue.push(resolve));
-    }
-    this.activeRequests++;
-    try {
-      return await fn();
-    } finally {
-      this.activeRequests--;
-      const next = this.queue.shift();
-      if (next) next();
-    }
-  }
-
-  private static async checkImageBitmapSupport(): Promise<boolean> {
-    if (this.supportsImageBitmap !== null) return this.supportsImageBitmap;
-
-    if (typeof createImageBitmap === 'undefined') {
-      this.supportsImageBitmap = false;
-      return false;
-    }
-
-    try {
-      const testCanvas = document.createElement('canvas');
-      testCanvas.width = 1;
-      testCanvas.height = 1;
-      const bitmap = await createImageBitmap(testCanvas, { imageOrientation: 'flipY' });
-      bitmap.close?.();
-      this.supportsImageBitmap = true;
-    } catch {
-      this.supportsImageBitmap = false;
-    }
-    return this.supportsImageBitmap;
-  }
-
-  /**
-   * Updates the visualization style for the imagery provider.
-   * @param options - Parameters to update.
-   * @param options.scale - New [min, max] scale range.
-   * @param options.colormap - New colormap name. See {@link ColorMapName}.
-   * @returns `true` if any changes were applied, otherwise `false`.
-   */
-  public updateStyle(options: { scale?: [number, number]; colormap?: ColorMapName }): boolean {
-    const { scale, colormap } = options;
-    if (!scale && !colormap) return false;
-    const nextMin = scale?.[0] ?? this.colorScale.min;
-    const nextMax = scale?.[1] ?? this.colorScale.max;
-    const nextColormap = colormap ?? this.colormap;
-
-    if (
-      nextMin === this.colorScale.min &&
-      nextMax === this.colorScale.max &&
-      nextColormap === this.colormap
-    ) {
-      return false;
-    }
-    if (scale) ((this.colorScale.min = scale[0]), (this.colorScale.max = scale[1]));
-
-    if (colormap) {
-      this.colormap = colormap;
-      const colors = colormapBuilder(colormap) as number[][];
-      this.colorScale.colors = colors;
-      this.updateColormapTexture();
-    }
+    const bounds = this.source.coverageBoundsDeg;
+    this._rectangle = Rectangle.fromDegrees(bounds.west, bounds.south, bounds.east, bounds.north);
+    this._ready = true;
     return true;
   }
 
   /**
-   * Updates the selectors for slicing dimensions.
-   * @param selectors - New selectors mapping. See {@link ZarrSelectorsProps}.
-   * @returns `true` if any changes were applied, otherwise `false`.
+   * Creates and initializes a {@link ZarrImageryLayer} ready to add to Cesium.
+   *
+   * @param viewer - Viewer or widget that will host the layer.
+   * @param options - Zarr dataset and visualization options.
+   * @returns A fully initialized imagery layer. Its provider is available as
+   * `layer.imageryProvider`.
+   * @throws If metadata, dimensions, CRS, or coverage cannot be initialized.
+   *
+   * @example
+   * ```ts
+   * const layer = await ZarrLayerProvider.createLayer(viewer, {
+   *   url: 'https://example.com/data.zarr',
+   *   variable: 'temperature',
+   *   scale: [0, 30]
+   * });
+   * viewer.imageryLayers.add(layer);
+   * ```
    */
-  public updateSelectors(selectors: { [key: string]: ZarrSelectorsProps }): boolean {
-    let layerUpdated = false;
-    if (selectors !== undefined) {
-      for (const key of Object.keys(selectors)) {
-        if (
-          !this.selectors[key] ||
-          JSON.stringify(this.selectors[key]) !== JSON.stringify(selectors[key])
-        ) {
-          this.selectors[key] = selectors[key];
-          layerUpdated = true;
-        }
-      }
-    }
-    return layerUpdated;
+  static async createLayer(viewer: CesiumHost, options: LayerOptions): Promise<ZarrImageryLayer> {
+    const provider = new ZarrLayerProvider(options);
+    if (!(await provider.readyPromise)) throw new Error('Failed to initialize ZarrLayerProvider');
+
+    const layer = new ZarrImageryLayer(provider);
+    layer.alpha = options.opacity ?? 1;
+    layer.viewer = viewer;
+    return layer;
   }
 
-  private updateColormapTexture(): void {
-    if (!this.gl) return;
-    if (this.colorTexture) this.gl.deleteTexture(this.colorTexture);
-    this.colorTexture = createColorRampTexture(this.gl, this.colorScale.colors, 1);
+  /** Coordinate values keyed by normalized dimension name. */
+  get dimensionValues(): DimensionValues {
+    return this.source.dimensionValues;
   }
 
-  private initWebGL() {
-    const canvas = document.createElement('canvas');
-    canvas.width = this.tileWidth;
-    canvas.height = this.tileHeight;
-
-    this.gl = canvas.getContext('webgl2', {
-      preserveDrawingBuffer: false,
-      premultipliedAlpha: false
-    }) as WebGL2RenderingContext;
-
-    if (!this.gl) {
-      console.error('WebGL2 not supported');
-      return;
-    }
-    const gl = this.gl;
-
-    const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
-    const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
-
-    if (!vertexShader || !fragmentShader) {
-      console.error('Shader creation failed');
-      return;
-    }
-
-    this.program = createProgram(gl, vertexShader!, fragmentShader!);
-    if (!this.program) return;
-
-    this.updateColormapTexture();
-
-    const positions = new Float32Array([
-      -1, -1, 0, 0, 1, -1, 1, 0, -1, 1, 0, 1, -1, 1, 0, 1, 1, -1, 1, 0, 1, 1, 1, 1
-    ]);
-
-    const buffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-    gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
-
-    const positionLocation = gl.getAttribLocation(this.program, 'a_position');
-    const texCoordLocation = gl.getAttribLocation(this.program, 'a_texCoord');
-
-    gl.enableVertexAttribArray(positionLocation);
-    gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 16, 0);
-
-    gl.enableVertexAttribArray(texCoordLocation);
-    gl.vertexAttribPointer(texCoordLocation, 2, gl.FLOAT, false, 16, 8);
-    this.uniforms = {
-      u_dataTexture: gl.getUniformLocation(this.program, 'u_dataTexture'),
-      u_colorRamp: gl.getUniformLocation(this.program, 'u_colorRamp'),
-      u_min: gl.getUniformLocation(this.program, 'u_min'),
-      u_max: gl.getUniformLocation(this.program, 'u_max'),
-      u_noDataMin: gl.getUniformLocation(this.program, 'u_noDataMin'),
-      u_noDataMax: gl.getUniformLocation(this.program, 'u_noDataMax'),
-      u_fillValue: gl.getUniformLocation(this.program, 'u_fillValue'),
-      u_useFillValue: gl.getUniformLocation(this.program, 'u_useFillValue'),
-      u_flipY: gl.getUniformLocation(this.program, 'u_flipY'),
-      u_scaleFactor: gl.getUniformLocation(this.program, 'u_scaleFactor'),
-      u_addOffset: gl.getUniformLocation(this.program, 'u_addOffset')
-    };
-  }
-
-  private choosePyramidLevel(cesiumLevel: number): string | null {
-    if (!this.levelInfos || this.levelInfos.length === 0) return null;
-
-    const maxCesium = this.maximumLevel;
-    const normalized = cesiumLevel / maxCesium;
-    const forwardIndex = Math.floor(normalized * (this.levelInfos.length - 1));
-    const reverseOrder = this.multiscaleFormat === 'geozarr' || this.multiscaleFormat === 'topozarr';
-    const index = reverseOrder
-      ? this.levelInfos.length - 1 - forwardIndex
-      : forwardIndex;
-    return this.levelInfos[index];
-  }
-
-  private prepareAbortController(key: string): AbortController {
-    const prev = this.abortControllers.get(key);
-    if (prev) prev.abort();
-
-    const controller = new AbortController();
-    this.abortControllers.set(key, controller);
-    return controller;
-  }
-
-  private async getArrayForLevel(level: number) {
-    if (!this.zarrArray) {
-      throw new Error('Zarr array not initialized');
-    }
-    const multiscaleLevel = this.choosePyramidLevel(level);
-
-    if (multiscaleLevel === null) {
-      const dataHeight = this.zarrArray.shape[this.dimIndices.lat.index];
-      const dataWidth = this.zarrArray.shape[this.dimIndices.lon.index];
-      return { dataWidth, dataHeight, currentArray: this.zarrArray, multiscaleLevel: null };
-    }
-
-    const currentArray = await openLevelArray(
-      this.root,
-      multiscaleLevel,
-      this.variable,
-      this.levelCache
-    );
-
-    const multiscaleLevelIndex = this.levelInfos.indexOf(multiscaleLevel);
-    const metadata = this.levelMetadata.get(multiscaleLevelIndex);
-
-    if (!metadata) {
-      const dataHeight = currentArray.shape[this.dimIndices.lat.index];
-      const dataWidth = currentArray.shape[this.dimIndices.lon.index];
-      return { dataWidth, dataHeight, currentArray, multiscaleLevel };
-    }
-
-    return {
-      dataWidth: metadata.width,
-      dataHeight: metadata.height,
-      currentArray,
-      multiscaleLevel
-    };
-  }
-
-  private computeTileUVs(tileRect: Rectangle) {
-    const rect = this._coverageRectangle;
-    const toDeg = CesiumMath.toDegrees;
-    const clamp = (v: number) => Math.max(0, Math.min(1, v));
-
-    if (this.crs === 'EPSG:3857') {
-      const RXW = lonDegToMercX(toDeg(rect.west));
-      const RXE = lonDegToMercX(toDeg(rect.east));
-      const RYS = latDegToMercY(toDeg(rect.south));
-      const RYN = latDegToMercY(toDeg(rect.north));
-      const XW = lonDegToMercX(toDeg(tileRect.west));
-      const XE = lonDegToMercX(toDeg(tileRect.east));
-      const YS = latDegToMercY(toDeg(tileRect.south));
-      const YN = latDegToMercY(toDeg(tileRect.north));
-      return {
-        u0: clamp((XW - RXW) / (RXE - RXW)),
-        u1: clamp((XE - RXW) / (RXE - RXW)),
-        v0: this.latAscending
-          ? clamp((YS - RYS) / (RYN - RYS))
-          : clamp((RYN - YN) / (RYN - RYS)),
-        v1: this.latAscending
-          ? clamp((YN - RYS) / (RYN - RYS))
-          : clamp((RYN - YS) / (RYN - RYS))
-      };
-    }
-
-    const west = toDeg(rect.west);
-    const east = toDeg(rect.east);
-    const south = toDeg(rect.south);
-    const north = toDeg(rect.north);
-    const tWest = toDeg(tileRect.west);
-    const tEast = toDeg(tileRect.east);
-    const tSouth = toDeg(tileRect.south);
-    const tNorth = toDeg(tileRect.north);
-
-    if (this.crs === 'EPSG:4326' && this.geographicLonOffset360) {
-      const normalizeLon360 = (lon: number) => ((lon % 360) + 360) % 360;
-      const { west: dataWest, span: dataSpan } = this.geographicLonOffset360;
-
-      let lonWest = normalizeLon360(tWest);
-      let lonEast = normalizeLon360(tEast);
-      if (lonWest < dataWest) lonWest += 360;
-      if (lonEast < dataWest) lonEast += 360;
-      if (lonEast <= lonWest) lonEast += 360;
-
-      return {
-        u0: clamp((lonWest - dataWest) / dataSpan),
-        u1: clamp((lonEast - dataWest) / dataSpan),
-        v0: this.latAscending
-          ? clamp((tSouth - south) / (north - south))
-          : clamp((north - tNorth) / (north - south)),
-        v1: this.latAscending
-          ? clamp((tNorth - south) / (north - south))
-          : clamp((north - tSouth) / (north - south))
-      };
-    }
-
-    return {
-      u0: clamp((tWest - west) / (east - west)),
-      u1: clamp((tEast - west) / (east - west)),
-      v0: this.latAscending
-        ? clamp((tSouth - south) / (north - south))
-        : clamp((north - tNorth) / (north - south)),
-      v1: this.latAscending
-        ? clamp((tNorth - south) / (north - south))
-        : clamp((north - tSouth) / (north - south))
-    };
-  }
-
-  private computePixelBounds(
-    u0: number,
-    u1: number,
-    v0: number,
-    v1: number,
-    dataWidth: number,
-    dataHeight: number
-  ) {
-    const startX = Math.floor(u0 * dataWidth),
-      endX = Math.ceil(u1 * dataWidth);
-    const startY = Math.floor(v0 * dataHeight),
-      endY = Math.ceil(v1 * dataHeight);
-    const clamp = (v: number, min: number, max: number) => Math.max(min, Math.min(max, v));
-    const sX = clamp(startX, 0, dataWidth - 1),
-      eX = clamp(endX, 0, dataWidth);
-    const sY = clamp(startY, 0, dataHeight - 1),
-      eY = clamp(endY, 0, dataHeight);
-    const width = eX - sX,
-      height = eY - sY;
-    return width > 0 && height > 0
-      ? { startX: sX, endX: eX, startY: sY, endY: eY, width, height }
-      : null;
-  }
-
-  private emptyCanvas(): HTMLCanvasElement {
-    if (!this._emptyCanvas) {
-      this._emptyCanvas = document.createElement('canvas');
-      this._emptyCanvas.width = this._tileWidth;
-      this._emptyCanvas.height = this._tileHeight;
-    }
-    return this._emptyCanvas;
+  /** Current index-based selectors used for tile rendering and queries. */
+  get selectors(): Record<string, ZarrSelectorsProps> {
+    return this.source.selectors;
   }
 
   /**
-   * Requests a rendered image tile from the Zarr dataset.
-   * @param x - Tile x coordinate.
-   * @param y - Tile y coordinate.
-   * @param level - Zoom level.
-   * @returns A rendered tile as an HTMLCanvasElement or ImageBitmap.
+   * Updates tile color mapping without recreating the provider.
+   *
+   * @param options - New scale and/or colormap.
+   * @returns `true` when the rendered tile output changed.
+   */
+  updateStyle(options: { scale?: [number, number]; colormap?: ColorMapName }): boolean {
+    return this.source.updateStyle(options);
+  }
+
+  /**
+   * Updates dimension selectors used for subsequent renders and queries.
+   *
+   * @param selectors - Selectors keyed by normalized dimension name.
+   * @returns `true` when at least one selector changed.
+   */
+  updateSelectors(selectors: Record<string, ZarrSelectorsProps>): boolean {
+    return this.source.updateSelectors(selectors);
+  }
+
+  /**
+   * Queries the nearest raster cell for a WGS84 GeoJSON point.
+   *
+   * @param geometry - Point geometry in `[longitude, latitude]` degrees.
+   * @param selectors - Optional selector overrides for this query only.
+   * @param options - Abort, resolution-level, and coordinate-output controls.
+   * @returns Values and coordinate labels for the selected cell or profile.
+   * @throws For unsupported geometries, invalid selectors, or failed reads.
+   */
+  async queryData(
+    geometry: QueryGeometry,
+    selectors?: Record<string, ZarrSelectorsProps>,
+    options: QueryOptions = {}
+  ): Promise<QueryResult> {
+    return this.source.queryData(geometry, selectors, options);
+  }
+
+  /**
+   * Reads every time value at one WGS84 position.
+   *
+   * @param position - `[longitude, latitude]` in degrees.
+   * @param selectors - Fixed selectors for dimensions other than time.
+   * @param options - Query controls, including cancellation and resolution.
+   * @returns A query result ordered by the time coordinate.
+   */
+  getTimeSeries(position: QueryPosition, selectors?: ZarrSelectors, options?: QueryOptions) {
+    return this.source.getTimeSeries(position, selectors, options);
+  }
+
+  /**
+   * Reads every elevation value at one WGS84 position.
+   *
+   * @param position - `[longitude, latitude]` in degrees.
+   * @param selectors - Fixed selectors for dimensions other than elevation.
+   * @param options - Query controls, including cancellation and resolution.
+   * @returns A query result ordered by the elevation coordinate.
+   */
+  getVerticalProfile(position: QueryPosition, selectors?: ZarrSelectors, options?: QueryOptions) {
+    return this.source.getVerticalProfile(position, selectors, options);
+  }
+
+  /**
+   * Samples one selected level along a line between two WGS84 positions.
+   *
+   * @param start - Starting `[longitude, latitude]` coordinate in degrees.
+   * @param end - Ending `[longitude, latitude]` coordinate in degrees.
+   * @param selectors - Dimension selectors applied to every sample.
+   * @param options - Sample count, concurrency, cancellation, and resolution controls.
+   * @returns Distances, positions, and scalar values along the transect.
+   */
+  getTransect(
+    start: QueryPosition,
+    end: QueryPosition,
+    selectors?: ZarrSelectors,
+    options?: TransectQueryOptions
+  ): Promise<TransectResult> {
+    return this.source.getTransect(start, end, selectors, options);
+  }
+
+  /**
+   * Samples all elevation levels along a line between two WGS84 positions.
+   *
+   * @param start - Starting `[longitude, latitude]` coordinate in degrees.
+   * @param end - Ending `[longitude, latitude]` coordinate in degrees.
+   * @param selectors - Fixed selectors for dimensions other than elevation.
+   * @param options - Sample count, concurrency, cancellation, and resolution controls.
+   * @returns A distance-by-elevation value matrix.
+   */
+  getFullTransect(
+    start: QueryPosition,
+    end: QueryPosition,
+    selectors?: ZarrSelectors,
+    options?: TransectQueryOptions
+  ): Promise<FullTransectResult> {
+    return this.source.getFullTransect(start, end, selectors, options);
+  }
+
+  /**
+   * Renders one Cesium imagery tile.
+   *
+   * @param x - Tile column.
+   * @param y - Tile row.
+   * @param level - Cesium imagery level.
+   * @param _request - Cesium request metadata; currently unused.
+   * @returns A vertically oriented canvas or image bitmap suitable for Cesium.
    */
   async requestImage(
     x: number,
     y: number,
-    level: number
+    level: number,
+    _request?: Request
   ): Promise<HTMLCanvasElement | ImageBitmap> {
-    if (this.destroyed) {
-      return this.emptyCanvas();
-    }
+    if (!this.ready) await this.readyPromise;
+
+    const rectangle = this.tilingScheme.tileXYToRectangle(x, y, level);
+    const bounds = {
+      west: rectangle.west * (180 / Math.PI),
+      south: rectangle.south * (180 / Math.PI),
+      east: rectangle.east * (180 / Math.PI),
+      north: rectangle.north * (180 / Math.PI)
+    };
     const key = `${level}/${x}/${y}`;
-
-    const controller = this.prepareAbortController(key);
-    if (!this.ready || !this.zarrArray || !this.gl || !this.program) {
-      console.warn('[requestImage] not ready yet', {
-        gl: !!this.gl,
-        program: !!this.program,
-        zarrArray: !!this.zarrArray
-      });
-      await this.readyPromise;
-      if (!this.gl || !this.program) return this.emptyCanvas();
-    }
-
-    try {
-      const tileRect = this._tilingScheme.tileXYToRectangle(x, y, level);
-      const intersection = Rectangle.intersection(tileRect, this._coverageRectangle);
-
-      if (!intersection) {
-        return this.emptyCanvas();
-      }
-
-      const fracWest = (intersection.west - tileRect.west) / (tileRect.east - tileRect.west);
-      const fracEast = (intersection.east - tileRect.west) / (tileRect.east - tileRect.west);
-      const fracSouth = (intersection.south - tileRect.south) / (tileRect.north - tileRect.south);
-      const fracNorth = (intersection.north - tileRect.south) / (tileRect.north - tileRect.south);
-
-      const { dataWidth, dataHeight, currentArray, multiscaleLevel } =
-        await this.getArrayForLevel(level);
-
-      const { u0, u1, v0, v1 } = this.computeTileUVs(tileRect);
-
-      const bounds = this.computePixelBounds(u0, u1, v0, v1, dataWidth, dataHeight);
-
-      if (!bounds) {
-        return this.emptyCanvas();
-      }
-      const sliceArgs = await calculateSliceArgsRequestImage(
-        currentArray.shape,
-        bounds,
-        this.dimIndices,
-        this.selectors
-      );
-      const data = await ZarrLayerProvider.throttle(() =>
-        zarr.get(currentArray, sliceArgs, { opts: { signal: controller.signal } })
-      );
-      const flatData = new Float32Array((data.data as Float32Array).buffer);
-
-      return this.renderWithWebGL(flatData, bounds.width, bounds.height, {
-        fracWest,
-        fracEast,
-        fracSouth,
-        fracNorth
-      });
-    } catch (error) {
-      return this.emptyCanvas();
-    } finally {
-      this.abortControllers.delete(key);
-    }
-  }
-
-  private async renderWithWebGL(
-    data: Float32Array,
-    width: number,
-    height: number,
-    frac: { fracWest: number; fracEast: number; fracSouth: number; fracNorth: number }
-  ): Promise<any> {
-    const gl = this.gl as WebGL2RenderingContext;
-    if (!gl || !this.program) throw new Error('WebGL2 not initialized');
-
-    const { fracWest, fracEast, fracSouth, fracNorth } = frac;
-
-    const dataTexture = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, dataTexture);
-
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.R32F, width, height, 0, gl.RED, gl.FLOAT, data);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-
-    gl.useProgram(this.program);
-    gl.viewport(0, 0, this._tileWidth, this._tileHeight);
-
-    gl.clearColor(0, 0, 0, 0);
-    gl.clear(gl.COLOR_BUFFER_BIT);
-
-    const x0 = fracWest * 2.0 - 1.0;
-    const x1 = fracEast * 2.0 - 1.0;
-    const y0 = fracSouth * 2.0 - 1.0;
-    const y1 = fracNorth * 2.0 - 1.0;
-
-    const positions = new Float32Array([
-      x0,
-      y0,
-      0,
-      0,
-      x1,
-      y0,
-      1,
-      0,
-      x0,
-      y1,
-      0,
-      1,
-      x0,
-      y1,
-      0,
-      1,
-      x1,
-      y0,
-      1,
-      0,
-      x1,
-      y1,
-      1,
-      1
-    ]);
-
-    const buffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-    gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STREAM_DRAW);
-
-    const positionLocation = gl.getAttribLocation(this.program, 'a_position');
-    const texCoordLocation = gl.getAttribLocation(this.program, 'a_texCoord');
-
-    gl.enableVertexAttribArray(positionLocation);
-    gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 16, 0);
-
-    gl.enableVertexAttribArray(texCoordLocation);
-    gl.vertexAttribPointer(texCoordLocation, 2, gl.FLOAT, false, 16, 8);
-
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, dataTexture);
-    gl.uniform1i(this.uniforms.u_dataTexture, 0);
-
-    gl.activeTexture(gl.TEXTURE1);
-    gl.bindTexture(gl.TEXTURE_2D, this.colorTexture);
-    gl.uniform1i(this.uniforms.u_colorRamp, 1);
-
-    gl.uniform1f(this.uniforms.u_min, this.colorScale.min);
-    gl.uniform1f(this.uniforms.u_max, this.colorScale.max);
-
-    gl.uniform1f(this.uniforms.u_noDataMin, this.noDataMin as number);
-    gl.uniform1f(this.uniforms.u_noDataMax, this.noDataMax as number);
-    gl.uniform1f(this.uniforms.u_fillValue, this.fillValue as number);
-    gl.uniform1i(this.uniforms.u_useFillValue, this.useFillValue ? 1 : 0);
-    gl.uniform1i(this.uniforms.u_flipY, this.latAscending ? 0 : 1);
-    gl.uniform1f(this.uniforms.u_scaleFactor, this.scaleFactor);
-    gl.uniform1f(this.uniforms.u_addOffset, this.offset);
-
-    gl.drawArrays(gl.TRIANGLES, 0, 6);
-
-    gl.deleteTexture(dataTexture);
-    gl.deleteBuffer(buffer);
-    if (this.browser === 'chrome' && (await ZarrLayerProvider.checkImageBitmapSupport())) {
+    const rendered = await this.source.renderTile(bounds, level, key);
+    if (typeof createImageBitmap === 'function') {
       try {
-        return await createImageBitmap(gl.canvas as HTMLCanvasElement, {
-          // imageOrientation: 'none',
+        return await createImageBitmap(rendered, {
           imageOrientation: 'flipY',
           premultiplyAlpha: 'premultiply'
         });
-      } catch (err) {
-        console.warn('ImageBitmap fallback:', err);
-        ZarrLayerProvider.supportsImageBitmap = false;
+      } catch {
+        // Fall through to a canvas-based flip when ImageBitmap options are unavailable.
       }
     }
-
-    const fallback = document.createElement('canvas');
-    fallback.width = this._tileWidth;
-    fallback.height = this._tileHeight;
-    fallback.getContext('2d')!.drawImage(gl.canvas as HTMLCanvasElement, 0, 0);
-    return fallback;
+    const canvas = document.createElement('canvas');
+    canvas.width = this.tileWidth;
+    canvas.height = this.tileHeight;
+    const context = canvas.getContext('2d')!;
+    context.translate(0, canvas.height);
+    context.scale(1, -1);
+    context.drawImage(rendered, 0, 0);
+    return canvas;
   }
 
-  /** Indicates whether the imagery has an alpha channel. */
-  get hasAlphaChannel() {
-    return true;
-  }
-  /** Picks features at a given geographic location. */
-  pickFeatures() {
-    return undefined;
-  }
-  /** Tiling scheme used by the imagery provider. */
-  get tilingScheme() {
-    return this._tilingScheme;
-  }
-  /** Geographic coverage rectangle of the imagery provider. */
-  get rectangle() {
-    return this._coverageRectangle;
-  }
-  /** Width of each tile, in pixels. */
-  get tileWidth() {
-    return this._tileWidth;
-  }
-  /** Height of each tile, in pixels. */
-  get tileHeight() {
-    return this._tileHeight;
-  }
-  /** Minimum zoom level supported by the provider. */
-  get minimumLevel() {
-    return this._minimumLevel;
-  }
-  /** Maximum zoom level supported by the provider. */
-  get maximumLevel() {
-    return this._maximumLevel;
-  }
-  /** Credit information for the imagery provider. */
-  get credit() {
-    return this._credit;
-  }
-  /** Indicates whether the provider is fully initialized and ready. */
-  get ready() {
-    return this._ready && !this.destroyed;
-  }
-  /**
-   * Promise that resolves when the provider is fully initialized.
-   */
-  get readyPromise() {
-    return this._readyPromise;
+  /** @returns Credit entries associated with every rendered tile. */
+  getTileCredits(): Credit[] {
+    return [this._credit];
   }
 
   /**
-   * Retrieves the credits for a specific tile.
-   * @param x - Tile x coordinate.
-   * @param y - Tile y coordinate.
-   * @param level - Zoom level.
-   * @returns An array of credits associated with the tile.
+   * Queries the feature underneath a Cesium imagery pick position.
+   *
+   * @param _x - Tile column; the point query uses the supplied longitude instead.
+   * @param _y - Tile row; the point query uses the supplied latitude instead.
+   * @param level - Resolution level used by the query.
+   * @param longitude - Longitude in radians.
+   * @param latitude - Latitude in radians.
+   * @returns Zero or one feature containing the queried value and coordinates.
    */
-  getTileCredits(x: number, y: number, level: number): Credit[] {
-    return this._credit ? [this._credit] : [];
+  async pickFeatures(
+    _x: number,
+    _y: number,
+    level: number,
+    longitude: number,
+    latitude: number
+  ): Promise<ImageryLayerFeatureInfo[]> {
+    const result = await this.queryData(
+      { type: 'Point', coordinates: [longitude * (180 / Math.PI), latitude * (180 / Math.PI)] },
+      undefined,
+      { level }
+    );
+    if (result.values.length === 0) return [];
+
+    const feature = new ImageryLayerFeatureInfo();
+    feature.name = result.variable;
+    feature.data = result;
+    feature.position = Cartographic.fromRadians(longitude, latitude);
+    feature.configureDescriptionFromProperties({
+      variable: result.variable,
+      value: result.values[0],
+      ...Object.fromEntries(Object.entries(result.coordinates).map(([key, value]) => [key, value[0]]))
+    });
+    return [feature];
   }
 
-  /** Cleans up resources used by the imagery provider. */
-  destroy() {
-    this.destroyed = true;
-
-    for (const [key, controller] of this.abortControllers.entries()) {
-      controller.abort();
-    }
-    this.abortControllers.clear();
+  /** Aborts pending reads and releases tile-renderer resources. */
+  destroy(): void {
+    this._ready = false;
+    this.source.destroy();
   }
+
+  /** Whether metadata initialization completed and the provider is usable. */
+  get ready(): boolean { return this._ready && this.source.ready; }
+  /** Promise resolving to the provider readiness state. */
+  get readyPromise(): Promise<boolean> { return this._readyPromise; }
+  /** Whether rendered tiles contain alpha values. Always `true`. */
+  get hasAlphaChannel(): boolean { return true; }
+  /** Cesium tiling scheme selected from the detected dataset CRS. */
+  get tilingScheme(): TilingScheme { return this._tilingScheme; }
+  /** Geographic coverage of the dataset. */
+  get rectangle(): Rectangle { return this._rectangle; }
+  /** Width of rendered imagery tiles in pixels. */
+  get tileWidth(): number { return this._tileWidth; }
+  /** Height of rendered imagery tiles in pixels. */
+  get tileHeight(): number { return this._tileHeight; }
+  /** Minimum imagery level requested by Cesium. */
+  get minimumLevel(): number { return this._minimumLevel; }
+  /** Maximum imagery level requested by Cesium. */
+  get maximumLevel(): number { return this._maximumLevel; }
+  /** Dataset attribution exposed to Cesium. */
+  get credit(): Credit { return this._credit; }
+  /** Cesium imagery-provider error event. */
+  get errorEvent(): Event { return this._errorEvent; }
 }

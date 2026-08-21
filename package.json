@@ -1,6 +1,6 @@
 {
   "name": "zarr-cesium",
-  "version": "0.1.7",
+  "version": "0.2.0",
   "description": "A Cesium integration library for visualizing Zarr datasets in 2D and 3D.",
   "author": "Tobias <tobias.ferreira@noc.ac.uk>",
   "license": "MIT",
@@ -19,26 +19,31 @@
     "dist"
   ],
   "scripts": {
-    "dev": "tsup src/index.ts --format cjs,esm --dts --sourcemap --watch",
-    "build": "tsup src/index.ts --format esm --dts --sourcemap --external cesium",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --sourcemap --external cesium-wind-layer --external zarrita --external zarr-maps-colormap --watch",
+    "build": "tsup src/index.ts --format esm --dts --sourcemap --external cesium --external cesium-wind-layer --external zarrita --external zarr-maps-colormap",
     "clean": "rm -rf dist",
     "docs": "npm --prefix docs run build",
+    "serve:docs": "npm --prefix docs run serve",
     "start:demo": "cd demo && npm run dev"
   },
   "peerDependencies": {
-    "cesium": ">=1.119.0"
+    "cesium": ">=1.119.0 <2"
+  },
+  "dependencies": {
+    "cesium-wind-layer": "https://github.com/NOC-OI/cesium-wind-layer/releases/download/v0.11.0/cesium-wind-layer-0.11.0.tgz",
+    "zarr-maps-colormap": "^0.2.0",
+    "zarr-maps-tiling": "^0.2.0",
+    "zarrita": "^0.7.4"
   },
   "devDependencies": {
-    "@zarrita/ndarray": "^0.1.5",
+    "@types/ndarray": "^1.0.14",
     "cesium": "1.142.0",
-    "cesium-wind-layer": "^0.10.0",
     "ndarray": "^1.0.19",
     "proj4": "^2.19.10",
     "tsup": "^8.0.2",
     "typedoc": "^0.28.14",
     "typedoc-plugin-markdown": "^4.9.0",
-    "typescript": "^5.6.3",
-    "zarrita": "^0.5.4"
+    "typescript": "^5.6.3"
   },
   "repository": {
     "type": "git",

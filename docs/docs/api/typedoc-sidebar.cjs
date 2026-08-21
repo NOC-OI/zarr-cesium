@@ -25,6 +25,11 @@ const typedocSidebar = {
           type: "doc",
           id: "api/classes/ZarrLayerProvider",
           label: "ZarrLayerProvider"
+        },
+        {
+          type: "doc",
+          id: "api/classes/ZarrTileProvider",
+          label: "ZarrTileProvider"
         }
       ]
     },
@@ -79,13 +84,73 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "api/interfaces/FullTransectResult",
+          label: "FullTransectResult"
+        },
+        {
+          type: "doc",
           id: "api/interfaces/LayerOptions",
           label: "LayerOptions"
         },
         {
           type: "doc",
+          id: "api/interfaces/QueryBackend",
+          label: "QueryBackend"
+        },
+        {
+          type: "doc",
+          id: "api/interfaces/QueryMultiPolygonGeometry",
+          label: "QueryMultiPolygonGeometry"
+        },
+        {
+          type: "doc",
+          id: "api/interfaces/QueryOptions",
+          label: "QueryOptions"
+        },
+        {
+          type: "doc",
+          id: "api/interfaces/QueryPointGeometry",
+          label: "QueryPointGeometry"
+        },
+        {
+          type: "doc",
+          id: "api/interfaces/QueryPolygonGeometry",
+          label: "QueryPolygonGeometry"
+        },
+        {
+          type: "doc",
+          id: "api/interfaces/QueryResult",
+          label: "QueryResult"
+        },
+        {
+          type: "doc",
+          id: "api/interfaces/RequestOverrides",
+          label: "RequestOverrides"
+        },
+        {
+          type: "doc",
+          id: "api/interfaces/RequestParameters",
+          label: "RequestParameters"
+        },
+        {
+          type: "doc",
+          id: "api/interfaces/TransectQueryOptions",
+          label: "TransectQueryOptions"
+        },
+        {
+          type: "doc",
+          id: "api/interfaces/TransectResult",
+          label: "TransectResult"
+        },
+        {
+          type: "doc",
           id: "api/interfaces/VelocityOptions",
           label: "VelocityOptions"
+        },
+        {
+          type: "doc",
+          id: "api/interfaces/VelocityQueryResult",
+          label: "VelocityQueryResult"
         },
         {
           type: "doc",
@@ -104,8 +169,18 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "api/interfaces/ZarrSelectors",
+          label: "ZarrSelectors"
+        },
+        {
+          type: "doc",
           id: "api/interfaces/ZarrSelectorsProps",
           label: "ZarrSelectorsProps"
+        },
+        {
+          type: "doc",
+          id: "api/interfaces/ZarrTileOptions",
+          label: "ZarrTileOptions"
         }
       ]
     },
@@ -147,11 +222,6 @@ const typedocSidebar = {
           type: "doc",
           id: "api/functions/colormapBuilder",
           label: "colormapBuilder"
-        },
-        {
-          type: "doc",
-          id: "api/functions/colorScaleByName",
-          label: "colorScaleByName"
         },
         {
           type: "doc",
@@ -200,8 +270,33 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "api/functions/getFullTransect",
+          label: "getFullTransect"
+        },
+        {
+          type: "doc",
+          id: "api/functions/getTimeSeries",
+          label: "getTimeSeries"
+        },
+        {
+          type: "doc",
+          id: "api/functions/getTransect",
+          label: "getTransect"
+        },
+        {
+          type: "doc",
+          id: "api/functions/getVerticalProfile",
+          label: "getVerticalProfile"
+        },
+        {
+          type: "doc",
           id: "api/functions/getXYLimits",
           label: "getXYLimits"
+        },
+        {
+          type: "doc",
+          id: "api/functions/getZarrData",
+          label: "getZarrData"
         },
         {
           type: "doc",
@@ -245,6 +340,11 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "api/functions/sampleTransectPositions",
+          label: "sampleTransectPositions"
+        },
+        {
+          type: "doc",
           id: "api/functions/updateImgData",
           label: "updateImgData"
         },
@@ -271,6 +371,11 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "api/type-aliases/CesiumHost",
+          label: "CesiumHost"
+        },
+        {
+          type: "doc",
           id: "api/type-aliases/CFCalendar",
           label: "CFCalendar"
         },
@@ -291,8 +396,33 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "api/type-aliases/OnAuthError",
+          label: "OnAuthError"
+        },
+        {
+          type: "doc",
+          id: "api/type-aliases/QueryGeometry",
+          label: "QueryGeometry"
+        },
+        {
+          type: "doc",
+          id: "api/type-aliases/QueryPosition",
+          label: "QueryPosition"
+        },
+        {
+          type: "doc",
           id: "api/type-aliases/SliceArgs",
           label: "SliceArgs"
+        },
+        {
+          type: "doc",
+          id: "api/type-aliases/TransformRequest",
+          label: "TransformRequest"
+        },
+        {
+          type: "doc",
+          id: "api/type-aliases/VelocityWindOptions",
+          label: "VelocityWindOptions"
         }
       ]
     }

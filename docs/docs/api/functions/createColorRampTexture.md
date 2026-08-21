@@ -2,9 +2,9 @@
 
 ```ts
 function createColorRampTexture(
-   gl, 
-   colors, 
-   opacity): 
+   gl,
+   colors,
+   opacity):
   | WebGLTexture
   | null;
 ```

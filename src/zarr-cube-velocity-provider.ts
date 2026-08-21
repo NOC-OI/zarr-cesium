@@ -151,7 +151,7 @@ export class ZarrCubeVelocityProvider {
       ? createTransformedFetch(options.transformRequest, options.onAuthError)
       : undefined;
     this.variables = options.variables;
-    this.bounds = options.bounds;
+    this.bounds = { ...options.bounds };
     this.crs = options.crs ?? null;
     this.latIsAscendingOverride = options.latIsAscending;
     if (options.latIsAscending !== undefined) {
@@ -160,7 +160,7 @@ export class ZarrCubeVelocityProvider {
     this.dimensionNames = options.dimensionNames ?? {};
     this.multiscaleFormat = options.multiscaleFormat ?? 'auto';
     this.multiscaleLevel = options.multiscaleLevel ?? 0;
-    this.selectors = options.selectors ?? {};
+    this.selectors = { ...(options.selectors ?? {}) };
     this.verticalExaggeration = options.verticalExaggeration ?? DEFAULT_VERTICAL_EXAGGERATION;
     this.opacity = options.opacity ?? 1;
     this.sliceSpacing = options.sliceSpacing ?? 1;
@@ -718,9 +718,11 @@ export class ZarrCubeVelocityProvider {
     }
     if (bounds !== undefined && JSON.stringify(this.bounds) !== JSON.stringify(bounds)) {
       if (validateBounds(bounds)) {
-        bounds.south = Math.clamp(bounds.south, -85.05112878, 85.05112878);
-        bounds.north = Math.clamp(bounds.north, -85.05112878, 85.05112878);
-        this.bounds = bounds;
+        this.bounds = {
+          ...bounds,
+          south: Math.clamp(bounds.south, -85.05112878, 85.05112878),
+          north: Math.clamp(bounds.north, -85.05112878, 85.05112878)
+        };
         updateLayer = true;
       }
     }

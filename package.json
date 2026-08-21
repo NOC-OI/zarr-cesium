@@ -30,7 +30,7 @@
     "cesium": ">=1.119.0 <2"
   },
   "dependencies": {
-    "cesium-wind-layer": "https://github.com/NOC-OI/cesium-wind-layer/releases/download/v0.11.0/cesium-wind-layer-0.11.0.tgz",
+    "cesium-wind-layer": "https://github.com/NOC-OI/cesium-wind-layer/releases/download/v0.11.1/cesium-wind-layer-0.11.1.tgz",
     "zarr-maps-colormap": "^0.2.0",
     "zarr-maps-tiling": "^0.2.0",
     "zarrita": "^0.7.4"

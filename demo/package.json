@@ -18,7 +18,7 @@
     "@reduxjs/toolkit": "^2.12.0",
     "@tailwindcss/vite": "^4.1.17",
     "axios": "^1.13.2",
-    "cesium": "1.119.0",
+    "cesium": "1.142.0",
     "classnames": "^2.5.1",
     "icechunk-js": "^0.3.2",
     "lz-string": "^1.5.0",
@@ -31,8 +31,8 @@
     "react-redux": "^9.3.0",
     "react-transition-group": "^4.4.5",
     "uplot": "^1.6.32",
-    "zarr-maps-colormap": "^0.2.0",
     "zarr-cesium": "file:..",
+    "zarr-maps-colormap": "^0.2.0",
     "zod": "^4.1.13"
   },
   "devDependencies": {

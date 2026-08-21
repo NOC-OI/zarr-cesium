@@ -182,7 +182,7 @@ export class ZarrCubeProvider {
       ? createTransformedFetch(options.transformRequest, options.onAuthError)
       : undefined;
     this.variable = options.variable;
-    this.bounds = options.bounds;
+    this.bounds = { ...options.bounds };
     this.dimensionNames = options.dimensionNames ?? {};
     this.crs = options.crs || null;
     this.latIsAscendingOverride = options.latIsAscending;
@@ -191,7 +191,7 @@ export class ZarrCubeProvider {
     }
     this.multiscaleFormat = options.multiscaleFormat ?? 'auto';
     this.multiscaleLevel = options.multiscaleLevel ?? 0;
-    this.selectors = options.selectors ?? {};
+    this.selectors = { ...(options.selectors ?? {}) };
     this.verticalExaggeration = options.verticalExaggeration ?? DEFAULT_VERTICAL_EXAGGERATION;
     this.opacity = options.opacity ?? DEFAULT_OPACITY;
     this.showHorizontalSlices = options.showHorizontalSlices ?? true;
@@ -772,9 +772,11 @@ export class ZarrCubeProvider {
     }
     if (bounds !== undefined && JSON.stringify(this.bounds) !== JSON.stringify(bounds)) {
       if (validateBounds(bounds)) {
-        bounds.south = Math.clamp(bounds.south, -85.05112878, 85.05112878);
-        bounds.north = Math.clamp(bounds.north, -85.05112878, 85.05112878);
-        this.bounds = bounds;
+        this.bounds = {
+          ...bounds,
+          south: Math.clamp(bounds.south, -85.05112878, 85.05112878),
+          north: Math.clamp(bounds.north, -85.05112878, 85.05112878)
+        };
         updateLayer = true;
       }
     }

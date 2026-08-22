@@ -192,7 +192,7 @@ https://github.com/user-attachments/assets/8b066725-c6c7-4b7a-9fc0-d632b623937c
 
 Renders **3D velocity fields** from U/V components as animated **wind/current layers** using the [NOC-OI fork of `cesium-wind-layer`](https://github.com/NOC-OI/cesium-wind-layer).
 
-Zarr-Cesium uses fork release v0.11.0, which adds `minVisibleRatio` to bound camera-driven particle width, trail-length, and speed scaling. It also restores the full data bounds and overview particle styling when zooming back out, avoiding particles remaining at the previous regional-view scale. The fork publishes installable tarballs with tagged GitHub releases so downstream packages can depend on an immutable build.
+Zarr-Cesium uses fork release v0.11.0, which adds `minVisibleRatio` to bound camera-driven particle width, trail-length, and speed scaling. It also restores the full data bounds and overview particle styling when zooming back out, avoiding particles remaining at the previous regional-view scale.
 
 It supports both Zarr v2/v3 and multiscale datasets, with configurable slice spacing and particle animation parameters.
 

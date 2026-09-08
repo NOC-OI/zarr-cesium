@@ -23,7 +23,7 @@
     "icechunk-js": "^0.3.2",
     "lz-string": "^1.5.0",
     "proj4": "^2.20.0",
-    "qs": "^6.14.0",
+    "qs": "^6.16.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-draggable": "^4.5.0",

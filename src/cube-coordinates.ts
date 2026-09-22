@@ -66,17 +66,6 @@ export function selectCubeCoordinates(longitude: number[], latitude: number[], b
     latitude: latitude.slice(...y), latIsAscending: latOverride ?? latitude[0] < latitude[latitude.length - 1] };
 }
 
-export async function loadCubeCoordinates(root: zarr.Location<zarr.Readable>, dimensions: DimIndicesProps,
-  level: string | null, version: 2 | 3 | null, bounds: BoundsProps, crs: CRS | null,
-  latOverride?: boolean): Promise<CubeCoordinates> {
-  // Never reuse a previously sliced coordinate array as the full axis.
-  const [lon, lat] = await Promise.all([
-    loadDimensionValues({}, level, dimensions.lon, root, version),
-    loadDimensionValues({}, level, dimensions.lat, root, version)
-  ]);
-  return selectCubeCoordinates(Array.from(lon, Number), Array.from(lat, Number), bounds, crs, latOverride);
-}
-
 /** Load complete coordinate arrays for every discovered dataset dimension. */
 export async function loadAllDimensionValues(
   root: zarr.Location<zarr.Readable>,
@@ -91,6 +80,18 @@ export async function loadAllDimensionValues(
     })
   );
   return values;
+}
+
+/** Add dataset-specific dimension-name aliases for zarr-maps-tiling's cache lookup. */
+export function withDimensionAliases(
+  values: DimensionValues,
+  dimensions: DimIndicesProps
+): DimensionValues {
+  const cache = { ...values };
+  for (const [canonicalName, dimension] of Object.entries(dimensions)) {
+    cache[dimension.name] = values[canonicalName];
+  }
+  return cache;
 }
 
 /** Reorder selected longitude columns, retaining the source dimension order. */

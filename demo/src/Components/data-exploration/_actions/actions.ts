@@ -1,4 +1,4 @@
-import { createElement, type ChangeEvent, type Dispatch, type SetStateAction } from 'react';
+import { createElement, type Dispatch, type SetStateAction } from 'react';
 import { DEFAULT_COLORMAP, DEFAULT_OPACITY } from 'zarr-cesium';
 import { layersActions, type AppDispatch } from '../../../application/store';
 import type {
@@ -7,10 +7,10 @@ import type {
   LayersLegendType,
   SelectedLayersType
 } from '../../../types';
-import { LayerInfoPanel } from '../../layer-info-panel';
+import { LayerInfoPanel } from 'zarr-maps-explorer';
 
 export function handleChangeOpacity(
-  e: ChangeEvent<HTMLInputElement>,
+  opacity: number,
   dispatch: AppDispatch,
   content: string,
   subLayer: string,
@@ -31,7 +31,7 @@ export function handleChangeOpacity(
         params: {
           ...subLayers[subLayer].params,
           ...selectedLayer.params,
-          opacity: Number(e.target.value)
+          opacity
         }
       }
     })
@@ -83,7 +83,11 @@ export function handleClickLayerInfo(
 ) {
   setInfoButtonBox({
     title: 'Layer details',
-    content: createElement(LayerInfoPanel, { group: content, layerId: subLayer, layer })
+    content: createElement(LayerInfoPanel, {
+      group: content,
+      layerId: subLayer,
+      content: layer.content
+    })
   });
 }
 

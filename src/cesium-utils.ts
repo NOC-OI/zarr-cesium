@@ -103,7 +103,6 @@ export const DEFAULT_WIND_OPTIONS: Partial<WindLayerOptions> = {
   minVisibleRatio: 0.6,
   useViewerBounds: true,
   dynamic: true,
-  flipY: true
 };
 
 /**

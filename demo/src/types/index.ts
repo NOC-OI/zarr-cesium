@@ -1,6 +1,7 @@
 import type { RefObject } from 'react';
 import type { BoundsProps, ZarrCubeProvider, ZarrCubeVelocityProvider } from 'zarr-cesium';
 import type { CubeOptions, LayerOptions, VelocityOptions } from 'zarr-cesium';
+import type { ExplorerInfoBox, ExplorerLayerLegend, FlashMessageValue } from 'zarr-maps-explorer';
 
 export interface keyable {
   [key: string]: any;
@@ -11,25 +12,13 @@ export interface LayerLegendBoxProps {
 }
 
 export interface ZarrCesiumRefs {
-  velocityRef: RefObject<ZarrCubeVelocityProvider | null>;
-  cubeRef: RefObject<ZarrCubeProvider | null>;
-  velocityCubeRef: RefObject<ZarrCubeVelocityProvider | null>;
+  cubeRefs: RefObject<Record<string, ZarrCubeProvider>>;
+  velocityCubeRefs: RefObject<Record<string, ZarrCubeVelocityProvider>>;
 }
 
-export interface InfoButtonBoxType {
-  title?: string;
-  content?: React.ReactNode;
-  /** Runtime layer associated with interactive content such as map queries. */
-  layerName?: string;
-  /** Cleanup invoked when the popup close button is used. */
-  onClose?: () => void;
-}
+export type InfoButtonBoxType = ExplorerInfoBox;
 
-export interface FlashMessageType {
-  messageType: string;
-  content: string;
-  duration?: number;
-}
+export type FlashMessageType = FlashMessageValue;
 
 export interface DimensionLegendProps {
   values: (string | number)[];
@@ -60,11 +49,7 @@ export interface LayersLegendType {
   [key: string]: LayerLegendType;
 }
 
-export interface LayerLegendType {
-  dataDescription: [string, string];
-  colormap: string;
-  scale: [number, number];
-}
+export type LayerLegendType = ExplorerLayerLegend;
 
 export interface SelectedLayersType {
   [key: string]: SelectedLayer;
@@ -76,12 +61,6 @@ export interface SelectedLayer extends DataInfoType {
   pyramidLevels?: string[];
 }
 
-export interface FlashMessagesProps {
-  width: 'full' | 'small' | 'medium' | 'large';
-  duration: number;
-  position: 'bleft' | 'bright' | 'tright' | 'tleft' | 'tcenter' | 'bcenter';
-}
-
 export interface DimensionSelectorProps {
   dimension: string;
   values: (string | number)[];
@@ -90,24 +69,7 @@ export interface DimensionSelectorProps {
   layerLegendName: string;
 }
 
-export interface DataExplorationTypeOptionsProps {
-  content: string;
-  subLayer: string;
-  subLayers: LayerNamesType;
-  setInfoButtonBox: React.Dispatch<React.SetStateAction<InfoButtonBoxType>>;
-}
-
-export interface DataExplorationTypeProps {
-  content: string;
-  childs: LayerNamesType;
-  setInfoButtonBox: React.Dispatch<React.SetStateAction<InfoButtonBoxType>>;
-}
-
 export interface DataExplorationSelectionProps {
   display: boolean;
   setInfoButtonBox: React.Dispatch<React.SetStateAction<InfoButtonBoxType>>;
-}
-
-export interface AddCustomZarrDataProps {
-  display: boolean;
 }

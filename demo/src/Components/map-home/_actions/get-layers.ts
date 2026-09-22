@@ -41,7 +41,7 @@ export async function generateSelectedLayer(
         layerName,
         actualLayer,
         viewerRef,
-        zarrCesiumRefs.cubeRef,
+        zarrCesiumRefs.cubeRefs,
         gebcoTerrainEnabled
       );
       return {
@@ -52,7 +52,7 @@ export async function generateSelectedLayer(
         layerName,
         actualLayer,
         viewerRef,
-        zarrCesiumRefs.velocityCubeRef,
+        zarrCesiumRefs.velocityCubeRefs,
         gebcoTerrainEnabled
       );
       return {
@@ -82,12 +82,14 @@ export function getSelectedLayerWithDimensions(
       };
     } else {
       dimensions[dimKey] = {
-        values: layer.dimensionValues[dimKey],
+        values:
+          cube && dimKey === 'elevation'
+            ? layer.cubeDimensionValues[dimKey]
+            : layer.dimensionValues[dimKey],
         selected: layer.selectors[dimKey].selected
       };
       if (cube && dimKey === 'elevation' && Array.isArray(layer.selectors[dimKey].selected)) {
-        const elevationShape = layer.elevationShape;
-        dimensions[dimKey].indices = Array.from({ length: elevationShape }, (_, i) => i);
+        dimensions[dimKey].indices = Array.from(layer.dimensionValues[dimKey]);
       }
     }
   });
@@ -127,7 +129,7 @@ export async function getZarrCube(
   layerName: DataInfoType,
   actualLayer: string,
   viewerRef: React.RefObject<Viewer>,
-  cubeRef: React.RefObject<ZarrCubeProvider | null>,
+  cubeRefs: React.RefObject<Record<string, ZarrCubeProvider>>,
   gebcoTerrainEnabled?: boolean
 ) {
   const options = structuredClone(layerName.params) as CubeOptions;
@@ -136,8 +138,9 @@ export async function getZarrCube(
   }
   const layer = new ZarrCubeProvider(viewerRef.current, options);
   layer.id = actualLayer;
-  cubeRef.current = layer;
   await layer.load();
+  cubeRefs.current[actualLayer]?.destroy();
+  cubeRefs.current[actualLayer] = layer;
   return layer;
 }
 
@@ -145,7 +148,7 @@ export async function getZarrCubeVelocity(
   layerName: DataInfoType,
   actualLayer: string,
   viewerRef: React.RefObject<Viewer>,
-  velocityCubeRef: React.RefObject<ZarrCubeVelocityProvider | null>,
+  velocityCubeRefs: React.RefObject<Record<string, ZarrCubeVelocityProvider>>,
   gebcoTerrainEnabled?: boolean
 ) {
   const options = structuredClone(layerName.params) as VelocityOptions;
@@ -155,8 +158,8 @@ export async function getZarrCubeVelocity(
   console.log('getZarrCubeVelocity options:', options);
   const layer = new ZarrCubeVelocityProvider(viewerRef.current, options);
   layer.id = actualLayer;
-  velocityCubeRef.current = layer;
-
   await layer.load();
+  velocityCubeRefs.current[actualLayer]?.destroy();
+  velocityCubeRefs.current[actualLayer] = layer;
   return layer;
 }

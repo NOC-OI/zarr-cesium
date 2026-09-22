@@ -7,8 +7,7 @@ import {
   DEFAULT_OPACITY,
   type VelocityOptions,
   type CubeOptions,
-  ZarrCubeProvider,
-  ZarrCubeVelocityProvider
+  ZarrLayerProvider
 } from 'zarr-cesium';
 
 export function getBoundsFromBBox(bbox: number[] | null): [[number, number], [number, number]] {
@@ -38,11 +37,11 @@ export function removeLayerFromMap(
 
   const layers = viewerMap(viewerRef, layerInfo.dataType) || null;
   if (layerInfo.dataType === 'zarr-cube') {
-    zarrCesiumRefs.cubeRef.current?.destroy();
-    zarrCesiumRefs.cubeRef.current = null;
+    zarrCesiumRefs.cubeRefs.current[actualLayer]?.destroy();
+    delete zarrCesiumRefs.cubeRefs.current[actualLayer];
   } else if (layerInfo.dataType === 'zarr-cube-velocity') {
-    zarrCesiumRefs.velocityCubeRef.current?.destroy();
-    zarrCesiumRefs.velocityCubeRef.current = null;
+    zarrCesiumRefs.velocityCubeRefs.current[actualLayer]?.destroy();
+    delete zarrCesiumRefs.velocityCubeRefs.current[actualLayer];
   } else {
     layers?._layers.forEach(function (layer: any) {
       if (actualLayer === layer.id) {
@@ -52,6 +51,25 @@ export function removeLayerFromMap(
         }
       }
     });
+  }
+}
+
+export function removeAllLayersFromMap(
+  viewerRef: React.RefObject<Viewer>,
+  zarrCesiumRefs: ZarrCesiumRefs
+): void {
+  Object.values(zarrCesiumRefs.cubeRefs.current).forEach(provider => provider.destroy());
+  zarrCesiumRefs.cubeRefs.current = {};
+  Object.values(zarrCesiumRefs.velocityCubeRefs.current).forEach(provider => provider.destroy());
+  zarrCesiumRefs.velocityCubeRefs.current = {};
+
+  const imageryLayers = viewerRef.current?.imageryLayers;
+  if (!imageryLayers) return;
+  for (let index = imageryLayers.length - 1; index >= 0; index--) {
+    const layer = imageryLayers.get(index);
+    if (!(layer.imageryProvider instanceof ZarrLayerProvider)) continue;
+    imageryLayers.remove(layer);
+    layer.imageryProvider.destroy();
   }
 }
 
@@ -70,9 +88,9 @@ export async function changeMapOpacity(
     opacity = opacity ? parseFloat(opacity) : DEFAULT_OPACITY;
   }
   if (layerInfo.dataType === 'zarr-cube') {
-    zarrCesiumRefs.cubeRef.current?.updateStyle({ opacity: opacity });
+    zarrCesiumRefs.cubeRefs.current[actualLayer]?.updateStyle({ opacity: opacity });
   } else if (layerInfo.dataType === 'zarr-cube-velocity') {
-    zarrCesiumRefs.velocityCubeRef.current?.updateStyle({ opacity: opacity });
+    zarrCesiumRefs.velocityCubeRefs.current[actualLayer]?.updateStyle({ opacity: opacity });
   } else {
     const layer = layers?._layers.find((layer: any) => layer.id === actualLayer);
     if (layer) {
@@ -89,12 +107,12 @@ export async function changeMapColors(
 ) {
   const layerInfo = selectedLayers[actualLayer];
   if (layerInfo.dataType === 'zarr-cube') {
-    zarrCesiumRefs.cubeRef.current?.updateStyle({
+    zarrCesiumRefs.cubeRefs.current[actualLayer]?.updateStyle({
       scale: layerInfo.params.scale,
       colormap: layerInfo.params.colormap
     });
   } else if (layerInfo.dataType === 'zarr-cube-velocity') {
-    zarrCesiumRefs.velocityCubeRef.current?.updateStyle({
+    zarrCesiumRefs.velocityCubeRefs.current[actualLayer]?.updateStyle({
       scale: layerInfo.params.scale,
       colormap: layerInfo.params.colormap
     });
@@ -117,8 +135,8 @@ export async function changeMapPyramidLevels(
   const params = layerInfo.params as CubeOptions | VelocityOptions;
   const ref =
     layerInfo.dataType === 'zarr-cube'
-      ? zarrCesiumRefs.cubeRef.current
-      : zarrCesiumRefs.velocityCubeRef.current;
+      ? zarrCesiumRefs.cubeRefs.current[actualLayer]
+      : zarrCesiumRefs.velocityCubeRefs.current[actualLayer];
   ref?.updateSelectors({ multiscaleLevel: params.multiscaleLevel });
   return getSelectedLayerWithDimensions(ref, actualLayer, selectedLayers, true);
 }
@@ -132,41 +150,30 @@ export async function changeMapBounds(
   const params = layerInfo.params as CubeOptions | VelocityOptions;
   const ref =
     layerInfo.dataType === 'zarr-cube'
-      ? zarrCesiumRefs.cubeRef.current
-      : zarrCesiumRefs.velocityCubeRef.current;
+      ? zarrCesiumRefs.cubeRefs.current[actualLayer]
+      : zarrCesiumRefs.velocityCubeRefs.current[actualLayer];
   ref?.updateSelectors({ bounds: params.bounds });
   return getSelectedLayerWithDimensions(ref, actualLayer, selectedLayers, true);
 }
 
 export function updateSeaLevelLayerReference(
-  cubeRef: React.RefObject<ZarrCubeProvider | null>,
-  velocityCubeRef: React.RefObject<ZarrCubeVelocityProvider | null>,
+  zarrCesiumRefs: ZarrCesiumRefs,
   gebcoTerrainEnabled: boolean,
   selectedLayers: SelectedLayersType
 ) {
   const updates = [];
-  if (cubeRef.current) {
-    cubeRef.current.updateSlices({ belowSeaLevel: gebcoTerrainEnabled });
+  for (const provider of Object.values(zarrCesiumRefs.cubeRefs.current)) {
+    provider.updateSlices({ belowSeaLevel: gebcoTerrainEnabled });
     updates.push({
-      name: cubeRef.current.id,
-      layer: getSelectedLayerWithDimensions(
-        cubeRef.current,
-        cubeRef.current.id,
-        selectedLayers,
-        true
-      )
+      name: provider.id,
+      layer: getSelectedLayerWithDimensions(provider, provider.id, selectedLayers, true)
     });
   }
-  if (velocityCubeRef.current) {
-    velocityCubeRef.current.updateSlices({ belowSeaLevel: gebcoTerrainEnabled });
+  for (const provider of Object.values(zarrCesiumRefs.velocityCubeRefs.current)) {
+    provider.updateSlices({ belowSeaLevel: gebcoTerrainEnabled });
     updates.push({
-      name: velocityCubeRef.current.id,
-      layer: getSelectedLayerWithDimensions(
-        velocityCubeRef.current,
-        velocityCubeRef.current.id,
-        selectedLayers,
-        true
-      )
+      name: provider.id,
+      layer: getSelectedLayerWithDimensions(provider, provider.id, selectedLayers, true)
     });
   }
   return updates.filter(update => update.layer);
@@ -181,19 +188,21 @@ export async function changeMapDimensions(
   const layerInfo = selectedLayers[actualLayer];
   const layers = viewerMap(viewerRef, layerInfo.dataType) || null;
   if (layerInfo.dataType === 'zarr-cube') {
-    zarrCesiumRefs.cubeRef.current?.updateSelectors({ selectors: layerInfo.params.selectors });
+    const provider = zarrCesiumRefs.cubeRefs.current[actualLayer];
+    provider?.updateSelectors({ selectors: layerInfo.params.selectors });
     return getSelectedLayerWithDimensions(
-      zarrCesiumRefs.cubeRef.current,
+      provider,
       actualLayer,
       selectedLayers,
       true
     );
   } else if (layerInfo.dataType === 'zarr-cube-velocity') {
-    await zarrCesiumRefs.velocityCubeRef.current?.updateSelectors({
+    const provider = zarrCesiumRefs.velocityCubeRefs.current[actualLayer];
+    await provider?.updateSelectors({
       selectors: layerInfo.params.selectors
     });
     return getSelectedLayerWithDimensions(
-      zarrCesiumRefs.velocityCubeRef.current,
+      provider,
       actualLayer,
       selectedLayers,
       true
@@ -217,23 +226,24 @@ export async function changeMapDimensions(
 export async function changeMapCubeSlices(
   actualLayer: string,
   selectedLayers: SelectedLayersType,
-  cubeRef: React.RefObject<ZarrCubeProvider>
+  zarrCesiumRefs: ZarrCesiumRefs
 ) {
   const layerInfo = selectedLayers[actualLayer];
   if (layerInfo.dataType === 'zarr-cube') {
-    cubeRef.current?.updateSlices(layerInfo.slices!);
-    return getSelectedLayerWithDimensions(cubeRef.current, actualLayer, selectedLayers, true);
+    const provider = zarrCesiumRefs.cubeRefs.current[actualLayer];
+    provider?.updateSlices(layerInfo.slices!);
+    return getSelectedLayerWithDimensions(provider, actualLayer, selectedLayers, true);
   }
 }
 export async function changeMapVelocitySlices(
   actualLayer: string,
   selectedLayers: SelectedLayersType,
-  velocityCubeRef: React.RefObject<ZarrCubeVelocityProvider>
+  zarrCesiumRefs: ZarrCesiumRefs
 ) {
   const layerInfo = selectedLayers[actualLayer];
   const params = layerInfo.params as VelocityOptions;
   if (layerInfo.dataType === 'zarr-cube-velocity') {
-    velocityCubeRef.current?.updateSlices({
+    zarrCesiumRefs.velocityCubeRefs.current[actualLayer]?.updateSlices({
       verticalExaggeration: params.verticalExaggeration
     });
   }
@@ -247,14 +257,14 @@ export async function changeMapCubeParams(
   const layerInfo = selectedLayers[actualLayer];
   if (layerInfo.dataType === 'zarr-cube') {
     const params = layerInfo.params as CubeOptions;
-    zarrCesiumRefs.cubeRef.current?.updateStyle({
+    zarrCesiumRefs.cubeRefs.current[actualLayer]?.updateStyle({
       scale: params.scale,
       colormap: params.colormap,
       verticalExaggeration: params.verticalExaggeration
     });
   } else if (layerInfo.dataType === 'zarr-cube-velocity') {
     const params = layerInfo.params as VelocityOptions;
-    zarrCesiumRefs.velocityCubeRef.current?.updateStyle({
+    zarrCesiumRefs.velocityCubeRefs.current[actualLayer]?.updateStyle({
       scale: params.scale,
       colormap: params.colormap,
       windOptions: params.windOptions

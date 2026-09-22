@@ -1,10 +1,9 @@
-import { loadAllDimensionValues, loadCubeCoordinates, reorderCubeLongitude, cubePointIndices, longitudeInBounds, validateCubeBounds } from './cube-coordinates';
+import { cubePointIndices, longitudeInBounds, validateCubeBounds } from './cube-coordinates';
+import { ZarrCubeDataProvider } from './zarr-cube-data-provider';
 import * as zarr from 'zarrita';
 import {
-  calculateElevationSlice,
   calculateHeightMeters,
   calculateNearestIndex,
-  calculateSliceArgs,
   detectCRS,
   extractNoDataMetadata,
   getZarrData,
@@ -250,62 +249,31 @@ export class ZarrCubeProvider {
 
     this.crs = this.crs || (await detectCRS(attrs, zarrArray));
 
-    const shape = this.zarrArray.shape;
     if (!this.dimIndices.elevation) {
       console.warn('No elevation dimension found in Zarr array.');
       return;
     }
-    const height = shape[this.dimIndices.lat.index];
-    const width = shape[this.dimIndices.lon.index];
     const levelInfo = this.levelInfos.length > 0 ? this.levelInfos[this.multiscaleLevel] : null;
-    this.dimensionValues = await loadAllDimensionValues(
-      this.root,
-      this.dimIndices,
-      levelInfo,
-      this.zarrVersion
-    );
-    const { dimensionValuesWithElevation, elevationSlice } = await calculateElevationSlice(
-      shape[this.dimIndices.elevation.index],
-      dimIndices.elevation,
-      this.selectors.elevation,
-      { ...this.dimensionValues },
-      this.root,
-      this.levelInfos.length > 0 ? this.levelInfos[this.multiscaleLevel] : null,
-      this.zarrVersion
-    );
-
-    const coordinates = await loadCubeCoordinates(
-      this.root, this.dimIndices, this.levelInfos.length > 0 ? this.levelInfos[this.multiscaleLevel] : null,
-      this.zarrVersion, this.bounds, this.crs, this.latIsAscendingOverride
-    );
-    const x: [number, number] = [coordinates.x.reduce((a, b) => globalThis.Math.min(a, b), Infinity), coordinates.x.reduce((a, b) => globalThis.Math.max(a, b), -Infinity) + 1];
-    const y = coordinates.y;
-    this.longitudeIndices = coordinates.x;
-    this.latIsAscending = coordinates.latIsAscending;
-    const sliceResult = await calculateSliceArgs(
-      shape,
-      { startX: x[0], endX: x[1], startY: y[0], endY: y[1],
-        startElevation: elevationSlice[0], endElevation: elevationSlice[1] },
-      this.dimIndices, this.selectors, dimensionValuesWithElevation, this.root,
-      this.levelInfos.length > 0 ? this.levelInfos[this.multiscaleLevel] : null,
-      this.zarrVersion, true
-    );
-    sliceResult.dimensionValues.lon = coordinates.longitude;
-    sliceResult.dimensionValues.lat = coordinates.latitude;
-    this.cubeDimensionValues = sliceResult.dimensionValues;
-    this.selectors = sliceResult.selectors;
-    this.loadedOrigin = { x: x[0], y: y[0], elevation: elevationSlice[0] };
+    const cube = await new ZarrCubeDataProvider({
+      array: this.zarrArray,
+      root: this.root,
+      dimensions: this.dimIndices,
+      level: levelInfo,
+      zarrVersion: this.zarrVersion,
+      selectors: this.selectors,
+      bounds: this.bounds,
+      crs: this.crs,
+      latIsAscending: this.latIsAscendingOverride
+    }).load();
+    this.dimensionValues = cube.dimensionValues;
+    this.cubeDimensionValues = cube.cubeDimensionValues;
+    this.selectors = cube.selectors;
+    this.loadedOrigin = cube.origin;
+    this.longitudeIndices = cube.coordinates.x;
+    this.latIsAscending = cube.coordinates.latIsAscending;
     this.elevationShape = this.zarrArray.shape[this.dimIndices.elevation.index];
-
-    const data = (await getZarrData(this.zarrArray, sliceResult.sliceArgs)) as ndarray.NdArray<any>;
-
-    // const data = (await ZarrCubeProvider.throttle(() =>
-    //   zarrNdarray.get(this.zarrArray!, sliceArgs)
-    // )) as ndarray.NdArray<any>;
-
-    this.volumeData = reorderCubeLongitude(ndarray(data.data, data.shape, data.stride), coordinates, this.dimIndices, sliceResult.sliceArgs);
-
-    this.cubeDimensions = [coordinates.x.length, y[1] - y[0], elevationSlice[1] - elevationSlice[0]];
+    this.volumeData = cube.data;
+    this.cubeDimensions = cube.dimensions;
     this.updateSlices({
       latIndex: this.latIsAscending ? this.cubeDimensions[1] - 1 : 0,
       lonIndex: 0,
@@ -708,6 +676,22 @@ export class ZarrCubeProvider {
         this.createLonSlicePrimitive(latIndex);
       }
     }
+  }
+
+  /**
+   * Get the current slice indices for latitude, longitude, and elevation.
+   * @returns An object containing the current slice indices for latitude, longitude, and elevation.
+   */
+  getSlices(): {
+    latSliceIndex: number;
+    lonSliceIndex: number;
+    elevationSliceIndex: number;
+  } {
+    return {
+      latSliceIndex: this.latSliceIndex,
+      lonSliceIndex: this.lonSliceIndex,
+      elevationSliceIndex: this.elevationSliceIndex
+    };
   }
 
   /**

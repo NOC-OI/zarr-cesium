@@ -219,7 +219,7 @@ export const layersJson: LayersJsonType = {
           scale: [0, 40],
           bounds: { west: -95, south: 15, east: -40, north: 45 },
           crs: undefined,
-          verticalExaggeration: 10,
+          verticalExaggeration: 1000,
           opacity: undefined,
           showHorizontalSlices: undefined,
           showVerticalSlices: undefined,
@@ -281,7 +281,7 @@ export const layersJson: LayersJsonType = {
             east: 180,
             north: 89.72809667673717
           },
-          latIsAscending: true,
+          latIsAscending: false,
           zarrVersion: 2,
           selectors: {
             time: {
@@ -310,7 +310,6 @@ export const layersJson: LayersJsonType = {
             dropRate: 0.002,
             dropRateBump: 0.01,
             minVisibleRatio: 0.6,
-            flipY: true,
             useViewerBounds: false,
             dynamic: true
           }
@@ -405,6 +404,7 @@ export const layersJson: LayersJsonType = {
           bounds: { west: -50, south: -20, east: 10, north: 20 },
           flipElevation: true,
           zarrVersion: 3,
+          latIsAscending: true,
           selectors: {
             time: {
               selected: 0

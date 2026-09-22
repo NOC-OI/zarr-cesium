@@ -170,30 +170,30 @@ This loads:
 - Windowed spatial slice (based on bounds)
 - Elevation slice ranges and spacing
 
-Then it automatically creates Cesium `WindLayer` instances (one per elevation slice) and adds them to the viewer.
+Then it creates one cube-aware Cesium `WindLayer` and adds it to the viewer.
 
 ---
 
 ## How It Renders the Data
 
-The provider generates **one WindLayer per elevation slice**, spaced by `sliceSpacing`:
+The provider passes the complete elevation-major U/V cube to one `WindLayer`. Particles are distributed across the enabled elevation levels according to `sliceSpacing`:
 
 - `sliceSpacing = 1` → one layer per model level
 - `sliceSpacing = 2` → one layer every two levels
 - `sliceSpacing = n` → coarse vertical sampling
 
-Each level has:
+The cube contains:
 
 - a 2D U-field
 - a 2D V-field
-- a computed **altitude**
-- a WindLayer placed at the correct height
+- elevation coordinate values used to compute particle height
+- semantic latitude orientation through `latIsAscending`
 
 Particles animate based on u/v speed and direction.
 
 ### WindLayer Integration
 
-Each layer receives a `windData` structure:
+The layer receives a cube `windData` structure:
 
 ```ts
 {
@@ -201,7 +201,9 @@ Each layer receives a `windData` structure:
   v: { array: Float32Array, min: -0.5, max: 0.5 },
   width,
   height,
-  unit: 'm s-1',
+  depth,
+  elevations,
+  latIsAscending,
   bounds: this.bounds
 }
 ```
@@ -215,7 +217,9 @@ Plus user-configurable **particle system settings**:
   lineLength,
   particlesTextureSize,
   minVisibleRatio,
-  flipY
+  elevationStep,
+  verticalExaggeration,
+  belowSeaLevel
   ...
 }
 ```

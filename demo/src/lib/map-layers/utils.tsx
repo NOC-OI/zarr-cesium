@@ -1,5 +1,4 @@
 import proj4 from 'proj4';
-import { colormapBuilder } from 'zarr-maps-colormap';
 import { Rectangle } from 'cesium';
 
 export function parseRangeString(rangeStr: string): number[] | string[] {
@@ -32,16 +31,6 @@ export function parseRangeString(rangeStr: string): number[] | string[] {
     result.push(i);
   }
   return result;
-}
-
-export function calculateColorsForLegend(colors: string, scale: [number, number], n: number) {
-  const listColors = colormapBuilder(colors, '', n) as number[][];
-  const difValues = scale[1] - scale[0];
-  const listColorsValues: number[] = [];
-  for (let i = 0; i < n; i++) {
-    listColorsValues.push(Number(scale[0]) + (difValues / (n - 1)) * i);
-  }
-  return { listColors, listColorsValues };
 }
 
 export const defaultView: [number, number] = [54, 0];

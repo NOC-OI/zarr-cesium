@@ -15,6 +15,7 @@ import {
   changeMapOpacity,
   changeMapPyramidLevels,
   changeMapVelocitySlices,
+  removeAllLayersFromMap,
   removeLayerFromMap,
   updateSeaLevelLayerReference
 } from './_actions/layers-handle';
@@ -31,10 +32,13 @@ export function MapHome() {
     useAppSelector(state => state.layers);
   const dispatch = useAppDispatch();
   const viewerRef = useRef<Viewer | null>(null);
-  const velocityCubeRef = useRef<ZarrCubeVelocityProvider | null>(null);
-  const cubeRef = useRef<ZarrCubeProvider | null>(null);
-  const velocityRef = useRef<ZarrCubeVelocityProvider | null>(null);
+  const velocityCubeRefs = useRef<Record<string, ZarrCubeVelocityProvider>>({});
+  const cubeRefs = useRef<Record<string, ZarrCubeProvider>>({});
   const sharedLayersRef = useRef(selectedLayers);
+  const selectedLayersRef = useRef(selectedLayers);
+  selectedLayersRef.current = selectedLayers;
+  const gebcoTerrainEnabledRef = useRef(gebcoTerrainEnabled);
+  gebcoTerrainEnabledRef.current = gebcoTerrainEnabled;
   const sharedLayersRestoredRef = useRef(false);
   const queryHandlerRef = useRef<Cesium.ScreenSpaceEventHandler | null>(null);
   const queryMarkerRef = useRef<Cesium.Entity | null>(null);
@@ -152,31 +156,23 @@ export function MapHome() {
               break;
             }
           }
-          if (!queryLayer && !cubeRef.current && !velocityCubeRef.current) return;
+          const cubeProvider = Object.keys(selectedLayersRef.current)
+            .map(layerName => velocityCubeRefs.current[layerName] ?? cubeRefs.current[layerName])
+            .find(candidate =>
+              candidate &&
+              longitude >= candidate.bounds.west &&
+              longitude <= candidate.bounds.east &&
+              latitude >= candidate.bounds.south &&
+              latitude <= candidate.bounds.north
+            );
+          if (!queryLayer && !cubeProvider) return;
           if (queryMarkerRef.current) {
             viewer.entities.remove(queryMarkerRef.current);
             queryMarkerRef.current = null;
             queryMarkerLayerRef.current = '';
           }
-          const cube = cubeRef.current;
-          const velocityCube = velocityCubeRef.current;
-          const velocityContainsPoint = velocityCube
-            ? longitude >= velocityCube.bounds.west &&
-              longitude <= velocityCube.bounds.east &&
-              latitude >= velocityCube.bounds.south &&
-              latitude <= velocityCube.bounds.north
-            : false;
-          const cubeContainsPoint = cube
-            ? longitude >= cube.bounds.west &&
-              longitude <= cube.bounds.east &&
-              latitude >= cube.bounds.south &&
-              latitude <= cube.bounds.north
-            : false;
-          const provider = velocityContainsPoint
-            ? velocityCube!
-            : cubeContainsPoint
-              ? cube!
-              : (queryLayer?.imageryProvider as ZarrLayerProvider | undefined);
+          const provider = cubeProvider ??
+            (queryLayer?.imageryProvider as ZarrLayerProvider | undefined);
           if (!provider) return;
           const layerName =
             provider instanceof ZarrCubeProvider || provider instanceof ZarrCubeVelocityProvider
@@ -222,8 +218,8 @@ export function MapHome() {
                 sharedLayers,
                 viewerRef as React.RefObject<Viewer>,
                 layers,
-                { velocityRef, cubeRef, velocityCubeRef },
-                gebcoTerrainEnabled
+                { cubeRefs, velocityCubeRefs },
+                gebcoTerrainEnabledRef.current
               );
               if (result?.selectedLayer) {
                 dispatch(
@@ -244,7 +240,7 @@ export function MapHome() {
         }
       }
     },
-    [clearQueryMarker, dispatch, gebcoTerrainEnabled, setFlashMessage, setInfoButtonBox, setLoading]
+    [clearQueryMarker, dispatch, setFlashMessage, setInfoButtonBox, setLoading]
   );
 
   useEffect(() => {
@@ -260,8 +256,8 @@ export function MapHome() {
     if (!transectLayerName || !viewerRef.current) return;
     const selected = selectedLayers[transectLayerName];
     let provider: ZarrLayerProvider | ZarrCubeProvider | undefined;
-    if (selected?.dataType === 'zarr-cube' && cubeRef.current?.id === transectLayerName) {
-      provider = cubeRef.current;
+    if (selected?.dataType === 'zarr-cube') {
+      provider = cubeRefs.current[transectLayerName];
     } else if (selected?.dataType === 'zarr-cesium') {
       const viewer = viewerRef.current;
       for (let index = 0; index < viewer.imageryLayers.length; index++) {
@@ -315,9 +311,8 @@ export function MapHome() {
       viewerRef as React.RefObject<Viewer>,
       layers,
       {
-        velocityRef,
-        cubeRef,
-        velocityCubeRef
+        cubeRefs,
+        velocityCubeRefs
       },
       gebcoTerrainEnabled
     );
@@ -348,20 +343,41 @@ export function MapHome() {
 
   useEffect(() => {
     if (!viewerRef.current) return;
+    const scene = viewerRef.current.scene;
+    let removeTerrainErrorListener: (() => void) | undefined;
+    let removeTerrainReadyListener: (() => void) | undefined;
+    let removeProviderErrorListener: (() => void) | undefined;
     if (gebcoTerrainEnabled) {
-      viewerRef.current.scene.setTerrain(
-        new Cesium.Terrain(Cesium.CesiumTerrainProvider.fromIonAssetId(2426648))
-      );
-      viewerRef.current.scene.verticalExaggerationRelativeHeight = 0.0;
-      viewerRef.current.scene.verticalExaggeration = VERTICAL_EXAGGERATION;
+      const terrain = Cesium.Terrain.fromWorldBathymetry({ requestVertexNormals: true });
+      removeTerrainErrorListener = terrain.errorEvent.addEventListener(error => {
+        const detail = error instanceof Error ? error.message : String(error);
+        setFlashMessage({
+          messageType: 'error',
+          content: `Unable to load Cesium World Bathymetry: ${detail}`
+        });
+      });
+      removeTerrainReadyListener = terrain.readyEvent.addEventListener(provider => {
+        removeProviderErrorListener = provider.errorEvent.addEventListener(error => {
+          const detail = error instanceof Error ? error.message : String(error);
+          setFlashMessage({
+            messageType: 'error',
+            content: `Unable to load a bathymetry tile: ${detail}`
+          });
+        });
+        scene.requestRender();
+      });
+      scene.setTerrain(terrain);
+      scene.globe.enableLighting = true;
+      scene.verticalExaggerationRelativeHeight = 0.0;
+      scene.verticalExaggeration = VERTICAL_EXAGGERATION;
     } else {
-      viewerRef.current.scene.terrainProvider = new Cesium.EllipsoidTerrainProvider();
-      viewerRef.current.scene.verticalExaggerationRelativeHeight = 0.0;
-      viewerRef.current.scene.verticalExaggeration = 1.0;
+      scene.globe.terrainProvider = new Cesium.EllipsoidTerrainProvider();
+      scene.globe.enableLighting = false;
+      scene.verticalExaggerationRelativeHeight = 0.0;
+      scene.verticalExaggeration = 1.0;
     }
     const updatedLayers = updateSeaLevelLayerReference(
-      cubeRef,
-      velocityCubeRef,
+      { cubeRefs, velocityCubeRefs },
       gebcoTerrainEnabled,
       selectedLayers
     );
@@ -369,8 +385,15 @@ export function MapHome() {
       if (update.layer)
         dispatch(layersActions.updateSelectedLayer({ name: update.name, layer: update.layer }));
     });
+    return () => {
+      removeTerrainErrorListener?.();
+      removeTerrainReadyListener?.();
+      removeProviderErrorListener?.();
+    };
+    // selectedLayers is intentionally read only when the terrain mode changes;
+    // including it would retrigger this effect after its own Redux updates.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gebcoTerrainEnabled]);
+  }, [gebcoTerrainEnabled, setFlashMessage]);
 
   useEffect(() => {
     if (!viewerRef.current) return;
@@ -387,14 +410,17 @@ export function MapHome() {
       clearTransect();
     }
     const zarrCesiumRefs = {
-      velocityRef,
-      cubeRef,
-      velocityCubeRef
+      cubeRefs,
+      velocityCubeRefs
     };
     const actionMap: Record<string, { function: any; args: any[] }> = {
       remove: {
         function: removeLayerFromMap,
         args: [actualLayer, listLayers, viewerRef, zarrCesiumRefs]
+      },
+      'remove-all': {
+        function: removeAllLayersFromMap,
+        args: [viewerRef, zarrCesiumRefs]
       },
       add: { function: addLayerIntoMap, args: [] },
       opacity: {
@@ -419,11 +445,11 @@ export function MapHome() {
       },
       'update-cube-slices': {
         function: changeMapCubeSlices,
-        args: [actualLayer, selectedLayers, zarrCesiumRefs.cubeRef]
+        args: [actualLayer, selectedLayers, zarrCesiumRefs]
       },
       'update-velocity-slices': {
         function: changeMapVelocitySlices,
-        args: [actualLayer, selectedLayers, zarrCesiumRefs.velocityCubeRef]
+        args: [actualLayer, selectedLayers, zarrCesiumRefs]
       },
       'update-cube-params': {
         function: changeMapCubeParams,

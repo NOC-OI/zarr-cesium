@@ -152,7 +152,7 @@ You can then use the demo app to test changes **live** by running it simultaneou
 
 We welcome contributions! Please follow the workflow below.
 
-## 🧩 5.1. Branching Model
+## 5.1. Branching Model
 
 Use feature branches:
 
@@ -162,7 +162,7 @@ fix/bug-description
 docs/update-provider-docs
 ```
 
-## 🧪 5.2. Before pushing
+## 5.2. Before pushing
 
 Run:
 
@@ -172,14 +172,14 @@ npm run build
 
 This will check all TypeScript types, eslint rules, and prettier formatting. And then build the library.
 
-## 📥 5.3. Pull Request Guidelines
+## 5.3. Pull Request Guidelines
 
 - Describe clearly **what the PR adds or fixes**
 - Link related **issues**
 - Update documentation when necessary
 - Keep PRs focused instead of large multi-purpose changes
 
-## 📚 5.4. Updating Documentation
+## 5.4. Updating Documentation
 
 Docs live under: `docs/`
 

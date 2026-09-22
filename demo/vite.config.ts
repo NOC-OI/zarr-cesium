@@ -35,7 +35,22 @@ export default defineConfig(({ mode }) => {
           'node_modules/@zip.js/zip.js/dist/zip-core.js'
         )
       },
-      dedupe: ['cesium', '@cesium/engine', '@cesium/widgets']
+      // zarr-maps-explorer is a linked workspace package. Without deduplication,
+      // Vite follows the symlink and can load React/MUI from the zarr-maps root,
+      // creating a second React dispatcher at runtime.
+      dedupe: [
+        'react',
+        'react-dom',
+        'react/jsx-runtime',
+        'react/jsx-dev-runtime',
+        '@emotion/react',
+        '@emotion/styled',
+        '@mui/material',
+        '@mui/icons-material',
+        'cesium',
+        '@cesium/engine',
+        '@cesium/widgets'
+      ]
     }
   };
 });

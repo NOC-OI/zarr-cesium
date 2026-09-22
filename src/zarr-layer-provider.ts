@@ -21,6 +21,7 @@ import {
   type QueryOptions,
   type QueryPosition,
   type QueryResult,
+  type TileCacheStats,
   type TransectQueryOptions,
   type TransectResult,
   type ZarrSelectors,
@@ -135,6 +136,7 @@ export class ZarrLayerProvider implements ImageryProvider {
       onAuthError: options.onAuthError,
       multiscaleFormat: options.multiscaleFormat,
       latIsAscending: options.latIsAscending,
+      cache: options.cache,
       renderTarget: 'cesium'
     });
 
@@ -193,6 +195,16 @@ export class ZarrLayerProvider implements ImageryProvider {
   /** Current index-based selectors used for tile rendering and queries. */
   get selectors(): Record<string, ZarrSelectorsProps> {
     return this.source.selectors;
+  }
+
+  /** Current decoded tile-cache usage and lifetime counters. */
+  get tileCacheStats(): TileCacheStats {
+    return this.source.tileCacheStats;
+  }
+
+  /** Removes decoded numeric tiles retained by this imagery provider. */
+  clearTileCache(): void {
+    this.source.clearTileCache();
   }
 
   /**

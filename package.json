@@ -19,6 +19,7 @@
     "dist"
   ],
   "scripts": {
+    "test:coordinates": "node tests/run-cube-coordinates.mjs",
     "dev": "tsup src/index.ts --format cjs,esm --dts --sourcemap --external cesium-wind-layer --external zarrita --external zarr-maps-colormap --watch",
     "build": "tsup src/index.ts --format esm --dts --sourcemap --external cesium --external cesium-wind-layer --external zarrita --external zarr-maps-colormap",
     "clean": "rm -rf dist",
@@ -31,8 +32,8 @@
   },
   "dependencies": {
     "cesium-wind-layer": "https://github.com/NOC-OI/cesium-wind-layer/releases/download/v0.11.1/cesium-wind-layer-0.11.1.tgz",
-    "zarr-maps-colormap": "^0.2.0",
-    "zarr-maps-tiling": "^0.2.0",
+    "zarr-maps-colormap": "file:../zarr-maps/packages/zarr-maps-colormap",
+    "zarr-maps-tiling": "file:../zarr-maps/packages/zarr-maps-tiling",
     "zarrita": "^0.7.4"
   },
   "devDependencies": {

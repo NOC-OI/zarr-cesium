@@ -1,10 +1,10 @@
+import { loadAllDimensionValues, loadCubeCoordinates, reorderCubeLongitude, cubePointIndices, longitudeInBounds, validateCubeBounds } from './cube-coordinates';
 import * as zarr from 'zarrita';
 import {
   calculateElevationSlice,
   calculateHeightMeters,
   calculateNearestIndex,
   calculateSliceArgs,
-  calculateXYFromBounds,
   detectCRS,
   extractNoDataMetadata,
   getZarrData,
@@ -14,8 +14,6 @@ import {
   getTransect as queryTransect,
   getVerticalProfile as queryVerticalProfile,
   initZarrDataset,
-  latDegToMercY,
-  lonDegToMercX,
   type QueryGeometry,
   type QueryOptions,
   type QueryPosition,
@@ -58,8 +56,7 @@ import {
 } from 'cesium';
 import ndarray from 'ndarray';
 import {
-  DEFAULT_VERTICAL_EXAGGERATION,
-  validateBounds
+  DEFAULT_VERTICAL_EXAGGERATION
 } from './cesium-utils';
 import { DEFAULT_COLORMAP, DEFAULT_OPACITY, DEFAULT_SCALE } from 'zarr-maps-tiling';
 import type { RequestOverrides } from 'zarr-maps-tiling';
@@ -93,6 +90,8 @@ import { createFetchStore, createTransformedFetch } from './zarr-store-utils';
 export class ZarrCubeProvider {
   /** Values of the cube’s coordinate dimensions (latitude, longitude, elevation, etc.). */
   public dimensionValues: DimensionValues = {};
+  /** Coordinate values represented by the currently loaded cube subset. */
+  public cubeDimensionValues: DimensionValues = {};
   /** Size of the cube in [longitude, latitude, elevation]. */
   public cubeDimensions: [number, number, number] | null = null;
   /** Unique identifier for the cube provider instance. */
@@ -138,6 +137,7 @@ export class ZarrCubeProvider {
   private useFillValue = false;
   private noDataMin: number | undefined;
   private noDataMax: number | undefined;
+  private longitudeIndices: number[] = [];
   private loadedOrigin = { x: 0, y: 0, elevation: 0 };
 
   /**
@@ -147,6 +147,10 @@ export class ZarrCubeProvider {
    */
   get queryIndexOffsets(): Record<string, number> {
     return { elevation: this.loadedOrigin.elevation };
+  }
+  /** Coordinate values addressable by queries against the loaded cube subset. */
+  get queryDimensionValues(): DimensionValues {
+    return this.cubeDimensionValues;
   }
   private static readonly concurrencyLimit = 4;
   private static activeRequests = 0;
@@ -253,65 +257,42 @@ export class ZarrCubeProvider {
     }
     const height = shape[this.dimIndices.lat.index];
     const width = shape[this.dimIndices.lon.index];
+    const levelInfo = this.levelInfos.length > 0 ? this.levelInfos[this.multiscaleLevel] : null;
+    this.dimensionValues = await loadAllDimensionValues(
+      this.root,
+      this.dimIndices,
+      levelInfo,
+      this.zarrVersion
+    );
     const { dimensionValuesWithElevation, elevationSlice } = await calculateElevationSlice(
       shape[this.dimIndices.elevation.index],
       dimIndices.elevation,
       this.selectors.elevation,
-      this.dimensionValues,
+      { ...this.dimensionValues },
       this.root,
       this.levelInfos.length > 0 ? this.levelInfos[this.multiscaleLevel] : null,
       this.zarrVersion
     );
 
-    const { x, y: descendingY } = calculateXYFromBounds(this.bounds, width, height, this.crs);
-    let y: [number, number] = this.latIsAscending
-      ? [height - descendingY[1], height - descendingY[0]]
-      : descendingY;
-    let sliceResult = await calculateSliceArgs(
-      shape,
-      {
-        startX: x[0],
-        endX: x[1],
-        startY: y[0],
-        endY: y[1],
-        startElevation: elevationSlice[0],
-        endElevation: elevationSlice[1]
-      },
-      this.dimIndices,
-      this.selectors,
-      dimensionValuesWithElevation,
-      this.root,
-      this.levelInfos.length > 0 ? this.levelInfos[this.multiscaleLevel] : null,
-      this.zarrVersion,
-      true
+    const coordinates = await loadCubeCoordinates(
+      this.root, this.dimIndices, this.levelInfos.length > 0 ? this.levelInfos[this.multiscaleLevel] : null,
+      this.zarrVersion, this.bounds, this.crs, this.latIsAscendingOverride
     );
-    this.dimensionValues = sliceResult.dimensionValues;
-    this.resolveLatitudeOrientation();
-    const resolvedY: [number, number] = this.latIsAscending
-      ? [height - descendingY[1], height - descendingY[0]]
-      : descendingY;
-    if (resolvedY[0] !== y[0] || resolvedY[1] !== y[1]) {
-      y = resolvedY;
-      sliceResult = await calculateSliceArgs(
-        shape,
-        {
-          startX: x[0],
-          endX: x[1],
-          startY: y[0],
-          endY: y[1],
-          startElevation: elevationSlice[0],
-          endElevation: elevationSlice[1]
-        },
-        this.dimIndices,
-        this.selectors,
-        dimensionValuesWithElevation,
-        this.root,
-        this.levelInfos.length > 0 ? this.levelInfos[this.multiscaleLevel] : null,
-        this.zarrVersion,
-        true
-      );
-      this.dimensionValues = sliceResult.dimensionValues;
-    }
+    const x: [number, number] = [coordinates.x.reduce((a, b) => globalThis.Math.min(a, b), Infinity), coordinates.x.reduce((a, b) => globalThis.Math.max(a, b), -Infinity) + 1];
+    const y = coordinates.y;
+    this.longitudeIndices = coordinates.x;
+    this.latIsAscending = coordinates.latIsAscending;
+    const sliceResult = await calculateSliceArgs(
+      shape,
+      { startX: x[0], endX: x[1], startY: y[0], endY: y[1],
+        startElevation: elevationSlice[0], endElevation: elevationSlice[1] },
+      this.dimIndices, this.selectors, dimensionValuesWithElevation, this.root,
+      this.levelInfos.length > 0 ? this.levelInfos[this.multiscaleLevel] : null,
+      this.zarrVersion, true
+    );
+    sliceResult.dimensionValues.lon = coordinates.longitude;
+    sliceResult.dimensionValues.lat = coordinates.latitude;
+    this.cubeDimensionValues = sliceResult.dimensionValues;
     this.selectors = sliceResult.selectors;
     this.loadedOrigin = { x: x[0], y: y[0], elevation: elevationSlice[0] };
     this.elevationShape = this.zarrArray.shape[this.dimIndices.elevation.index];
@@ -322,9 +303,9 @@ export class ZarrCubeProvider {
     //   zarrNdarray.get(this.zarrArray!, sliceArgs)
     // )) as ndarray.NdArray<any>;
 
-    this.volumeData = ndarray(data.data, data.shape, data.stride);
+    this.volumeData = reorderCubeLongitude(ndarray(data.data, data.shape, data.stride), coordinates, this.dimIndices, sliceResult.sliceArgs);
 
-    this.cubeDimensions = [x[1] - x[0], y[1] - y[0], elevationSlice[1] - elevationSlice[0]];
+    this.cubeDimensions = [coordinates.x.length, y[1] - y[0], elevationSlice[1] - elevationSlice[0]];
     this.updateSlices({
       latIndex: this.latIsAscending ? this.cubeDimensions[1] - 1 : 0,
       lonIndex: 0,
@@ -357,7 +338,8 @@ export class ZarrCubeProvider {
     }
     this.throwIfQueryAborted(options.signal);
 
-    const [longitude, latitude] = geometry.coordinates;
+    const [inputLongitude, latitude] = geometry.coordinates;
+    const longitude = longitudeInBounds(inputLongitude, this.bounds);
     const emptyResult = (): QueryResult => ({
       variable: this.variable,
       values: [],
@@ -375,22 +357,13 @@ export class ZarrCubeProvider {
       return emptyResult();
     }
 
-    const lonValues = this.dimensionValues.lon;
-    const latValues = this.dimensionValues.lat;
-    const elevationValues = this.dimensionValues.elevation;
+    const lonValues = this.cubeDimensionValues.lon;
+    const latValues = this.cubeDimensionValues.lat;
+    const elevationValues = this.cubeDimensionValues.elevation;
     if (!lonValues || !latValues || !elevationValues) {
       throw new Error('Cube spatial coordinate values are unavailable');
     }
-    let sourceLongitude = longitude;
-    let sourceLatitude = latitude;
-    if (this.crs === 'EPSG:3857') {
-      sourceLongitude = lonDegToMercX(longitude);
-      sourceLatitude = latDegToMercY(latitude);
-    } else if (Number(lonValues[0]) >= 0 && Number(lonValues[lonValues.length - 1]) > 180) {
-      sourceLongitude = ((longitude % 360) + 360) % 360;
-    }
-    const lonIndex = calculateNearestIndex(lonValues, sourceLongitude);
-    const latIndex = calculateNearestIndex(latValues, sourceLatitude);
+    const [lonIndex, latIndex] = cubePointIndices(lonValues, latValues, longitude, latitude, this.crs);
 
     const timeKey = this.dimIndices.time?.name ?? 'time';
     const requestedTime = selectors?.time ?? selectors?.[timeKey];
@@ -610,7 +583,7 @@ export class ZarrCubeProvider {
     if (elevationSelection && Array.isArray(elevationSelection.selected)) {
       throw new Error('A time series requires one scalar elevation selector');
     }
-    const elevationValues = this.dimensionValues.elevation;
+    const elevationValues = this.cubeDimensionValues.elevation;
     const defaultLocalElevation = this.elevationSliceIndex >= 0 ? this.elevationSliceIndex : 0;
     const localElevationIndex = elevationSelection
       ? elevationSelection.type === 'value'
@@ -628,7 +601,7 @@ export class ZarrCubeProvider {
     const selection: (number | ReturnType<typeof zarr.slice>)[] = new Array(
       this.zarrArray.shape.length
     ).fill(0);
-    selection[this.dimIndices.lon.index] = this.loadedOrigin.x + localLonIndex;
+    selection[this.dimIndices.lon.index] = this.longitudeIndices[localLonIndex];
     selection[this.dimIndices.lat.index] = this.loadedOrigin.y + localLatIndex;
     selection[this.dimIndices.elevation.index] = this.loadedOrigin.elevation + localElevationIndex;
     selection[this.dimIndices.time.index] = zarr.slice(timeStart, timeEnd);
@@ -743,7 +716,7 @@ export class ZarrCubeProvider {
    * @param options - Partial data-selection update. Changed selectors, level,
    * or bounds cause the current primitives to be destroyed and reloaded.
    * @returns Nothing. Reloading continues asynchronously after a change.
-   * @remarks Latitude bounds are clamped to the Web Mercator limit.
+   * @remarks Bounds are validated against geographic latitude limits.
    */
   updateSelectors({
     selectors,
@@ -771,11 +744,11 @@ export class ZarrCubeProvider {
       updateLayer = true;
     }
     if (bounds !== undefined && JSON.stringify(this.bounds) !== JSON.stringify(bounds)) {
-      if (validateBounds(bounds)) {
+      if (validateCubeBounds(bounds)) {
         this.bounds = {
           ...bounds,
-          south: Math.clamp(bounds.south, -85.05112878, 85.05112878),
-          north: Math.clamp(bounds.north, -85.05112878, 85.05112878)
+          south: bounds.south,
+          north: bounds.north
         };
         updateLayer = true;
       }
@@ -858,18 +831,7 @@ export class ZarrCubeProvider {
     return { viewer, nx, ny, nz, indicesOrder, strides, rect };
   }
 
-  private resolveLatitudeOrientation(): void {
-    if (this.latIsAscendingOverride !== undefined) {
-      this.latIsAscending = this.latIsAscendingOverride;
-      return;
-    }
-    const values = this.dimensionValues.lat as ArrayLike<number> | undefined;
-    if (values && values.length > 1) {
-      this.latIsAscending = Number(values[0]) < Number(values[values.length - 1]);
-      return;
-    }
-    console.warn('Failed to infer latitude ordering. Falling back to descending latitude.');
-  }
+
 
   /** Converts a south-to-north display index into the dataset latitude index. */
   private getLatitudeDataIndex(displayIndex: number, height: number): number {
@@ -921,10 +883,10 @@ export class ZarrCubeProvider {
       }
     }
     ctx.putImageData(imgData, 0, 0);
-    const elevationValue = this.dimensionValues.elevation[elevationSliceIndex];
+    const elevationValue = this.cubeDimensionValues.elevation[elevationSliceIndex];
     const heightMeters = calculateHeightMeters(
       elevationValue as number,
-      this.dimensionValues.elevation as number[],
+      this.cubeDimensionValues.elevation as number[],
       this.verticalExaggeration,
       this.belowSeaLevel,
       this.flipElevation
@@ -986,10 +948,10 @@ export class ZarrCubeProvider {
 
     for (let iz = 0; iz <= segmentsZ; iz++) {
       const heightFraction = this.flipElevation ? (segmentsZ - iz) / segmentsZ : iz / segmentsZ;
-      const elevationValue = this.dimensionValues.elevation[iz];
+      const elevationValue = this.cubeDimensionValues.elevation[iz];
       const height = calculateHeightMeters(
         elevationValue as number,
-        this.dimensionValues.elevation as number[],
+        this.cubeDimensionValues.elevation as number[],
         this.verticalExaggeration,
         this.belowSeaLevel,
         this.flipElevation

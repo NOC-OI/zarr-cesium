@@ -1,3 +1,4 @@
+import { loadAllDimensionValues, loadCubeCoordinates, reorderCubeLongitude, cubePointIndices, longitudeInBounds, validateCubeBounds } from './cube-coordinates';
 import { type Viewer, Math } from 'cesium';
 import { WindLayer, type WindLayerOptions } from 'cesium-wind-layer';
 import * as zarr from 'zarrita';
@@ -6,7 +7,6 @@ import {
   calculateHeightMeters,
   calculateNearestIndex,
   calculateSliceArgs,
-  calculateXYFromBounds,
   detectCRS,
   getZarrData,
   getTimeSeries as queryTimeSeries,
@@ -38,8 +38,7 @@ import { colormapBuilder } from 'zarr-maps-colormap';
 import ndarray from 'ndarray';
 import {
   DEFAULT_VERTICAL_EXAGGERATION,
-  DEFAULT_WIND_OPTIONS,
-  validateBounds
+  DEFAULT_WIND_OPTIONS
 } from './cesium-utils';
 import { DEFAULT_COLORMAP } from 'zarr-maps-tiling';
 import type { RequestOverrides } from 'zarr-maps-tiling';
@@ -77,6 +76,8 @@ export interface VelocityQueryResult extends QueryResult {
 export class ZarrCubeVelocityProvider {
   /** Dimension coordinate arrays (e.g. lat, lon, elevation). */
   public dimensionValues: { [key: string]: Float64Array | number[] | string[] } = {};
+  /** Coordinate values represented by the currently loaded velocity cube subset. */
+  public cubeDimensionValues: { [key: string]: Float64Array | number[] | string[] } = {};
   /** Cube dimensions: [longitude, latitude, elevation]. */
   public cubeDimensions: [number, number, number] | null = null;
   /** Unique identifier for the cube provider instance. */
@@ -98,6 +99,10 @@ export class ZarrCubeVelocityProvider {
    */
   get queryIndexOffsets(): Record<string, number> {
     return { elevation: this.loadedOrigin.elevation };
+  }
+  /** Coordinate values addressable by queries against the loaded velocity subset. */
+  get queryDimensionValues(): { [key: string]: Float64Array | number[] | string[] } {
+    return this.cubeDimensionValues;
   }
   private viewer: CesiumHost;
   private zarrVersion: 2 | 3 | null = null;
@@ -130,6 +135,7 @@ export class ZarrCubeVelocityProvider {
   private zarrArrays: Partial<Record<'u' | 'v', zarr.Array<any>>> = {};
   private validityData: Partial<Record<'u' | 'v', Uint8Array>> = {};
   private dimIndices: DimIndicesProps = {};
+  private longitudeIndices: number[] = [];
   private loadedOrigin = { x: 0, y: 0, elevation: 0 };
 
   /**
@@ -245,80 +251,71 @@ export class ZarrCubeVelocityProvider {
     const height = shape[dimIndices.lat.index];
     const width = shape[dimIndices.lon.index];
 
+    const levelInfo = this.levelInfos.length > 0 ? this.levelInfos[this.multiscaleLevel] : null;
+    const fullDimensionValues = await loadAllDimensionValues(
+      root,
+      dimIndices,
+      levelInfo,
+      this.zarrVersion
+    );
+    if (component === 'u') this.dimensionValues = fullDimensionValues;
     const { dimensionValuesWithElevation, elevationSlice } = await calculateElevationSlice(
       shape[dimIndices.elevation.index],
       dimIndices.elevation,
       this.selectors.elevation,
-      this.dimensionValues,
+      { ...fullDimensionValues },
       root,
       this.levelInfos.length > 0 ? this.levelInfos[this.multiscaleLevel] : null,
       this.zarrVersion
     );
 
-    const { x, y: descendingY } = calculateXYFromBounds(this.bounds, width, height, this.crs);
-    let y: [number, number] = this.latIsAscending
-      ? [height - descendingY[1], height - descendingY[0]]
-      : descendingY;
-    let sliceResult = await calculateSliceArgs(
-      shape,
-      {
-        startX: x[0],
-        endX: x[1],
-        startY: y[0],
-        endY: y[1],
-        startElevation: elevationSlice[0],
-        endElevation: elevationSlice[1]
-      },
-      dimIndices,
-      this.selectors,
-      dimensionValuesWithElevation,
-      root,
-      this.levelInfos.length > 0 ? this.levelInfos[this.multiscaleLevel] : null,
-      this.zarrVersion,
-      true
+    const coordinates = await loadCubeCoordinates(
+      root, dimIndices, this.levelInfos.length > 0 ? this.levelInfos[this.multiscaleLevel] : null,
+      this.zarrVersion, this.bounds, this.crs, this.latIsAscendingOverride
     );
-    this.dimensionValues = sliceResult.dimensionValues;
-    this.resolveLatitudeOrientation();
-    const resolvedY: [number, number] = this.latIsAscending
-      ? [height - descendingY[1], height - descendingY[0]]
-      : descendingY;
-    if (resolvedY[0] !== y[0] || resolvedY[1] !== y[1]) {
-      y = resolvedY;
-      sliceResult = await calculateSliceArgs(
-        shape,
-        {
-          startX: x[0],
-          endX: x[1],
-          startY: y[0],
-          endY: y[1],
-          startElevation: elevationSlice[0],
-          endElevation: elevationSlice[1]
-        },
-        dimIndices,
-        this.selectors,
-        dimensionValuesWithElevation,
-        root,
-        this.levelInfos.length > 0 ? this.levelInfos[this.multiscaleLevel] : null,
-        this.zarrVersion,
-        true
-      );
-      this.dimensionValues = sliceResult.dimensionValues;
-    }
+    const x: [number, number] = [coordinates.x.reduce((a, b) => globalThis.Math.min(a, b), Infinity), coordinates.x.reduce((a, b) => globalThis.Math.max(a, b), -Infinity) + 1];
+    const y = coordinates.y;
+    this.longitudeIndices = coordinates.x;
+    this.latIsAscending = coordinates.latIsAscending;
+    const sliceResult = await calculateSliceArgs(
+      shape,
+      { startX: x[0], endX: x[1], startY: y[0], endY: y[1],
+        startElevation: elevationSlice[0], endElevation: elevationSlice[1] },
+      dimIndices, this.selectors, dimensionValuesWithElevation, root,
+      this.levelInfos.length > 0 ? this.levelInfos[this.multiscaleLevel] : null,
+      this.zarrVersion, true
+    );
+    sliceResult.dimensionValues.lon = coordinates.longitude;
+    sliceResult.dimensionValues.lat = coordinates.latitude;
+    if (component === 'u') this.cubeDimensionValues = sliceResult.dimensionValues;
     this.selectors = sliceResult.selectors;
     this.elevationShape = zarrArray.shape[dimIndices.elevation.index];
     if (component === 'u') {
       this.loadedOrigin = { x: x[0], y: y[0], elevation: elevationSlice[0] };
     }
 
-    const data = await getZarrData(zarrArray, sliceResult.sliceArgs);
+    const rawData = await getZarrData(zarrArray, sliceResult.sliceArgs);
+    const data = reorderCubeLongitude(ndarray(rawData.data, rawData.shape, rawData.stride), coordinates, dimIndices, sliceResult.sliceArgs);
 
-    const arr = new Float32Array(data.data as ArrayLike<number>);
-    this.validityData[component] = Uint8Array.from(arr, value => Number.isFinite(value) ? 1 : 0);
+    const spatialOrder = Object.entries(dimIndices)
+      .filter(([name]) => ['lon', 'lat', 'elevation'].includes(name))
+      .sort((a, b) => a[1].index - b[1].index).map(([name]) => name);
+    const arr = new Float32Array(data.data.length);
+    let outputIndex = 0;
+    for (let elevation = 0; elevation < elevationSlice[1] - elevationSlice[0]; elevation++) {
+      for (let lat = 0; lat < y[1] - y[0]; lat++) {
+        for (let lon = 0; lon < coordinates.x.length; lon++) {
+          const position: Record<string, number> = { lon, lat, elevation };
+          arr[outputIndex++] = Number(data.get(...spatialOrder.map(name => position[name])));
+        }
+      }
+    }
+    this.validityData[component] = Uint8Array.from(arr, value => (Number.isFinite(value) ? 1 : 0));
     this.sanitizeArray(arr);
 
     return {
-      array: ndarray(arr, data.shape, data.stride),
-      width: x[1] - x[0],
+      array: ndarray(arr, [elevationSlice[1] - elevationSlice[0], y[1] - y[0], coordinates.x.length]),
+      width: coordinates.x.length,
       height: y[1] - y[0],
       elevation: elevationSlice[1] - elevationSlice[0],
       dimensionValues: sliceResult.dimensionValues
@@ -331,16 +328,18 @@ export class ZarrCubeVelocityProvider {
    * @returns A promise resolved after both components, coordinates, selected
    * subsets, and all elevation wind layers have loaded.
    * @throws When either custom or URL-backed store, selected array, dimensions, or data chunks cannot be read.
-   * @remarks U and V are loaded concurrently and must describe compatible grids.
+   * @remarks U and V must describe compatible grids.
    */
   async load(): Promise<void> {
-    const [uCube, vCube] = await Promise.all([
-      this.loadZarrVariable('u', this.variables.u),
-      this.loadZarrVariable('v', this.variables.v)
-    ]);
+    const uCube = await this.loadZarrVariable('u', this.variables.u);
+    const vCube = await this.loadZarrVariable('v', this.variables.v);
     if (!uCube || !vCube) {
       console.error('Failed to load U or V component data.');
       return;
+    }
+    if (['lon', 'lat', 'elevation'].some(axis =>
+      JSON.stringify(Array.from(uCube.dimensionValues[axis], Number)) !== JSON.stringify(Array.from(vCube.dimensionValues[axis], Number)))) {
+      throw new Error('Velocity U and V coordinate grids must match');
     }
     this.cubeDimensions = [uCube.width, uCube.height, uCube.elevation];
     this.volumeData = { uCube, vCube };
@@ -348,18 +347,7 @@ export class ZarrCubeVelocityProvider {
     await this.createWindLayers();
   }
 
-  private resolveLatitudeOrientation(): void {
-    if (this.latIsAscendingOverride !== undefined) {
-      this.latIsAscending = this.latIsAscendingOverride;
-      return;
-    }
-    const values = this.dimensionValues.lat as ArrayLike<number> | undefined;
-    if (values && values.length > 1) {
-      this.latIsAscending = Number(values[0]) < Number(values[values.length - 1]);
-      return;
-    }
-    console.warn('Failed to infer latitude ordering. Falling back to descending latitude.');
-  }
+
 
   private async createWindLayers(): Promise<void> {
     if (!this.volumeData) {
@@ -385,7 +373,7 @@ export class ZarrCubeVelocityProvider {
       const elevationValue = dimensionValues.elevation[d];
       const altitude = calculateHeightMeters(
         elevationValue as number,
-        this.dimensionValues.elevation as number[],
+        this.cubeDimensionValues.elevation as number[],
         this.verticalExaggeration,
         this.belowSeaLevel,
         this.flipElevation
@@ -421,10 +409,13 @@ export class ZarrCubeVelocityProvider {
     options: QueryOptions = {}
   ): Promise<VelocityQueryResult> {
     if (geometry.type !== 'Point') {
-      throw new Error(`Query geometry ${geometry.type} is not implemented; only Point is supported`);
+      throw new Error(
+        `Query geometry ${geometry.type} is not implemented; only Point is supported`
+      );
     }
     this.throwIfQueryAborted(options.signal);
-    const [longitude, latitude] = geometry.coordinates;
+    const [inputLongitude, latitude] = geometry.coordinates;
+    const longitude = longitudeInBounds(inputLongitude, this.bounds);
     const emptyResult = (): VelocityQueryResult => ({
       variable: 'current_speed',
       values: [],
@@ -446,13 +437,7 @@ export class ZarrCubeVelocityProvider {
     const timeKey = this.dimIndices.time?.name ?? 'time';
     const timeSelection = selectors.time ?? selectors[timeKey];
     if (timeSelection && Array.isArray(timeSelection.selected)) {
-      return this.queryVelocityTimeSeries(
-        longitude,
-        latitude,
-        timeSelection,
-        selectors,
-        options
-      );
+      return this.queryVelocityTimeSeries(longitude, latitude, timeSelection, selectors, options);
     }
 
     const elevationKey = this.dimIndices.elevation?.name ?? 'elevation';
@@ -473,7 +458,7 @@ export class ZarrCubeVelocityProvider {
       values.push(current.interpolated.speed);
       u.push(current.interpolated.u);
       v.push(current.interpolated.v);
-      elevations.push(this.dimensionValues.elevation[elevationIndex]);
+      elevations.push(this.cubeDimensionValues.elevation[elevationIndex]);
     }
 
     const coordinates: QueryResult['coordinates'] = {};
@@ -493,25 +478,16 @@ export class ZarrCubeVelocityProvider {
     };
   }
 
-  private hasValidCurrentAt(
-    longitude: number,
-    latitude: number,
-    elevationIndex: number
-  ): boolean {
+  private hasValidCurrentAt(longitude: number, latitude: number, elevationIndex: number): boolean {
     if (!this.cubeDimensions) return false;
-    const longitudeValues = this.dimensionValues.lon;
-    const latitudeValues = this.dimensionValues.lat;
+    const longitudeValues = this.cubeDimensionValues.lon;
+    const latitudeValues = this.cubeDimensionValues.lat;
     const uValidity = this.validityData.u;
     const vValidity = this.validityData.v;
     if (!longitudeValues?.length || !latitudeValues?.length || !uValidity || !vValidity) {
       return false;
     }
-    let sourceLongitude = longitude;
-    if (Number(longitudeValues[0]) >= 0 && Number(longitudeValues[longitudeValues.length - 1]) > 180) {
-      sourceLongitude = ((longitude % 360) + 360) % 360;
-    }
-    const longitudeIndex = calculateNearestIndex(longitudeValues, sourceLongitude);
-    const latitudeIndex = calculateNearestIndex(latitudeValues, latitude);
+    const [longitudeIndex, latitudeIndex] = cubePointIndices(longitudeValues, latitudeValues, longitude, latitude, this.crs);
     const [width, height] = this.cubeDimensions;
     const flatIndex = elevationIndex * width * height + latitudeIndex * width + longitudeIndex;
     return uValidity[flatIndex] === 1 && vValidity[flatIndex] === 1;
@@ -552,7 +528,7 @@ export class ZarrCubeVelocityProvider {
   }
 
   private resolveElevationIndices(selection?: ZarrSelectorsProps): number[] {
-    const elevations = this.dimensionValues.elevation;
+    const elevations = this.cubeDimensionValues.elevation;
     if (!elevations?.length) throw new Error('Velocity elevation coordinates are unavailable');
     if (!selection || !Array.isArray(selection.selected)) return [0];
 
@@ -588,8 +564,8 @@ export class ZarrCubeVelocityProvider {
       throw new Error('Velocity Zarr arrays do not have queryable time and elevation dimensions');
     }
     const timeValues = this.dimensionValues.time;
-    const lonValues = this.dimensionValues.lon;
-    const latValues = this.dimensionValues.lat;
+    const lonValues = this.cubeDimensionValues.lon;
+    const latValues = this.cubeDimensionValues.lat;
     if (!timeValues?.length || !lonValues?.length || !latValues?.length) {
       throw new Error('Velocity coordinate values are unavailable');
     }
@@ -612,26 +588,25 @@ export class ZarrCubeVelocityProvider {
       throw new RangeError('Time-series selector is outside the velocity array bounds');
     }
 
-    let sourceLongitude = longitude;
-    if (Number(lonValues[0]) >= 0 && Number(lonValues[lonValues.length - 1]) > 180) {
-      sourceLongitude = ((longitude % 360) + 360) % 360;
-    }
-    const localLonIndex = calculateNearestIndex(lonValues, sourceLongitude);
-    const localLatIndex = calculateNearestIndex(latValues, latitude);
+    const [localLonIndex, localLatIndex] = cubePointIndices(lonValues, latValues, longitude, latitude, this.crs);
     const createSelection = (array: zarr.Array<any>) => {
-      const selection: (number | ReturnType<typeof zarr.slice>)[] = new Array(array.shape.length).fill(0);
-      selection[this.dimIndices.lon.index] = this.loadedOrigin.x + localLonIndex;
+      const selection: (number | ReturnType<typeof zarr.slice>)[] = new Array(
+        array.shape.length
+      ).fill(0);
+      selection[this.dimIndices.lon.index] = this.longitudeIndices[localLonIndex];
       selection[this.dimIndices.lat.index] = this.loadedOrigin.y + localLatIndex;
       // Time series are intentionally queried at the first loaded elevation.
       selection[elevationInfo.index] = this.loadedOrigin.elevation;
       selection[timeInfo.index] = zarr.slice(timeStart, timeEnd);
       for (const [dimension, dimInfo] of Object.entries(this.dimIndices)) {
         if (['lon', 'lat', 'elevation', 'time'].includes(dimension)) continue;
-        const selector = selectors[dimension] ?? selectors[dimInfo.name] ?? this.selectors[dimension];
+        const selector =
+          selectors[dimension] ?? selectors[dimInfo.name] ?? this.selectors[dimension];
         if (selector && !Array.isArray(selector.selected)) {
-          selection[dimInfo.index] = selector.type === 'value'
-            ? calculateNearestIndex(this.dimensionValues[dimension], selector.selected)
-            : Number(selector.selected);
+          selection[dimInfo.index] =
+            selector.type === 'value'
+              ? calculateNearestIndex(this.dimensionValues[dimension], selector.selected)
+              : Number(selector.selected);
         }
       }
       return selection;
@@ -662,7 +637,7 @@ export class ZarrCubeVelocityProvider {
 
     const coordinates: QueryResult['coordinates'] = {
       [timeInfo.name]: validTimes,
-      [elevationInfo.name]: [this.dimensionValues.elevation[0]]
+      [elevationInfo.name]: [this.cubeDimensionValues.elevation[0]]
     };
     if (options.includeSpatialCoordinates !== false && values.length > 0) {
       coordinates[this.dimIndices.lon?.name ?? 'lon'] = [longitude];
@@ -689,7 +664,7 @@ export class ZarrCubeVelocityProvider {
    * or bounds destroy the existing wind layers and reload both components.
    * @returns A promise that resolves after the change is scheduled. If no value
    * changed, it resolves without rebuilding layers.
-   * @remarks Latitude bounds are clamped to the Web Mercator limit.
+   * @remarks Bounds are validated against geographic latitude limits.
    */
   async updateSelectors({
     selectors,
@@ -717,11 +692,11 @@ export class ZarrCubeVelocityProvider {
       updateLayer = true;
     }
     if (bounds !== undefined && JSON.stringify(this.bounds) !== JSON.stringify(bounds)) {
-      if (validateBounds(bounds)) {
+      if (validateCubeBounds(bounds)) {
         this.bounds = {
           ...bounds,
-          south: Math.clamp(bounds.south, -85.05112878, 85.05112878),
-          north: Math.clamp(bounds.north, -85.05112878, 85.05112878)
+          south: bounds.south,
+          north: bounds.north
         };
         updateLayer = true;
       }
@@ -758,7 +733,7 @@ export class ZarrCubeVelocityProvider {
         console.warn('Slice spacing must be a positive integer.');
         return;
       }
-      if (sliceSpacing >= this.dimensionValues.elevation.length) {
+      if (sliceSpacing >= this.cubeDimensionValues.elevation.length) {
         console.warn('Slice spacing exceeds number of elevation levels.');
         return;
       }

@@ -100,12 +100,11 @@ export async function changeMapColors(
     });
   } else {
     const layers = viewerMap(viewerRef, layerInfo.dataType) || null;
-    layers?._layers.forEach(function (layer: any) {
-      if (actualLayer === layer.id) {
-        layers.remove(layer);
-      }
+    const layer = layers?._layers.find((candidate: any) => actualLayer === candidate.id);
+    layer?.updateStyle({
+      scale: layerInfo.params.scale,
+      colormap: layerInfo.params.colormap
     });
-    await generateSelectedLayer(actualLayer, selectedLayers, viewerRef, layers, zarrCesiumRefs);
   }
 }
 

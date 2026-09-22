@@ -48,13 +48,7 @@ export function EditColors({ layerLegendName }: { layerLegendName: string }) {
   };
 
   return (
-    <div
-      className="
-      mt-3 p-3 rounded-2xl
-      bg-[rgba(17,17,17,0.6)] text-white
-      shadow-[0px_4px_4px_rgba(0,0,0,1)]
-      flex flex-col gap-3 px-4"
-    >
+    <div className="flex flex-col gap-3 rounded-xl border border-white/12 bg-white/[.035] p-3 text-white">
       <div className="pt-4 flex justify-left w-full items-center gap-2">
         <p className="text-md font-bold text-white text-center">Color Scale:</p>
         <div className="flex flex-col items-center gap-2">

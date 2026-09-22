@@ -39,68 +39,78 @@ export default function BoundsSelector({
   };
 
   return (
-    <div className="p-1 pt-4 flex justify-between w-full items-center gap-4">
-      <p className="text-md font-bold text-white text-center">Bounds</p>
-      <div className="flex flex-col items-center gap-2 w-full">
-        <div className="flex justify-between w-full items-center gap-4">
-          <span className="text-sm text-white">
-            {pendingBounds.west < 0
-              ? `${Math.round(pendingBounds.west) * -1}°W`
-              : `${Math.round(pendingBounds.west)}°E`}
-          </span>
-          <Slider
-            getAriaLabel={() => 'Elevation range'}
-            value={[Math.round(pendingBounds.west), Math.round(pendingBounds.east)]}
-            min={-180}
-            max={180}
-            disableSwap
-            onChange={(_, newValue) => {
-              if (!Array.isArray(newValue)) return;
-              setPendingBounds(prev => ({
-                ...prev,
-                west: newValue[0],
-                east: newValue[1]
-              }));
-            }}
-            className="clickable"
-            color="success"
-          />
-          {pendingBounds.east < 0
-            ? `${Math.round(pendingBounds.east) * -1}°W`
-            : `${Math.round(pendingBounds.east)}°E`}
+    <div className="grid w-full grid-cols-[72px_minmax(0,1fr)] items-center gap-2.5 py-1">
+      <p className="text-[10px] font-semibold leading-tight text-[#b8b8b8]">Bounds</p>
+      <div className="flex min-w-0 items-center gap-2">
+        <div className="flex min-w-0 flex-1 flex-col gap-2">
+          <div className="grid grid-cols-[34px_minmax(0,1fr)_34px] items-center gap-2">
+            <span className="text-right text-[9px] tabular-nums text-[#aaa]">
+              {pendingBounds.west < 0
+                ? `${Math.round(pendingBounds.west) * -1}°W`
+                : `${Math.round(pendingBounds.west)}°E`}
+            </span>
+            <Slider
+              getAriaLabel={() => 'Elevation range'}
+              value={[Math.round(pendingBounds.west), Math.round(pendingBounds.east)]}
+              min={-180}
+              max={180}
+              disableSwap
+              onChange={(_, newValue) => {
+                if (!Array.isArray(newValue)) return;
+                setPendingBounds(prev => ({
+                  ...prev,
+                  west: newValue[0],
+                  east: newValue[1]
+                }));
+              }}
+              className="clickable"
+              color="success"
+            />
+            <span className="text-[9px] tabular-nums text-[#aaa]">
+              {pendingBounds.east < 0
+                ? `${Math.round(pendingBounds.east) * -1}°W`
+                : `${Math.round(pendingBounds.east)}°E`}
+            </span>
+          </div>
+          <div className="grid grid-cols-[34px_minmax(0,1fr)_34px] items-center gap-2">
+            <span className="text-right text-[9px] tabular-nums text-[#aaa]">
+              {pendingBounds.south < 0
+                ? `${Math.round(pendingBounds.south) * -1}°S`
+                : `${Math.round(pendingBounds.south)}°N`}
+            </span>
+            <Slider
+              getAriaLabel={() => 'Elevation range'}
+              value={[Math.round(pendingBounds.south), Math.round(pendingBounds.north)]}
+              min={-85}
+              max={85}
+              disableSwap
+              onChange={(_, newValue) => {
+                if (!Array.isArray(newValue)) return;
+                setPendingBounds(prev => ({
+                  ...prev,
+                  south: newValue[0],
+                  north: newValue[1]
+                }));
+              }}
+              className="clickable"
+              color="success"
+            />
+            <span className="text-[9px] tabular-nums text-[#aaa]">
+              {pendingBounds.north < 0
+                ? `${Math.round(pendingBounds.north) * -1}°S`
+                : `${Math.round(pendingBounds.north)}°N`}
+            </span>
+          </div>
         </div>
-        <div className="flex justify-between w-full items-center gap-4">
-          {pendingBounds.south < 0
-            ? `${Math.round(pendingBounds.south) * -1}°S`
-            : `${Math.round(pendingBounds.south)}°N`}
-          <Slider
-            getAriaLabel={() => 'Elevation range'}
-            value={[Math.round(pendingBounds.south), Math.round(pendingBounds.north)]}
-            min={-85}
-            max={85}
-            disableSwap
-            onChange={(_, newValue) => {
-              if (!Array.isArray(newValue)) return;
-              setPendingBounds(prev => ({
-                ...prev,
-                south: newValue[0],
-                north: newValue[1]
-              }));
-            }}
-            className="clickable"
-            color="success"
-          />
-          {pendingBounds.north < 0
-            ? `${Math.round(pendingBounds.north) * -1}°S`
-            : `${Math.round(pendingBounds.north)}°N`}
-        </div>
+        <button
+          type="button"
+          title="Apply bounds"
+          className="layer-control-apply clickable"
+          onClick={() => handleChangeDimension(pendingBounds)}
+        >
+          <CheckCircleIcon />
+        </button>
       </div>
-      <button
-        className=" text-white rounded-md hover:opacity-100 opacity-70 clickable p-0"
-        onClick={() => handleChangeDimension(pendingBounds)}
-      >
-        <CheckCircleIcon />
-      </button>
     </div>
   );
 }

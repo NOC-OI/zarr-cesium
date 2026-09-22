@@ -39,7 +39,7 @@ export function ScaleField({
                 disableSwap
                 onChange={(_, v) => field.onChange(v as [number, number])}
                 className="clickable"
-                color="success"
+                sx={{ color: '#d49511' }}
               />
 
               <div className="flex justify-between text-xs text-white mt-1">

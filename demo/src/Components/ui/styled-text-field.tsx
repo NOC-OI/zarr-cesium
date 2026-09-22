@@ -13,12 +13,15 @@ export function StyledTextField({ label, className = '', ...props }: StyledTextF
       variant="outlined"
       size="small"
       fullWidth
-      className={`bg-black bg-opacity-20 rounded-lg ${className}`}
+      className={className}
       sx={{
-        '.MuiOutlinedInput-notchedOutline': { borderColor: 'white' },
-        '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'white' },
+        '.MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(234,234,234,.18)' },
+        '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(212,149,17,.65)' },
+        '& .Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#d49511' },
         '& .MuiOutlinedInput-root': {
-          color: 'white'
+          color: 'white',
+          backgroundColor: 'rgba(10,10,10,.45)',
+          fontSize: '12px'
         }
       }}
       {...props}

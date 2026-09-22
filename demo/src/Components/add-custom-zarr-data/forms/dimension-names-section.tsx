@@ -21,14 +21,14 @@ export function DimensionNamesSection({
     <>
       <Button
         onClick={() => setShowDimensions(v => !v)}
-        className="w-full text-white bg-black rounded-lg opacity-100 hover:opacity-80
-                   flex justify-center items-center py-2! gap-2 clickable"
+        type="button"
+        className="form-secondary-button clickable"
       >
         {showDimensions ? 'Use CF dimension names' : 'Add custom dim names'}
       </Button>
 
       {showDimensions && (
-        <div className="mt-3 space-y-3 border border-white/20 rounded-md p-3">
+        <div className="form-nested-section">
           <p className="text-white font-semibold text-md">Dimension Names</p>
 
           <FormRow label="Time" error={error}>

@@ -27,6 +27,7 @@ const zarrCesiumParams = z
     url: z.url(),
     variable: z.string(),
     crs: crsSchema.nullable().optional(),
+    latIsAscending: z.boolean().optional(),
     tileWidth: z.number().optional(),
     tileHeight: z.number().optional(),
     minimumLevel: z.number().optional(),
@@ -38,12 +39,18 @@ const zarrCesiumParams = z
     dimensionNames: z.record(z.string(), z.string()).optional(),
     noDataMin: z.number().optional(),
     noDataMax: z.number().optional(),
-    requestOverrides: z.object({
-      headers: z.record(z.string(), z.string()).optional(),
-      credentials: z.enum(['omit', 'same-origin', 'include']).optional(),
-      mode: z.enum(['cors', 'no-cors', 'same-origin', 'navigate']).optional(),
-      cache: z.enum(['default', 'no-store', 'reload', 'no-cache', 'force-cache', 'only-if-cached']).optional()
-    }).optional()
+    selectors: z.record(z.string(), z.any()).optional(),
+    multiscaleFormat: z.enum(['geozarr']).optional(),
+    requestOverrides: z
+      .object({
+        headers: z.record(z.string(), z.string()).optional(),
+        credentials: z.enum(['omit', 'same-origin', 'include']).optional(),
+        mode: z.enum(['cors', 'no-cors', 'same-origin', 'navigate']).optional(),
+        cache: z
+          .enum(['default', 'no-store', 'reload', 'no-cache', 'force-cache', 'only-if-cached'])
+          .optional()
+      })
+      .optional()
   })
   .strict();
 
@@ -65,7 +72,15 @@ const zarrCubeParams = z
     zarrVersion: zarrVersionSchema.optional(),
     flipElevation: z.boolean().optional(),
     scale: z.tuple([z.number(), z.number()]).optional(),
-    colormap: z.string().optional()
+    colormap: z.string().optional(),
+    multiscaleFormat: z.enum(['geozarr']).optional(),
+    requestOverrides: z
+      .object({
+        credentials: z.enum(['omit', 'same-origin', 'include']).optional(),
+        mode: z.enum(['cors', 'no-cors', 'same-origin']).optional(),
+        cache: z.enum(['default', 'no-store', 'reload', 'no-cache', 'force-cache']).optional()
+      })
+      .optional()
   })
   .strict();
 
@@ -93,7 +108,15 @@ const zarrCubeVelocityParams = z
     scale: z.tuple([z.number(), z.number()]).optional(),
     colormap: z.string().optional(),
     zarrVersion: zarrVersionSchema.optional(),
-    windOptions: z.record(z.string(), z.any()).optional()
+    windOptions: z.record(z.string(), z.any()).optional(),
+    multiscaleFormat: z.enum(['geozarr']).optional(),
+    requestOverrides: z
+      .object({
+        credentials: z.enum(['omit', 'same-origin', 'include']).optional(),
+        mode: z.enum(['cors', 'no-cors', 'same-origin']).optional(),
+        cache: z.enum(['default', 'no-store', 'reload', 'no-cache', 'force-cache']).optional()
+      })
+      .optional()
   })
   .strict();
 

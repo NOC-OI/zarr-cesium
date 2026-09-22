@@ -30,15 +30,17 @@ export function BooleanSwitchField({
             <Switch
               checked={!!field.value}
               onChange={(_, checked) => field.onChange(checked)}
-              color="success"
               sx={{
+                '& .MuiSwitch-switchBase.Mui-checked': { color: '#d49511' },
+                '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                  backgroundColor: '#d49511'
+                },
                 '& .MuiSwitch-track': {
-                  border: '1px solid white',
-                  backgroundColor: field.value ? 'rgba(0, 255, 0, 0.4)' : 'rgba(255, 255, 255, 0.2)'
+                  border: '1px solid rgba(234,234,234,.2)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.2)'
                 },
                 '& .MuiSwitch-thumb': {
-                  border: '1px solid white',
-                  backgroundColor: '#000'
+                  border: '1px solid rgba(255,255,255,.45)'
                 }
               }}
             />

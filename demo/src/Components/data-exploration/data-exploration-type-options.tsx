@@ -27,65 +27,84 @@ export function DataExplorationTypeOptions({
   const [opacityIsClicked, setOpacityIsClicked] = useState(false);
   const { setTransectLayerName } = useContextHandle();
   const layerName = `${content}_${subLayer}`;
+  const layer = subLayers[subLayer];
+  const displayName = layer.dataDescription[0];
   return (
-    <div className="text-xs">
-      <div
-        id="type-option"
-        className="flex justify-between items-center gap-1.5 font-bold text-white"
-      >
-        <CustomSwitch
-          checked={verifyIfWasSelectedBefore(content, subLayer, selectedLayers)}
-          onChange={(checked: boolean) =>
-            handleChangeMapLayerAndAddLegend(
-              checked,
-              JSON.parse(
-                JSON.stringify({
-                  subLayer: `${content}_${subLayer}`,
-                  dataInfo: subLayers[subLayer]
-                })
-              ),
-              dispatch,
-              subLayer,
-              layerLegend,
-              content,
-              setOpacityIsClicked
-            )
-          }
-          id={`${content}_${subLayer}`}
-          label={subLayer}
-        />
-        {verifyIfWasSelectedBefore(content, subLayer, selectedLayers) ? (
-          <div id="layer-edit" className="flex justify-between gap-1.5 font-bold">
-            <InfoIcon
-              id="info-subsection-button"
-              onClick={() =>
-                handleClickLayerInfo(content, subLayer, setInfoButtonBox, selectedLayers)
-              }
-              className="cursor-pointer hover:text-yellow-700"
-              fontSize="small"
-            />
-            {['zarr-cesium', 'zarr-cube'].includes(selectedLayers[layerName].dataType) ? (
-              <AreaChartIcon
-                titleAccess="Query transect"
-                onClick={() => setTransectLayerName(layerName)}
-                className="cursor-pointer hover:text-yellow-700"
-                fontSize="small"
-              />
-            ) : null}
-            <TuneIcon
-              onClick={() =>
-                handleClickLegend(subLayers[subLayer], subLayer, dispatch, content, selectedLayers)
-              }
-              fontSize="small"
-              className="cursor-pointer hover:text-yellow-700"
-            />
-            <OpacityIcon
-              onClick={() => handleClickSlider(setOpacityIsClicked)}
-              className="cursor-pointer hover:text-yellow-700"
-              fontSize="small"
-            />
+    <div className={`layer-card relative ${selectedLayers[layerName] ? 'layer-card--active' : ''}`}>
+      <div id="type-option" className="text-white">
+        <div className={`min-w-0 ${selectedLayers[layerName] ? 'pr-29' : 'pr-8'}`}>
+          <CustomSwitch
+            checked={verifyIfWasSelectedBefore(content, subLayer, selectedLayers)}
+            onChange={(checked: boolean) =>
+              handleChangeMapLayerAndAddLegend(
+                checked,
+                JSON.parse(JSON.stringify({ subLayer: layerName, dataInfo: layer })),
+                dispatch,
+                subLayer,
+                layerLegend,
+                content,
+                setOpacityIsClicked
+              )
+            }
+            id={layerName}
+            label={displayName}
+          />
+          <div className="layer-card__meta">
+            {layer.tags?.map((tag: string) => (
+              <span key={tag} className="tag">
+                {tag.toUpperCase()}
+              </span>
+            ))}
           </div>
-        ) : null}
+        </div>
+        <div
+          id="layer-edit"
+          className="layer-card__actions layer-option-actions absolute right-2.5 top-1/2 -translate-y-1/2"
+        >
+          <button
+            type="button"
+            title="View layer details"
+            aria-label={`View details for ${displayName}`}
+            onClick={() => handleClickLayerInfo(content, subLayer, setInfoButtonBox, layer)}
+          >
+            <InfoIcon fontSize="small" />
+          </button>
+          {verifyIfWasSelectedBefore(content, subLayer, selectedLayers) ? (
+            <>
+              {['zarr-cesium', 'zarr-cube'].includes(selectedLayers[layerName].dataType) ? (
+                <button
+                  type="button"
+                  title="Query a transect"
+                  onClick={() => setTransectLayerName(layerName)}
+                >
+                  <AreaChartIcon titleAccess="Query transect" fontSize="small" />
+                </button>
+              ) : null}
+              <button
+                type="button"
+                title="Style layer"
+                onClick={() =>
+                  handleClickLegend(
+                    subLayers[subLayer],
+                    subLayer,
+                    dispatch,
+                    content,
+                    selectedLayers
+                  )
+                }
+              >
+                <TuneIcon fontSize="small" />
+              </button>
+              <button
+                type="button"
+                title="Change opacity"
+                onClick={() => handleClickSlider(setOpacityIsClicked)}
+              >
+                <OpacityIcon fontSize="small" />
+              </button>
+            </>
+          ) : null}
+        </div>
       </div>
       {opacityIsClicked && verifyIfWasSelectedBefore(content, subLayer, selectedLayers) && (
         <input

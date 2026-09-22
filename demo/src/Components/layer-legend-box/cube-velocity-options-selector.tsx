@@ -24,6 +24,8 @@ export function CubeVelocityOptionsSelector({ layerLegendName }: LayerLegendBoxP
     ...DEFAULT_WIND_OPTIONS,
     ...(params.windOptions || {})
   };
+  const elevationSelection = params.selectors?.elevation?.selected;
+  const is2D = elevationSelection !== undefined && !Array.isArray(elevationSelection);
 
   const handleUpdateParams = (newParams: Partial<VelocityOptions>) => {
     dispatch(layersActions.setLayerAction('update-cube-params'));
@@ -64,26 +66,22 @@ export function CubeVelocityOptionsSelector({ layerLegendName }: LayerLegendBoxP
   };
 
   return (
-    <div
-      className="
-      mt-3 p-3 rounded-2xl
-      bg-[rgba(17,17,17,0.6)] text-white
-      shadow-[0px_4px_4px_rgba(0,0,0,1)]
-      flex flex-col gap-3 px-4"
-    >
-      <div className="flex flex-col gap-1">
-        <p className="text-[11px] font-bold">Vertical Exaggeration</p>
-        <Slider
-          value={params.verticalExaggeration || DEFAULT_VERTICAL_EXAGGERATION}
-          min={0}
-          max={100000}
-          onChange={(_, v) => handleUpdateSlice({ verticalExaggeration: v as number })}
-          color="success"
-          className="clickable"
-          valueLabelDisplay="auto"
-          valueLabelFormat={idx => idx}
-        />
-      </div>
+    <div className="flex flex-col gap-3 rounded-xl border border-white/12 bg-white/[.035] p-3 text-white">
+      {!is2D && (
+        <div className="flex flex-col gap-1">
+          <p className="text-[11px] font-bold">Vertical Exaggeration</p>
+          <Slider
+            value={params.verticalExaggeration || DEFAULT_VERTICAL_EXAGGERATION}
+            min={0}
+            max={100000}
+            onChange={(_, v) => handleUpdateSlice({ verticalExaggeration: v as number })}
+            color="success"
+            className="clickable"
+            valueLabelDisplay="auto"
+            valueLabelFormat={idx => idx}
+          />
+        </div>
+      )}
       <div className="flex flex-col gap-1">
         <p className="text-[11px] font-bold">Color Map</p>
         <FormControl fullWidth size="small">
@@ -93,8 +91,11 @@ export function CubeVelocityOptionsSelector({ layerLegendName }: LayerLegendBoxP
             className="text-white clickable"
             sx={{
               color: 'white',
-              '.MuiOutlinedInput-notchedOutline': { borderColor: 'white' },
-              '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'white' },
+              backgroundColor: 'rgba(10,10,10,.45)',
+              fontSize: '11px',
+              '.MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,.18)' },
+              '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(212,149,17,.65)' },
+              '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#d49511' },
               '.MuiSvgIcon-root': { color: 'white' }
             }}
           >
@@ -139,7 +140,7 @@ export function CubeVelocityOptionsSelector({ layerLegendName }: LayerLegendBoxP
           <p className="text-[11px] font-bold">Speed Factor</p>
           <input
             type="text"
-            className="w-full rounded-lg px-2 py-1 bg-black bg-opacity-30 text-white text-[12px] clickable"
+            className="layer-control-input clickable"
             value={windOptions.speedFactor}
             onChange={e => updateWindOptions({ speedFactor: JSON.parse(e.target.value) })}
           />
@@ -167,7 +168,7 @@ export function CubeVelocityOptionsSelector({ layerLegendName }: LayerLegendBoxP
           <p className="text-[11px] font-bold">Particles Texture Size</p>
           <input
             type="text"
-            className="w-full rounded-lg px-2 py-1 bg-black bg-opacity-30 text-white text-[12px] clickable"
+            className="layer-control-input clickable"
             value={windOptions.particlesTextureSize}
             onChange={e => updateWindOptions({ particlesTextureSize: JSON.parse(e.target.value) })}
           />
@@ -198,7 +199,7 @@ export function CubeVelocityOptionsSelector({ layerLegendName }: LayerLegendBoxP
             min={0}
             max={1}
             step={0.001}
-            className="w-full rounded-lg px-2 py-1 bg-black bg-opacity-30 text-white text-[12px] clickable"
+            className="layer-control-input clickable"
             value={windOptions.dropRate}
             onChange={e => updateWindOptions({ dropRate: Number(e.target.value) })}
           />
@@ -210,7 +211,7 @@ export function CubeVelocityOptionsSelector({ layerLegendName }: LayerLegendBoxP
             min={0}
             max={1}
             step={0.001}
-            className="w-full rounded-lg px-2 py-1 bg-black bg-opacity-30 text-white text-[12px] clickable"
+            className="layer-control-input clickable"
             value={windOptions.dropRateBump}
             onChange={e => updateWindOptions({ dropRateBump: Number(e.target.value) })}
           />
@@ -222,7 +223,7 @@ export function CubeVelocityOptionsSelector({ layerLegendName }: LayerLegendBoxP
             min={0}
             max={1}
             step={0.05}
-            className="w-full rounded-lg px-2 py-1 bg-black bg-opacity-30 text-white text-[12px] clickable"
+            className="layer-control-input clickable"
             value={windOptions.minVisibleRatio}
             onChange={e => updateWindOptions({ minVisibleRatio: Number(e.target.value) })}
           />

@@ -14,26 +14,28 @@ export function ColorBar({ layerLegend }: ColorBarProps) {
     30
   );
   return (
-    <div className="p-2 z-40 block">
-      <div className="flex justify-center font-extrabold gap-3">
-        <p className="text-xs text-center font-bold">{dataDescription[0]}</p>
-        <p className="text-xs text-center font-bold">{dataDescription[1]}</p>
+    <div className="z-40 block w-full">
+      <div className="mb-2 flex items-baseline justify-between gap-3">
+        <p className="truncate text-[11px] font-bold text-[#e8e8e8]">{dataDescription[0]}</p>
+        <p className="shrink-0 text-[9px] font-semibold text-[#888]">{dataDescription[1]}</p>
       </div>
-      <div className="flex justify-between font-extrabold">
-        <p className="text-xs text-center font-bold">{Math.min(...listColorsValues).toFixed(1)}</p>
-        <p className="text-xs text-center font-bold">{Math.max(...listColorsValues).toFixed(1)}</p>
+      <div className="mb-1.5 flex justify-between">
+        <p className="text-[9px] font-semibold tabular-nums text-[#aaa]">
+          {Math.min(...listColorsValues).toFixed(1)}
+        </p>
+        <p className="text-[9px] font-semibold tabular-nums text-[#aaa]">
+          {Math.max(...listColorsValues).toFixed(1)}
+        </p>
       </div>
-      <div className="flex">
+      <div className="flex h-3.5 overflow-hidden rounded-full ring-1 ring-white/10">
         {listColors.map((value: number[], idx: number) => (
           <div
-            className="px-[0.1rem] py-1.5"
+            className="min-w-0 flex-1"
             key={idx}
             style={{
               backgroundColor: `rgb(${value[0]},${value[1]},${value[2]})`
             }}
-          >
-            <p className="opacity-0">=</p>
-          </div>
+          />
         ))}
       </div>
     </div>

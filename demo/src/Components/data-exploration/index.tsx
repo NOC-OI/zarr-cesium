@@ -11,13 +11,17 @@ export function DataExplorationSelection({
     return null;
   }
   return (
-    <div className="rounded-2xl p-1.5  fadeIn-50-ease">
-      <div className="m-h-[80vh] overflow-y-auto">
+    <div className="catalog-panel">
+      <div className="catalog-panel__list">
         {Object.keys(listLayers).map((layerClass: string) => (
           <DataExplorationType
             key={layerClass}
             content={layerClass}
-            childs={listLayers[layerClass].layerNames}
+            childs={Object.fromEntries(
+              Object.entries(listLayers[layerClass].layerNames).filter(([name, layer]) =>
+                `${name} ${layer.dataDescription.join(' ')} ${layer.content}`.toLowerCase()
+              )
+            )}
             setInfoButtonBox={setInfoButtonBox}
           />
         ))}

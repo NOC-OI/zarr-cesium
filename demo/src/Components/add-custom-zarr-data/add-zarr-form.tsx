@@ -1,4 +1,4 @@
-import { Controller, FormProvider, useForm } from 'react-hook-form';
+import { FormProvider, useForm } from 'react-hook-form';
 import { FormRow } from '../ui/form-row';
 import { getDefaultLayerValues } from './_actions/actions';
 import { layerFormSchema, type LayerFormType } from '../../application/data/schemas';
@@ -8,13 +8,13 @@ import { ZarrCubeForm } from './zarr-cube-form';
 import { ZarrCesiumForm } from './zarr-cesium-form';
 import { ZarrCubeVelocityForm } from './zarr-cube-velocity-form';
 import { useEffect } from 'react';
-import FormControl from '@mui/material/FormControl';
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
 import { Button } from '../ui/button';
 import { useAppDispatch, useAppSelector } from '../../application/use-layers';
 import { layersActions } from '../../application/store';
 import { handleChangeMapLayerAndAddLegend } from '../data-exploration/_actions/actions';
+import { StyledTextField } from '../ui/styled-text-field';
+import { SelectField } from './forms/select-field';
+import { formHeadingClass, formSectionClass } from './form-styles';
 
 export function AddZarrForm() {
   const form = useForm<LayerFormType>({
@@ -62,35 +62,42 @@ export function AddZarrForm() {
   };
   return (
     <FormProvider {...form}>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 p-6 ...">
-        {/* Data type selector */}
-        <FormRow label="Data Type" error={errors.dataType?.message}>
-          <Controller
+      <form onSubmit={handleSubmit(onSubmit)} className="custom-data-form">
+        <section className={formSectionClass}>
+          <div className={formHeadingClass}>
+            <span>Layer</span>
+            <small>How this dataset appears in the catalog</small>
+          </div>
+          <SelectField
+            control={control as any}
             name="dataType"
-            control={control}
-            render={({ field }) => (
-              <FormControl fullWidth size="small">
-                <Select
-                  {...field}
-                  value={field.value ?? 'zarr-cesium'}
-                  className="text-white clickable"
-                  sx={{
-                    color: 'white',
-                    '.MuiOutlinedInput-notchedOutline': { borderColor: 'white' },
-                    '&:hover .MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'white'
-                    },
-                    '.MuiSvgIcon-root': { color: 'white' }
-                  }}
-                >
-                  <MenuItem value="zarr-cesium">zarr-cesium</MenuItem>
-                  <MenuItem value="zarr-cube">zarr-cube</MenuItem>
-                  <MenuItem value="zarr-cube-velocity">zarr-cube-velocity</MenuItem>
-                </Select>
-              </FormControl>
-            )}
+            label="Layer type"
+            optional={false}
+            options={[
+              { label: '2D Zarr imagery', value: 'zarr-cesium' },
+              { label: '3D Zarr cube', value: 'zarr-cube' },
+              { label: 'Velocity particles', value: 'zarr-cube-velocity' }
+            ]}
+            error={errors.dataType?.message}
           />
-        </FormRow>
+          <FormRow label="Display name" error={errors.dataDescription?.[0]?.message}>
+            <StyledTextField
+              {...register('dataDescription.0')}
+              placeholder="e.g. Sea-surface temperature"
+            />
+          </FormRow>
+          <FormRow label="Units" error={errors.dataDescription?.[1]?.message}>
+            <StyledTextField {...register('dataDescription.1')} placeholder="e.g. °C, m/s, g/kg" />
+          </FormRow>
+          <FormRow label="Description" error={errors.content?.message}>
+            <StyledTextField
+              {...register('content')}
+              placeholder="Describe the source and coverage"
+              multiline
+              minRows={2}
+            />
+          </FormRow>
+        </section>
 
         {/* Type-specific forms */}
         {dataType === 'zarr-cesium' && (
@@ -103,10 +110,7 @@ export function AddZarrForm() {
         {dataType === 'zarr-cube-velocity' && (
           <ZarrCubeVelocityForm register={register} control={control as any} errors={errors} />
         )}
-        <Button
-          className="w-full text-white bg-black rounded-lg opacity-100 hover:opacity-80 flex justify-center items-center py-2! gap-2 clickable"
-          type="submit"
-        >
+        <Button className="form-submit clickable" type="submit">
           Add Layer
         </Button>
       </form>

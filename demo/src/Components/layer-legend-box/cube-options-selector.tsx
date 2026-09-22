@@ -71,13 +71,7 @@ export function CubeOptionsSelector({ layerLegendName }: LayerLegendBoxProps) {
   }, [latSlice, lonSlice, elevationSlice]);
 
   return (
-    <div
-      className="
-      mt-3 p-3 rounded-2xl
-      bg-[rgba(17,17,17,0.6)] text-white
-      shadow-[0px_4px_4px_rgba(0,0,0,1)]
-      flex flex-col gap-3 px-4"
-    >
+    <div className="flex flex-col gap-3 rounded-xl border border-white/12 bg-white/[.035] p-3 text-white">
       <div className="flex flex-col gap-1">
         <p className="text-[11px] font-bold">
           Elevation Slice:{' '}
@@ -162,8 +156,11 @@ export function CubeOptionsSelector({ layerLegendName }: LayerLegendBoxProps) {
             className="text-white clickable"
             sx={{
               color: 'white',
-              '.MuiOutlinedInput-notchedOutline': { borderColor: 'white' },
-              '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'white' },
+              backgroundColor: 'rgba(10,10,10,.45)',
+              fontSize: '11px',
+              '.MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,.18)' },
+              '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(212,149,17,.65)' },
+              '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#d49511' },
               '.MuiSvgIcon-root': { color: 'white' }
             }}
           >

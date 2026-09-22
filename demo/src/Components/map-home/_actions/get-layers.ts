@@ -1,15 +1,13 @@
 import type { Viewer } from 'cesium';
 import { ZarrCubeProvider, ZarrCubeVelocityProvider, ZarrLayerProvider } from 'zarr-cesium';
 import { IcechunkStore } from 'icechunk-js';
-import { GetZarrLayer } from '../../../lib/map-layers/addZarrLayer';
 import type { DataInfoType, keyable, SelectedLayersType, ZarrCesiumRefs } from '../../../types';
 import type { CubeOptions, LayerOptions, VelocityOptions } from 'zarr-cesium';
 import type React from 'react';
 
 export function viewerMap(viewerRef: React.RefObject<Viewer | null>, dataType: string) {
   const relationship: keyable = {
-    'zarr-cesium': viewerRef.current?.imageryLayers,
-    'zarr-titiler': viewerRef.current?.imageryLayers
+    'zarr-cesium': viewerRef.current?.imageryLayers
   };
   return relationship[dataType];
 }
@@ -60,9 +58,6 @@ export async function generateSelectedLayer(
       return {
         selectedLayer: getSelectedLayerWithDimensions(layer, actualLayer, selectedLayers, true)
       };
-    } else if (layerName.dataType === 'zarr-titiler') {
-      const layer = await getZarrLayer(layerName, actualLayer);
-      layers.add(layer);
     }
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'Error adding layer' };
@@ -82,7 +77,7 @@ export function getSelectedLayerWithDimensions(
     if (dimKey === 'lat' || dimKey === 'lon') {
       if (!cube) return;
       dimensions[dimKey] = {
-        values: layer.dimensionValues[dimKey],
+        values: layer.cubeDimensionValues[dimKey],
         selected: dimKey === 'lat' ? layer.latSliceIndex : layer.lonSliceIndex
       };
     } else {
@@ -90,7 +85,7 @@ export function getSelectedLayerWithDimensions(
         values: layer.dimensionValues[dimKey],
         selected: layer.selectors[dimKey].selected
       };
-      if (cube && dimKey === 'elevation') {
+      if (cube && dimKey === 'elevation' && Array.isArray(layer.selectors[dimKey].selected)) {
         const elevationShape = layer.elevationShape;
         dimensions[dimKey].indices = Array.from({ length: elevationShape }, (_, i) => i);
       }
@@ -157,16 +152,11 @@ export async function getZarrCubeVelocity(
   if (gebcoTerrainEnabled !== undefined && options.flipElevation !== true) {
     options.belowSeaLevel = gebcoTerrainEnabled;
   }
+  console.log('getZarrCubeVelocity options:', options);
   const layer = new ZarrCubeVelocityProvider(viewerRef.current, options);
   layer.id = actualLayer;
   velocityCubeRef.current = layer;
 
   await layer.load();
-  return layer;
-}
-
-export async function getZarrLayer(layerName: DataInfoType, actualLayer: string) {
-  const zarrLayerClass = new GetZarrLayer(layerName, actualLayer);
-  const layer = await zarrLayerClass.getTile();
   return layer;
 }

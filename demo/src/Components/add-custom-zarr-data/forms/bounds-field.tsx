@@ -41,7 +41,7 @@ export function BoundsField({ control, name = 'params.bounds', error }: BoundsFi
                     field.onChange({ ...bounds, west, east });
                   }}
                   className="clickable"
-                  color="success"
+                  sx={{ color: '#d49511' }}
                 />
 
                 <div className="flex justify-between text-xs text-white mt-1">
@@ -75,7 +75,7 @@ export function BoundsField({ control, name = 'params.bounds', error }: BoundsFi
                     field.onChange({ ...bounds, south, north });
                   }}
                   className="clickable"
-                  color="success"
+                  sx={{ color: '#d49511' }}
                 />
 
                 <div className="flex justify-between text-xs text-white mt-1">

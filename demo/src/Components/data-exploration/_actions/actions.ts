@@ -1,17 +1,16 @@
-import type React from 'react';
+import { createElement, type ChangeEvent, type Dispatch, type SetStateAction } from 'react';
 import { DEFAULT_COLORMAP, DEFAULT_OPACITY } from 'zarr-cesium';
 import { layersActions, type AppDispatch } from '../../../application/store';
-import { ZARR_TILE_SERVER_URL } from '../../../lib/map-layers/utils';
 import type {
   DataInfoType,
   LayerNamesType,
   LayersLegendType,
-  SelectedLayersType,
-  TitilerOptions
+  SelectedLayersType
 } from '../../../types';
+import { LayerInfoPanel } from '../../layer-info-panel';
 
 export function handleChangeOpacity(
-  e: React.ChangeEvent<HTMLInputElement>,
+  e: ChangeEvent<HTMLInputElement>,
   dispatch: AppDispatch,
   content: string,
   subLayer: string,
@@ -72,9 +71,7 @@ export function verifyIfWasSelectedBefore(
   return !!selectedLayers[`${content}_${subLayer}`];
 }
 
-export function handleClickSlider(
-  setOpacityIsClicked: React.Dispatch<React.SetStateAction<boolean>>
-) {
+export function handleClickSlider(setOpacityIsClicked: Dispatch<SetStateAction<boolean>>) {
   setOpacityIsClicked(value => !value);
 }
 
@@ -82,11 +79,11 @@ export function handleClickLayerInfo(
   content: string,
   subLayer: string,
   setInfoButtonBox: any,
-  selectedLayers: SelectedLayersType
+  layer: DataInfoType
 ) {
   setInfoButtonBox({
-    title: `${content} - ${subLayer}`,
-    content: selectedLayers[`${content}_${subLayer}`].content
+    title: 'Layer details',
+    content: createElement(LayerInfoPanel, { group: content, layerId: subLayer, layer })
   });
 }
 
@@ -108,7 +105,7 @@ export function addMapLayer(
   dispatch: AppDispatch
 ) {
   const layer = structuredClone(layerInfo.dataInfo);
-  if (['zarr-titiler', 'zarr-cesium'].includes(layer.dataType)) {
+  if (layer.dataType === 'zarr-cesium') {
     layer.params.scale ||= [0, 1];
     layer.params.colormap ||= DEFAULT_COLORMAP;
   }
@@ -132,20 +129,9 @@ export async function handleChangeMapLayerAndAddLegend(
   subLayer: string,
   layerLegend: LayersLegendType,
   content: string,
-  setOpacityIsClicked?: React.Dispatch<React.SetStateAction<boolean>>
+  setOpacityIsClicked?: Dispatch<SetStateAction<boolean>>
 ) {
-  if (checked && layerInfo.dataInfo.dataType === 'zarr-titiler') {
-    const params = layerInfo.dataInfo.params as TitilerOptions;
-    const response = await fetch(
-      `${ZARR_TILE_SERVER_URL}time_values?url=${encodeURIComponent(params.url)}`
-    );
-    Object.assign(layerInfo.dataInfo, {
-      dimensions: {
-        time: { values: await response.json(), selected: 0 }
-      }
-    });
-    layerInfo.dataInfo.params.colormap ||= DEFAULT_COLORMAP;
-  } else if (!checked) {
+  if (!checked) {
     const name = `${content}_${subLayer}`;
     if (layerLegend[name]) dispatch(layersActions.removeLayerLegend(name));
   }
@@ -156,7 +142,7 @@ export function handleChangeMapLayer(
   checked: boolean,
   layerInfo: { subLayer: string; dataInfo: DataInfoType },
   dispatch: AppDispatch,
-  setOpacityIsClicked?: React.Dispatch<React.SetStateAction<boolean>>
+  setOpacityIsClicked?: Dispatch<SetStateAction<boolean>>
 ) {
   dispatch(layersActions.setActualLayer(layerInfo.subLayer));
   if (checked) {

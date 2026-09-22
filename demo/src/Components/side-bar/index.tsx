@@ -44,9 +44,33 @@ export function SideBar() {
   }
 
   return (
-    <div className="flex absolute left-2 top-[2vh] z-10">
-      <div className="relative max-h-[80vh] bg-[rgba(17,17,17,0.6)] rounded-2xl text-base p-1.5 z-20 shadow-[0px_4px_4px_rgba(0,0,0,1)]">
-        <div className="flex gap-3 md:gap-6 pl-2 pr-2">
+    <div className="absolute left-2 top-2 z-10 flex sm:left-4 sm:top-4">
+      <div className="sidebar relative z-20 w-[min(390px,calc(100vw-16px))] sm:w-[390px]">
+        <div className="sidebar__brand">
+          <div className="grid h-[34px] w-[34px] place-items-center rounded-[10px] bg-gradient-to-br from-[#efc35f] to-[#d49511] font-black text-[#1a1a1a] shadow-[0_7px_20px_rgba(212,149,17,0.24)]">
+            Z
+          </div>
+          <div className="flex flex-1">
+            <strong>Zarr-Cesium</strong>
+          </div>
+          <div className="flex flex-row! items-center gap-1">
+            <SideBarLink
+              title="Source Code"
+              id="source_code"
+              href="https://github.com/noc-oi/zarr-cesium"
+              icon={GitHubIcon}
+              iconOnly
+            />
+            <SideBarLink
+              title="Documentation"
+              id="documentation"
+              href="https://noc-oi.github.io/zarr-cesium/docs/"
+              icon={DescriptionIcon}
+              iconOnly
+            />
+          </div>
+        </div>
+        <div className="sidebar__nav">
           <SideBarLink
             title={'Data Exploration'}
             id={'data_exploration'}
@@ -60,18 +84,6 @@ export function SideBar() {
             onClick={handleShowSelection}
             active={sideBarOption === 'add_your_own_zarr_data'}
             icon={AddCircleIcon}
-          />
-          <SideBarLink
-            title={'Source Code'}
-            id={'source_code'}
-            href={'https://github.com/noc-oi/zarr-cesium'}
-            icon={GitHubIcon}
-          />
-          <SideBarLink
-            title={'Documentation'}
-            id={'documentation'}
-            href={'https://noc-oi.github.io/zarr-cesium/docs/'}
-            icon={DescriptionIcon}
           />
         </div>
         <div>

@@ -29,6 +29,7 @@ export function getDefaultLayerValues(dataType: LayerFormType['dataType']): Laye
           scale: [0, 1],
           colormap: 'viridis',
           bounds: { west: -50, south: -20, east: 10, north: 20 },
+          selectors: { time: { selected: 0 }, elevation: { selected: [0, 10] } },
           opacity: 1
         }
       };
@@ -45,6 +46,7 @@ export function getDefaultLayerValues(dataType: LayerFormType['dataType']): Laye
           bounds: { west: -50, south: -20, east: 10, north: 20 },
           colormap: 'viridis',
           flipElevation: false,
+          selectors: { time: { selected: 0 }, elevation: { selected: [0, 10] } },
           opacity: 1
         }
       };

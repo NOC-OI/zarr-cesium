@@ -32,7 +32,8 @@
     "react-transition-group": "^4.4.5",
     "uplot": "^1.6.32",
     "zarr-cesium": "file:..",
-    "zarr-maps-colormap": "^0.2.0",
+    "zarr-maps-colormap": "file:../../zarr-maps/packages/zarr-maps-colormap",
+    "zarr-maps-tiling": "file:../../zarr-maps/packages/zarr-maps-tiling",
     "zod": "^4.1.13"
   },
   "devDependencies": {

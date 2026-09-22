@@ -6,8 +6,8 @@ export function AddCustomZarrData({ display }: AddCustomZarrDataProps) {
     return null;
   }
   return (
-    <div className="rounded-2xl p-1.5  fadeIn-50-ease w-100">
-      <div className="max-h-[70vh] overflow-y-auto">
+    <div className="bg-[rgba(17,17,17,.35)]">
+      <div className="max-h-[calc(100vh-190px)] overflow-y-auto p-3 [scrollbar-color:#555_transparent] scrollbar-thin max-sm:max-h-[calc(58vh-160px)]">
         <AddZarrForm />
       </div>
     </div>

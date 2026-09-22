@@ -8,6 +8,7 @@ interface SideBarLinkProps {
   href?: string;
   title?: string;
   id?: string;
+  iconOnly?: boolean;
 }
 
 export function SideBarLink({
@@ -16,30 +17,31 @@ export function SideBarLink({
   onClick,
   href,
   title = '',
-  id = ''
+  id = '',
+  iconOnly = false
 }: SideBarLinkProps): JSX.Element {
+  const className = iconOnly
+    ? 'sidebar-icon-link flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg transition hover:bg-white/8'
+    : `sidebar-link ${active ? 'sidebar-link--active' : ''}`;
   if (href) {
     return (
       <a
-        className={`flex items-center justify-center p-1 ${active ? 'cursor-pointer bg-[#D49511] rounded-full' : 'cursor-pointer'}`}
+        className={className}
         title={title}
         id={id}
         href={href}
         target="_blank"
         rel="noopener noreferrer"
       >
-        {React.createElement(icon, { className: 'text-white', fontSize: 'large' })}
+        {React.createElement(icon, { fontSize: 'small' })}
+        {!iconOnly && <span>{title}</span>}
       </a>
     );
   }
   return (
-    <div
-      className={`flex items-center justify-center p-1 ${active ? 'cursor-pointer bg-[#D49511] rounded-full' : 'cursor-pointer'}`}
-      title={title}
-      id={id}
-      onClick={onClick}
-    >
-      {React.createElement(icon, { className: 'text-white', fontSize: 'large' })}
+    <div className={className} title={title} id={id} onClick={onClick}>
+      {React.createElement(icon, { fontSize: 'small' })}
+      {!iconOnly && <span>{title}</span>}
     </div>
   );
 }

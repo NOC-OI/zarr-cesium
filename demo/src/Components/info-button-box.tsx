@@ -16,18 +16,18 @@ export function InfoButtonBox({ infoButtonBox, setInfoButtonBox }: InfoButtonBox
   return (
     <Draggable nodeRef={nodeRef} cancel=".clickable">
       <div
-        className="w-104 ml-4 left-full top-[5vh] absolute bg-[rgba(17,17,17,0.6)] text-white z-20 p-2 rounded-2xl shadow-[0px_4px_4px_rgba(0,0,0,1)] whitespace-pre-line overflow-y-auto overflow-x-hidden"
+        className="info-panel absolute left-full top-0 z-20 ml-4 overflow-x-hidden overflow-y-auto whitespace-pre-line p-3 text-white max-sm:fixed! max-sm:bottom-2 max-sm:left-2! max-sm:top-auto! max-sm:m-0 max-sm:max-h-[52vh]"
         id="info-subsection"
         ref={nodeRef}
       >
-        <div className="flex justify-end">
+        <div className="info-panel__topbar">
+          <span>{infoButtonBox.title}</span>
           <CancelIcon
             onClick={handleClose}
             className="clickable cursor-pointer hover:text-yellow-500"
           />
         </div>
-        <div className="text-sm text-center pb-1.5 font-bold">{infoButtonBox.title}</div>
-        <div className="markdown-content content-center pb-2 pt-3 max-h-[85vh] overflow-y-auto overflow-x-hidden">
+        <div className="markdown-content max-h-[82vh] overflow-y-auto overflow-x-hidden">
           <div>{infoButtonBox.content}</div>
         </div>
       </div>

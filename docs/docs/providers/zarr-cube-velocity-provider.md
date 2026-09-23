@@ -5,9 +5,9 @@ title: ZarrCubeVelocityProvider
 
 # ZarrCubeVelocityProvider
 
-The **ZarrCubeVelocityProvider** loads and visualizes **3D vector fields** (U, V components) from Zarr datasets as animated particle layers in Cesium using the `WindLayer` from the [NOC-OI `cesium-wind-layer` fork](https://github.com/NOC-OI/cesium-wind-layer).
+The **ZarrCubeVelocityProvider** loads and visualizes **3D vector fields** (U, V components) from Zarr datasets as animated particle layers in Cesium using `WindLayer` from [`cube-cesium-wind-layer`](https://www.npmjs.com/package/cube-cesium-wind-layer), the [NOC-OI fork](https://github.com/NOC-OI/cesium-wind-layer) of the original [`cesium-wind-layer`](https://github.com/hongfaqiu/cesium-wind-layer).
 
-Zarr-Cesium targets fork release v0.11.0. Compared with the upstream release, this version adds `minVisibleRatio`, which clamps camera-driven particle width, trail-length, and speed scaling (`0.6` by default, or `1` to retain the overview scale at every zoom). It also resets the visible longitude/latitude ranges and pixel scale when zooming back to a globe overview, preventing regional-view styling from becoming stuck. Tagged releases include an installable package tarball, allowing Zarr-Cesium to use a fixed fork build.
+The NOC-OI fork adds cube-aware particle rendering and `minVisibleRatio`, which clamps camera-driven particle width, trail-length, and speed scaling (`0.6` by default, or `1` to retain the overview scale at every zoom). It also resets visible longitude/latitude ranges and pixel scale when zooming back to a globe overview.
 
 This provider enables real-time visualization of:
 
@@ -73,7 +73,8 @@ const windCube = new ZarrCubeVelocityProvider(viewer, options);
 await windCube.load();
 ```
 
-This creates a **stack of animated particle layers**, one per elevation slice.
+This creates one cube-aware animated particle layer. The layer receives the complete U/V cube and
+distributes particles across the selected elevation levels.
 
 ---
 
@@ -85,6 +86,7 @@ interface VelocityOptions {
   stores?: { u?: Readable; v?: Readable }; // Custom U/V stores, including IcechunkStore
   variables: { u: string; v: string }; // Zarr array names for U and V
   bounds: BoundsProps; // geographic rectangle
+  latIsAscending?: boolean; // Override latitude array orientation when metadata is incorrect
   dimensionNames?: DimensionNamesProps; // Custom dimension names. If not provided, defaults will be used or identified automatically based on CF conventions.
   selectors?: Record<string, ZarrSelectorsProps>; // Initial dimension slices
   multiscaleLevel?: number; // Index in the metadata's level list; defaults to 0
@@ -104,6 +106,10 @@ interface VelocityOptions {
   onAuthError?: OnAuthError; // Called once for HTTP 400/401 responses
 }
 ```
+
+`latIsAscending` controls the north/south orientation of rows and is inferred from latitude
+coordinates by default. It is not a replacement for `flipElevation`: that option reverses the
+vertical coordinate direction. Use overrides only for datasets whose metadata is absent or wrong.
 
 ---
 
@@ -170,30 +176,34 @@ This loads:
 - Windowed spatial slice (based on bounds)
 - Elevation slice ranges and spacing
 
-Then it automatically creates Cesium `WindLayer` instances (one per elevation slice) and adds them to the viewer.
+Then it creates one cube-aware Cesium `WindLayer` and adds it to the viewer.
+
+Before rendering, the provider verifies that U and V have identical longitude, latitude, and
+elevation coordinate grids. A mismatch is rejected because component values cannot be paired
+reliably. Both components are loaded through the same cube-loading path as `ZarrCubeProvider`.
 
 ---
 
 ## How It Renders the Data
 
-The provider generates **one WindLayer per elevation slice**, spaced by `sliceSpacing`:
+The provider passes the complete elevation-major U/V cube to one `WindLayer`. Particles are distributed across the enabled elevation levels according to `sliceSpacing`:
 
-- `sliceSpacing = 1` → one layer per model level
-- `sliceSpacing = 2` → one layer every two levels
+- `sliceSpacing = 1` → particles may occupy every model level
+- `sliceSpacing = 2` → particles use every second model level
 - `sliceSpacing = n` → coarse vertical sampling
 
-Each level has:
+The cube contains:
 
-- a 2D U-field
-- a 2D V-field
-- a computed **altitude**
-- a WindLayer placed at the correct height
+- a contiguous elevation-major U cube
+- a contiguous elevation-major V cube
+- elevation coordinate values used to compute particle height
+- semantic latitude orientation through `latIsAscending`
 
 Particles animate based on u/v speed and direction.
 
 ### WindLayer Integration
 
-Each layer receives a `windData` structure:
+The layer receives a cube `windData` structure:
 
 ```ts
 {
@@ -201,7 +211,9 @@ Each layer receives a `windData` structure:
   v: { array: Float32Array, min: -0.5, max: 0.5 },
   width,
   height,
-  unit: 'm s-1',
+  depth,
+  elevations,
+  latIsAscending,
   bounds: this.bounds
 }
 ```
@@ -215,7 +227,9 @@ Plus user-configurable **particle system settings**:
   lineLength,
   particlesTextureSize,
   minVisibleRatio,
-  flipY
+  elevationStep,
+  verticalExaggeration,
+  belowSeaLevel
   ...
 }
 ```
@@ -289,7 +303,7 @@ await windCube.updateSelectors({
 });
 ```
 
-This **reloads U and V cubes**, destroys old wind layers, and creates new ones.
+This reloads the U and V cubes, destroys the old wind layer, and creates a new one.
 
 CF time coordinates are decoded to ISO strings in `windCube.dimensionValues`.
 Selectors may therefore use either an array index or a decoded time value, for
@@ -349,9 +363,9 @@ await windCube.updateSlices({
 
 This:
 
-- Removes all current WindLayers
+- Updates the current cube-aware `WindLayer`
 - Recomputes heights
-- Rebuilds wind layers with new parameters
+- Applies the new vertical-layout parameters without rereading the cube
 
 All the parameters are optional. If not provided, the current value is retained.
 
@@ -374,11 +388,13 @@ windCube.updateStyle({
 });
 ```
 
-This applies instantly to all existing layers.
+This applies instantly to the existing layer.
 
 The full list of supported colormaps is available in the [Colormaps section](../api/type-aliases/ColorMapName.md).
 
-The `windOptions` allows fine-tuning of particle system parameters. For more information, see the [`WindLayerOptions` documentation in the NOC-OI fork](https://github.com/NOC-OI/cesium-wind-layer/tree/v0.11.0/packages/cesium-wind-layer).
+`windOptions` allows fine-tuning of particle-system parameters. `particleHeight` is ignored because
+height is derived from the Zarr elevation coordinates. For more information, see the
+[`WindLayerOptions` source in the NOC-OI fork](https://github.com/NOC-OI/cesium-wind-layer/tree/main/packages/cesium-wind-layer).
 
 ---
 
@@ -408,7 +424,7 @@ vertical subset. Pass `{ signal }` to cancel a query.
 
 ### Remove Layers, Clearing & Destroying
 
-Remove all velocity layers:
+Remove the velocity layer and release its resources:
 
 ```ts
 windCube.destroy();

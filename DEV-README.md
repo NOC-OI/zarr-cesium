@@ -101,7 +101,7 @@ The demo will be available at:
 
 ## Customize the Demo (Use Your Own Zarr Data)
 
-Edit: [`demo/src/application/data/layers-json.tsx`](https://github.com/NOC-OI/zarr-cesium/blob/dev/demo/src/application/data/layers-json.tsx).
+Edit: [`demo/src/application/data/layers-json.ts`](https://github.com/NOC-OI/zarr-cesium/blob/dev/demo/src/application/data/layers-json.ts).
 
 You can change:
 
@@ -152,7 +152,7 @@ You can then use the demo app to test changes **live** by running it simultaneou
 
 We welcome contributions! Please follow the workflow below.
 
-## 🧩 5.1. Branching Model
+## 5.1. Branching Model
 
 Use feature branches:
 
@@ -162,7 +162,7 @@ fix/bug-description
 docs/update-provider-docs
 ```
 
-## 🧪 5.2. Before pushing
+## 5.2. Before pushing
 
 Run:
 
@@ -172,14 +172,14 @@ npm run build
 
 This will check all TypeScript types, eslint rules, and prettier formatting. And then build the library.
 
-## 📥 5.3. Pull Request Guidelines
+## 5.3. Pull Request Guidelines
 
 - Describe clearly **what the PR adds or fixes**
 - Link related **issues**
 - Update documentation when necessary
 - Keep PRs focused instead of large multi-purpose changes
 
-## 📚 5.4. Updating Documentation
+## 5.4. Updating Documentation
 
 Docs live under: `docs/`
 
@@ -195,50 +195,15 @@ To test docs locally:
 cd docs
 npm run start
 ```
-
 ---
 
-# 6. Deployment (Docs Only)
-
-If you have Docusaurus deployment configured:
-
-```bash
-cd docs
-npm run deploy
-```
-
-This depends on your project’s hosting setup (GitHub Pages, Vercel, etc.).
-
----
-
-# 7. Troubleshooting
-
-### Cesium access token errors
-
-Make sure `.env` is present in the demo directory:
-
-```
-VITE_CESIUM_TOKEN=...
-```
-
-### Missing dependencies in docs
-
-Run:
-
-```bash
-cd docs
-npm install
-```
-
----
-
-# 8. Releasing zarr-cesium to npm
+# 6. Releasing zarr-cesium to npm
 
 `zarr-cesium` is published as a single npm package. Its `zarr-maps-colormap` and `zarr-maps-tiling` dependencies must be available on npm before publishing a release that depends on them.
 
 The following example prepares `zarr-cesium` version `0.2.0`, using version `0.2.0` of both Zarr Maps dependencies. Run all commands from the repository root.
 
-## 8.1. Update the release branch
+## 6.1. Update the release branch
 
 Start with an up-to-date branch and a clean understanding of any local changes:
 
@@ -249,7 +214,7 @@ git pull --ff-only origin dev
 
 If the pull reports local changes or diverging history, resolve that branch state before creating a release tag.
 
-## 8.2. Confirm the Zarr Maps dependencies
+## 6.2. Confirm the Zarr Maps dependencies
 
 Publish `zarr-maps-colormap@0.2.0` and `zarr-maps-tiling@0.2.0` from the `zarr-maps` repository first. Confirm that npm can resolve them:
 
@@ -260,7 +225,7 @@ npm view zarr-maps-tiling@0.2.0 version
 
 Both commands must print `0.2.0`. Do not tag the Cesium release until these dependencies are available from npm.
 
-## 8.3. Update the package version and dependencies
+## 6.3. Update the package version and dependencies
 
 Set the Cesium package version and its Zarr Maps dependency ranges:
 
@@ -285,7 +250,7 @@ npm install --prefix demo
 
 For later releases, replace `0.2.0` with the intended versions in every command.
 
-## 8.4. Validate the release
+## 6.4. Validate the release
 
 Build the library, demo, and documentation:
 
@@ -307,7 +272,7 @@ Confirm that the package uses npm version ranges rather than local `file:` depen
 npm pkg get version dependencies
 ```
 
-## 8.5. Commit and tag the release
+## 6.5. Commit and tag the release
 
 Review the package manifest and lockfiles before committing:
 

@@ -24,6 +24,9 @@ jobs:
           registry-url: https://registry.npmjs.org/
           package-manager-cache: false
 
+      - name: Update npm for trusted publishing
+        run: npm install --global npm@latest
+
       - name: Validate release version
         env:
           RELEASE_TAG: ${{ github.ref_name }}
@@ -60,10 +63,22 @@ jobs:
       - name: Build package
         run: npm run build
 
-      - name: Publish to npm
-        run: npm publish --access public
+      - name: Create installable tarball
+        run: |
+          mkdir -p release
+          npm pack --pack-destination release
 
-      - name: Create GitHub release
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" --verify-tag --generate-notes --title "$GITHUB_REF_NAME"
+      - name: Stage package on npm
+        run: npm stage publish --access public --provenance
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: zarr-cesium-${{ github.ref_name }}
+          path: release/*.tgz
+
+      - name: Attach package to GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release/*.tgz
+          generate_release_notes: true

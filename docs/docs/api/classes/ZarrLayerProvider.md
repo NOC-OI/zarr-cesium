@@ -206,6 +206,22 @@ Current index-based selectors used for tile rendering and queries.
 
 ***
 
+### tileCacheStats
+
+#### Get Signature
+
+```ts
+get tileCacheStats(): TileCacheStats;
+```
+
+Current decoded tile-cache usage and lifetime counters.
+
+##### Returns
+
+[`TileCacheStats`](../interfaces/TileCacheStats.md)
+
+***
+
 ### tileHeight
 
 #### Get Signature
@@ -295,6 +311,20 @@ Creates a Cesium imagery provider backed by a URL or custom Zarrita store.
 Prefer [createLayer](#createlayer) when adding the result to a viewer.
 
 ## Methods
+
+### clearTileCache()
+
+```ts
+clearTileCache(): void;
+```
+
+Removes decoded numeric tiles retained by this imagery provider.
+
+#### Returns
+
+`void`
+
+***
 
 ### destroy()
 

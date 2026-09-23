@@ -28,6 +28,22 @@ await cubeProvider.load();
 
 ## Accessors
 
+### queryDimensionValues
+
+#### Get Signature
+
+```ts
+get queryDimensionValues(): DimensionValues;
+```
+
+Coordinate values addressable by queries against the loaded cube subset.
+
+##### Returns
+
+[`DimensionValues`](../interfaces/DimensionValues.md)
+
+***
+
 ### queryIndexOffsets
 
 #### Get Signature
@@ -135,6 +151,40 @@ Samples every loaded elevation along a WGS84 line.
 `Promise`\<[`FullTransectResult`](../interfaces/FullTransectResult.md)\>
 
 A distance-by-elevation value matrix.
+
+***
+
+### getSlices()
+
+```ts
+getSlices(): object;
+```
+
+Get the current slice indices for latitude, longitude, and elevation.
+
+#### Returns
+
+`object`
+
+An object containing the current slice indices for latitude, longitude, and elevation.
+
+##### elevationSliceIndex
+
+```ts
+elevationSliceIndex: number;
+```
+
+##### latSliceIndex
+
+```ts
+latSliceIndex: number;
+```
+
+##### lonSliceIndex
+
+```ts
+lonSliceIndex: number;
+```
 
 ***
 
@@ -311,7 +361,7 @@ Nothing. Reloading continues asynchronously after a change.
 
 #### Remarks
 
-Latitude bounds are clamped to the Web Mercator limit.
+Bounds are validated against geographic latitude limits.
 
 ***
 
@@ -389,6 +439,16 @@ cubeDimensions: [number, number, number] | null = null;
 ```
 
 Size of the cube in [longitude, latitude, elevation].
+
+***
+
+### cubeDimensionValues
+
+```ts
+cubeDimensionValues: DimensionValues = {};
+```
+
+Coordinate values represented by the currently loaded cube subset.
 
 ***
 

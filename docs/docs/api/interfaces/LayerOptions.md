@@ -2,6 +2,16 @@
 
 ## Properties
 
+### cache?
+
+```ts
+optional cache: boolean | TileCacheOptions;
+```
+
+Decoded numeric tile cache. Enabled by default and scoped to this layer.
+
+***
+
 ### colormap?
 
 ```ts

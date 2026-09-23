@@ -28,7 +28,7 @@ import {
   type ZarrLevelMetadata
 } from './types';
 import * as zarr from 'zarrita';
-import { WindLayerOptions } from 'cesium-wind-layer';
+import { WindLayerOptions } from 'cube-cesium-wind-layer';
 
 /**
  * Global Web Mercator projection instance used for coordinate conversions.
@@ -103,7 +103,6 @@ export const DEFAULT_WIND_OPTIONS: Partial<WindLayerOptions> = {
   minVisibleRatio: 0.6,
   useViewerBounds: true,
   dynamic: true,
-  flipY: true
 };
 
 /**

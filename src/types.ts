@@ -1,5 +1,5 @@
 import type { CesiumWidget, Viewer } from 'cesium';
-import type { WindLayerOptions } from 'cesium-wind-layer';
+import type { WindLayerOptions } from 'cube-cesium-wind-layer';
 import type ndarray from 'ndarray';
 import type {
   BoundsProps,
@@ -7,6 +7,7 @@ import type {
   DimensionNamesProps,
   DimensionValues,
   MultiscaleFormat,
+  TileCacheOptions,
   ZarrSelectorsProps
 } from 'zarr-maps-tiling';
 import type { ColorMapName } from 'zarr-maps-colormap';
@@ -92,6 +93,8 @@ export interface LayerOptions {
   transformRequest?: TransformRequest;
   onAuthError?: OnAuthError;
   multiscaleFormat?: MultiscaleFormat;
+  /** Decoded numeric tile cache. Enabled by default and scoped to this layer. */
+  cache?: boolean | TileCacheOptions;
 }
 
 export interface VelocityOptions {

@@ -63,6 +63,10 @@ The 2D data pipeline is shared with OpenLayers and Leaflet through
 `zarr-maps-tiling`. Palette definitions and color-ramp helpers are provided by
 the separate `zarr-maps-colormap` package and re-exported by `zarr-cesium`.
 
+The two 3D providers share `ZarrCubeDataProvider`, an exported non-rendering loader that applies
+selectors and geographic bounds, reads the cube once, normalizes longitude ordering, and exposes
+both full coordinate axes and the loaded subset coordinates.
+
 ---
 
 ## Installation
@@ -95,9 +99,9 @@ npm install
 npm run dev
 ```
 
-The demo site will be available at `http://localhost:3000`.
+The demo site will be available at `http://localhost:5173` by default.
 
-If you want to use your own Zarr datasets, you can modify the demo code in [`demo/src/application/data/layers-json.tsx`](https://github.com/NOC-OI/zarr-cesium/blob/dev/demo/src/application/data/layers-json.tsx) to point to your data URLs. You may need to adjust variable names, bounds, and other parameters accordingly.
+If you want to use your own Zarr datasets, you can modify the demo code in [`demo/src/application/data/layers-json.ts`](https://github.com/NOC-OI/zarr-cesium/blob/dev/demo/src/application/data/layers-json.ts) to point to your data URLs. You may need to adjust variable names, bounds, and other parameters accordingly.
 
 ---
 
@@ -190,9 +194,9 @@ https://github.com/user-attachments/assets/8b066725-c6c7-4b7a-9fc0-d632b623937c
 
 ### 3. `ZarrCubeVelocityProvider`
 
-Renders **3D velocity fields** from U/V components as animated **wind/current layers** using the [NOC-OI fork of `cesium-wind-layer`](https://github.com/NOC-OI/cesium-wind-layer).
+Renders **3D velocity fields** from U/V components as animated **wind/current layers** using [`cube-cesium-wind-layer`](https://www.npmjs.com/package/cube-cesium-wind-layer), the NOC-OI fork of the original [`cesium-wind-layer`](https://github.com/hongfaqiu/cesium-wind-layer).
 
-Zarr-Cesium uses fork release v0.11.0, which adds `minVisibleRatio` to bound camera-driven particle width, trail-length, and speed scaling. It also restores the full data bounds and overview particle styling when zooming back out, avoiding particles remaining at the previous regional-view scale. The fork publishes installable tarballs with tagged GitHub releases so downstream packages can depend on an immutable build.
+Zarr-Cesium installs the NOC-OI fork from npm as `cube-cesium-wind-layer`. The fork adds cube-aware rendering and `minVisibleRatio` to bound camera-driven particle width, trail-length, and speed scaling. It also restores the full data bounds and overview particle styling when zooming back out, avoiding particles remaining at the previous regional-view scale. The original project remains credited in the fork package and documentation.
 
 It supports both Zarr v2/v3 and multiscale datasets, with configurable slice spacing and particle animation parameters.
 
@@ -262,7 +266,7 @@ This tool is built with:
 - [Zarrita](https://zarrita.dev/)
 - [`zarr-maps-tiling`](https://www.npmjs.com/package/zarr-maps-tiling)
 - [`zarr-maps-colormap`](https://www.npmjs.com/package/zarr-maps-colormap)
-- [NOC-OI/cesium-wind-layer](https://github.com/NOC-OI/cesium-wind-layer)
+- [`cube-cesium-wind-layer`](https://www.npmjs.com/package/cube-cesium-wind-layer) ([NOC-OI source](https://github.com/NOC-OI/cesium-wind-layer), forked from [hongfaqiu/cesium-wind-layer](https://github.com/hongfaqiu/cesium-wind-layer))
 - [jscolormaps](https://github.com/timothygebhard/js-colormaps)
 
 This work is part of the [Atlantis project](https://atlantis.ac.uk/), a UK initiative supporting long-term ocean observations and marine science in the Atlantic. The project is led by the [National Oceanography Centre (NOC)](https://noc.ac.uk/).

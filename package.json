@@ -20,8 +20,8 @@
   ],
   "scripts": {
     "test:coordinates": "node tests/run-cube-coordinates.mjs",
-    "dev": "tsup src/index.ts --format cjs,esm --dts --sourcemap --external cesium-wind-layer --external zarrita --external zarr-maps-colormap --watch",
-    "build": "tsup src/index.ts --format esm --dts --sourcemap --external cesium --external cesium-wind-layer --external zarrita --external zarr-maps-colormap",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --sourcemap --external cube-cesium-wind-layer --external zarrita --external zarr-maps-colormap --watch",
+    "build": "tsup src/index.ts --format esm --dts --sourcemap --external cesium --external cube-cesium-wind-layer --external zarrita --external zarr-maps-colormap",
     "clean": "rm -rf dist",
     "docs": "npm --prefix docs run build",
     "serve:docs": "npm --prefix docs run serve",
@@ -31,7 +31,7 @@
     "cesium": ">=1.119.0 <2"
   },
   "dependencies": {
-    "cesium-wind-layer": "file:../cesium-wind-layer/packages/cesium-wind-layer",
+    "cube-cesium-wind-layer": "^0.12.0",
     "zarr-maps-colormap": "^0.3.0",
     "zarr-maps-tiling": "^0.3.0",
     "zarrita": "^0.7.4"

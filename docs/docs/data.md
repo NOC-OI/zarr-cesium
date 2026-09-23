@@ -73,47 +73,59 @@ This lets the browser fetch only the **visible slice**.
 
 # 3. Building Multiscale Pyramids
 
-To support seamless zooming, convert your dataset to a pyramid representation using [`ndpyramid`](https://github.com/carbonplan/ndpyramid):
+To support seamless zooming, convert your dataset to a pyramid representation using
+[`topozarr`](https://github.com/carbonplan/topozarr). TopoZarr writes metadata following
+the [GeoZarr conventions](https://github.com/zarr-developers/geozarr-spec), including
+the multiscales, projection, and spatial conventions. This is the recommended format
+for new datasets.
 
 ```python
-from ndpyramid import pyramid_resample
+import xproj  # registers the Xarray .proj accessor
+from topozarr import create_pyramid
 
-pyramid_ds = pyramid_resample(
-    reprojected_ds,
-    x="longitude",
-    y="latitude",
+pyramid_input = reprojected_ds.proj.assign_crs(spatial_ref="EPSG:4326")
+
+pyramid = create_pyramid(
+    pyramid_input,
     levels=6,
-    resampling="nearest",
+    x_dim="longitude",
+    y_dim="latitude",
+    method="nearest",
 )
+
+pyramid.write("multiscale.zarr")
 ```
+
+`levels` includes the original dataset. Level `0` is the original, highest-resolution
+level; each subsequent level is coarser. Choose the aggregation method to match the
+data: `nearest` is useful for categorical values, while `mean`, `min`, `max`, or `sum`
+may be more appropriate for continuous variables.
 
 Output structure:
 
 ```
 multiscale.zarr/
-├── 0/    # lowest resolution
-├── 1/    # 2× highres
-├── 2/    # 4× highres
+├── 0/    # original, highest resolution
+├── 1/    # 2× coarser in each spatial dimension
+├── 2/    # 4× coarser in each spatial dimension
 └── ...
 ```
 
 Zarr-Cesium’s 2D provider automatically selects levels based on zoom. For the 3D providers, you can specify the desired level.
 
+[`ndpyramid`](https://github.com/carbonplan/ndpyramid) remains supported for existing
+stores, but its legacy metadata layout is not recommended for new datasets. If the
+data needs reprojection or regridding, perform that step before passing it to TopoZarr.
+
 # 4. Zarr Format
 
-If you are using **Zarr v2**, write the final dataset to with consolidated metadata:
+TopoZarr writes the pyramid and its GeoZarr metadata with `pyramid.write(...)`, as
+shown above. Ensure the resulting store is accessible via HTTP(S). For web delivery,
+use small spatial chunks and avoid consolidating Zarr v3 metadata; TopoZarr provides
+chunking and sharding recommendations for this workflow.
 
-```python
-pyramid_ds.to_zarr("multiscale.zarr", consolidated=True, zarr_version=2)
-```
-
-This ensures compatibility with Zarr-Cesium and efficient loading in the browser.
-
-If you are using **Zarr v3**, ensure your Zarr store is accessible via HTTP(S) and follows the Zarr v3 specification:
-
-```python
-pyramid_ds.to_zarr("multiscale.zarr", zarr_version=3)
-```
+Zarr-Cesium also supports existing Zarr v2 stores. These should use consolidated
+metadata to reduce the number of browser requests.
 
 ---
 
@@ -129,7 +141,7 @@ We used **approximately 30 GB of NEMO NPD ocean model output** (documentation av
 
 We also provide a sample atmospheric dataset for testing wind-related visualisations. This dataset contains U/V wind components on a regular latitude–longitude grid, processed with the same workflow, and derived from the ERA5 reanalysis of Hurricane Florence.
 
-A full list of available datasets is provided in the **data information file** on [demo/src/application/data/layers-json.tsx](https://github.com/NOC-OI/zarr-cesium/blob/dev/demo/src/application/data/layers-json.tsx).
+A full list of available datasets is provided in the **data information file** on [demo/src/application/data/layers-json.ts](https://github.com/NOC-OI/zarr-cesium/blob/dev/demo/src/application/data/layers-json.ts).
 
 A full demo is available:
 
@@ -147,7 +159,7 @@ Reproject (iris / xESMF)
         ↓
 Rechunk (small spatial chunks)
         ↓
-Build pyramids using either the legacy ndpyramid layout or the GeoZarr layout
+Build a GeoZarr pyramid with TopoZarr
         ↓
 Write Zarr v2/v3
         ↓

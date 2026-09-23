@@ -28,6 +28,22 @@ await cubeProvider.load();
 
 ## Accessors
 
+### queryDimensionValues
+
+#### Get Signature
+
+```ts
+get queryDimensionValues(): DimensionValues;
+```
+
+Coordinate values addressable by queries against the loaded cube subset.
+
+##### Returns
+
+[`DimensionValues`](../interfaces/DimensionValues.md)
+
+***
+
 ### queryIndexOffsets
 
 #### Get Signature
@@ -113,9 +129,9 @@ The currently loaded array remains in memory. Call [load](#load) or
 
 ```ts
 getFullTransect(
-   start,
-   end,
-   selectors?,
+   start, 
+   end, 
+   selectors?, 
 options?): Promise<FullTransectResult>;
 ```
 
@@ -138,12 +154,46 @@ A distance-by-elevation value matrix.
 
 ***
 
+### getSlices()
+
+```ts
+getSlices(): object;
+```
+
+Get the current slice indices for latitude, longitude, and elevation.
+
+#### Returns
+
+`object`
+
+An object containing the current slice indices for latitude, longitude, and elevation.
+
+##### elevationSliceIndex
+
+```ts
+elevationSliceIndex: number;
+```
+
+##### latSliceIndex
+
+```ts
+latSliceIndex: number;
+```
+
+##### lonSliceIndex
+
+```ts
+lonSliceIndex: number;
+```
+
+***
+
 ### getTimeSeries()
 
 ```ts
 getTimeSeries(
-   position,
-   selectors?,
+   position, 
+   selectors?, 
 options?): Promise<QueryResult>;
 ```
 
@@ -169,9 +219,9 @@ A result ordered by the time coordinate.
 
 ```ts
 getTransect(
-   start,
-   end,
-   selectors?,
+   start, 
+   end, 
+   selectors?, 
 options?): Promise<TransectResult>;
 ```
 
@@ -198,8 +248,8 @@ Positions, distances, and values along the transect.
 
 ```ts
 getVerticalProfile(
-   position,
-   selectors?,
+   position, 
+   selectors?, 
 options?): Promise<QueryResult>;
 ```
 
@@ -257,8 +307,8 @@ Calling `load` again replaces the in-memory subset. Use
 
 ```ts
 queryData(
-   geometry,
-   selectors?,
+   geometry, 
+   selectors?, 
 options?): Promise<QueryResult>;
 ```
 
@@ -311,7 +361,7 @@ Nothing. Reloading continues asynchronously after a change.
 
 #### Remarks
 
-Latitude bounds are clamped to the Web Mercator limit.
+Bounds are validated against geographic latitude limits.
 
 ***
 
@@ -389,6 +439,16 @@ cubeDimensions: [number, number, number] | null = null;
 ```
 
 Size of the cube in [longitude, latitude, elevation].
+
+***
+
+### cubeDimensionValues
+
+```ts
+cubeDimensionValues: DimensionValues = {};
+```
+
+Coordinate values represented by the currently loaded cube subset.
 
 ***
 

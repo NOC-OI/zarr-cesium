@@ -4,6 +4,17 @@ Framework-neutral options for the shared 2D Zarr tile renderer.
 
 ## Properties
 
+### cache?
+
+```ts
+optional cache: boolean | TileCacheOptions;
+```
+
+Decoded numeric tile cache. Enabled by default. Pass `false` to disable it,
+or an options object to configure its per-provider byte budget.
+
+***
+
 ### colormap?
 
 ```ts

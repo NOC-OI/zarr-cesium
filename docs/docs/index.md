@@ -100,6 +100,6 @@ Built with:
 
 - [CesiumJS](https://cesium.com/platform/cesiumjs/)
 - [zarrita.js](https://zarrita.dev/)
-- [NOC-OI/cesium-wind-layer](https://github.com/NOC-OI/cesium-wind-layer)
+- [`cube-cesium-wind-layer`](https://www.npmjs.com/package/cube-cesium-wind-layer) ([NOC-OI source](https://github.com/NOC-OI/cesium-wind-layer), forked from [hongfaqiu/cesium-wind-layer](https://github.com/hongfaqiu/cesium-wind-layer))
 
 **Developed at the [National Oceanography Centre (NOC)](https://www.noc.ac.uk/) as part of the [Atlantis](https://atlantis.ac.uk/) project.**

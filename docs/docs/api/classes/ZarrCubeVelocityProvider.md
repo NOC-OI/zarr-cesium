@@ -5,11 +5,11 @@ from Zarr datasets as animated Cesium `WindLayer`s.
 
 ## Remarks
 
-This provider targets the NOC-OI fork of `cesium-wind-layer` v0.11.0. The
-fork adds bounded camera-driven particle scaling through `minVisibleRatio`
-and restores overview styling after zooming back out. The provider loads 3D
-vector data, slices it by elevation, and creates animated particle layers
-that visualize flow direction and speed.
+This provider uses `cube-cesium-wind-layer`, the NOC-OI fork of
+`cesium-wind-layer`. The fork adds
+cube-aware rendering, bounded camera-driven particle scaling through
+`minVisibleRatio`, and restores overview styling after zooming back out. The
+provider passes one elevation-major U/V cube to a single animated layer.
 
 ## Example
 
@@ -23,6 +23,22 @@ await provider.load();
 ```
 
 ## Accessors
+
+### queryDimensionValues
+
+#### Get Signature
+
+```ts
+get queryDimensionValues(): object;
+```
+
+Coordinate values addressable by queries against the loaded velocity subset.
+
+##### Returns
+
+`object`
+
+***
 
 ### queryIndexOffsets
 
@@ -73,7 +89,7 @@ If either U or V has neither a URL nor a custom store.
 destroy(): void;
 ```
 
-Removes all active wind layers from the Cesium scene.
+Removes the active wind cube layer from the Cesium scene and releases its GPU resources.
 
 #### Returns
 
@@ -90,8 +106,8 @@ Loaded U/V arrays and selectors remain in memory. Call
 
 ```ts
 getTimeSeries(
-   position,
-   selectors?,
+   position, 
+   selectors?, 
 options?): Promise<QueryResult>;
 ```
 
@@ -117,8 +133,8 @@ Speed and component values ordered by time.
 
 ```ts
 getVerticalProfile(
-   position,
-   selectors?,
+   position, 
+   selectors?, 
 options?): Promise<QueryResult>;
 ```
 
@@ -161,7 +177,7 @@ When either custom or URL-backed store, selected array, dimensions, or data chun
 
 #### Remarks
 
-U and V are loaded concurrently and must describe compatible grids.
+U and V must describe compatible grids.
 
 ***
 
@@ -169,8 +185,8 @@ U and V are loaded concurrently and must describe compatible grids.
 
 ```ts
 queryData(
-   geometry,
-   selectors,
+   geometry, 
+   selectors, 
 options): Promise<VelocityQueryResult>;
 ```
 
@@ -228,7 +244,7 @@ changed, it resolves without rebuilding layers.
 
 #### Remarks
 
-Latitude bounds are clamped to the Web Mercator limit.
+Bounds are validated against geographic latitude limits.
 
 ***
 
@@ -238,7 +254,7 @@ Latitude bounds are clamped to the Web Mercator limit.
 updateSlices(options): Promise<void>;
 ```
 
-Updates the rendered slices (number of vertical layers) based on the spacing or exaggeration.
+Updates the rendered cube's active elevation interval or vertical placement.
 
 #### Parameters
 
@@ -253,7 +269,7 @@ Updates the rendered slices (number of vertical layers) based on the spacing or 
 
 `Promise`\<`void`\>
 
-A promise resolved after replacement wind layers are created.
+A promise resolved after the cube layer options are updated.
 
 #### Remarks
 
@@ -268,14 +284,14 @@ dimension are rejected with a warning.
 updateStyle(options): void;
 ```
 
-Updates the visual style of the velocity layers, such as opacity,
+Updates the visual style of the velocity cube, such as opacity,
 color scale, or particle simulation parameters.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `options` | \{ `colormap?`: `string`; `opacity?`: `number`; `scale?`: \[`number`, `number`\]; `windOptions?`: [`VelocityWindOptions`](../type-aliases/VelocityWindOptions.md); \} | Partial style update. `windOptions` are forwarded to each WindLayer except `particleHeight`, which remains derived from Zarr elevation. |
+| `options` | \{ `colormap?`: `string`; `opacity?`: `number`; `scale?`: \[`number`, `number`\]; `windOptions?`: [`VelocityWindOptions`](../type-aliases/VelocityWindOptions.md); \} | Partial style update. `windOptions` are forwarded to the WindLayer except `particleHeight`, which remains derived from Zarr elevation. |
 | `options.colormap?` | `string` | - |
 | `options.opacity?` | `number` | - |
 | `options.scale?` | \[`number`, `number`\] | - |
@@ -287,7 +303,7 @@ color scale, or particle simulation parameters.
 
 #### Remarks
 
-Existing layers are updated in place; source data is not reloaded.
+The existing layer is updated in place; source data is not reloaded.
 
 ## Properties
 
@@ -308,6 +324,22 @@ cubeDimensions: [number, number, number] | null = null;
 ```
 
 Cube dimensions: [longitude, latitude, elevation].
+
+***
+
+### cubeDimensionValues
+
+```ts
+cubeDimensionValues: object = {};
+```
+
+Coordinate values represented by the currently loaded velocity cube subset.
+
+#### Index Signature
+
+```ts
+[key: string]: string[] | number[] | Float64Array<ArrayBufferLike>
+```
 
 ***
 

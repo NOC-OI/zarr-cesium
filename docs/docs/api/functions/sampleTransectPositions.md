@@ -2,8 +2,8 @@
 
 ```ts
 function sampleTransectPositions(
-   start,
-   end,
+   start, 
+   end, 
    samples?): QueryPosition[];
 ```
 

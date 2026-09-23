@@ -2,10 +2,10 @@
 
 ```ts
 function openLevelArray(
-   root,
-   levelPath,
-   variable,
-   levelCache,
+   root, 
+   levelPath, 
+   variable, 
+   levelCache, 
 zarrVersion?): Promise<Array<any, Readable>>;
 ```
 

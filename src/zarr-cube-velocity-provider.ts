@@ -1,7 +1,7 @@
 import { cubePointIndices, longitudeInBounds, validateCubeBounds } from './cube-coordinates';
 import { ZarrCubeDataProvider } from './zarr-cube-data-provider';
 import { type Viewer, Math } from 'cesium';
-import { WindLayer, type WindLayerOptions } from 'cesium-wind-layer';
+import { WindLayer, type WindLayerOptions } from 'cube-cesium-wind-layer';
 import * as zarr from 'zarrita';
 import {
   calculateNearestIndex,
@@ -55,11 +55,11 @@ export interface VelocityQueryResult extends QueryResult {
  * from Zarr datasets as animated Cesium `WindLayer`s.
  *
  * @remarks
- * This provider targets the NOC-OI fork of `cesium-wind-layer` v0.11.0. The
- * fork adds bounded camera-driven particle scaling through `minVisibleRatio`
- * and restores overview styling after zooming back out. The provider loads 3D
- * vector data, slices it by elevation, and creates animated particle layers
- * that visualize flow direction and speed.
+ * This provider uses `cube-cesium-wind-layer`, the NOC-OI fork of
+ * `cesium-wind-layer`. The fork adds
+ * cube-aware rendering, bounded camera-driven particle scaling through
+ * `minVisibleRatio`, and restores overview styling after zooming back out. The
+ * provider passes one elevation-major U/V cube to a single animated layer.
  *
  * @example
  * ```ts

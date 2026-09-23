@@ -8,6 +8,11 @@ const typedocSidebar = {
       items: [
         {
           type: "doc",
+          id: "api/classes/ZarrCubeDataProvider",
+          label: "ZarrCubeDataProvider"
+        },
+        {
+          type: "doc",
           id: "api/classes/ZarrCubeProvider",
           label: "ZarrCubeProvider"
         },
@@ -134,6 +139,16 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "api/interfaces/TileCacheOptions",
+          label: "TileCacheOptions"
+        },
+        {
+          type: "doc",
+          id: "api/interfaces/TileCacheStats",
+          label: "TileCacheStats"
+        },
+        {
+          type: "doc",
           id: "api/interfaces/TransectQueryOptions",
           label: "TransectQueryOptions"
         },
@@ -161,6 +176,16 @@ const typedocSidebar = {
           type: "doc",
           id: "api/interfaces/XYLimitsProps",
           label: "XYLimitsProps"
+        },
+        {
+          type: "doc",
+          id: "api/interfaces/ZarrCubeData",
+          label: "ZarrCubeData"
+        },
+        {
+          type: "doc",
+          id: "api/interfaces/ZarrCubeDataOptions",
+          label: "ZarrCubeDataOptions"
         },
         {
           type: "doc",

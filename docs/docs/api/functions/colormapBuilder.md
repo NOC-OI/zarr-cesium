@@ -2,9 +2,9 @@
 
 ```ts
 function colormapBuilder(
-   color,
-   convertTo?,
-   n?,
+   color, 
+   convertTo?, 
+   n?, 
    opacity?): string[] | number[][];
 ```
 

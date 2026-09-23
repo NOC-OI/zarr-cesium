@@ -2,12 +2,12 @@
 
 ```ts
 function calculateElevationSlice(
-   shapeElevation,
-   dimInfo,
-   selectorsElevation,
-   dimensionValuesWithElevation,
-   root,
-   levelInfo,
+   shapeElevation, 
+   dimInfo, 
+   selectorsElevation, 
+   dimensionValuesWithElevation, 
+   root, 
+   levelInfo, 
    zarrVersion): Promise<{
   dimensionValuesWithElevation: DimensionValues;
   elevationSlice: [number, number];

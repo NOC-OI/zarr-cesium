@@ -2,10 +2,10 @@
 
 ```ts
 function getFullTransect(
-   backend,
-   start,
-   end,
-   selectors?,
+   backend, 
+   start, 
+   end, 
+   selectors?, 
 options?): Promise<FullTransectResult>;
 ```
 

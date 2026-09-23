@@ -1,5 +1,5 @@
 import type { CesiumWidget, Viewer } from 'cesium';
-import type { WindLayerOptions } from 'cesium-wind-layer';
+import type { WindLayerOptions } from 'cube-cesium-wind-layer';
 import type ndarray from 'ndarray';
 import type {
   BoundsProps,

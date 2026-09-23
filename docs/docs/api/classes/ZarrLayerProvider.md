@@ -206,6 +206,22 @@ Current index-based selectors used for tile rendering and queries.
 
 ***
 
+### tileCacheStats
+
+#### Get Signature
+
+```ts
+get tileCacheStats(): TileCacheStats;
+```
+
+Current decoded tile-cache usage and lifetime counters.
+
+##### Returns
+
+[`TileCacheStats`](../interfaces/TileCacheStats.md)
+
+***
+
 ### tileHeight
 
 #### Get Signature
@@ -296,6 +312,20 @@ Prefer [createLayer](#createlayer) when adding the result to a viewer.
 
 ## Methods
 
+### clearTileCache()
+
+```ts
+clearTileCache(): void;
+```
+
+Removes decoded numeric tiles retained by this imagery provider.
+
+#### Returns
+
+`void`
+
+***
+
 ### destroy()
 
 ```ts
@@ -314,9 +344,9 @@ Aborts pending reads and releases tile-renderer resources.
 
 ```ts
 getFullTransect(
-   start,
-   end,
-   selectors?,
+   start, 
+   end, 
+   selectors?, 
 options?): Promise<FullTransectResult>;
 ```
 
@@ -363,8 +393,8 @@ ImageryProvider.getTileCredits
 
 ```ts
 getTimeSeries(
-   position,
-   selectors?,
+   position, 
+   selectors?, 
 options?): Promise<QueryResult>;
 ```
 
@@ -390,9 +420,9 @@ A query result ordered by the time coordinate.
 
 ```ts
 getTransect(
-   start,
-   end,
-   selectors?,
+   start, 
+   end, 
+   selectors?, 
 options?): Promise<TransectResult>;
 ```
 
@@ -419,8 +449,8 @@ Distances, positions, and scalar values along the transect.
 
 ```ts
 getVerticalProfile(
-   position,
-   selectors?,
+   position, 
+   selectors?, 
 options?): Promise<QueryResult>;
 ```
 
@@ -446,10 +476,10 @@ A query result ordered by the elevation coordinate.
 
 ```ts
 pickFeatures(
-   _x,
-   _y,
-   level,
-   longitude,
+   _x, 
+   _y, 
+   level, 
+   longitude, 
 latitude): Promise<ImageryLayerFeatureInfo[]>;
 ```
 
@@ -483,8 +513,8 @@ ImageryProvider.pickFeatures
 
 ```ts
 queryData(
-   geometry,
-   selectors?,
+   geometry, 
+   selectors?, 
 options?): Promise<QueryResult>;
 ```
 
@@ -514,9 +544,9 @@ For unsupported geometries, invalid selectors, or failed reads.
 
 ```ts
 requestImage(
-   x,
-   y,
-   level,
+   x, 
+   y, 
+   level, 
 _request?): Promise<HTMLCanvasElement | ImageBitmap>;
 ```
 

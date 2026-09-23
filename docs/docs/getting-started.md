@@ -124,6 +124,11 @@ const cube = new ZarrCubeProvider(viewer, {
 await cube.load();
 ```
 
+Latitude orientation is inferred from coordinate values. Use `latIsAscending` only when the
+dataset metadata is missing or incorrect. Use `flipElevation` separately when the vertical axis
+must be reversed. After loading, build slice controls from `cube.cubeDimensionValues` rather than
+the full `cube.dimensionValues` axes.
+
 <div style={{ maxWidth: "800px", margin: "0 auto" }}>
   <video
     src="https://github.com/user-attachments/assets/8b066725-c6c7-4b7a-9fc0-d632b623937c"
@@ -152,13 +157,20 @@ const velocity = new ZarrCubeVelocityProvider(viewer, {
   },
   variables: { u: 'uo', v: 'vo' },
   bounds: { west: -50, south: -20, east: 10, north: 20 },
-  colormap: 'plasma'
+  colormap: 'plasma',
+  selectors: {
+    elevation: { type: 'index', selected: [0, 22] }
+  }
 });
 
 await velocity.load();
 ```
 
-This uses the [NOC-OI fork of `cesium-wind-layer`](https://github.com/NOC-OI/cesium-wind-layer) for GPU-accelerated particle flow animations. Its `minVisibleRatio` option prevents particle width, trail length, and speed from shrinking below a configured fraction while zooming.
+The provider passes the selected elevation-major U/V cube to one cube-aware `WindLayer`. U and V must resolve to matching longitude, latitude,
+and elevation coordinate grids. `sliceSpacing` controls which model levels receive particles,
+while the actual elevation coordinate values determine their rendered heights.
+
+This uses [`cube-cesium-wind-layer`](https://www.npmjs.com/package/cube-cesium-wind-layer), the [NOC-OI fork](https://github.com/NOC-OI/cesium-wind-layer) of the original [`cesium-wind-layer`](https://github.com/hongfaqiu/cesium-wind-layer), for GPU-accelerated particle flow animations. Its `minVisibleRatio` option prevents particle width, trail length, and speed from shrinking below a configured fraction while zooming.
 
 <div style={{ maxWidth: "800px", margin: "0 auto" }}>
   <video

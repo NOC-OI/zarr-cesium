@@ -1,6 +1,6 @@
 {
   "name": "zarr-cesium",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A Cesium integration library for visualizing Zarr datasets in 2D and 3D.",
   "author": "Tobias <tobias.ferreira@noc.ac.uk>",
   "license": "MIT",

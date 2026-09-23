@@ -2,14 +2,14 @@
 
 ```ts
 function initZarrDataset(
-   store,
-   root,
-   variable,
-   dimensions,
-   levelMetadata,
-   levelCache,
-   zarrVersion,
-   multiscaleLevel?,
+   store, 
+   root, 
+   variable, 
+   dimensions, 
+   levelMetadata, 
+   levelCache, 
+   zarrVersion, 
+   multiscaleLevel?, 
    multiscaleFormat?): Promise<{
   attrs: Record<string, any>;
   dimIndices: DimIndicesProps;

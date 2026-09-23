@@ -2,9 +2,9 @@
 
 ```ts
 function getTimeSeries(
-   backend,
-   position,
-   selectors?,
+   backend, 
+   position, 
+   selectors?, 
 options?): Promise<QueryResult>;
 ```
 

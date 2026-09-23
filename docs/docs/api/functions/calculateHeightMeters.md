@@ -2,10 +2,10 @@
 
 ```ts
 function calculateHeightMeters(
-   elevationValue,
-   elevationArray,
-   verticalExaggeration,
-   belowSeaLevel,
+   elevationValue, 
+   elevationArray, 
+   verticalExaggeration, 
+   belowSeaLevel, 
    flipElevation?): number;
 ```
 

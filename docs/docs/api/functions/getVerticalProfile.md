@@ -2,9 +2,9 @@
 
 ```ts
 function getVerticalProfile(
-   backend,
-   position,
-   selectors?,
+   backend, 
+   position, 
+   selectors?, 
 options?): Promise<QueryResult>;
 ```
 

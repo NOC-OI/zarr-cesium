@@ -32,6 +32,10 @@ export default function DimensionSelector({
     if (dimension === 'time' && typeof value === 'string' && value.length > 10) {
       return value.slice(0, 13);
     }
+    if (dimension === 'elevation' || dimension === 'depth') {
+      const numericValue = Number(value);
+      return Number.isFinite(numericValue) ? numericValue.toFixed(3) : String(value);
+    }
     return String(value).replace(/(\.\d+)?$/, '');
   };
 
@@ -108,12 +112,12 @@ export default function DimensionSelector({
   };
 
   return (
-    <div className="p-1 flex justify-between w-full items-center gap-4">
-      <p className="text-md font-bold text-white text-center">
+    <div className="grid w-full grid-cols-[72px_minmax(0,1fr)] items-center gap-2.5 py-1">
+      <p className="text-[10px] font-semibold leading-tight text-[#b8b8b8]">
         {dimension.charAt(0).toUpperCase() + dimension.slice(1)}:
       </p>
 
-      <div className="flex flex-col items-center gap-0 w-full">
+      <div className="flex min-w-0 items-center gap-2">
         {dimension === 'elevation' && totalShape ? (
           <div className="w-full flex items-center gap-2">
             <Slider
@@ -131,7 +135,9 @@ export default function DimensionSelector({
               color="success"
             />
             <button
-              className=" text-white rounded-md hover:opacity-100 opacity-70 clickable p-0"
+              type="button"
+              title="Apply elevation range"
+              className="layer-control-apply clickable"
               onClick={() => handleChangeDimension(pendingRange)}
             >
               <CheckCircleIcon />
@@ -142,7 +148,7 @@ export default function DimensionSelector({
             <select
               value={values[pendingValue as number]}
               onChange={e => setPendingValue(e.target.value)}
-              className="clickable bg-black bg-opacity-20 border border-black text-white text-sm rounded-lg block w-full p-2 hover:bg-opacity-80"
+              className="layer-control-select clickable"
             >
               {values.map((value, idx) => (
                 <option
@@ -155,7 +161,9 @@ export default function DimensionSelector({
               ))}
             </select>
             <button
-              className=" text-white rounded-md hover:opacity-100 opacity-70 clickable p-0"
+              type="button"
+              title="Apply pyramid level"
+              className="layer-control-apply clickable"
               onClick={() => handleChangePyramidLevel(pendingValue as string)}
             >
               <CheckCircleIcon />
@@ -166,7 +174,7 @@ export default function DimensionSelector({
             <select
               value={values[pendingValue as number]}
               onChange={e => setPendingValue(e.target.value)}
-              className="clickable bg-black bg-opacity-20 border border-black text-white text-sm rounded-lg block w-full p-2 hover:bg-opacity-80"
+              className="layer-control-select clickable"
             >
               {values.map((value, idx) => (
                 <option
@@ -179,7 +187,9 @@ export default function DimensionSelector({
               ))}
             </select>
             <button
-              className=" text-white rounded-md hover:opacity-100 opacity-70 clickable p-0"
+              type="button"
+              title={`Apply ${dimension}`}
+              className="layer-control-apply clickable"
               onClick={() => handleChangeDimension(pendingValue)}
             >
               <CheckCircleIcon />

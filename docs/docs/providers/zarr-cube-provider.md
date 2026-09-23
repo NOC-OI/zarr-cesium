@@ -28,6 +28,11 @@ This provider supports:
 
 Use this provider when you need to visualize **3D fields** rather than 2D rasters.
 
+Cube loading and coordinate subsetting are implemented by the exported `ZarrCubeDataProvider`.
+It can also be used without Cesium when an integration needs the normalized in-memory cube,
+loaded-subset dimensions, coordinate values, and global index origin but will provide its own
+renderer.
+
 ## When to Use ZarrCubeProvider
 
 Use **ZarrCubeProvider** when your dataset:
@@ -95,6 +100,7 @@ interface CubeOptions {
   store?: Readable; // Custom Zarrita-compatible store, including IcechunkStore
   variable: string; // Zarr array name
   bounds: BoundsProps; // geographic rectangle
+  latIsAscending?: boolean; // Override latitude array orientation when metadata is incorrect
   selectors?: { [key: string]: ZarrSelectorsProps }; // Initial dimension slices
   dimensionNames?: DimensionNamesProps; // Custom dimension names. If not provided, defaults will be used or identified automatically based on CF conventions.
   multiscaleLevel?: number; // Index in the metadata's level list; defaults to 0
@@ -114,6 +120,11 @@ interface CubeOptions {
   onAuthError?: OnAuthError; // Called once for HTTP 400/401 responses
 }
 ```
+
+`latIsAscending` and `flipElevation` describe different axes. `latIsAscending` controls how rows
+in each horizontal slice map to south/north and is normally inferred from the latitude coordinate
+values. `flipElevation` reverses the vertical ordering or depth direction. Set either option only
+when the coordinate metadata does not describe the stored array correctly.
 
 ---
 
@@ -179,6 +190,11 @@ This step performs:
 8. Initialize default slice positions (first index of each dimension)
 
 Once loaded, the cube can render immediately.
+
+`dimensionValues` contains the complete coordinate axes from the selected Zarr level.
+`cubeDimensionValues` and `cubeDimensions` describe only the geographic and elevation subset that
+was loaded. Use the cube-specific values when building slice controls; otherwise a control can
+offer indices that are outside the in-memory cube.
 
 ---
 

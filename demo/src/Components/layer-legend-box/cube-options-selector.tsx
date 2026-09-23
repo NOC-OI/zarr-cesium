@@ -9,10 +9,8 @@ import {
   DEFAULT_VERTICAL_EXAGGERATION,
   type CubeOptions
 } from 'zarr-cesium';
-import { allColorScales, type ColorMapName } from 'zarr-maps-colormap';
-import FormControl from '@mui/material/FormControl';
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
+import type { ColorMapName } from 'zarr-maps-colormap';
+import { ColormapSelect } from 'zarr-maps-explorer';
 
 export function CubeOptionsSelector({ layerLegendName }: LayerLegendBoxProps) {
   const selectedLayers = useAppSelector(state => state.layers.selectedLayers);
@@ -71,13 +69,7 @@ export function CubeOptionsSelector({ layerLegendName }: LayerLegendBoxProps) {
   }, [latSlice, lonSlice, elevationSlice]);
 
   return (
-    <div
-      className="
-      mt-3 p-3 rounded-2xl
-      bg-[rgba(17,17,17,0.6)] text-white
-      shadow-[0px_4px_4px_rgba(0,0,0,1)]
-      flex flex-col gap-3 px-4"
-    >
+    <div className="flex flex-col gap-4 rounded-xl border border-white/12 bg-white/[.035] p-4 text-white">
       <div className="flex flex-col gap-1">
         <p className="text-[11px] font-bold">
           Elevation Slice:{' '}
@@ -155,25 +147,10 @@ export function CubeOptionsSelector({ layerLegendName }: LayerLegendBoxProps) {
       </div>
       <div className="flex flex-col gap-1">
         <p className="text-[11px] font-bold">Color Map</p>
-        <FormControl fullWidth size="small">
-          <Select
-            value={params.colormap || DEFAULT_COLORMAP}
-            onChange={e => handleUpdateParams({ colormap: e.target.value as ColorMapName })}
-            className="text-white clickable"
-            sx={{
-              color: 'white',
-              '.MuiOutlinedInput-notchedOutline': { borderColor: 'white' },
-              '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'white' },
-              '.MuiSvgIcon-root': { color: 'white' }
-            }}
-          >
-            {allColorScales.map(c => (
-              <MenuItem key={c} value={c}>
-                {c.charAt(0).toUpperCase() + c.slice(1)}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+        <ColormapSelect
+          value={(params.colormap || DEFAULT_COLORMAP) as ColorMapName}
+          onChange={colormap => handleUpdateParams({ colormap })}
+        />
       </div>
 
       <div className="flex flex-col gap-1">

@@ -1,7 +1,7 @@
 # QueryGeometry
 
 ```ts
-type QueryGeometry =
+type QueryGeometry = 
   | QueryPointGeometry
   | QueryPolygonGeometry
   | QueryMultiPolygonGeometry;

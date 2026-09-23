@@ -8,8 +8,8 @@ Minimal interface required by the framework-neutral convenience queries.
 
 ```ts
 queryData(
-   geometry,
-   selectors?,
+   geometry, 
+   selectors?, 
 options?): Promise<QueryResult>;
 ```
 
@@ -31,8 +31,8 @@ options?): Promise<QueryResult>;
 
 ```ts
 optional queryPoints(
-   positions,
-   selectors?,
+   positions, 
+   selectors?, 
 options?): Promise<QueryResult[]>;
 ```
 
@@ -57,6 +57,18 @@ Optional chunk-aware batch lookup used by transects.
 ```ts
 dimensionValues: DimensionValues;
 ```
+
+***
+
+### queryDimensionValues?
+
+```ts
+readonly optional queryDimensionValues: DimensionValues;
+```
+
+Coordinate values addressable by the current in-memory query backend.
+Defaults to `dimensionValues`; subset-backed providers can expose a
+narrower set without hiding the complete dataset coordinates.
 
 ***
 

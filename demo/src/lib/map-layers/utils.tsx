@@ -1,5 +1,4 @@
 import proj4 from 'proj4';
-import { colormapBuilder } from 'zarr-maps-colormap';
 import { Rectangle } from 'cesium';
 
 export function parseRangeString(rangeStr: string): number[] | string[] {
@@ -33,22 +32,6 @@ export function parseRangeString(rangeStr: string): number[] | string[] {
   }
   return result;
 }
-
-export function calculateColorsForLegend(colors: string, scale: [number, number], n: number) {
-  const listColors = colormapBuilder(colors, '', n) as number[][];
-  const difValues = scale[1] - scale[0];
-  const listColorsValues: number[] = [];
-  for (let i = 0; i < n; i++) {
-    listColorsValues.push(Number(scale[0]) + (difValues / (n - 1)) * i);
-  }
-  return { listColors, listColorsValues };
-}
-
-export const TILE_SERVER_URL: string =
-  import.meta.env.NEXT_PUBLIC_TILE_SERVER_URL || 'https://imfe-pilot-tileserver.noc.ac.uk/';
-
-export const ZARR_TILE_SERVER_URL: string =
-  import.meta.env.NEXT_PUBLIC_ZARR_TILE_SERVER_URL || 'https://titiler-xarray.atlantis-viz.online/';
 
 export const defaultView: [number, number] = [54, 0];
 export const defaultZoom = 6;

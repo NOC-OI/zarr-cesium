@@ -2,14 +2,14 @@
 
 ```ts
 function calculateSliceArgs(
-   shape,
-   dataSlice,
-   dimIndices,
-   selectors,
-   dimensionValues,
-   root,
-   levelInfo,
-   zarrVersion,
+   shape, 
+   dataSlice, 
+   dimIndices, 
+   selectors, 
+   dimensionValues, 
+   root, 
+   levelInfo, 
+   zarrVersion, 
    updateDimensionValues?): Promise<{
   dimensionValues: DimensionValues;
   selectors: {

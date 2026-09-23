@@ -1,6 +1,6 @@
 {
   "name": "zarr-cesium",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A Cesium integration library for visualizing Zarr datasets in 2D and 3D.",
   "author": "Tobias <tobias.ferreira@noc.ac.uk>",
   "license": "MIT",
@@ -19,8 +19,9 @@
     "dist"
   ],
   "scripts": {
-    "dev": "tsup src/index.ts --format cjs,esm --dts --sourcemap --external cesium-wind-layer --external zarrita --external zarr-maps-colormap --watch",
-    "build": "tsup src/index.ts --format esm --dts --sourcemap --external cesium --external cesium-wind-layer --external zarrita --external zarr-maps-colormap",
+    "test:coordinates": "node tests/run-cube-coordinates.mjs",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --sourcemap --external cube-cesium-wind-layer --external zarrita --external zarr-maps-colormap --watch",
+    "build": "tsup src/index.ts --format esm --dts --sourcemap --external cesium --external cube-cesium-wind-layer --external zarrita --external zarr-maps-colormap",
     "clean": "rm -rf dist",
     "docs": "npm --prefix docs run build",
     "serve:docs": "npm --prefix docs run serve",
@@ -30,9 +31,9 @@
     "cesium": ">=1.119.0 <2"
   },
   "dependencies": {
-    "cesium-wind-layer": "https://github.com/NOC-OI/cesium-wind-layer/releases/download/v0.11.1/cesium-wind-layer-0.11.1.tgz",
-    "zarr-maps-colormap": "^0.2.0",
-    "zarr-maps-tiling": "^0.2.0",
+    "cube-cesium-wind-layer": "^0.12.0",
+    "zarr-maps-colormap": "^0.3.0",
+    "zarr-maps-tiling": "^0.3.0",
     "zarrita": "^0.7.4"
   },
   "devDependencies": {

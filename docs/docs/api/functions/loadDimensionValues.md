@@ -2,11 +2,11 @@
 
 ```ts
 function loadDimensionValues(
-   dimensionValues,
-   levelInfo,
-   dimIndices,
-   root,
-   zarrVersion,
+   dimensionValues, 
+   levelInfo, 
+   dimIndices, 
+   root, 
+   zarrVersion, 
 slice?): Promise<string[] | number[] | Float64Array<ArrayBufferLike>>;
 ```
 

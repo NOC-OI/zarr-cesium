@@ -4,6 +4,7 @@
 
 | Class | Description |
 | ------ | ------ |
+| [ZarrCubeDataProvider](classes/ZarrCubeDataProvider.md) | Loads and spatially subsets a three-dimensional Zarr variable without rendering it. |
 | [ZarrCubeProvider](classes/ZarrCubeProvider.md) | Provides rendering of volumetric (3D) Zarr datasets as Cesium primitives. |
 | [ZarrCubeVelocityProvider](classes/ZarrCubeVelocityProvider.md) | Provider responsible for loading and rendering 3D velocity fields (U and V components) from Zarr datasets as animated Cesium `WindLayer`s. |
 | [ZarrImageryLayer](classes/ZarrImageryLayer.md) | Cesium imagery layer backed by a shared [ZarrTileProvider](classes/ZarrTileProvider.md). |
@@ -33,12 +34,16 @@
 | [QueryResult](interfaces/QueryResult.md) | Values and coordinates returned from a shared Zarr query. |
 | [RequestOverrides](interfaces/RequestOverrides.md) | Serializable static fetch options suitable for application state and FetchStore. |
 | [RequestParameters](interfaces/RequestParameters.md) | - |
+| [TileCacheOptions](interfaces/TileCacheOptions.md) | Controls the in-memory cache used to recolor tiles without reading Zarr data again. |
+| [TileCacheStats](interfaces/TileCacheStats.md) | Runtime counters for a provider's decoded tile cache. |
 | [TransectQueryOptions](interfaces/TransectQueryOptions.md) | Sampling controls for one-level and full-depth transects. |
 | [TransectResult](interfaces/TransectResult.md) | A one-level transect. Values preserve no-data gaps as null. |
 | [VelocityOptions](interfaces/VelocityOptions.md) | - |
 | [VelocityQueryResult](interfaces/VelocityQueryResult.md) | Values and coordinates returned from a shared Zarr query. |
 | [XYLimits](interfaces/XYLimits.md) | Describes the XY coordinate boundaries of a dataset. |
 | [XYLimitsProps](interfaces/XYLimitsProps.md) | Alias of [XYLimits](interfaces/XYLimits.md) with explicit type name for Zarr coordinate bounds. |
+| [ZarrCubeData](interfaces/ZarrCubeData.md) | - |
+| [ZarrCubeDataOptions](interfaces/ZarrCubeDataOptions.md) | - |
 | [ZarrLevelMetadata](interfaces/ZarrLevelMetadata.md) | Metadata for a single multiscale level in a Zarr dataset. |
 | [ZarrSelectors](interfaces/ZarrSelectors.md) | Describes a selector for a Zarr dataset dimension. |
 | [ZarrSelectorsProps](interfaces/ZarrSelectorsProps.md) | - |

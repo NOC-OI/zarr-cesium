@@ -258,6 +258,8 @@ concurrency limits.
 
 For more details on how to contribute to the development of this toolkit, please refer to the [DEV-README.md](DEV-README.md) file.
 
+---
+
 ## Acknowledgements
 
 This tool is built with:

@@ -1,24 +1,26 @@
-import { useLayersManagementHandle } from '../../application/use-layers';
+import { useAppSelector } from '../../application/use-layers';
 import { CubeOptionsSelector } from './cube-options-selector';
 import { CubeVelocityOptionsSelector } from './cube-velocity-options-selector';
 import { EditColors } from './edit-colors';
 import type { EditSelectorsProps } from './edit-selectors';
 
 export function EditStyle({ layerLegendName }: EditSelectorsProps) {
-  const { selectedLayers } = useLayersManagementHandle();
+  const selectedLayers = useAppSelector(state => state.layers.selectedLayers);
 
   return (
-    <div className="">
-      <div className="text-sm text-center pt-2 pb-0 font-bold">Edit Style</div>
+    <section className="mt-3">
+      <div className="mb-2 px-1 text-[9px] font-extrabold uppercase tracking-[.1em] text-[#888]">
+        Appearance
+      </div>
       {selectedLayers[layerLegendName].dataType === 'zarr-cube' && (
         <CubeOptionsSelector layerLegendName={layerLegendName} />
       )}
       {selectedLayers[layerLegendName].dataType === 'zarr-cube-velocity' && (
         <CubeVelocityOptionsSelector layerLegendName={layerLegendName} />
       )}
-      {['zarr-titiler', 'zarr-cesium'].includes(selectedLayers[layerLegendName].dataType) && (
+      {selectedLayers[layerLegendName].dataType === 'zarr-cesium' && (
         <EditColors layerLegendName={layerLegendName} />
       )}
-    </div>
+    </section>
   );
 }

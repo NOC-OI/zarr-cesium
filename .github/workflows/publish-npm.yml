@@ -6,7 +6,7 @@ on:
       - "v*"
 
 permissions:
-  contents: read
+  contents: write
   id-token: write
 
 jobs:
@@ -15,19 +15,70 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org/
+          package-manager-cache: false
+
+      - name: Update npm for trusted publishing
+        run: npm install --global npm@latest
+
+      - name: Validate release version
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFileSync } from 'node:fs';
+
+          const packageJson = JSON.parse(readFileSync('package.json', 'utf8'));
+          const packageLock = JSON.parse(readFileSync('package-lock.json', 'utf8'));
+          const expectedTag = `v${packageJson.version}`;
+          const versions = {
+            tag: process.env.RELEASE_TAG,
+            packageJson: packageJson.version,
+            packageLock: packageLock.version,
+            packageLockRoot: packageLock.packages?.['']?.version
+          };
+
+          if (
+            versions.tag !== expectedTag ||
+            versions.packageLock !== packageJson.version ||
+            versions.packageLockRoot !== packageJson.version
+          ) {
+            console.error('Release versions do not match:', versions);
+            console.error(`Expected tag: ${expectedTag}`);
+            process.exit(1);
+          }
+
+          console.log('Release versions match:', versions);
+          NODE
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --include=dev
 
       - name: Build package
         run: npm run build
 
-      - name: Publish to npm
-        run: npm publish --access public
+      - name: Create installable tarball
+        run: |
+          mkdir -p release
+          npm pack --pack-destination release
+
+      - name: Stage package on npm
+        run: npm stage publish --access public --provenance
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: zarr-cesium-${{ github.ref_name }}
+          path: release/*.tgz
+
+      - name: Attach package to GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release/*.tgz
+          generate_release_notes: true

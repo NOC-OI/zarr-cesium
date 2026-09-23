@@ -21,7 +21,13 @@ The **Zarr-Cesium Visualization Toolkit** provides **CesiumJS data providers** f
   Read datasets from any Zarr store, including public cloud object storage.
 
 - **Multiscale or single-scale datasets**
-  Automatically handles multi-resolution datasets (from [ndpyramid](https://github.com/carbonplan/ndpyramid)) or standard Zarr datasets.
+  Handles legacy ndpyramid and GeoZarr layouts with automatic resolution selection.
+
+- **Icechunk and custom stores**
+  All 2D and 3D providers accept Zarrita-compatible readable stores, including `IcechunkStore`.
+
+- **Private datasets**
+  Supports static request credentials and dynamic per-object headers, proxies, or signed URLs.
 
 - **2D & 3D visualization**
   Render gridded scalar, vector, and volumetric data directly in CesiumJS.
@@ -38,6 +44,9 @@ The **Zarr-Cesium Visualization Toolkit** provides **CesiumJS data providers** f
 - **Style and animation controls**
   Programmatic control of color maps, opacity, scale range, slice spacing, and vertical exaggeration.
 
+- **Scientific data queries**
+  Point, time-series, vertical-profile, transect, and full-depth transect APIs with cancellation support.
+
 ---
 
 ## Architecture
@@ -50,6 +59,14 @@ The toolkit provides **three Cesium provider classes**, each specialized for a d
 | `ZarrCubeProvider`         | 3D volumetric fields | Renders volumetric cubes with horizontal and vertical slices (e.g., ocean temperature).   |
 | `ZarrCubeVelocityProvider` | 3D vector fields     | Visualizes vector flow (u/v components) using animated particle advection.                |
 
+The 2D data pipeline is shared with OpenLayers and Leaflet through
+`zarr-maps-tiling`. Palette definitions and color-ramp helpers are provided by
+the separate `zarr-maps-colormap` package and re-exported by `zarr-cesium`.
+
+The two 3D providers share `ZarrCubeDataProvider`, an exported non-rendering loader that applies
+selectors and geographic bounds, reads the cube once, normalizes longitude ordering, and exposes
+both full coordinate axes and the loaded subset coordinates.
+
 ---
 
 ## Installation
@@ -57,6 +74,8 @@ The toolkit provides **three Cesium provider classes**, each specialized for a d
 ```bash
 npm install zarr-cesium
 ```
+
+`zarr-cesium` supports CesiumJS 1.119 and newer, including CesiumJS 1.142+.
 
 ## Run the demo website locally
 
@@ -80,9 +99,9 @@ npm install
 npm run dev
 ```
 
-The demo site will be available at `http://localhost:3000`.
+The demo site will be available at `http://localhost:5173` by default.
 
-If you want to use your own Zarr datasets, you can modify the demo code in [`demo/src/application/data/layers-json.tsx`](https://github.com/NOC-OI/zarr-cesium/blob/dev/demo/src/application/data/layers-json.tsx) to point to your data URLs. You may need to adjust variable names, bounds, and other parameters accordingly.
+If you want to use your own Zarr datasets, you can modify the demo code in [`demo/src/application/data/layers-json.ts`](https://github.com/NOC-OI/zarr-cesium/blob/dev/demo/src/application/data/layers-json.ts) to point to your data URLs. You may need to adjust variable names, bounds, and other parameters accordingly.
 
 ---
 
@@ -110,6 +129,27 @@ const layer = await ZarrLayerProvider.createLayer(viewer, options);
 
 viewer.imageryLayers.add(layer);
 ```
+
+For Icechunk or another custom storage backend, pass any Zarrita-compatible readable store:
+
+```ts
+import { IcechunkStore } from 'icechunk-js';
+
+const store = await IcechunkStore.open('https://example.com/data.icechunk', {
+  branch: 'main',
+  formatVersion: 'v1'
+});
+
+const layer = await ZarrLayerProvider.createLayer(viewer, {
+  store,
+  variable: 'temperature',
+  scale: [0, 30]
+});
+```
+
+Private HTTP Zarr stores can use `requestOverrides` for static credentials and headers, or
+`transformRequest` for per-object headers, proxy URLs, and signed URLs. Use `onAuthError` to
+refresh credentials when a transformed request returns HTTP 400 or 401.
 
 For more details, see the [Zarr-Cesium documentation](https://noc-oi.github.io/zarr-cesium/docs/).
 
@@ -142,6 +182,8 @@ const cube = new ZarrCubeProvider(viewer, {
 await cube.load();
 ```
 
+Like the 2D provider, cubes accept a custom Zarrita `Readable` store for Icechunk data, or `requestOverrides`/`transformRequest` for private HTTP stores.
+
 For more details, see the [Zarr-Cesium documentation](https://noc-oi.github.io/zarr-cesium/docs/).
 
 https://github.com/user-attachments/assets/8b066725-c6c7-4b7a-9fc0-d632b623937c
@@ -152,7 +194,9 @@ https://github.com/user-attachments/assets/8b066725-c6c7-4b7a-9fc0-d632b623937c
 
 ### 3. `ZarrCubeVelocityProvider`
 
-Renders **3D velocity fields** from U/V components as animated **wind/current layers** using [`cesium-wind-layer`](https://github.com/hongfaqiu/cesium-wind-layer).
+Renders **3D velocity fields** from U/V components as animated **wind/current layers** using [`cube-cesium-wind-layer`](https://www.npmjs.com/package/cube-cesium-wind-layer), the NOC-OI fork of the original [`cesium-wind-layer`](https://github.com/hongfaqiu/cesium-wind-layer).
+
+Zarr-Cesium installs the NOC-OI fork from npm as `cube-cesium-wind-layer`. The fork adds cube-aware rendering and `minVisibleRatio` to bound camera-driven particle width, trail-length, and speed scaling. It also restores the full data bounds and overview particle styling when zooming back out, avoiding particles remaining at the previous regional-view scale. The original project remains credited in the fork package and documentation.
 
 It supports both Zarr v2/v3 and multiscale datasets, with configurable slice spacing and particle animation parameters.
 
@@ -177,6 +221,8 @@ const velocity = new ZarrCubeVelocityProvider(viewer, {
 await velocity.load();
 ```
 
+Velocity fields support custom stores through `stores.u` and `stores.v`. URL-backed U/V stores share the same `requestOverrides`, `transformRequest`, and `onAuthError` configuration.
+
 For more details, see the [Zarr-Cesium documentation](https://noc-oi.github.io/zarr-cesium/docs/).
 
 https://github.com/user-attachments/assets/a54ddd70-9b00-4a3e-9cb9-41025cceffd0
@@ -185,9 +231,34 @@ https://github.com/user-attachments/assets/a54ddd70-9b00-4a3e-9cb9-41025cceffd0
 
 ---
 
+## Querying data
+
+The providers expose values directly from the underlying Zarr arrays:
+
+```ts
+const point = await layer.imageryProvider.queryData({
+  type: 'Point',
+  coordinates: [-4.2, 50.1]
+});
+
+const timeSeries = await layer.imageryProvider.getTimeSeries([-4.2, 50.1]);
+const profile = await cube.getVerticalProfile([-4.2, 50.1]);
+const transect = await cube.getTransect([-5, 50], [-3, 51], undefined, {
+  samples: 100
+});
+```
+
+Query positions use WGS84 longitude/latitude. Query options support abort
+signals, coordinate omission, resolution selection, transect sample count, and
+concurrency limits.
+
+---
+
 ## DEVELOPMENT
 
 For more details on how to contribute to the development of this toolkit, please refer to the [DEV-README.md](DEV-README.md) file.
+
+---
 
 ## Acknowledgements
 
@@ -195,7 +266,9 @@ This tool is built with:
 
 - [CesiumJS](https://cesium.com/)
 - [Zarrita](https://zarrita.dev/)
-- [cesium-wind-layer](https://github.com/hongfaqiu/cesium-wind-layer)
+- [`zarr-maps-tiling`](https://www.npmjs.com/package/zarr-maps-tiling)
+- [`zarr-maps-colormap`](https://www.npmjs.com/package/zarr-maps-colormap)
+- [`cube-cesium-wind-layer`](https://www.npmjs.com/package/cube-cesium-wind-layer) ([NOC-OI source](https://github.com/NOC-OI/cesium-wind-layer), forked from [hongfaqiu/cesium-wind-layer](https://github.com/hongfaqiu/cesium-wind-layer))
 - [jscolormaps](https://github.com/timothygebhard/js-colormaps)
 
 This work is part of the [Atlantis project](https://atlantis.ac.uk/), a UK initiative supporting long-term ocean observations and marine science in the Atlantic. The project is led by the [National Oceanography Centre (NOC)](https://noc.ac.uk/).

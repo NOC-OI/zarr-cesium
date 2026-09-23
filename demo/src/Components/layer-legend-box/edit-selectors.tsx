@@ -1,5 +1,5 @@
 import { type CubeOptions, type VelocityOptions } from 'zarr-cesium';
-import { useLayersManagementHandle } from '../../application/use-layers';
+import { useAppSelector } from '../../application/use-layers';
 import type { DimensionLegendProps } from '../../types';
 import BoundsSelector from './bounds-selector';
 import DimensionSelector from './dimension-selector';
@@ -9,17 +9,13 @@ export interface EditSelectorsProps {
 }
 
 export function EditSelectors({ layerLegendName }: EditSelectorsProps) {
-  const { selectedLayers } = useLayersManagementHandle();
+  const selectedLayers = useAppSelector(state => state.layers.selectedLayers);
   return (
-    <div className="p-0">
-      <div className="text-sm text-center pt-2 pb-0 font-bold">Edit Selectors</div>
-      <div
-        className="
-      mt-3 p-3 rounded-2xl
-      bg-[rgba(17,17,17,0.6)] text-white
-      shadow-[0px_4px_4px_rgba(0,0,0,1)]
-      flex flex-col gap-3 px-4"
-      >
+    <section className="mt-3">
+      <div className="mb-2 px-1 text-[9px] font-extrabold uppercase tracking-[.1em] text-[#888]">
+        Data selectors
+      </div>
+      <div className="flex flex-col gap-2 rounded-xl border border-white/12 bg-white/[.035] p-3 text-white">
         {(selectedLayers[layerLegendName].params as CubeOptions | VelocityOptions).bounds && (
           <BoundsSelector
             bounds={
@@ -55,6 +51,6 @@ export function EditSelectors({ layerLegendName }: EditSelectorsProps) {
           />
         )}
       </div>
-    </div>
+    </section>
   );
 }

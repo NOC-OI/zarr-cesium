@@ -1,22 +1,20 @@
 import { useEffect, useState } from 'react';
-import { useLayersManagementHandle } from '../../application/use-layers';
+import { useAppDispatch, useAppSelector } from '../../application/use-layers';
+import { layersActions } from '../../application/store';
 import type { LayerLegendBoxProps, SelectedLayer } from '../../types';
 import Slider from '@mui/material/Slider';
 import {
-  allColorScales,
   DEFAULT_COLORMAP,
   DEFAULT_SCALE,
   DEFAULT_VERTICAL_EXAGGERATION,
-  type ColorMapName,
   type CubeOptions
 } from 'zarr-cesium';
-import FormControl from '@mui/material/FormControl';
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
+import type { ColorMapName } from 'zarr-maps-colormap';
+import { ColormapSelect } from 'zarr-maps-explorer';
 
 export function CubeOptionsSelector({ layerLegendName }: LayerLegendBoxProps) {
-  const { selectedLayers, setSelectedLayers, setLayerAction, setActualLayer } =
-    useLayersManagementHandle();
+  const selectedLayers = useAppSelector(state => state.layers.selectedLayers);
+  const dispatch = useAppDispatch();
   const [latSlice, setLatSlice] = useState<number>(
     selectedLayers[layerLegendName]?.slices?.latIndex || 0
   );
@@ -41,42 +39,37 @@ export function CubeOptionsSelector({ layerLegendName }: LayerLegendBoxProps) {
   }, [selectedLayer]);
 
   const handleUpdateParams = (newParams: Partial<CubeOptions>) => {
-    setLayerAction('update-cube-params');
-    setActualLayer(layerLegendName);
+    dispatch(layersActions.setLayerAction('update-cube-params'));
+    dispatch(layersActions.setActualLayer(layerLegendName));
     const updatedParams = { ...params, ...newParams };
-    setSelectedLayers(prev => {
-      const updatedLayer = {
-        ...prev[layerLegendName],
-        params: updatedParams
-      };
-      return { ...prev, [layerLegendName]: updatedLayer };
-    });
+    dispatch(
+      layersActions.updateSelectedLayer({
+        name: layerLegendName,
+        layer: { ...selectedLayers[layerLegendName], params: updatedParams }
+      })
+    );
   };
   useEffect(() => {
-    setLayerAction('update-cube-slices');
-    setActualLayer(layerLegendName);
-    setSelectedLayers(prev => {
-      const slices = {
-        latIndex: latSlice,
-        lonIndex: lonSlice,
-        elevationIndex: elevationSlice
-      };
-      const updatedLayer = { ...selectedLayer, slices };
-      const updated = { ...prev };
-      updated[layerLegendName] = updatedLayer;
-      return updated;
-    });
+    dispatch(layersActions.setLayerAction('update-cube-slices'));
+    dispatch(layersActions.setActualLayer(layerLegendName));
+    dispatch(
+      layersActions.updateSelectedLayer({
+        name: layerLegendName,
+        layer: {
+          ...selectedLayer,
+          slices: {
+            latIndex: latSlice,
+            lonIndex: lonSlice,
+            elevationIndex: elevationSlice
+          }
+        }
+      })
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [latSlice, lonSlice, elevationSlice]);
 
   return (
-    <div
-      className="
-      mt-3 p-3 rounded-2xl
-      bg-[rgba(17,17,17,0.6)] text-white
-      shadow-[0px_4px_4px_rgba(0,0,0,1)]
-      flex flex-col gap-3 px-4"
-    >
+    <div className="flex flex-col gap-4 rounded-xl border border-white/12 bg-white/[.035] p-4 text-white">
       <div className="flex flex-col gap-1">
         <p className="text-[11px] font-bold">
           Elevation Slice:{' '}
@@ -154,25 +147,10 @@ export function CubeOptionsSelector({ layerLegendName }: LayerLegendBoxProps) {
       </div>
       <div className="flex flex-col gap-1">
         <p className="text-[11px] font-bold">Color Map</p>
-        <FormControl fullWidth size="small">
-          <Select
-            value={params.colormap || DEFAULT_COLORMAP}
-            onChange={e => handleUpdateParams({ colormap: e.target.value as ColorMapName })}
-            className="text-white clickable"
-            sx={{
-              color: 'white',
-              '.MuiOutlinedInput-notchedOutline': { borderColor: 'white' },
-              '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'white' },
-              '.MuiSvgIcon-root': { color: 'white' }
-            }}
-          >
-            {allColorScales.map(c => (
-              <MenuItem key={c} value={c}>
-                {c.charAt(0).toUpperCase() + c.slice(1)}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+        <ColormapSelect
+          value={(params.colormap || DEFAULT_COLORMAP) as ColorMapName}
+          onChange={colormap => handleUpdateParams({ colormap })}
+        />
       </div>
 
       <div className="flex flex-col gap-1">

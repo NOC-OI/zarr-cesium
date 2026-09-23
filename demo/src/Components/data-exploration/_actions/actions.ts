@@ -1,89 +1,66 @@
-import type React from 'react';
-import { ZARR_TILE_SERVER_URL } from '../../../lib/map-layers/utils';
+import { createElement, type Dispatch, type SetStateAction } from 'react';
+import { DEFAULT_COLORMAP, DEFAULT_OPACITY } from 'zarr-cesium';
+import { layersActions, type AppDispatch } from '../../../application/store';
 import type {
   DataInfoType,
   LayerNamesType,
   LayersLegendType,
-  SelectedLayersType,
-  TitilerOptions
+  SelectedLayersType
 } from '../../../types';
-import { DEFAULT_COLORMAP, DEFAULT_OPACITY } from 'zarr-cesium';
+import { LayerInfoPanel } from 'zarr-maps-explorer';
 
 export function handleChangeOpacity(
-  e: React.ChangeEvent<HTMLInputElement>,
-  setLayerAction: React.Dispatch<React.SetStateAction<string>>,
-  setSelectedLayers: React.Dispatch<React.SetStateAction<SelectedLayersType>>,
+  opacity: number,
+  dispatch: AppDispatch,
   content: string,
   subLayer: string,
   subLayers: LayerNamesType,
-  setActualLayer: React.Dispatch<React.SetStateAction<string>>
+  selectedLayers: SelectedLayersType
 ) {
-  function changeMapOpacity(
-    layerInfo: { subLayer: string; dataInfo: DataInfoType },
-    opacity: number
-  ) {
-    setLayerAction('opacity');
-    setSelectedLayers((prevSelectedLayers: SelectedLayersType) => {
-      const copy = { ...prevSelectedLayers };
-      const newSelectedLayer = prevSelectedLayers[layerInfo.subLayer];
-      if (!newSelectedLayer) return prevSelectedLayers;
-      newSelectedLayer.params.opacity = opacity;
-
-      delete copy[layerInfo.subLayer];
-      const newSelectedLayers: SelectedLayersType = {
-        [layerInfo.subLayer]: newSelectedLayer,
-        ...copy
-      };
-      return newSelectedLayers;
-    });
-  }
-
-  const layerInfo = JSON.parse(
-    JSON.stringify({
-      subLayer: `${content}_${subLayer}`,
-      dataInfo: subLayers[subLayer]
+  const name = `${content}_${subLayer}`;
+  const selectedLayer = selectedLayers[name];
+  if (!selectedLayer) return;
+  dispatch(layersActions.setActualLayer(name));
+  dispatch(layersActions.setLayerAction('opacity'));
+  dispatch(
+    layersActions.updateSelectedLayer({
+      name,
+      moveToFront: true,
+      layer: {
+        ...selectedLayer,
+        params: {
+          ...subLayers[subLayer].params,
+          ...selectedLayer.params,
+          opacity
+        }
+      }
     })
   );
-  setActualLayer(layerInfo.subLayer);
-  changeMapOpacity(layerInfo, parseFloat(e.target.value));
 }
 
 export function getPreviousOpacityValue(content: string, selectedLayers: SelectedLayersType) {
   return selectedLayers[content].params.opacity;
 }
 
-export async function handleClickLegend(
+export function handleClickLegend(
   layerInfo: DataInfoType,
   subLayer: string,
-  setLayerLegend: React.Dispatch<React.SetStateAction<LayersLegendType>>,
+  dispatch: AppDispatch,
   content: string,
   selectedLayers?: SelectedLayersType
 ) {
-  const legendLayerName = `${content}_${subLayer}`;
-  let scale: [number, number];
-  if (!selectedLayers) {
-    if (layerInfo.params.scale) {
-      scale = layerInfo.params.scale;
-    } else {
-      scale = [0, 1];
-    }
-  } else {
-    scale = selectedLayers[`${content}_${subLayer}`].params.scale || [0, 1];
-  }
-  const colorName = selectedLayers
-    ? selectedLayers[`${content}_${subLayer}`].params.colormap || DEFAULT_COLORMAP
-    : layerInfo.params.colormap || DEFAULT_COLORMAP;
-
-  setLayerLegend((layerLegend: LayersLegendType) => {
-    const newLayerLegend = { ...layerLegend };
-    delete newLayerLegend[legendLayerName];
-    newLayerLegend[legendLayerName] = {
-      colormap: colorName,
-      scale: scale,
-      dataDescription: layerInfo.dataDescription || ['', '']
-    };
-    return newLayerLegend;
-  });
+  const name = `${content}_${subLayer}`;
+  const params = selectedLayers?.[name]?.params ?? layerInfo.params;
+  dispatch(
+    layersActions.upsertLayerLegend({
+      name,
+      legend: {
+        colormap: params.colormap || DEFAULT_COLORMAP,
+        scale: params.scale || [0, 1],
+        dataDescription: layerInfo.dataDescription || ['', '']
+      }
+    })
+  );
 }
 
 export function verifyIfWasSelectedBefore(
@@ -94,143 +71,88 @@ export function verifyIfWasSelectedBefore(
   return !!selectedLayers[`${content}_${subLayer}`];
 }
 
-export function handleClickSlider(
-  setOpacityIsClicked: React.Dispatch<React.SetStateAction<boolean>>
-) {
-  setOpacityIsClicked((opacityIsClicked: boolean) => !opacityIsClicked);
+export function handleClickSlider(setOpacityIsClicked: Dispatch<SetStateAction<boolean>>) {
+  setOpacityIsClicked(value => !value);
 }
 
 export function handleClickLayerInfo(
   content: string,
   subLayer: string,
   setInfoButtonBox: any,
-  selectedLayers: any
+  layer: DataInfoType
 ) {
   setInfoButtonBox({
-    title: `${content} - ${subLayer}`,
-    content: selectedLayers[`${content}_${subLayer}`].content
+    title: 'Layer details',
+    content: createElement(LayerInfoPanel, {
+      group: content,
+      layerId: subLayer,
+      content: layer.content
+    })
   });
 }
 
 export function changeMapZoom(
   layerInfo: { subLayer: string; dataInfo: DataInfoType },
-  setLayerAction: React.Dispatch<React.SetStateAction<string>>,
-  selectedLayers: SelectedLayersType,
-  setSelectedLayers: React.Dispatch<React.SetStateAction<SelectedLayersType>>
+  dispatch: AppDispatch,
+  selectedLayers: SelectedLayersType
 ) {
-  setLayerAction('zoom');
-  const newSelectedLayer = selectedLayers[layerInfo.subLayer];
-  setSelectedLayers((selectedLayers: SelectedLayersType) => {
-    const copy = { ...selectedLayers };
-    delete copy[layerInfo.subLayer];
-    const newSelectedLayers: SelectedLayersType = {
-      [layerInfo.subLayer]: newSelectedLayer,
-      ...copy
-    };
-    return newSelectedLayers;
-  });
+  const layer = selectedLayers[layerInfo.subLayer];
+  if (!layer) return;
+  dispatch(layersActions.setLayerAction('zoom'));
+  dispatch(
+    layersActions.updateSelectedLayer({ name: layerInfo.subLayer, layer, moveToFront: true })
+  );
 }
 
-export async function addMapLayer(
+export function addMapLayer(
   layerInfo: { subLayer: string; dataInfo: DataInfoType },
-  setLayerAction: React.Dispatch<React.SetStateAction<string>>,
-  setSelectedLayers: React.Dispatch<React.SetStateAction<SelectedLayersType>>
+  dispatch: AppDispatch
 ) {
-  setLayerAction('add');
-  const newSelectedLayer = layerInfo.dataInfo;
-  if (['zarr-titiler', 'zarr-cesium'].includes(newSelectedLayer.dataType)) {
-    newSelectedLayer.params.scale = newSelectedLayer.params.scale || [0, 1];
-    newSelectedLayer.params.colormap = newSelectedLayer.params.colormap
-      ? newSelectedLayer.params.colormap
-      : 'jet';
+  const layer = structuredClone(layerInfo.dataInfo);
+  if (layer.dataType === 'zarr-cesium') {
+    layer.params.scale ||= [0, 1];
+    layer.params.colormap ||= DEFAULT_COLORMAP;
   }
-  newSelectedLayer.params.opacity = DEFAULT_OPACITY;
-  setSelectedLayers((selectedLayers: SelectedLayersType) => {
-    const newSelectedLayers: SelectedLayersType = {
-      [layerInfo.subLayer]: newSelectedLayer,
-      ...selectedLayers
-    };
-    return newSelectedLayers;
-  });
+  layer.params.opacity = DEFAULT_OPACITY;
+  dispatch(layersActions.setLayerAction('add'));
+  dispatch(layersActions.addSelectedLayer({ name: layerInfo.subLayer, layer }));
 }
 
 export function removeMapLayer(
   layerInfo: { subLayer: string; dataInfo: DataInfoType },
-  setLayerAction: React.Dispatch<React.SetStateAction<string>>,
-  setSelectedLayers: React.Dispatch<React.SetStateAction<SelectedLayersType>>
+  dispatch: AppDispatch
 ) {
-  setLayerAction('remove');
-  setSelectedLayers((selectedLayers: SelectedLayersType) => {
-    const copy = { ...selectedLayers };
-    delete copy[layerInfo.subLayer];
-    return copy;
-  });
+  dispatch(layersActions.setLayerAction('remove'));
+  dispatch(layersActions.removeSelectedLayer(layerInfo.subLayer));
 }
 
 export async function handleChangeMapLayerAndAddLegend(
   checked: boolean,
-  layerInfo: any,
-  setActualLayer: React.Dispatch<React.SetStateAction<string>>,
-  setLayerAction: React.Dispatch<React.SetStateAction<string>>,
-  setSelectedLayers: React.Dispatch<React.SetStateAction<SelectedLayersType>>,
+  layerInfo: { subLayer: string; dataInfo: DataInfoType },
+  dispatch: AppDispatch,
   subLayer: string,
-  setLayerLegend: React.Dispatch<React.SetStateAction<LayersLegendType>>,
   layerLegend: LayersLegendType,
   content: string,
-  setOpacityIsClicked?: React.Dispatch<React.SetStateAction<boolean>>
+  setOpacityIsClicked?: Dispatch<SetStateAction<boolean>>
 ) {
-  if (checked) {
-    if (['zarr-titiler'].includes(layerInfo.dataInfo.dataType)) {
-      const params = layerInfo.dataInfo.params as TitilerOptions;
-      const layerUrl = params.url;
-      const url = `${ZARR_TILE_SERVER_URL}time_values?url=${encodeURIComponent(layerUrl)}`;
-
-      const response = await fetch(url);
-      const timeValues = await response.json();
-      layerInfo.dataInfo.dimensions = {
-        time: {
-          values: timeValues,
-          selected: 0
-        }
-      };
-      if (!layerInfo.dataInfo.params.colormap) {
-        layerInfo.dataInfo.params.colormap = DEFAULT_COLORMAP;
-      }
-    }
-  } else {
-    const legendLayerName = `${content}_${subLayer}`;
-    if (layerLegend[legendLayerName]) {
-      setLayerLegend((layerLegend: LayersLegendType) => {
-        const newLayerLegend = { ...layerLegend };
-        delete newLayerLegend[legendLayerName];
-        return newLayerLegend;
-      });
-    }
+  if (!checked) {
+    const name = `${content}_${subLayer}`;
+    if (layerLegend[name]) dispatch(layersActions.removeLayerLegend(name));
   }
-  await handleChangeMapLayer(
-    checked,
-    layerInfo,
-    setActualLayer,
-    setLayerAction,
-    setSelectedLayers,
-    setOpacityIsClicked
-  );
+  handleChangeMapLayer(checked, layerInfo, dispatch, setOpacityIsClicked);
 }
-export async function handleChangeMapLayer(
+
+export function handleChangeMapLayer(
   checked: boolean,
   layerInfo: { subLayer: string; dataInfo: DataInfoType },
-  setActualLayer: React.Dispatch<React.SetStateAction<string>>,
-  setLayerAction: React.Dispatch<React.SetStateAction<string>>,
-  setSelectedLayers: React.Dispatch<React.SetStateAction<SelectedLayersType>>,
-  setOpacityIsClicked?: React.Dispatch<React.SetStateAction<boolean>>
+  dispatch: AppDispatch,
+  setOpacityIsClicked?: Dispatch<SetStateAction<boolean>>
 ) {
-  setActualLayer(layerInfo.subLayer);
+  dispatch(layersActions.setActualLayer(layerInfo.subLayer));
   if (checked) {
-    await addMapLayer(layerInfo, setLayerAction, setSelectedLayers);
+    addMapLayer(layerInfo, dispatch);
   } else {
-    if (setOpacityIsClicked) {
-      setOpacityIsClicked(false);
-    }
-    removeMapLayer(layerInfo, setLayerAction, setSelectedLayers);
+    setOpacityIsClicked?.(false);
+    removeMapLayer(layerInfo, dispatch);
   }
 }

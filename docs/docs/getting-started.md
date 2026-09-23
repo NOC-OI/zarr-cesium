@@ -9,9 +9,9 @@ title: Getting Started
 
 ```bash
 npm install zarr-cesium
-# or
-yarn add zarr-cesium
 ```
+
+`zarr-cesium` supports CesiumJS 1.119 and newer, including CesiumJS 1.142+.
 
 ---
 
@@ -59,6 +59,53 @@ viewer.imageryLayers.add(layer);
 
 More details on this provider can be found in the [ZarrLayerProvider documentation](./providers/zarr-layer-provider.md).
 
+### Icechunk and custom stores
+
+The 2D provider also accepts any Zarrita-compatible readable store. Install the
+backend client in your application and pass the opened store instead of a URL:
+
+The Icechunk and private Zarr integrations were directly inspired by CarbonPlan's
+[`zarr-layer`](https://github.com/carbonplan/zarr-layer) implementation.
+
+```ts
+import { IcechunkStore } from 'icechunk-js';
+import { ZarrLayerProvider } from 'zarr-cesium';
+
+const store = await IcechunkStore.open('https://example.com/data.icechunk', {
+  branch: 'main',
+  formatVersion: 'v1'
+});
+
+const layer = await ZarrLayerProvider.createLayer(viewer, {
+  store,
+  variable: 'temperature',
+  colormap: 'viridis',
+  scale: [0, 30]
+});
+viewer.imageryLayers.add(layer);
+```
+
+### Querying rendered data
+
+All providers support point queries and convenience methods for common
+scientific profiles. The 2D and scalar-cube providers also support transects:
+
+```ts
+const point = await layer.imageryProvider.queryData({
+  type: 'Point',
+  coordinates: [-4.2, 50.1]
+});
+
+const series = await layer.imageryProvider.getTimeSeries([-4.2, 50.1]);
+const profile = await cube.getVerticalProfile([-4.2, 50.1]);
+const transect = await cube.getTransect([-5, 50], [-3, 51], undefined, {
+  samples: 100
+});
+```
+
+Input positions use WGS84 longitude/latitude. Pass an `AbortSignal` through
+query options to cancel long-running reads.
+
 ---
 
 ## Rendering 3D Volumes (ZarrCubeProvider)
@@ -76,6 +123,11 @@ const cube = new ZarrCubeProvider(viewer, {
 
 await cube.load();
 ```
+
+Latitude orientation is inferred from coordinate values. Use `latIsAscending` only when the
+dataset metadata is missing or incorrect. Use `flipElevation` separately when the vertical axis
+must be reversed. After loading, build slice controls from `cube.cubeDimensionValues` rather than
+the full `cube.dimensionValues` axes.
 
 <div style={{ maxWidth: "800px", margin: "0 auto" }}>
   <video
@@ -105,13 +157,20 @@ const velocity = new ZarrCubeVelocityProvider(viewer, {
   },
   variables: { u: 'uo', v: 'vo' },
   bounds: { west: -50, south: -20, east: 10, north: 20 },
-  colormap: 'plasma'
+  colormap: 'plasma',
+  selectors: {
+    elevation: { type: 'index', selected: [0, 22] }
+  }
 });
 
 await velocity.load();
 ```
 
-This uses [`cesium-wind-layer`](https://github.com/hongfaqiu/cesium-wind-layer) for GPU-accelerated particle flow animations.
+The provider passes the selected elevation-major U/V cube to one cube-aware `WindLayer`. U and V must resolve to matching longitude, latitude,
+and elevation coordinate grids. `sliceSpacing` controls which model levels receive particles,
+while the actual elevation coordinate values determine their rendered heights.
+
+This uses [`cube-cesium-wind-layer`](https://www.npmjs.com/package/cube-cesium-wind-layer), the [NOC-OI fork](https://github.com/NOC-OI/cesium-wind-layer) of the original [`cesium-wind-layer`](https://github.com/hongfaqiu/cesium-wind-layer), for GPU-accelerated particle flow animations. Its `minVisibleRatio` option prevents particle width, trail length, and speed from shrinking below a configured fraction while zooming.
 
 <div style={{ maxWidth: "800px", margin: "0 auto" }}>
   <video
@@ -126,6 +185,8 @@ This uses [`cesium-wind-layer`](https://github.com/hongfaqiu/cesium-wind-layer) 
 > Example of visualizing wind-speed vector data from Zarr in a CesiumJS map using Zarr-Cesium. This dataset is from Hurricane Florence, which occurred in 2018. You can easily change the timestamp, colormap, and particle speed.
 
 More details on this provider can be found in the [ZarrCubeVelocityProvider documentation](./providers/zarr-cube-velocity-provider.md).
+
+Both 3D providers support the same private-store request hooks as the 2D provider. `ZarrCubeProvider` accepts `store`, while `ZarrCubeVelocityProvider` accepts `stores.u` and `stores.v` for Zarrita-compatible stores such as Icechunk. URL-backed stores accept `requestOverrides`, `transformRequest`, and `onAuthError`.
 
 ---
 

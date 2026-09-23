@@ -5,7 +5,9 @@ title: ZarrCubeVelocityProvider
 
 # ZarrCubeVelocityProvider
 
-The **ZarrCubeVelocityProvider** loads and visualizes **3D vector fields** (U, V components) from Zarr datasets as animated particle layers in Cesium using the `WindLayer` from [`cesium-wind-layer`](https://github.com/hongfaqiu/cesium-wind-layer)
+The **ZarrCubeVelocityProvider** loads and visualizes **3D vector fields** (U, V components) from Zarr datasets as animated particle layers in Cesium using `WindLayer` from [`cube-cesium-wind-layer`](https://www.npmjs.com/package/cube-cesium-wind-layer), the [NOC-OI fork](https://github.com/NOC-OI/cesium-wind-layer) of the original [`cesium-wind-layer`](https://github.com/hongfaqiu/cesium-wind-layer).
+
+The NOC-OI fork adds cube-aware particle rendering and `minVisibleRatio`, which clamps camera-driven particle width, trail-length, and speed scaling (`0.6` by default, or `1` to retain the overview scale at every zoom). It also resets visible longitude/latitude ranges and pixel scale when zooming back to a globe overview.
 
 This provider enables real-time visualization of:
 
@@ -18,7 +20,7 @@ It supports:
 
 - Zarr v2 and v3
 - Multiscale pyramids
-- Legacy ndpyramid, GeoZarr, and TopoZarr multiscale layouts
+- Legacy ndpyramid and GeoZarr multiscale layouts
 - GPU-accelerated particle animations
 - Dynamic elevation slicing
 - CF-compliant time decoding for selectors
@@ -71,7 +73,8 @@ const windCube = new ZarrCubeVelocityProvider(viewer, options);
 await windCube.load();
 ```
 
-This creates a **stack of animated particle layers**, one per elevation slice.
+This creates one cube-aware animated particle layer. The layer receives the complete U/V cube and
+distributes particles across the selected elevation levels.
 
 ---
 
@@ -79,9 +82,11 @@ This creates a **stack of animated particle layers**, one per elevation slice.
 
 ```ts
 interface VelocityOptions {
-  urls: { u: string; v: string }; // Public Zarr stores for U and V components
+  urls?: { u?: string; v?: string }; // URLs; each is required unless its store is supplied
+  stores?: { u?: Readable; v?: Readable }; // Custom U/V stores, including IcechunkStore
   variables: { u: string; v: string }; // Zarr array names for U and V
   bounds: BoundsProps; // geographic rectangle
+  latIsAscending?: boolean; // Override latitude array orientation when metadata is incorrect
   dimensionNames?: DimensionNamesProps; // Custom dimension names. If not provided, defaults will be used or identified automatically based on CF conventions.
   selectors?: Record<string, ZarrSelectorsProps>; // Initial dimension slices
   multiscaleLevel?: number; // Index in the metadata's level list; defaults to 0
@@ -95,9 +100,64 @@ interface VelocityOptions {
   scale?: [number, number]; // Min/max for color scaling
   windOptions?: Partial<WindLayerOptions>; // Additional WindLayer configuration
   crs?: CRS; // Force CRS (auto-detected if not set)
-  multiscaleFormat?: MultiscaleFormat; // 'auto' (default), 'legacy', 'geozarr', or 'topozarr'
+  multiscaleFormat?: MultiscaleFormat; // 'auto' (default), 'legacy', or 'geozarr'
+  requestOverrides?: RequestOverrides; // Static options shared by URL-backed U/V stores
+  transformRequest?: TransformRequest; // Per-request auth, proxy, or signed URL transform
+  onAuthError?: OnAuthError; // Called once for HTTP 400/401 responses
 }
 ```
+
+`latIsAscending` controls the north/south orientation of rows and is inferred from latitude
+coordinates by default. It is not a replacement for `flipElevation`: that option reverses the
+vertical coordinate direction. Use overrides only for datasets whose metadata is absent or wrong.
+
+---
+
+## Icechunk and Custom Stores
+
+Supply one Zarrita-compatible `Readable` store for each component. When U and V are arrays in the same Icechunk repository, the same store can be used for both:
+
+```ts
+import { IcechunkStore } from 'icechunk-js';
+import { ZarrCubeVelocityProvider } from 'zarr-cesium';
+
+const store = await IcechunkStore.open(repositoryUrl, {
+  branch: 'main',
+  formatVersion: 'v1'
+});
+
+const velocity = new ZarrCubeVelocityProvider(viewer, {
+  stores: { u: store, v: store },
+  variables: { u: 'uo', v: 'vo' },
+  bounds: { west: -50, south: -20, east: 10, north: 20 }
+});
+
+await velocity.load();
+```
+
+You can mix sources, for example `urls.u` with `stores.v`, provided both components have a source.
+
+## Private HTTP Stores
+
+URL-backed U and V stores share request configuration. The transformed fetch and its one-shot authentication callback are reused across both components:
+
+```ts
+const velocity = new ZarrCubeVelocityProvider(viewer, {
+  urls: {
+    u: 'https://data.example.com/private-u.zarr',
+    v: 'https://data.example.com/private-v.zarr'
+  },
+  variables: { u: 'uo', v: 'vo' },
+  bounds,
+  transformRequest: async url => ({
+    url,
+    headers: { Authorization: `Bearer ${await getAccessToken()}` }
+  }),
+  onAuthError: status => refreshSession(status)
+});
+```
+
+Use `requestOverrides` instead when credentials and headers are static.
 
 ---
 
@@ -116,30 +176,34 @@ This loads:
 - Windowed spatial slice (based on bounds)
 - Elevation slice ranges and spacing
 
-Then it automatically creates Cesium `WindLayer` instances (one per elevation slice) and adds them to the viewer.
+Then it creates one cube-aware Cesium `WindLayer` and adds it to the viewer.
+
+Before rendering, the provider verifies that U and V have identical longitude, latitude, and
+elevation coordinate grids. A mismatch is rejected because component values cannot be paired
+reliably. Both components are loaded through the same cube-loading path as `ZarrCubeProvider`.
 
 ---
 
 ## How It Renders the Data
 
-The provider generates **one WindLayer per elevation slice**, spaced by `sliceSpacing`:
+The provider passes the complete elevation-major U/V cube to one `WindLayer`. Particles are distributed across the enabled elevation levels according to `sliceSpacing`:
 
-- `sliceSpacing = 1` → one layer per model level
-- `sliceSpacing = 2` → one layer every two levels
+- `sliceSpacing = 1` → particles may occupy every model level
+- `sliceSpacing = 2` → particles use every second model level
 - `sliceSpacing = n` → coarse vertical sampling
 
-Each level has:
+The cube contains:
 
-- a 2D U-field
-- a 2D V-field
-- a computed **altitude**
-- a WindLayer placed at the correct height
+- a contiguous elevation-major U cube
+- a contiguous elevation-major V cube
+- elevation coordinate values used to compute particle height
+- semantic latitude orientation through `latIsAscending`
 
 Particles animate based on u/v speed and direction.
 
 ### WindLayer Integration
 
-Each layer receives a `windData` structure:
+The layer receives a cube `windData` structure:
 
 ```ts
 {
@@ -147,7 +211,9 @@ Each layer receives a `windData` structure:
   v: { array: Float32Array, min: -0.5, max: 0.5 },
   width,
   height,
-  unit: 'm s-1',
+  depth,
+  elevations,
+  latIsAscending,
   bounds: this.bounds
 }
 ```
@@ -160,7 +226,10 @@ Plus user-configurable **particle system settings**:
   lineWidth,
   lineLength,
   particlesTextureSize,
-  flipY
+  minVisibleRatio,
+  elevationStep,
+  verticalExaggeration,
+  belowSeaLevel
   ...
 }
 ```
@@ -208,16 +277,16 @@ Then:
 - Resolution, W×H×Z, and bounding box adapt
 - Switching levels triggers a reload
 
-For a TopoZarr store, whose level `0` is normally full resolution:
+For a GeoZarr store whose level `0` is full resolution:
 
 ```ts
-multiscaleFormat: 'topozarr',
-multiscaleLevel: 0 // loads TopoZarr's full-resolution level
+multiscaleFormat: 'geozarr',
+multiscaleLevel: 0 // loads the GeoZarr full-resolution level
 ```
 
 Legacy ndpyramid stores commonly use the opposite order, with level `0` as the
 coarsest resolution. Inspect `windCube.levelInfos` when choosing a level.
-GeoZarr/TopoZarr metadata supplies levels through `multiscales.layout[].asset`,
+GeoZarr metadata supplies levels through `multiscales.layout[].asset`,
 whereas legacy metadata uses `multiscales[0].datasets[].path`.
 
 ---
@@ -234,7 +303,7 @@ await windCube.updateSelectors({
 });
 ```
 
-This **reloads U and V cubes**, destroys old wind layers, and creates new ones.
+This reloads the U and V cubes, destroys the old wind layer, and creates a new one.
 
 CF time coordinates are decoded to ISO strings in `windCube.dimensionValues`.
 Selectors may therefore use either an array index or a decoded time value, for
@@ -294,9 +363,9 @@ await windCube.updateSlices({
 
 This:
 
-- Removes all current WindLayers
+- Updates the current cube-aware `WindLayer`
 - Recomputes heights
-- Rebuilds wind layers with new parameters
+- Applies the new vertical-layout parameters without rereading the cube
 
 All the parameters are optional. If not provided, the current value is retained.
 
@@ -319,17 +388,43 @@ windCube.updateStyle({
 });
 ```
 
-This applies instantly to all existing layers.
+This applies instantly to the existing layer.
 
 The full list of supported colormaps is available in the [Colormaps section](../api/type-aliases/ColorMapName.md).
 
-The `windOptions` allows fine-tuning of particle system parameters. For more info, see the [`WindLayerOptions` information on cesium-wind-layer github repo](https://github.com/hongfaqiu/cesium-wind-layer)
+`windOptions` allows fine-tuning of particle-system parameters. `particleHeight` is ignored because
+height is derived from the Zarr elevation coordinates. For more information, see the
+[`WindLayerOptions` source in the NOC-OI fork](https://github.com/NOC-OI/cesium-wind-layer/tree/main/packages/cesium-wind-layer).
+
+---
+
+### Query Velocity Data
+
+Velocity queries return derived speed alongside aligned U and V components:
+
+```ts
+const point = await windCube.queryData({
+  type: 'Point',
+  coordinates: [-4.2, 50.1]
+});
+
+console.log(point.values);       // speed
+console.log(point.components.u); // U component
+console.log(point.components.v); // V component
+
+const profile = await windCube.getVerticalProfile([-4.2, 50.1]);
+const series = await windCube.getTimeSeries([-4.2, 50.1]);
+```
+
+Input positions use WGS84 longitude/latitude. A ranged time selector reads the
+source arrays, while an elevation range returns values across the loaded
+vertical subset. Pass `{ signal }` to cancel a query.
 
 ---
 
 ### Remove Layers, Clearing & Destroying
 
-Remove all velocity layers:
+Remove the velocity layer and release its resources:
 
 ```ts
 windCube.destroy();

@@ -1,14 +1,13 @@
 import type { Viewer } from 'cesium';
 import { ZarrCubeProvider, ZarrCubeVelocityProvider, ZarrLayerProvider } from 'zarr-cesium';
-import { GetZarrLayer } from '../../../lib/map-layers/addZarrLayer';
+import { IcechunkStore } from 'icechunk-js';
 import type { DataInfoType, keyable, SelectedLayersType, ZarrCesiumRefs } from '../../../types';
 import type { CubeOptions, LayerOptions, VelocityOptions } from 'zarr-cesium';
 import type React from 'react';
 
 export function viewerMap(viewerRef: React.RefObject<Viewer | null>, dataType: string) {
   const relationship: keyable = {
-    'zarr-cesium': viewerRef.current?.imageryLayers,
-    'zarr-titiler': viewerRef.current?.imageryLayers
+    'zarr-cesium': viewerRef.current?.imageryLayers
   };
   return relationship[dataType];
 }
@@ -19,8 +18,7 @@ export async function generateSelectedLayer(
   viewerRef: React.RefObject<Viewer>,
   layers: any,
   zarrCesiumRefs: ZarrCesiumRefs,
-  gebcoTerrainEnabled?: boolean,
-  setSelectedLayers?: React.Dispatch<React.SetStateAction<SelectedLayersType>>
+  gebcoTerrainEnabled?: boolean
 ) {
   const layerName = selectedLayers[actualLayer];
   layers?._layers.forEach(function (layer: any) {
@@ -31,77 +29,67 @@ export async function generateSelectedLayer(
   try {
     if (layerName.dataType === 'zarr-cesium') {
       const layer = await getZarrCesiumLayer(layerName, actualLayer, viewerRef);
-      updateSelectedLayersWithDimensions(
+      const selectedLayer = getSelectedLayerWithDimensions(
         layer.imageryProvider,
         actualLayer,
-        selectedLayers,
-        setSelectedLayers
+        selectedLayers
       );
       layers.add(layer);
+      return { selectedLayer };
     } else if (layerName.dataType === 'zarr-cube') {
       const layer = await getZarrCube(
         layerName,
         actualLayer,
         viewerRef,
-        zarrCesiumRefs.cubeRef,
+        zarrCesiumRefs.cubeRefs,
         gebcoTerrainEnabled
       );
-      updateSelectedLayersWithDimensions(
-        layer,
-        actualLayer,
-        selectedLayers,
-        setSelectedLayers,
-        true
-      );
+      return {
+        selectedLayer: getSelectedLayerWithDimensions(layer, actualLayer, selectedLayers, true)
+      };
     } else if (layerName.dataType === 'zarr-cube-velocity') {
       const layer = await getZarrCubeVelocity(
         layerName,
         actualLayer,
         viewerRef,
-        zarrCesiumRefs.velocityCubeRef,
+        zarrCesiumRefs.velocityCubeRefs,
         gebcoTerrainEnabled
       );
-      updateSelectedLayersWithDimensions(
-        layer,
-        actualLayer,
-        selectedLayers,
-        setSelectedLayers,
-        true
-      );
-    } else if (layerName.dataType === 'zarr-titiler') {
-      const layer = await getZarrLayer(layerName, actualLayer);
-      layers.add(layer);
+      return {
+        selectedLayer: getSelectedLayerWithDimensions(layer, actualLayer, selectedLayers, true)
+      };
     }
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'Error adding layer' };
   }
 }
 
-export function updateSelectedLayersWithDimensions(
+export function getSelectedLayerWithDimensions(
   layer: any,
   actualLayer: string,
   selectedLayers: SelectedLayersType,
-  setSelectedLayers?: React.Dispatch<React.SetStateAction<SelectedLayersType>>,
   cube?: boolean
 ) {
-  if (!setSelectedLayers) return;
-  const selected = selectedLayers[actualLayer];
+  const selected = structuredClone(selectedLayers[actualLayer]);
+  if (!selected || !layer) return;
   const dimensions: Record<string, { values: any; selected: any; indices?: number[] }> = {};
   Object.keys(layer.dimensionValues).forEach((dimKey: string) => {
     if (dimKey === 'lat' || dimKey === 'lon') {
       if (!cube) return;
       dimensions[dimKey] = {
-        values: layer.dimensionValues[dimKey],
+        values: layer.cubeDimensionValues[dimKey],
         selected: dimKey === 'lat' ? layer.latSliceIndex : layer.lonSliceIndex
       };
     } else {
       dimensions[dimKey] = {
-        values: layer.dimensionValues[dimKey],
+        values:
+          cube && dimKey === 'elevation'
+            ? layer.cubeDimensionValues[dimKey]
+            : layer.dimensionValues[dimKey],
         selected: layer.selectors[dimKey].selected
       };
-      if (cube && dimKey === 'elevation') {
-        const elevationShape = layer.elevationShape;
-        dimensions[dimKey].indices = Array.from({ length: elevationShape }, (_, i) => i);
+      if (cube && dimKey === 'elevation' && Array.isArray(layer.selectors[dimKey].selected)) {
+        dimensions[dimKey].indices = Array.from(layer.dimensionValues[dimKey]);
       }
     }
   });
@@ -120,10 +108,7 @@ export function updateSelectedLayersWithDimensions(
     selected.pyramidLevels = layer.levelInfos || [];
   }
   selected.dimensions = dimensions;
-  setSelectedLayers(prev => ({
-    ...prev,
-    [actualLayer]: selected
-  }));
+  return selected;
 }
 
 export async function getZarrCesiumLayer(
@@ -131,7 +116,10 @@ export async function getZarrCesiumLayer(
   actualLayer: string,
   viewerRef: React.RefObject<Viewer>
 ) {
-  const options = layerName.params as LayerOptions;
+  const options = structuredClone(layerName.params) as LayerOptions;
+  if (options.url?.endsWith('.icechunk')) {
+    options.store = await IcechunkStore.open(options.url, { branch: 'main', formatVersion: 'v1' });
+  }
   const imageryLayer = (await ZarrLayerProvider.createLayer(viewerRef.current, options)) as any;
   imageryLayer.id = actualLayer;
   return imageryLayer;
@@ -141,17 +129,18 @@ export async function getZarrCube(
   layerName: DataInfoType,
   actualLayer: string,
   viewerRef: React.RefObject<Viewer>,
-  cubeRef: React.RefObject<ZarrCubeProvider | null>,
+  cubeRefs: React.RefObject<Record<string, ZarrCubeProvider>>,
   gebcoTerrainEnabled?: boolean
 ) {
-  const options = layerName.params as CubeOptions;
+  const options = structuredClone(layerName.params) as CubeOptions;
   if (gebcoTerrainEnabled !== undefined && options.flipElevation !== true) {
     options.belowSeaLevel = gebcoTerrainEnabled;
   }
   const layer = new ZarrCubeProvider(viewerRef.current, options);
   layer.id = actualLayer;
-  cubeRef.current = layer;
   await layer.load();
+  cubeRefs.current[actualLayer]?.destroy();
+  cubeRefs.current[actualLayer] = layer;
   return layer;
 }
 
@@ -159,23 +148,18 @@ export async function getZarrCubeVelocity(
   layerName: DataInfoType,
   actualLayer: string,
   viewerRef: React.RefObject<Viewer>,
-  velocityCubeRef: React.RefObject<ZarrCubeVelocityProvider | null>,
+  velocityCubeRefs: React.RefObject<Record<string, ZarrCubeVelocityProvider>>,
   gebcoTerrainEnabled?: boolean
 ) {
-  const options = layerName.params as VelocityOptions;
+  const options = structuredClone(layerName.params) as VelocityOptions;
   if (gebcoTerrainEnabled !== undefined && options.flipElevation !== true) {
     options.belowSeaLevel = gebcoTerrainEnabled;
   }
+  console.log('getZarrCubeVelocity options:', options);
   const layer = new ZarrCubeVelocityProvider(viewerRef.current, options);
   layer.id = actualLayer;
-  velocityCubeRef.current = layer;
-
   await layer.load();
-  return layer;
-}
-
-export async function getZarrLayer(layerName: DataInfoType, actualLayer: string) {
-  const zarrLayerClass = new GetZarrLayer(layerName, actualLayer);
-  const layer = await zarrLayerClass.getTile();
+  velocityCubeRefs.current[actualLayer]?.destroy();
+  velocityCubeRefs.current[actualLayer] = layer;
   return layer;
 }

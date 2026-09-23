@@ -2,8 +2,8 @@
 
 ```ts
 function decodeCFTime(
-   values,
-   units,
+   values, 
+   units, 
    calendar?): string[];
 ```
 

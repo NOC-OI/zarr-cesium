@@ -2,8 +2,8 @@
 
 ```ts
 function getZarrData(
-   arr,
-   selection?,
+   arr, 
+   selection?, 
 options?): Promise<any>;
 ```
 

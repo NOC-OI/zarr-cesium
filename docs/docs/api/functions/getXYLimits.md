@@ -2,10 +2,10 @@
 
 ```ts
 function getXYLimits(
-   root,
-   dimIndices,
-   levelInfos,
-   multiscale,
+   root, 
+   dimIndices, 
+   levelInfos, 
+   multiscale, 
 zarrVersion): Promise<XYLimitsProps>;
 ```
 

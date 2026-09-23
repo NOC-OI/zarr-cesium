@@ -134,6 +134,16 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "api/interfaces/TileCacheOptions",
+          label: "TileCacheOptions"
+        },
+        {
+          type: "doc",
+          id: "api/interfaces/TileCacheStats",
+          label: "TileCacheStats"
+        },
+        {
+          type: "doc",
           id: "api/interfaces/TransectQueryOptions",
           label: "TransectQueryOptions"
         },

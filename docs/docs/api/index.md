@@ -33,6 +33,8 @@
 | [QueryResult](interfaces/QueryResult.md) | Values and coordinates returned from a shared Zarr query. |
 | [RequestOverrides](interfaces/RequestOverrides.md) | Serializable static fetch options suitable for application state and FetchStore. |
 | [RequestParameters](interfaces/RequestParameters.md) | - |
+| [TileCacheOptions](interfaces/TileCacheOptions.md) | Controls the in-memory cache used to recolor tiles without reading Zarr data again. |
+| [TileCacheStats](interfaces/TileCacheStats.md) | Runtime counters for a provider's decoded tile cache. |
 | [TransectQueryOptions](interfaces/TransectQueryOptions.md) | Sampling controls for one-level and full-depth transects. |
 | [TransectResult](interfaces/TransectResult.md) | A one-level transect. Values preserve no-data gaps as null. |
 | [VelocityOptions](interfaces/VelocityOptions.md) | - |

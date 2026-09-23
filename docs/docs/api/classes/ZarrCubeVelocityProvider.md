@@ -90,8 +90,8 @@ Loaded U/V arrays and selectors remain in memory. Call
 
 ```ts
 getTimeSeries(
-   position,
-   selectors?,
+   position, 
+   selectors?, 
 options?): Promise<QueryResult>;
 ```
 
@@ -117,8 +117,8 @@ Speed and component values ordered by time.
 
 ```ts
 getVerticalProfile(
-   position,
-   selectors?,
+   position, 
+   selectors?, 
 options?): Promise<QueryResult>;
 ```
 
@@ -169,8 +169,8 @@ U and V are loaded concurrently and must describe compatible grids.
 
 ```ts
 queryData(
-   geometry,
-   selectors,
+   geometry, 
+   selectors, 
 options): Promise<VelocityQueryResult>;
 ```
 

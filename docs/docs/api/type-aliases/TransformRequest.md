@@ -1,7 +1,7 @@
 # TransformRequest()
 
 ```ts
-type TransformRequest = (url, options?) =>
+type TransformRequest = (url, options?) => 
   | RequestParameters
 | Promise<RequestParameters>;
 ```

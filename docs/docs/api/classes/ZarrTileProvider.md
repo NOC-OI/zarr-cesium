@@ -50,6 +50,22 @@ Promise that resolves with the result of asynchronous dataset initialization.
 
 `Promise`\<`boolean`\>
 
+***
+
+### tileCacheStats
+
+#### Get Signature
+
+```ts
+get tileCacheStats(): TileCacheStats;
+```
+
+Current decoded tile-cache usage and lifetime hit/eviction counters.
+
+##### Returns
+
+[`TileCacheStats`](../interfaces/TileCacheStats.md)
+
 ## Constructors
 
 ### Constructor
@@ -100,6 +116,20 @@ Aborts an in-flight tile request.
 
 ***
 
+### clearTileCache()
+
+```ts
+clearTileCache(): void;
+```
+
+Removes all decoded numeric tiles retained by this provider.
+
+#### Returns
+
+`void`
+
+***
+
 ### destroy()
 
 ```ts
@@ -118,9 +148,9 @@ Aborts outstanding tile requests and prevents further rendering work.
 
 ```ts
 getFullTransect(
-   start,
-   end,
-   selectors?,
+   start, 
+   end, 
+   selectors?, 
 options?): Promise<FullTransectResult>;
 ```
 
@@ -145,8 +175,8 @@ Samples every vertical level along a line between two WGS84 positions.
 
 ```ts
 getTimeSeries(
-   position,
-   selectors?,
+   position, 
+   selectors?, 
 options?): Promise<QueryResult>;
 ```
 
@@ -172,9 +202,9 @@ Values and their time coordinates.
 
 ```ts
 getTransect(
-   start,
-   end,
-   selectors?,
+   start, 
+   end, 
+   selectors?, 
 options?): Promise<TransectResult>;
 ```
 
@@ -199,8 +229,8 @@ Samples one selected level along a line between two WGS84 positions.
 
 ```ts
 getVerticalProfile(
-   position,
-   selectors?,
+   position, 
+   selectors?, 
 options?): Promise<QueryResult>;
 ```
 
@@ -226,8 +256,8 @@ Values and their vertical coordinates.
 
 ```ts
 queryData(
-   geometry,
-   selectors?,
+   geometry, 
+   selectors?, 
 options?): Promise<QueryResult>;
 ```
 
@@ -261,8 +291,8 @@ One ranged non-spatial selector produces a profile or time series.
 
 ```ts
 queryPoints(
-   positions,
-   selectors?,
+   positions, 
+   selectors?, 
 options?): Promise<QueryResult[]>;
 ```
 
@@ -292,8 +322,8 @@ Source chunks are deduplicated so transects do not fetch and decode a chunk per 
 
 ```ts
 renderTile(
-   boundsDeg,
-   z,
+   boundsDeg, 
+   z, 
 key): Promise<HTMLCanvasElement | ImageBitmap>;
 ```
 
@@ -368,7 +398,7 @@ Updates the data scale or colormap without reopening the dataset.
 ### coverageBoundsDeg
 
 ```ts
-coverageBoundsDeg:
+coverageBoundsDeg: 
   | {
   east: number;
   north: number;
@@ -383,7 +413,7 @@ coverageBoundsDeg:
 ### coverageBoundsMerc
 
 ```ts
-coverageBoundsMerc:
+coverageBoundsMerc: 
   | {
   xMax: number;
   xMin: number;

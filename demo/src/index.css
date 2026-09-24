@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 @import 'zarr-maps-explorer/styles.css';
 
-/* Tailwind does not automatically scan source behind linked package boundaries. */
+/* Tailwind ignores node_modules by default, so explicitly scan the installed
+   explorer package for the utility classes used by its components. */
 @source '.';
-@source '../../../zarr-maps/packages/zarr-maps-explorer/src';
+@source '../node_modules/zarr-maps-explorer/dist';

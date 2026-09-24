@@ -389,22 +389,6 @@ export class ZarrCubeVelocityProvider {
         };
       });
 
-    console.info('[ZarrCubeVelocityProvider] cube passed to WindLayer', {
-      dimensions: { width, height, depth: elevation },
-      expectedLength: sliceSize * elevation,
-      uLength: windData.u.array.length,
-      vLength: windData.v.array.length,
-      sourceElevations,
-      renderedElevations: elevations,
-      latIsAscending: this.latIsAscending,
-      flipElevation: this.flipElevation,
-      elevationStep: this.sliceSpacing,
-      verticalExaggeration: this.verticalExaggeration,
-      belowSeaLevel: this.belowSeaLevel,
-      uLevels: summarizeComponent(windData.u.array),
-      vLevels: summarizeComponent(windData.v.array)
-    });
-
     // WindLayer only uses APIs shared by Viewer and CesiumWidget, but its
     // published declaration currently narrows this parameter to Viewer.
     this.layer = new WindLayer(this.viewer as Viewer, windData, layerOptions);

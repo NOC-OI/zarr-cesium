@@ -155,7 +155,6 @@ export async function getZarrCubeVelocity(
   if (gebcoTerrainEnabled !== undefined && options.flipElevation !== true) {
     options.belowSeaLevel = gebcoTerrainEnabled;
   }
-  console.log('getZarrCubeVelocity options:', options);
   const layer = new ZarrCubeVelocityProvider(viewerRef.current, options);
   layer.id = actualLayer;
   await layer.load();

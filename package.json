@@ -19,7 +19,6 @@
     "dist"
   ],
   "scripts": {
-    "test:coordinates": "node tests/run-cube-coordinates.mjs",
     "dev": "tsup src/index.ts --format cjs,esm --dts --sourcemap --external cube-cesium-wind-layer --external zarrita --external zarr-maps-colormap --watch",
     "build": "tsup src/index.ts --format esm --dts --sourcemap --external cesium --external cube-cesium-wind-layer --external zarrita --external zarr-maps-colormap",
     "clean": "rm -rf dist",

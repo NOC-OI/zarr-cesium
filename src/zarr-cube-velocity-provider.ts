@@ -134,6 +134,8 @@ export class ZarrCubeVelocityProvider {
   private dimIndices: DimIndicesProps = {};
   private longitudeIndices: number[] = [];
   private loadedOrigin = { x: 0, y: 0, elevation: 0 };
+  /** Invalidates stale asynchronous loads without making the provider permanently unusable. */
+  private loadGeneration = 0;
 
   /**
    * Creates a new {@link ZarrCubeVelocityProvider} instance.
@@ -300,12 +302,15 @@ export class ZarrCubeVelocityProvider {
    * @remarks U and V must describe compatible grids.
    */
   async load(): Promise<void> {
+    const loadGeneration = ++this.loadGeneration;
     // calculateSliceArgs normalizes selectors to array indices. Both components
     // must start from the same unmodified request rather than letting U's
     // normalized selectors become V's input.
     const requestedSelectors = structuredClone(this.selectors);
     const uCube = await this.loadZarrVariable('u', this.variables.u, requestedSelectors);
+    if (loadGeneration !== this.loadGeneration) return;
     const vCube = await this.loadZarrVariable('v', this.variables.v, requestedSelectors);
+    if (loadGeneration !== this.loadGeneration) return;
     if (!uCube || !vCube) {
       console.error('Failed to load U or V component data.');
       return;
@@ -325,12 +330,10 @@ export class ZarrCubeVelocityProvider {
     this.cubeDimensions = [uCube.width, uCube.height, uCube.elevation];
     this.volumeData = { uCube, vCube };
 
-    await this.createWindLayer();
+    await this.createWindLayer(loadGeneration);
   }
 
-
-
-  private async createWindLayer(): Promise<void> {
+  private async createWindLayer(loadGeneration: number): Promise<void> {
     if (!this.volumeData) {
       console.error('Volume data not loaded.');
       return;
@@ -389,9 +392,16 @@ export class ZarrCubeVelocityProvider {
         };
       });
 
+    if (loadGeneration !== this.loadGeneration) return;
     // WindLayer only uses APIs shared by Viewer and CesiumWidget, but its
     // published declaration currently narrows this parameter to Viewer.
-    this.layer = new WindLayer(this.viewer as Viewer, windData, layerOptions);
+    const nextLayer = new WindLayer(this.viewer as Viewer, windData, layerOptions);
+    if (loadGeneration !== this.loadGeneration) {
+      nextLayer.destroy();
+      return;
+    }
+    this.layer?.destroy();
+    this.layer = nextLayer;
   }
 
   /**
@@ -703,7 +713,7 @@ export class ZarrCubeVelocityProvider {
     }
     if (updateLayer) {
       this.destroy();
-      this.load();
+      await this.load();
     }
   }
 
@@ -823,6 +833,7 @@ export class ZarrCubeVelocityProvider {
    * {@link updateSlices} or {@link load} to render layers again.
    */
   destroy(): void {
+    this.loadGeneration++;
     this.layer?.destroy();
     this.layer = null;
   }

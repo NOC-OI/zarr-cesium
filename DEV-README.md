@@ -277,12 +277,13 @@ npm pkg get version dependencies
 Review the package manifest and lockfiles before committing:
 
 ```bash
+export VERSION=0.2.0
 git diff -- package.json package-lock.json demo/package.json demo/package-lock.json
 git add package.json package-lock.json demo/package.json demo/package-lock.json
-git commit -m "Release v0.2.0"
-git tag -a v0.2.0 -m "Release v0.2.0"
+git commit -m "Release v$VERSION"
+git tag -a v$VERSION -m "Release v$VERSION"
 git push origin dev
-git push origin v0.2.0
+git push origin v$VERSION
 ```
 
 Pushing the tag triggers `.github/workflows/publish-npm.yml`. The workflow verifies that the tag, `package.json`, and both root version entries in `package-lock.json` match before building and publishing the package. It then creates the corresponding GitHub release.

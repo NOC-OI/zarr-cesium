@@ -366,31 +366,6 @@ export class ZarrCubeVelocityProvider {
     };
 
     const sliceSize = width * height;
-    const summarizeComponent = (values: ArrayLike<number>) =>
-      Array.from({ length: elevation }, (_, level) => {
-        const start = level * sliceSize;
-        const end = start + sliceSize;
-        let min = Number.POSITIVE_INFINITY;
-        let max = Number.NEGATIVE_INFINITY;
-        let finite = 0;
-        let nonZero = 0;
-        for (let index = start; index < end; index++) {
-          const value = Number(values[index]);
-          if (!Number.isFinite(value)) continue;
-          finite++;
-          if (value !== 0) nonZero++;
-          min = globalThis.Math.min(min, value);
-          max = globalThis.Math.max(max, value);
-        }
-        return {
-          level,
-          coordinate: sourceElevations[level],
-          min: finite ? min : null,
-          max: finite ? max : null,
-          finite,
-          nonZero
-        };
-      });
 
     if (loadGeneration !== this.loadGeneration) return;
     // WindLayer only uses APIs shared by Viewer and CesiumWidget, but its

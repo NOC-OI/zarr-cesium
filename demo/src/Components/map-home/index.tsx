@@ -1,4 +1,4 @@
-import { Ion, type Viewer } from 'cesium';
+import { type Viewer } from 'cesium';
 import { useEffect, useRef, useCallback } from 'react';
 import * as Cesium from 'cesium';
 import { useContextHandle } from '../../application/use-context';
@@ -24,8 +24,6 @@ import { CESIUM_START_COORDINATES, VERTICAL_EXAGGERATION } from '../../lib/map-l
 import { PointQueryInfo } from '../point-query-info';
 import { TransectQueryInfo } from '../transect-query-info';
 import type { QueryPosition } from 'zarr-cesium';
-
-Ion.defaultAccessToken = import.meta.env.VITE_CESIUM_TOKEN;
 
 export function MapHome() {
   const { selectedLayers, actualLayer, layerAction, gebcoTerrainEnabled, listLayers } =
@@ -348,7 +346,14 @@ export function MapHome() {
     let removeTerrainReadyListener: (() => void) | undefined;
     let removeProviderErrorListener: (() => void) | undefined;
     if (gebcoTerrainEnabled) {
-      const terrain = Cesium.Terrain.fromWorldBathymetry({ requestVertexNormals: true });
+      const terrainUrl = import.meta.env.VITE_TERRAIN_URL || "https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/terrain/gebco/gebco-2026-vertexnormals/"
+
+      const terrain = new Cesium.Terrain(
+        Cesium.CesiumTerrainProvider.fromUrl(terrainUrl, {
+          requestVertexNormals: true
+        })
+      );
+
       removeTerrainErrorListener = terrain.errorEvent.addEventListener(error => {
         const detail = error instanceof Error ? error.message : String(error);
         setFlashMessage({
@@ -358,6 +363,7 @@ export function MapHome() {
       });
       removeTerrainReadyListener = terrain.readyEvent.addEventListener(provider => {
         removeProviderErrorListener = provider.errorEvent.addEventListener(error => {
+          console.error('Provider error:', error);
           const detail = error instanceof Error ? error.message : String(error);
           setFlashMessage({
             messageType: 'error',

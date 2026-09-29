@@ -73,15 +73,13 @@ git clone https://github.com/noc-oi/zarr-cesium.git
 cd zarr-cesium/demo
 ```
 
-## Add Your Cesium Ion Token
+## Add the Terrain Server URL
 
 Create a `.env` file inside `demo/`:
 
 ```env
-VITE_CESIUM_TOKEN=your_cesium_access_token_here
+VITE_TERRAIN_URL=https://your-terrain-server/terrain-tileset/
 ```
-
-If you don't have a token, create a free account at [https://cesium.com/ion/](https://cesium.com/ion/).
 
 ## Install dependencies
 

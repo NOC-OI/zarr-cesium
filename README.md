@@ -86,12 +86,6 @@ git clone https://github.com/noc-oi/zarr-cesium.git
 cd zarr-cesium/demo
 ```
 
-Create a `.env` file in the `demo` directory with your Cesium access token:
-
-```env
-VITE_CESIUM_TOKEN=your_cesium_access_token_here
-```
-
 Install dependencies and start the development server:
 
 ```bash

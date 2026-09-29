@@ -27,9 +27,6 @@ jobs:
             demo/package-lock.json
             docs/package-lock.json
 
-      - name: Inject Cesium token
-        run: echo "VITE_CESIUM_TOKEN=${{ secrets.VITE_CESIUM_TOKEN }}" >> $GITHUB_ENV
-
       - name: Install root dependencies
         run: npm ci
 
@@ -41,7 +38,7 @@ jobs:
 
       - name: Build demo
         env:
-          VITE_CESIUM_TOKEN: ${{ secrets.VITE_CESIUM_TOKEN }}
+          VITE_TERRAIN_URL: https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/terrain/gebco/gebco-2026-vertexnormals/
         run: npm run build --prefix demo
 
       - name: Install docs dependencies

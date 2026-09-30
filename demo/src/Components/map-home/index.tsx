@@ -443,7 +443,7 @@ export function MapHome() {
       },
       'update-dimensions': {
         function: changeMapDimensions,
-        args: [actualLayer, selectedLayers, viewerRef, zarrCesiumRefs]
+        args: [actualLayer, selectedLayers, viewerRef, zarrCesiumRefs, gebcoTerrainEnabled]
       },
       'update-bounds': {
         function: changeMapBounds,

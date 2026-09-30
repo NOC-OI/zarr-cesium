@@ -97,7 +97,7 @@ pyramid.write("multiscale.zarr")
 ```
 
 `levels` includes the original dataset. Level `0` is the original, highest-resolution
-level; each subsequent level is coarser. Choose the aggregation method to match the
+level. Each subsequent level is coarser. Choose the aggregation method to match the
 data: `nearest` is useful for categorical values, while `mean`, `min`, `max`, or `sum`
 may be more appropriate for continuous variables.
 
@@ -121,7 +121,7 @@ data needs reprojection or regridding, perform that step before passing it to To
 
 TopoZarr writes the pyramid and its GeoZarr metadata with `pyramid.write(...)`, as
 shown above. Ensure the resulting store is accessible via HTTP(S). For web delivery,
-use small spatial chunks and avoid consolidating Zarr v3 metadata; TopoZarr provides
+use small spatial chunks and avoid consolidating Zarr v3 metadata. TopoZarr provides
 chunking and sharding recommendations for this workflow.
 
 Zarr-Cesium also supports existing Zarr v2 stores. These should use consolidated

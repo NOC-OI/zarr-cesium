@@ -125,9 +125,10 @@ await cube.load();
 ```
 
 Latitude orientation is inferred from coordinate values. Use `latIsAscending` only when the
-dataset metadata is missing or incorrect. Use `flipElevation` separately when the vertical axis
-must be reversed. After loading, build slice controls from `cube.cubeDimensionValues` rather than
-the full `cube.dimensionValues` axes.
+dataset metadata is missing or incorrect. Use `flipElevation` separately when the data/index order
+of the vertical axis must be reversed. Set `elevationMode: 'depth'` when positive vertical
+coordinates represent depths below sea level. Its default is `'height'`. After loading, build
+slice controls from `cube.cubeDimensionValues` rather than the full `cube.dimensionValues` axes.
 
 <div style={{ maxWidth: "800px", margin: "0 auto" }}>
   <video

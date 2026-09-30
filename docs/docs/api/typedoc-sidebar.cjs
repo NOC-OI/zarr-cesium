@@ -416,6 +416,11 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "api/type-aliases/ElevationMode",
+          label: "ElevationMode"
+        },
+        {
+          type: "doc",
           id: "api/type-aliases/MultiscaleFormat",
           label: "MultiscaleFormat"
         },

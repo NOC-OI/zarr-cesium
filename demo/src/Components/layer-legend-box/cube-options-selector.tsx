@@ -75,11 +75,7 @@ export function CubeOptionsSelector({ layerLegendName }: LayerLegendBoxProps) {
           Elevation Slice:{' '}
           {selectedLayer.dimensions!.elevation
             ? (
-                selectedLayer.dimensions!.elevation.values[
-                  params.flipElevation
-                    ? selectedLayer.dimensions!.elevation.values.length - 1 - elevationSlice
-                    : elevationSlice
-                ] as number
+                selectedLayer.dimensions!.elevation.values[elevationSlice] as number
               ).toFixed(2)
             : elevationSlice}{' '}
           m

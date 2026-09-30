@@ -260,8 +260,8 @@ Updates the rendered cube's active elevation interval or vertical placement.
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `options` | \{ `belowSeaLevel?`: `boolean`; `sliceSpacing?`: `number`; `verticalExaggeration?`: `number`; \} | Partial slice-layout update. `sliceSpacing` is an elevation index interval; `verticalExaggeration` scales height; `belowSeaLevel` controls whether depth is placed beneath the ellipsoid. |
-| `options.belowSeaLevel?` | `boolean` | - |
+| `options` | \{ `elevationMode?`: [`ElevationMode`](../type-aliases/ElevationMode.md); `sliceSpacing?`: `number`; `verticalExaggeration?`: `number`; \} | Partial slice-layout update. `sliceSpacing` is an elevation index interval; `verticalExaggeration` scales height; `elevationMode` controls whether coordinates are heights or depths. |
+| `options.elevationMode?` | [`ElevationMode`](../type-aliases/ElevationMode.md) | - |
 | `options.sliceSpacing?` | `number` | - |
 | `options.verticalExaggeration?` | `number` | - |
 

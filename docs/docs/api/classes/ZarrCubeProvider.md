@@ -129,9 +129,9 @@ The currently loaded array remains in memory. Call [load](#load) or
 
 ```ts
 getFullTransect(
-   start, 
-   end, 
-   selectors?, 
+   start,
+   end,
+   selectors?,
 options?): Promise<FullTransectResult>;
 ```
 
@@ -192,8 +192,8 @@ lonSliceIndex: number;
 
 ```ts
 getTimeSeries(
-   position, 
-   selectors?, 
+   position,
+   selectors?,
 options?): Promise<QueryResult>;
 ```
 
@@ -219,9 +219,9 @@ A result ordered by the time coordinate.
 
 ```ts
 getTransect(
-   start, 
-   end, 
-   selectors?, 
+   start,
+   end,
+   selectors?,
 options?): Promise<TransectResult>;
 ```
 
@@ -248,8 +248,8 @@ Positions, distances, and values along the transect.
 
 ```ts
 getVerticalProfile(
-   position, 
-   selectors?, 
+   position,
+   selectors?,
 options?): Promise<QueryResult>;
 ```
 
@@ -307,13 +307,13 @@ Calling `load` again replaces the in-memory subset. Use
 
 ```ts
 queryData(
-   geometry, 
-   selectors?, 
+   geometry,
+   selectors?,
 options?): Promise<QueryResult>;
 ```
 
 Queries a voxel or vertical profile from the cube subset currently held in memory.
-A scalar elevation selector returns one voxel; an elevation range returns a profile.
+A scalar elevation selector returns one voxel. An elevation range returns a profile.
 
 #### Parameters
 
@@ -377,12 +377,13 @@ Updates the rendered slices based on the provided indices.
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `options` | \{ `belowSeaLevel?`: `boolean`; `elevationIndex?`: `number`; `force?`: `boolean`; `latIndex?`: `number`; `lonIndex?`: `number`; \} | Slice update options. `latIndex`, `lonIndex`, and `elevationIndex` are local indices within the loaded subset. `force` recreates unchanged primitives; `belowSeaLevel` changes height placement. |
-| `options.belowSeaLevel?` | `boolean` | - |
+| `options` | \{ `elevationIndex?`: `number`; `elevationMode?`: [`ElevationMode`](../type-aliases/ElevationMode.md); `force?`: `boolean`; `latIndex?`: `number`; `lonIndex?`: `number`; `verticalExaggeration?`: `number`; \} | Slice update options. `latIndex`, `lonIndex`, and `elevationIndex` are local indices within the loaded subset. `verticalExaggeration` and `elevationMode` control height placement, while `force` recreates unchanged primitives. |
 | `options.elevationIndex?` | `number` | - |
+| `options.elevationMode?` | [`ElevationMode`](../type-aliases/ElevationMode.md) | - |
 | `options.force?` | `boolean` | - |
 | `options.latIndex?` | `number` | - |
 | `options.lonIndex?` | `number` | - |
+| `options.verticalExaggeration?` | `number` | - |
 
 #### Returns
 
@@ -400,17 +401,16 @@ Has no effect until [load](#load) has completed.
 updateStyle(options): void;
 ```
 
-Updates cube styling and immediately recreates the visible slices.
+Updates cube styling and recreates the visible slices when a value changes.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `options` | \{ `colormap?`: `string`; `opacity?`: `number`; `scale?`: \[`number`, `number`\]; `verticalExaggeration?`: `number`; \} | Partial style update: vertical exaggeration, opacity, numeric color range, and/or colormap. |
+| `options` | \{ `colormap?`: `string`; `opacity?`: `number`; `scale?`: \[`number`, `number`\]; \} | Partial style update: opacity, numeric color range, and/or colormap. |
 | `options.colormap?` | `string` | - |
 | `options.opacity?` | `number` | - |
 | `options.scale?` | \[`number`, `number`\] | - |
-| `options.verticalExaggeration?` | `number` | - |
 
 #### Returns
 

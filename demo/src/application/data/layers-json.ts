@@ -132,7 +132,7 @@ export const layersJson: LayersJsonType = {
           opacity: undefined,
           showHorizontalSlices: undefined,
           showVerticalSlices: undefined,
-          belowSeaLevel: undefined,
+          elevationMode: undefined,
           dimensionNames: undefined,
           multiscaleFormat: 'geozarr',
           latIsAscending: true
@@ -167,7 +167,7 @@ export const layersJson: LayersJsonType = {
           opacity: undefined,
           showHorizontalSlices: undefined,
           showVerticalSlices: undefined,
-          belowSeaLevel: undefined,
+          elevationMode: undefined,
           dimensionNames: undefined
         }
       },
@@ -200,7 +200,7 @@ export const layersJson: LayersJsonType = {
           opacity: undefined,
           showHorizontalSlices: undefined,
           showVerticalSlices: undefined,
-          belowSeaLevel: undefined,
+          elevationMode: undefined,
           dimensionNames: undefined
         }
       },
@@ -223,7 +223,7 @@ export const layersJson: LayersJsonType = {
           opacity: undefined,
           showHorizontalSlices: undefined,
           showVerticalSlices: undefined,
-          belowSeaLevel: undefined,
+          elevationMode: undefined,
           dimensionNames: undefined
         }
       },
@@ -255,7 +255,7 @@ export const layersJson: LayersJsonType = {
           opacity: undefined,
           showHorizontalSlices: undefined,
           showVerticalSlices: undefined,
-          belowSeaLevel: undefined,
+          elevationMode: undefined,
           dimensionNames: undefined
         }
       }
@@ -297,7 +297,7 @@ export const layersJson: LayersJsonType = {
           scale: [0, 0.7],
           verticalExaggeration: undefined,
           sliceSpacing: undefined,
-          belowSeaLevel: undefined,
+          elevationMode: undefined,
           dimensionNames: undefined,
           multiscaleLevel: undefined,
           opacity: undefined,
@@ -344,7 +344,7 @@ export const layersJson: LayersJsonType = {
           scale: [0, 0.6],
           verticalExaggeration: 4500,
           sliceSpacing: undefined,
-          belowSeaLevel: undefined,
+          elevationMode: undefined,
           dimensionNames: undefined,
           opacity: undefined,
           crs: undefined,
@@ -381,7 +381,7 @@ export const layersJson: LayersJsonType = {
           scale: [0, 0.5],
           verticalExaggeration: undefined,
           sliceSpacing: undefined,
-          belowSeaLevel: undefined,
+          elevationMode: undefined,
           dimensionNames: undefined,
           multiscaleLevel: undefined,
           opacity: undefined,
@@ -417,7 +417,7 @@ export const layersJson: LayersJsonType = {
           scale: [0, 0.5],
           verticalExaggeration: undefined,
           sliceSpacing: undefined,
-          belowSeaLevel: undefined,
+          elevationMode: undefined,
           dimensionNames: undefined,
           multiscaleLevel: undefined,
           opacity: undefined,
@@ -449,7 +449,7 @@ export const layersJson: LayersJsonType = {
           },
           verticalExaggeration: 5100,
           sliceSpacing: undefined,
-          belowSeaLevel: undefined,
+          elevationMode: undefined,
           multiscaleLevel: undefined,
           opacity: undefined,
           crs: undefined,

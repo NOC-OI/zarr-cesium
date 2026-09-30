@@ -17,6 +17,7 @@ import {
   type CRS,
   type CubeVelocityProps,
   type DimensionNamesProps,
+  type ElevationMode,
   type MultiscaleFormat,
   type DimIndicesProps,
   type VelocityOptions,
@@ -119,7 +120,7 @@ export class ZarrCubeVelocityProvider {
   private verticalExaggeration: number;
   private opacity: number;
   private sliceSpacing: number;
-  private belowSeaLevel: boolean;
+  private elevationMode: ElevationMode;
   private static readonly concurrencyLimit = 4;
   private static activeRequests = 0;
   private static readonly queue: (() => void)[] = [];
@@ -169,7 +170,7 @@ export class ZarrCubeVelocityProvider {
     this.verticalExaggeration = options.verticalExaggeration ?? DEFAULT_VERTICAL_EXAGGERATION;
     this.opacity = options.opacity ?? 1;
     this.sliceSpacing = options.sliceSpacing ?? 1;
-    this.belowSeaLevel = options.belowSeaLevel ?? false;
+    this.elevationMode = options.elevationMode ?? 'height';
     this.zarrVersion = options.zarrVersion ?? null;
     const [min, max] = options.scale ?? [-3, 3];
     this.colormap = options.colormap || DEFAULT_COLORMAP;
@@ -340,14 +341,19 @@ export class ZarrCubeVelocityProvider {
     }
     const { uCube, vCube } = this.volumeData;
     const { width, height, elevation, dimensionValues } = uCube;
+    const uArray = uCube.array.data as Float32Array;
+    const vArray = vCube.array.data as Float32Array;
+    const renderedU = this.flipElevation
+      ? this.reverseElevationLevels(uArray, width * height, elevation)
+      : uArray;
+    const renderedV = this.flipElevation
+      ? this.reverseElevationLevels(vArray, width * height, elevation)
+      : vArray;
     const sourceElevations = Array.from(dimensionValues.elevation, Number);
-    const maximumElevation = globalThis.Math.max(...sourceElevations);
-    const elevations = this.flipElevation
-      ? sourceElevations.map(elevationValue => maximumElevation - elevationValue)
-      : sourceElevations;
+    const elevations = sourceElevations;
     const windData = {
-      u: { array: uCube.array.data as Float32Array, min: -0.5, max: 0.5 },
-      v: { array: vCube.array.data as Float32Array, min: -0.5, max: 0.5 },
+      u: { array: renderedU, min: -0.5, max: 0.5 },
+      v: { array: renderedV, min: -0.5, max: 0.5 },
       width,
       height,
       depth: elevation,
@@ -361,7 +367,7 @@ export class ZarrCubeVelocityProvider {
       ...this.windOptions,
       flipY: undefined,
       verticalExaggeration: this.verticalExaggeration,
-      belowSeaLevel: this.belowSeaLevel,
+      elevationMode: this.elevationMode,
       elevationStep: this.sliceSpacing
     };
 
@@ -377,6 +383,20 @@ export class ZarrCubeVelocityProvider {
     }
     this.layer?.destroy();
     this.layer = nextLayer;
+  }
+
+  /** Reverses complete elevation planes without changing values within a plane. */
+  private reverseElevationLevels(
+    values: Float32Array,
+    sliceSize: number,
+    elevationCount: number
+  ): Float32Array {
+    const reversed = new Float32Array(values.length);
+    for (let elevationIndex = 0; elevationIndex < elevationCount; elevationIndex++) {
+      const sourceOffset = (elevationCount - 1 - elevationIndex) * sliceSize;
+      reversed.set(values.subarray(sourceOffset, sourceOffset + sliceSize), elevationIndex * sliceSize);
+    }
+    return reversed;
   }
 
   /**
@@ -438,7 +458,10 @@ export class ZarrCubeVelocityProvider {
       this.throwIfQueryAborted(options.signal);
       if (!this.hasValidCurrentAt(longitude, latitude, elevationIndex)) continue;
       if (!this.layer || elevationIndex % this.sliceSpacing !== 0) continue;
-      const current = this.layer.getDataAtLonLat(longitude, latitude, elevationIndex);
+      const renderedElevationIndex = this.flipElevation
+        ? this.cubeDimensionValues.elevation.length - 1 - elevationIndex
+        : elevationIndex;
+      const current = this.layer.getDataAtLonLat(longitude, latitude, renderedElevationIndex);
       if (!current || !Number.isFinite(current.interpolated.speed)) continue;
       values.push(current.interpolated.speed);
       u.push(current.interpolated.u);
@@ -696,8 +719,8 @@ export class ZarrCubeVelocityProvider {
    * Updates the rendered cube's active elevation interval or vertical placement.
    *
    * @param options - Partial slice-layout update. `sliceSpacing` is an elevation
-   * index interval; `verticalExaggeration` scales height; `belowSeaLevel`
-   * controls whether depth is placed beneath the ellipsoid.
+   * index interval; `verticalExaggeration` scales height; `elevationMode`
+   * controls whether coordinates are heights or depths.
    * @returns A promise resolved after the cube layer options are updated.
    * @remarks Non-positive spacing/exaggeration and spacing beyond the elevation
    * dimension are rejected with a warning.
@@ -705,11 +728,11 @@ export class ZarrCubeVelocityProvider {
   async updateSlices({
     sliceSpacing,
     verticalExaggeration,
-    belowSeaLevel
+    elevationMode
   }: {
     sliceSpacing?: number;
     verticalExaggeration?: number;
-    belowSeaLevel?: boolean;
+    elevationMode?: ElevationMode;
   }): Promise<void> {
     if (!this.volumeData || !this.cubeDimensions) return;
     let updateLayers = false;
@@ -727,15 +750,15 @@ export class ZarrCubeVelocityProvider {
         updateLayers = true;
       }
     }
-    if (belowSeaLevel !== undefined) {
-      if (this.belowSeaLevel !== belowSeaLevel) {
+    if (elevationMode !== undefined) {
+      if (this.elevationMode !== elevationMode) {
         updateLayers = true;
-        this.belowSeaLevel = belowSeaLevel;
+        this.elevationMode = elevationMode;
       }
     }
     if (verticalExaggeration !== undefined) {
       if (verticalExaggeration <= 0) {
-        console.warn('Vertical exaggeration must be a positive integer.');
+        console.warn('Vertical exaggeration must be a positive number.');
         return;
       }
       if (this.verticalExaggeration !== verticalExaggeration) {
@@ -747,7 +770,7 @@ export class ZarrCubeVelocityProvider {
     this.layer.updateOptions({
       elevationStep: this.sliceSpacing,
       verticalExaggeration: this.verticalExaggeration,
-      belowSeaLevel: this.belowSeaLevel
+      elevationMode: this.elevationMode
     });
   }
 

@@ -71,7 +71,7 @@ This method:
 
 ```ts
 export interface LayerOptions {
-  url?: string; // Zarr URL; required unless store is provided
+  url?: string; // Zarr URL. Required unless store is provided
   store?: Readable; // Custom Zarrita store, e.g. IcechunkStore
   variable: string; // Zarr array name
   latIsAscending?: boolean; // Optional override for latitude ordering (south->north if true)
@@ -91,7 +91,7 @@ export interface LayerOptions {
   requestOverrides?: RequestOverrides; // Serializable static fetch options
   transformRequest?: TransformRequest; // Per-object URL/header transformation
   onAuthError?: (status: number) => void; // Called once for HTTP 400/401
-  multiscaleFormat?: MultiscaleFormat; // Metadata layout; defaults to 'auto'.
+  multiscaleFormat?: MultiscaleFormat; // Metadata layout. Defaults to 'auto'.
 }
 ```
 
@@ -154,7 +154,7 @@ crs: 'EPSG:3857';
 Regular global `EPSG:4326` grids using either `-180…180` or `0…360`
 longitudes are supported. A global `0…360` domain is exposed to Cesium as
 full-world coverage and tile requests are mapped back to the wrapped source
-coordinates. Latitude orientation is inferred automatically; use
+coordinates. Latitude orientation is inferred automatically. Use
 `latIsAscending` only when the coordinate metadata is missing or incorrect.
 
 ---

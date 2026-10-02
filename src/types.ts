@@ -35,6 +35,8 @@ export type {
 export type { ColorMapInfo, ColorMapName, ColorScaleProps } from 'zarr-maps-colormap';
 
 export type CesiumHost = Viewer | CesiumWidget;
+/** Controls whether vertical coordinates are interpreted as heights or depths. */
+export type ElevationMode = 'height' | 'depth';
 
 export interface CubeOptions {
   /** URL to a Zarr store. Required unless `store` is provided. */
@@ -50,12 +52,14 @@ export interface CubeOptions {
   opacity?: number;
   showHorizontalSlices?: boolean;
   showVerticalSlices?: boolean;
-  belowSeaLevel?: boolean;
+  /** Render positive vertical coordinates above sea level or as depths below it. */
+  elevationMode?: ElevationMode;
   dimensionNames?: DimensionNamesProps;
   selectors?: Record<string, ZarrSelectorsProps>;
   colorScale?: [number, number, number][];
   multiscaleLevel?: number;
   zarrVersion?: 2 | 3;
+  /** Reverse vertical data-plane placement without changing source elevation indices. */
   flipElevation?: boolean;
   scale?: [number, number];
   colormap?: ColorMapName;
@@ -107,9 +111,11 @@ export interface VelocityOptions {
   /** Whether latitude coordinate values increase with their array index. */
   latIsAscending?: boolean;
   verticalExaggeration?: number;
+  /** Reverse vertical data-plane placement without changing source elevation indices. */
   flipElevation?: boolean;
   sliceSpacing?: number;
-  belowSeaLevel?: boolean;
+  /** Render positive vertical coordinates above sea level or as depths below it. */
+  elevationMode?: ElevationMode;
   dimensionNames?: DimensionNamesProps;
   selectors?: Record<string, ZarrSelectorsProps>;
   multiscaleLevel?: number;
@@ -129,7 +135,13 @@ export interface VelocityOptions {
   onAuthError?: OnAuthError;
 }
 
-export type VelocityWindOptions = Omit<Partial<WindLayerOptions>, 'particleHeight'>;
+export type VelocityWindOptions = Omit<
+  Partial<WindLayerOptions>,
+  | 'particleHeight'
+  | 'verticalExaggeration'
+  | 'elevationMode'
+  | 'elevationStep'
+>;
 
 export interface CubeVelocityProps {
   array: ndarray.NdArray<any>;

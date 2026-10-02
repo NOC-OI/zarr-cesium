@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../application/use-layers';
 import { layersActions } from '../../application/store';
 import type { LayerLegendBoxProps, SelectedLayer } from '../../types';
@@ -24,6 +24,7 @@ export function CubeOptionsSelector({ layerLegendName }: LayerLegendBoxProps) {
   const [elevationSlice, setElevationSlice] = useState<number>(
     selectedLayers[layerLegendName]?.slices?.elevationIndex || 0
   );
+  const synchronizingSlices = useRef(false);
   const [selectedLayer, setSelectedLayer] = useState<SelectedLayer>(
     selectedLayers[layerLegendName]
   );
@@ -38,6 +39,24 @@ export function CubeOptionsSelector({ layerLegendName }: LayerLegendBoxProps) {
     setParams(selectedLayer.params as CubeOptions);
   }, [selectedLayer]);
 
+  useEffect(() => {
+    if (!selectedLayer.slices) return;
+    if (
+      selectedLayer.slices.latIndex === latSlice &&
+      selectedLayer.slices.lonIndex === lonSlice &&
+      selectedLayer.slices.elevationIndex === elevationSlice
+    ) {
+      return;
+    }
+    synchronizingSlices.current = true;
+    setLatSlice(selectedLayer.slices.latIndex);
+    setLonSlice(selectedLayer.slices.lonIndex);
+    setElevationSlice(selectedLayer.slices.elevationIndex);
+    // Slice state changes are dispatched separately. This effect only reacts to
+    // a new provider/Redux slice snapshot.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedLayer.slices]);
+
   const handleUpdateParams = (newParams: Partial<CubeOptions>) => {
     dispatch(layersActions.setLayerAction('update-cube-params'));
     dispatch(layersActions.setActualLayer(layerLegendName));
@@ -50,6 +69,10 @@ export function CubeOptionsSelector({ layerLegendName }: LayerLegendBoxProps) {
     );
   };
   useEffect(() => {
+    if (synchronizingSlices.current) {
+      synchronizingSlices.current = false;
+      return;
+    }
     dispatch(layersActions.setLayerAction('update-cube-slices'));
     dispatch(layersActions.setActualLayer(layerLegendName));
     dispatch(
@@ -75,11 +98,7 @@ export function CubeOptionsSelector({ layerLegendName }: LayerLegendBoxProps) {
           Elevation Slice:{' '}
           {selectedLayer.dimensions!.elevation
             ? (
-                selectedLayer.dimensions!.elevation.values[
-                  params.flipElevation
-                    ? selectedLayer.dimensions!.elevation.values.length - 1 - elevationSlice
-                    : elevationSlice
-                ] as number
+                selectedLayer.dimensions!.elevation.values[elevationSlice] as number
               ).toFixed(2)
             : elevationSlice}{' '}
           m

@@ -2,7 +2,6 @@ import { cubePointIndices, longitudeInBounds, validateCubeBounds } from './cube-
 import { ZarrCubeDataProvider } from './zarr-cube-data-provider';
 import * as zarr from 'zarrita';
 import {
-  calculateHeightMeters,
   calculateNearestIndex,
   detectCRS,
   extractNoDataMetadata,
@@ -28,6 +27,7 @@ import {
   type CRS,
   type CubeOptions,
   type CesiumHost,
+  type ElevationMode,
   type DimensionNamesProps,
   type DimIndicesProps,
   type MultiscaleFormat,
@@ -125,10 +125,11 @@ export class ZarrCubeProvider {
   private dimensionNames: DimensionNamesProps;
   private multiscaleFormat: MultiscaleFormat = 'auto';
   private verticalExaggeration: number;
+  private maximumElevationValue = 0;
   private opacity: number;
   private showHorizontalSlices: boolean;
   private showVerticalSlices: boolean;
-  private belowSeaLevel: boolean;
+  private elevationMode: ElevationMode;
   private volumeData: ndarray.NdArray<any> | null = null;
   private scaleFactor = 1;
   private addOffset = 0;
@@ -199,7 +200,7 @@ export class ZarrCubeProvider {
     this.opacity = options.opacity ?? DEFAULT_OPACITY;
     this.showHorizontalSlices = options.showHorizontalSlices ?? true;
     this.showVerticalSlices = options.showVerticalSlices ?? true;
-    this.belowSeaLevel = options.belowSeaLevel ?? false;
+    this.elevationMode = options.elevationMode ?? 'height';
     this.zarrVersion = options.zarrVersion ?? null;
     this.flipElevation = options.flipElevation ?? false;
     const [min, max] = options.scale ?? DEFAULT_SCALE;
@@ -267,6 +268,9 @@ export class ZarrCubeProvider {
     }).load();
     this.dimensionValues = cube.dimensionValues;
     this.cubeDimensionValues = cube.cubeDimensionValues;
+    const elevationValues = Array.from(this.cubeDimensionValues.elevation ?? [], Number);
+    this.maximumElevationValue =
+      elevationValues.length > 0 ? globalThis.Math.max(...elevationValues) : 0;
     this.selectors = cube.selectors;
     this.loadedOrigin = cube.origin;
     this.longitudeIndices = cube.coordinates.x;
@@ -638,25 +642,38 @@ export class ZarrCubeProvider {
    * Updates the rendered slices based on the provided indices.
    *
    * @param options - Slice update options. `latIndex`, `lonIndex`, and
-   * `elevationIndex` are local indices within the loaded subset. `force`
-   * recreates unchanged primitives; `belowSeaLevel` changes height placement.
+   * `elevationIndex` are local indices within the loaded subset.
+   * `verticalExaggeration` and `elevationMode` control height placement, while
+   * `force` recreates unchanged primitives.
    * @remarks Has no effect until {@link load} has completed.
    */
   updateSlices({
     latIndex,
     lonIndex,
     elevationIndex,
+    verticalExaggeration,
     force = false,
-    belowSeaLevel
+    elevationMode
   }: {
     latIndex?: number;
     lonIndex?: number;
     elevationIndex?: number;
+    verticalExaggeration?: number;
     force?: boolean;
-    belowSeaLevel?: boolean;
+    elevationMode?: ElevationMode;
   }): void {
-    if (belowSeaLevel !== undefined) {
-      this.belowSeaLevel = belowSeaLevel;
+    if (verticalExaggeration !== undefined) {
+      if (verticalExaggeration <= 0) {
+        console.warn('Vertical exaggeration must be a positive number.');
+        return;
+      }
+      if (verticalExaggeration !== this.verticalExaggeration) {
+        this.verticalExaggeration = verticalExaggeration;
+        force = true;
+      }
+    }
+    if (elevationMode !== undefined && elevationMode !== this.elevationMode) {
+      this.elevationMode = elevationMode;
       force = true;
     }
     if (!this.volumeData || !this.cubeDimensions) return;
@@ -699,10 +716,10 @@ export class ZarrCubeProvider {
    *
    * @param options - Partial data-selection update. Changed selectors, level,
    * or bounds cause the current primitives to be destroyed and reloaded.
-   * @returns Nothing. Reloading continues asynchronously after a change.
+   * @returns A promise that resolves after any required reload completes.
    * @remarks Bounds are validated against geographic latitude limits.
    */
-  updateSelectors({
+  async updateSelectors({
     selectors,
     multiscaleLevel,
     bounds
@@ -710,7 +727,7 @@ export class ZarrCubeProvider {
     selectors?: { [key: string]: ZarrSelectorsProps };
     multiscaleLevel?: number;
     bounds?: BoundsProps;
-  }): void {
+  }): Promise<void> {
     let updateLayer = false;
     if (selectors !== undefined) {
       for (const key of Object.keys(selectors)) {
@@ -739,43 +756,46 @@ export class ZarrCubeProvider {
     }
     if (updateLayer) {
       this.destroy();
-      this.load(true);
+      await this.load(true);
     }
   }
 
   /**
-   * Updates cube styling and immediately recreates the visible slices.
+   * Updates cube styling and recreates the visible slices when a value changes.
    *
-   * @param options - Partial style update: vertical exaggeration, opacity,
-   * numeric color range, and/or colormap.
+   * @param options - Partial style update: opacity, numeric color range,
+   * and/or colormap.
    * @remarks This reuses the loaded data and does not refetch Zarr chunks.
    */
   updateStyle({
-    verticalExaggeration,
     opacity,
     scale,
     colormap
   }: {
-    verticalExaggeration?: number;
     opacity?: number;
     scale?: [number, number];
     colormap?: ColorMapName;
   }): void {
-    if (verticalExaggeration !== undefined) {
-      this.verticalExaggeration = verticalExaggeration;
-    }
-    if (opacity !== undefined) {
+    let changed = false;
+    if (opacity !== undefined && opacity !== this.opacity) {
       this.opacity = opacity;
+      changed = true;
     }
     if (scale !== undefined) {
       const [min, max] = scale;
-      this.colorScale.min = min;
-      this.colorScale.max = max;
+      if (min !== this.colorScale.min || max !== this.colorScale.max) {
+        this.colorScale.min = min;
+        this.colorScale.max = max;
+        changed = true;
+      }
     }
-    if (colormap !== undefined) {
+    if (colormap !== undefined && colormap !== this.colormap) {
       const colors = colormapBuilder(colormap);
       this.colorScale.colors = colors;
+      this.colormap = colormap;
+      changed = true;
     }
+    if (!changed) return;
     this.updateSlices({
       latIndex: this.latSliceIndex,
       lonIndex: this.lonSliceIndex,
@@ -845,9 +865,6 @@ export class ZarrCubeProvider {
     const outputCanvas = this.createCanvas(nx, ny);
     const { canvas, ctx } = outputCanvas;
     let imgData = outputCanvas.imgData;
-    const elevationSliceIndex = this.flipElevation
-      ? nz - 1 - this.elevationSliceIndex
-      : this.elevationSliceIndex;
     for (let y = 0; y < ny; y++) {
       for (let x = 0; x < nx; x++) {
         const coord: Record<string, number> = {
@@ -855,7 +872,7 @@ export class ZarrCubeProvider {
           // Rectangle image textures use canvas row 0 at the geographic north edge.
           // Convert that north-to-south canvas row to the dataset latitude index.
           lat: this.getLatitudeDataIndex(ny - 1 - y, ny),
-          elevation: elevationSliceIndex
+          elevation: this.elevationSliceIndex
         };
         const idx =
           coord[indicesOrder[0]] * strides[indicesOrder[0]] +
@@ -867,14 +884,11 @@ export class ZarrCubeProvider {
       }
     }
     ctx.putImageData(imgData, 0, 0);
-    const elevationValue = this.cubeDimensionValues.elevation[elevationSliceIndex];
-    const heightMeters = calculateHeightMeters(
-      elevationValue as number,
-      this.cubeDimensionValues.elevation as number[],
-      this.verticalExaggeration,
-      this.belowSeaLevel,
-      this.flipElevation
-    );
+    const placementElevationIndex = this.flipElevation
+      ? nz - 1 - this.elevationSliceIndex
+      : this.elevationSliceIndex;
+    const elevationValue = this.cubeDimensionValues.elevation[placementElevationIndex];
+    const heightMeters = this.calculateElevationHeight(elevationValue as number);
 
     const primitive = new Primitive({
       geometryInstances: new GeometryInstance({
@@ -931,15 +945,9 @@ export class ZarrCubeProvider {
     const segmentsZ = nz - 1;
 
     for (let iz = 0; iz <= segmentsZ; iz++) {
-      const heightFraction = this.flipElevation ? (segmentsZ - iz) / segmentsZ : iz / segmentsZ;
+      const heightFraction = iz / segmentsZ;
       const elevationValue = this.cubeDimensionValues.elevation[iz];
-      const height = calculateHeightMeters(
-        elevationValue as number,
-        this.cubeDimensionValues.elevation as number[],
-        this.verticalExaggeration,
-        this.belowSeaLevel,
-        this.flipElevation
-      );
+      const height = this.calculateElevationHeight(elevationValue as number);
 
       for (let iN = 0; iN <= segments; iN++) {
         const otherFraction = iN / segments;
@@ -1005,6 +1013,13 @@ export class ZarrCubeProvider {
     });
 
     return primitive;
+  }
+
+  /** Converts one vertical coordinate to its Cesium height independently of data ordering. */
+  private calculateElevationHeight(elevationValue: number): number {
+    return this.elevationMode === 'depth'
+      ? (elevationValue - this.maximumElevationValue) * this.verticalExaggeration
+      : elevationValue * this.verticalExaggeration;
   }
 
   private createLonSlicePrimitive(latIndex: number) {

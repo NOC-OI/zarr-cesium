@@ -96,14 +96,14 @@ This creates a **stack of slice primitives**: horizontal, vertical longitude, an
 
 ```ts
 interface CubeOptions {
-  url?: string; // Zarr URL; required unless store is supplied
+  url?: string; // Zarr URL. Required unless store is supplied
   store?: Readable; // Custom Zarrita-compatible store, including IcechunkStore
   variable: string; // Zarr array name
   bounds: BoundsProps; // geographic rectangle
   latIsAscending?: boolean; // Override latitude array orientation when metadata is incorrect
   selectors?: { [key: string]: ZarrSelectorsProps }; // Initial dimension slices
   dimensionNames?: DimensionNamesProps; // Custom dimension names. If not provided, defaults will be used or identified automatically based on CF conventions.
-  multiscaleLevel?: number; // Index in the metadata's level list; defaults to 0
+  multiscaleLevel?: number; // Index in the metadata's level list. Defaults to 0
   zarrVersion?: 2 | 3; // Zarr version (auto-detected if not set)
   colormap?: ColorMapName; // Name from jsColormaps, based on matplotlib colormaps
   scale?: [number, number]; // Min/max for color scaling
@@ -111,8 +111,8 @@ interface CubeOptions {
   verticalExaggeration?: number; // Vertical exaggeration factor
   showHorizontalSlices?: boolean; // Show horizontal (XY) slice
   showVerticalSlices?: boolean; // Show vertical (XZ and YZ) slices
-  belowSeaLevel?: boolean; // If true, allows rendering below sea level
-  flipElevation?: boolean; // If true, flips the elevation axis
+  elevationMode?: 'height' | 'depth'; // Positive coordinates render above or below sea level
+  flipElevation?: boolean; // Reverse only the elevation data/index ordering
   crs?: CRS; // Force CRS (auto-detected if not set)
   multiscaleFormat?: MultiscaleFormat; // 'auto' (default), 'legacy', or 'geozarr'
   requestOverrides?: RequestOverrides; // Static fetch credentials, headers, and options
@@ -123,8 +123,10 @@ interface CubeOptions {
 
 `latIsAscending` and `flipElevation` describe different axes. `latIsAscending` controls how rows
 in each horizontal slice map to south/north and is normally inferred from the latitude coordinate
-values. `flipElevation` reverses the vertical ordering or depth direction. Set either option only
-when the coordinate metadata does not describe the stored array correctly.
+values. `flipElevation` reverses only the vertical placement of elevation data planes and does not determine
+whether coordinates render above or below sea level. Use `elevationMode: 'depth'` for positive
+depth coordinates and `'height'` for height coordinates. Set orientation overrides only when the
+coordinate metadata does not describe the stored array correctly.
 
 ---
 
@@ -193,7 +195,7 @@ Once loaded, the cube can render immediately.
 
 `dimensionValues` contains the complete coordinate axes from the selected Zarr level.
 `cubeDimensionValues` and `cubeDimensions` describe only the geographic and elevation subset that
-was loaded. Use the cube-specific values when building slice controls; otherwise a control can
+was loaded. Use the cube-specific values when building slice controls. Otherwise a control can
 offer indices that are outside the in-memory cube.
 
 ---
@@ -384,13 +386,39 @@ And with that, you can build UI controls (sliders, dropdowns) to update the laye
 
 ---
 
+### Update Slice Rendering
+
+Change slice indices and vertical placement without reloading the Zarr data:
+
+```ts
+cube.updateSlices({
+  latIndex: 20,
+  lonIndex: 30,
+  elevationIndex: 4,
+  verticalExaggeration: 8,
+  elevationMode: 'depth'
+});
+```
+
+`verticalExaggeration` must be greater than zero. `force: true` can be used to
+recreate the current primitives even when no slice or layout value changed.
+`flipElevation` is configured independently and only changes vertical data-plane placement.
+An `elevationIndex` passed to `updateSlices` always selects that same source data plane;
+when flipping is enabled, the selected plane is rendered at the opposite vertical position.
+
+Elevation placement preserves the source coordinate order. In `height` mode,
+height is `elevation * verticalExaggeration`. In `depth` mode, height is
+`(elevation - maximumElevation) * verticalExaggeration`, translating the cube
+below sea level without reversing its data-plane indices.
+
+---
+
 ### Update Style
 
-Change color scale, vertical exaggeration, opacity, etc.
+Change color scale, opacity, and colormap:
 
 ```ts
 cube.updateStyle({
-  verticalExaggeration: 8,
   opacity: 0.85,
   scale: [5, 15], // data min/max
   colormap: 'inferno'

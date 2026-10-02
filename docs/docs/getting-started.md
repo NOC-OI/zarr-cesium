@@ -124,10 +124,17 @@ const cube = new ZarrCubeProvider(viewer, {
 await cube.load();
 ```
 
+With `elevationMode: 'height'`, each level is placed at
+`elevation * verticalExaggeration`. With `elevationMode: 'depth'`, it is placed
+at `(elevation - maximumElevation) * verticalExaggeration`. Depth mode therefore
+moves the complete cube below sea level while preserving the original pairing
+between every elevation coordinate and its data-plane index.
+
 Latitude orientation is inferred from coordinate values. Use `latIsAscending` only when the
-dataset metadata is missing or incorrect. Use `flipElevation` separately when the vertical axis
-must be reversed. After loading, build slice controls from `cube.cubeDimensionValues` rather than
-the full `cube.dimensionValues` axes.
+dataset metadata is missing or incorrect. Use `flipElevation` separately when the vertical
+placement of the source data planes must be reversed. Set `elevationMode: 'depth'` when positive vertical
+coordinates represent depths below sea level. Its default is `'height'`. After loading, build
+slice controls from `cube.cubeDimensionValues` rather than the full `cube.dimensionValues` axes.
 
 <div style={{ maxWidth: "800px", margin: "0 auto" }}>
   <video

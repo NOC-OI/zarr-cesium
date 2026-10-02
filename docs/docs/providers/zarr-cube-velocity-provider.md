@@ -82,7 +82,7 @@ distributes particles across the selected elevation levels.
 
 ```ts
 interface VelocityOptions {
-  urls?: { u?: string; v?: string }; // URLs; each is required unless its store is supplied
+  urls?: { u?: string; v?: string }; // URLs. Each is required unless its store is supplied
   stores?: { u?: Readable; v?: Readable }; // Custom U/V stores, including IcechunkStore
   variables: { u: string; v: string }; // Zarr array names for U and V
   bounds: BoundsProps; // geographic rectangle
@@ -93,8 +93,8 @@ interface VelocityOptions {
   zarrVersion?: 2 | 3; // Zarr version (auto-detected if not set)
   sliceSpacing?: number; // Vertical sampling interval
   verticalExaggeration?: number; // Vertical exaggeration factor
-  belowSeaLevel?: boolean; // Whether to render layers below sea level
-  flipElevation?: boolean; // Flip elevation axis
+  elevationMode?: 'height' | 'depth'; // Positive coordinates render above or below sea level
+  flipElevation?: boolean; // Reverse only the elevation data/index ordering
   opacity?: number; // Layer opacity (0–1)
   colormap?: ColorMapName; // Name from jsColormaps, based on matplotlib colormaps
   scale?: [number, number]; // Min/max for color scaling
@@ -108,8 +108,10 @@ interface VelocityOptions {
 ```
 
 `latIsAscending` controls the north/south orientation of rows and is inferred from latitude
-coordinates by default. It is not a replacement for `flipElevation`: that option reverses the
-vertical coordinate direction. Use overrides only for datasets whose metadata is absent or wrong.
+coordinates by default. It is not a replacement for `flipElevation`: that option reverses only
+the vertical placement of elevation data planes without changing their source indices. `elevationMode` independently selects whether positive
+coordinates are heights or depths. Use orientation overrides only for datasets whose metadata is
+absent or wrong.
 
 ---
 
@@ -229,7 +231,7 @@ Plus user-configurable **particle system settings**:
   minVisibleRatio,
   elevationStep,
   verticalExaggeration,
-  belowSeaLevel
+  elevationMode
   ...
 }
 ```
@@ -357,7 +359,7 @@ Control vertical sampling or exaggeration:
 await windCube.updateSlices({
   sliceSpacing: 2,
   verticalExaggeration: 8,
-  belowSeaLevel: true
+  elevationMode: 'depth'
 });
 ```
 
@@ -368,6 +370,10 @@ This:
 - Applies the new vertical-layout parameters without rereading the cube
 
 All the parameters are optional. If not provided, the current value is retained.
+Changing `elevationMode` only changes vertical placement. In `height` mode,
+height is `elevation * verticalExaggeration`; in `depth` mode, height is
+`(elevation - maximumElevation) * verticalExaggeration`. U/V values, latitude,
+longitude, and elevation-to-data-plane index pairings are unchanged.
 
 ---
 

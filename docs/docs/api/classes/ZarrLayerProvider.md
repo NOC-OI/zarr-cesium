@@ -2,7 +2,7 @@
 
 Thin Cesium adapter around the framework-independent Zarr tile renderer.
 Dataset loading, slicing, styling, caching, and WebGL rendering live in
-`zarr-maps-tiling`; this class only translates Cesium tile requests.
+`zarr-maps-tiling`. This class only translates Cesium tile requests.
 
 ## Implements
 

@@ -1,7 +1,13 @@
 import type React from 'react';
 import { DEFAULT_BOUNDS } from '../../../lib/map-layers/utils';
 import type { LayersJsonType, SelectedLayersType, ZarrCesiumRefs } from '../../../types';
-import { generateSelectedLayer, getSelectedLayerWithDimensions, viewerMap } from './get-layers';
+import {
+  generateSelectedLayer,
+  getLowestElevationIndex,
+  getSelectedLayerWithDimensions,
+  getTerrainElevationMode,
+  viewerMap
+} from './get-layers';
 import { type Viewer } from 'cesium';
 import {
   DEFAULT_OPACITY,
@@ -137,7 +143,7 @@ export async function changeMapPyramidLevels(
     layerInfo.dataType === 'zarr-cube'
       ? zarrCesiumRefs.cubeRefs.current[actualLayer]
       : zarrCesiumRefs.velocityCubeRefs.current[actualLayer];
-  ref?.updateSelectors({ multiscaleLevel: params.multiscaleLevel });
+  await ref?.updateSelectors({ multiscaleLevel: params.multiscaleLevel });
   return getSelectedLayerWithDimensions(ref, actualLayer, selectedLayers, true);
 }
 
@@ -152,7 +158,7 @@ export async function changeMapBounds(
     layerInfo.dataType === 'zarr-cube'
       ? zarrCesiumRefs.cubeRefs.current[actualLayer]
       : zarrCesiumRefs.velocityCubeRefs.current[actualLayer];
-  ref?.updateSelectors({ bounds: params.bounds });
+  await ref?.updateSelectors({ bounds: params.bounds });
   return getSelectedLayerWithDimensions(ref, actualLayer, selectedLayers, true);
 }
 
@@ -163,14 +169,31 @@ export function updateSeaLevelLayerReference(
 ) {
   const updates = [];
   for (const provider of Object.values(zarrCesiumRefs.cubeRefs.current)) {
-    provider.updateSlices({ belowSeaLevel: gebcoTerrainEnabled });
+    const elevationMode = getTerrainElevationMode(
+      provider.id,
+      gebcoTerrainEnabled
+    );
+    if (elevationMode === undefined) continue;
+    const options = selectedLayers[provider.id]?.params as CubeOptions | undefined;
+    provider.updateSlices({
+      elevationMode,
+      elevationIndex: getLowestElevationIndex(
+        provider.cubeDimensionValues.elevation,
+        options?.flipElevation
+      )
+    });
     updates.push({
       name: provider.id,
       layer: getSelectedLayerWithDimensions(provider, provider.id, selectedLayers, true)
     });
   }
   for (const provider of Object.values(zarrCesiumRefs.velocityCubeRefs.current)) {
-    provider.updateSlices({ belowSeaLevel: gebcoTerrainEnabled });
+    const elevationMode = getTerrainElevationMode(
+      provider.id,
+      gebcoTerrainEnabled
+    );
+    if (elevationMode === undefined) continue;
+    provider.updateSlices({ elevationMode });
     updates.push({
       name: provider.id,
       layer: getSelectedLayerWithDimensions(provider, provider.id, selectedLayers, true)
@@ -183,13 +206,14 @@ export async function changeMapDimensions(
   actualLayer: string,
   selectedLayers: SelectedLayersType,
   viewerRef: React.RefObject<Viewer>,
-  zarrCesiumRefs: ZarrCesiumRefs
+  zarrCesiumRefs: ZarrCesiumRefs,
+  gebcoTerrainEnabled: boolean
 ) {
   const layerInfo = selectedLayers[actualLayer];
   const layers = viewerMap(viewerRef, layerInfo.dataType) || null;
   if (layerInfo.dataType === 'zarr-cube') {
     const provider = zarrCesiumRefs.cubeRefs.current[actualLayer];
-    provider?.updateSelectors({ selectors: layerInfo.params.selectors });
+    await provider?.updateSelectors({ selectors: layerInfo.params.selectors });
     return getSelectedLayerWithDimensions(
       provider,
       actualLayer,
@@ -219,7 +243,14 @@ export async function changeMapDimensions(
         layers.remove(layer);
       }
     });
-    await generateSelectedLayer(actualLayer, selectedLayers, viewerRef, layers, zarrCesiumRefs);
+    await generateSelectedLayer(
+      actualLayer,
+      selectedLayers,
+      viewerRef,
+      layers,
+      zarrCesiumRefs,
+      gebcoTerrainEnabled
+    );
   }
 }
 
@@ -259,7 +290,9 @@ export async function changeMapCubeParams(
     const params = layerInfo.params as CubeOptions;
     zarrCesiumRefs.cubeRefs.current[actualLayer]?.updateStyle({
       scale: params.scale,
-      colormap: params.colormap,
+      colormap: params.colormap
+    });
+    zarrCesiumRefs.cubeRefs.current[actualLayer]?.updateSlices({
       verticalExaggeration: params.verticalExaggeration
     });
   } else if (layerInfo.dataType === 'zarr-cube-velocity') {

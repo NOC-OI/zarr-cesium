@@ -340,6 +340,11 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "api/functions/limitStoreRequests",
+          label: "limitStoreRequests"
+        },
+        {
+          type: "doc",
           id: "api/functions/loadDimensionValues",
           label: "loadDimensionValues"
         },
@@ -413,6 +418,11 @@ const typedocSidebar = {
           type: "doc",
           id: "api/type-aliases/CRS",
           label: "CRS"
+        },
+        {
+          type: "doc",
+          id: "api/type-aliases/ElevationMode",
+          label: "ElevationMode"
         },
         {
           type: "doc",

@@ -8,7 +8,7 @@
 | [ZarrCubeProvider](classes/ZarrCubeProvider.md) | Provides rendering of volumetric (3D) Zarr datasets as Cesium primitives. |
 | [ZarrCubeVelocityProvider](classes/ZarrCubeVelocityProvider.md) | Provider responsible for loading and rendering 3D velocity fields (U and V components) from Zarr datasets as animated Cesium `WindLayer`s. |
 | [ZarrImageryLayer](classes/ZarrImageryLayer.md) | Cesium imagery layer backed by a shared [ZarrTileProvider](classes/ZarrTileProvider.md). |
-| [ZarrLayerProvider](classes/ZarrLayerProvider.md) | Thin Cesium adapter around the framework-independent Zarr tile renderer. Dataset loading, slicing, styling, caching, and WebGL rendering live in `zarr-maps-tiling`; this class only translates Cesium tile requests. |
+| [ZarrLayerProvider](classes/ZarrLayerProvider.md) | Thin Cesium adapter around the framework-independent Zarr tile renderer. Dataset loading, slicing, styling, caching, and WebGL rendering live in `zarr-maps-tiling`. This class only translates Cesium tile requests. |
 | [ZarrTileProvider](classes/ZarrTileProvider.md) | Provides Zarr dataset access and rendering capabilities for web-map layers. |
 
 ## Interfaces
@@ -78,6 +78,7 @@
 | [identifyDimensionIndices](functions/identifyDimensionIndices.md) | Identify the indices of common dimensions (lat, lon, time, elevation) in a Zarr array, optionally using CF-compliant standard names or custom dimension mappings. |
 | [initZarrDataset](functions/initZarrDataset.md) | Opens a Zarr variable (single-scale or multiscale pyramid) and prepares its metadata. |
 | [latDegToMercY](functions/latDegToMercY.md) | - |
+| [limitStoreRequests](functions/limitStoreRequests.md) | Wrap a Zarrita store so all reads share one request-concurrency budget. |
 | [loadDimensionValues](functions/loadDimensionValues.md) | Loads the coordinate values for a specific dimension. |
 | [lonDegToMercX](functions/lonDegToMercX.md) | - |
 | [openLevelArray](functions/openLevelArray.md) | Opens and caches a specific multiscale level array. Keeps a small LRU-style cache of up to three levels. |
@@ -97,6 +98,7 @@
 | [CFCalendar](type-aliases/CFCalendar.md) | Supported CF calendar types. |
 | [ColorMapName](type-aliases/ColorMapName.md) | Name of a bundled Matplotlib-inspired colormap. |
 | [CRS](type-aliases/CRS.md) | Supported Coordinate Reference Systems. |
+| [ElevationMode](type-aliases/ElevationMode.md) | Controls whether vertical coordinates are interpreted as heights or depths. |
 | [MultiscaleFormat](type-aliases/MultiscaleFormat.md) | Supported conventions for discovering multiscale Zarr levels. |
 | [OnAuthError](type-aliases/OnAuthError.md) | - |
 | [QueryGeometry](type-aliases/QueryGeometry.md) | Geometry accepted by the shared query API. Only points are implemented currently. |

@@ -6,7 +6,7 @@ import { realpathSync } from 'fs';
 import tailwindcss from '@tailwindcss/vite';
 
 // The demo consumes zarr-cesium through `file:..`. Force the linked package and
-// all of its dependencies to use the demo's Cesium runtime; separate engine
+// all of its dependencies to use the demo's Cesium runtime. Separate engine
 // singletons leave ContextLimits uninitialized (`maximumTextureSize === 0`).
 const demoCesiumPath = realpathSync(path.resolve(__dirname, 'node_modules/cesium'));
 const demoCesiumEnginePath = path.resolve(demoCesiumPath, '../@cesium/engine');

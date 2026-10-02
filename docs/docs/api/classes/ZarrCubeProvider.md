@@ -339,7 +339,7 @@ selector indices outside the loaded subset.
 ### updateSelectors()
 
 ```ts
-updateSelectors(options): void;
+updateSelectors(options): Promise<void>;
 ```
 
 Updates the dimension selectors, multiscale level, and bounds.
@@ -357,7 +357,7 @@ Updates the dimension selectors, multiscale level, and bounds.
 
 `void`
 
-Nothing. Reloading continues asynchronously after a change.
+A promise that resolves after any required reload completes.
 
 #### Remarks
 
@@ -377,12 +377,13 @@ Updates the rendered slices based on the provided indices.
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `options` | \{ `belowSeaLevel?`: `boolean`; `elevationIndex?`: `number`; `force?`: `boolean`; `latIndex?`: `number`; `lonIndex?`: `number`; \} | Slice update options. `latIndex`, `lonIndex`, and `elevationIndex` are local indices within the loaded subset. `force` recreates unchanged primitives; `belowSeaLevel` changes height placement. |
-| `options.belowSeaLevel?` | `boolean` | - |
+| `options` | \{ `elevationIndex?`: `number`; `elevationMode?`: [`ElevationMode`](../type-aliases/ElevationMode.md); `force?`: `boolean`; `latIndex?`: `number`; `lonIndex?`: `number`; `verticalExaggeration?`: `number`; \} | Slice update options. `latIndex`, `lonIndex`, and `elevationIndex` are local indices within the loaded subset. `verticalExaggeration` and `elevationMode` control height placement, while `force` recreates unchanged primitives. |
 | `options.elevationIndex?` | `number` | - |
+| `options.elevationMode?` | [`ElevationMode`](../type-aliases/ElevationMode.md) | - |
 | `options.force?` | `boolean` | - |
 | `options.latIndex?` | `number` | - |
 | `options.lonIndex?` | `number` | - |
+| `options.verticalExaggeration?` | `number` | - |
 
 #### Returns
 
@@ -400,17 +401,16 @@ Has no effect until [load](#load) has completed.
 updateStyle(options): void;
 ```
 
-Updates cube styling and immediately recreates the visible slices.
+Updates cube styling and recreates the visible slices when a value changes.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `options` | \{ `colormap?`: `string`; `opacity?`: `number`; `scale?`: \[`number`, `number`\]; `verticalExaggeration?`: `number`; \} | Partial style update: vertical exaggeration, opacity, numeric color range, and/or colormap. |
+| `options` | \{ `colormap?`: `string`; `opacity?`: `number`; `scale?`: \[`number`, `number`\]; \} | Partial style update: opacity, numeric color range, and/or colormap. |
 | `options.colormap?` | `string` | - |
 | `options.opacity?` | `number` | - |
 | `options.scale?` | \[`number`, `number`\] | - |
-| `options.verticalExaggeration?` | `number` | - |
 
 #### Returns
 

@@ -2,14 +2,6 @@
 
 ## Properties
 
-### belowSeaLevel?
-
-```ts
-optional belowSeaLevel: boolean;
-```
-
-***
-
 ### bounds
 
 ```ts
@@ -42,11 +34,23 @@ optional dimensionNames: DimensionNamesProps;
 
 ***
 
+### elevationMode?
+
+```ts
+optional elevationMode: ElevationMode;
+```
+
+Render positive vertical coordinates above sea level or as depths below it.
+
+***
+
 ### flipElevation?
 
 ```ts
 optional flipElevation: boolean;
 ```
+
+Reverse the elevation data/index ordering without changing height/depth placement.
 
 ***
 

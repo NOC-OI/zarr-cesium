@@ -2,8 +2,34 @@ import type { Viewer } from 'cesium';
 import { ZarrCubeProvider, ZarrCubeVelocityProvider, ZarrLayerProvider } from 'zarr-cesium';
 import { IcechunkStore } from 'icechunk-js';
 import type { DataInfoType, keyable, SelectedLayersType, ZarrCesiumRefs } from '../../../types';
-import type { CubeOptions, LayerOptions, VelocityOptions } from 'zarr-cesium';
+import type { CubeOptions, ElevationMode, LayerOptions, VelocityOptions } from 'zarr-cesium';
 import type React from 'react';
+
+const TERRAIN_POSITION_EXCEPTIONS = new Set([
+  'wind_speed_florence_v3',
+  'wind_3d_florence_v3'
+]);
+
+export function getTerrainElevationMode(
+  actualLayer: string,
+  gebcoTerrainEnabled: boolean
+): ElevationMode | undefined {
+  if (TERRAIN_POSITION_EXCEPTIONS.has(actualLayer)) return undefined;
+  return gebcoTerrainEnabled ? 'depth' : 'height';
+}
+
+export function getLowestElevationIndex(
+  elevations: ArrayLike<number | string>,
+  flipElevation = false
+): number {
+  let lowestIndex = 0;
+  for (let index = 1; index < elevations.length; index++) {
+    if (Number(elevations[index]) < Number(elevations[lowestIndex])) {
+      lowestIndex = index;
+    }
+  }
+  return flipElevation ? elevations.length - 1 - lowestIndex : lowestIndex;
+}
 
 export function viewerMap(viewerRef: React.RefObject<Viewer | null>, dataType: string) {
   const relationship: keyable = {
@@ -18,7 +44,7 @@ export async function generateSelectedLayer(
   viewerRef: React.RefObject<Viewer>,
   layers: any,
   zarrCesiumRefs: ZarrCesiumRefs,
-  gebcoTerrainEnabled?: boolean
+  gebcoTerrainEnabled: boolean
 ) {
   const layerName = selectedLayers[actualLayer];
   layers?._layers.forEach(function (layer: any) {
@@ -130,15 +156,25 @@ export async function getZarrCube(
   actualLayer: string,
   viewerRef: React.RefObject<Viewer>,
   cubeRefs: React.RefObject<Record<string, ZarrCubeProvider>>,
-  gebcoTerrainEnabled?: boolean
+  gebcoTerrainEnabled: boolean
 ) {
   const options = structuredClone(layerName.params) as CubeOptions;
-  if (gebcoTerrainEnabled !== undefined && options.flipElevation !== true) {
-    options.belowSeaLevel = gebcoTerrainEnabled;
-  }
+  const terrainElevationMode = getTerrainElevationMode(
+    actualLayer,
+    gebcoTerrainEnabled
+  );
+  options.elevationMode = terrainElevationMode ?? options.elevationMode;
   const layer = new ZarrCubeProvider(viewerRef.current, options);
   layer.id = actualLayer;
   await layer.load();
+  if (terrainElevationMode !== undefined && layer.cubeDimensions) {
+    layer.updateSlices({
+      elevationIndex: getLowestElevationIndex(
+        layer.cubeDimensionValues.elevation,
+        options.flipElevation
+      )
+    });
+  }
   cubeRefs.current[actualLayer]?.destroy();
   cubeRefs.current[actualLayer] = layer;
   return layer;
@@ -149,12 +185,13 @@ export async function getZarrCubeVelocity(
   actualLayer: string,
   viewerRef: React.RefObject<Viewer>,
   velocityCubeRefs: React.RefObject<Record<string, ZarrCubeVelocityProvider>>,
-  gebcoTerrainEnabled?: boolean
+  gebcoTerrainEnabled: boolean
 ) {
   const options = structuredClone(layerName.params) as VelocityOptions;
-  if (gebcoTerrainEnabled !== undefined && options.flipElevation !== true) {
-    options.belowSeaLevel = gebcoTerrainEnabled;
-  }
+  options.elevationMode = getTerrainElevationMode(
+    actualLayer,
+    gebcoTerrainEnabled
+  ) ?? options.elevationMode;
   const layer = new ZarrCubeVelocityProvider(viewerRef.current, options);
   layer.id = actualLayer;
   await layer.load();

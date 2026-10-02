@@ -123,8 +123,7 @@ interface CubeOptions {
 
 `latIsAscending` and `flipElevation` describe different axes. `latIsAscending` controls how rows
 in each horizontal slice map to south/north and is normally inferred from the latitude coordinate
-values. `flipElevation` reverses only the elevation data/index ordering, leaves elevation
-coordinates in place, and does not determine
+values. `flipElevation` reverses only the vertical placement of elevation data planes and does not determine
 whether coordinates render above or below sea level. Use `elevationMode: 'depth'` for positive
 depth coordinates and `'height'` for height coordinates. Set orientation overrides only when the
 coordinate metadata does not describe the stored array correctly.
@@ -403,7 +402,14 @@ cube.updateSlices({
 
 `verticalExaggeration` must be greater than zero. `force: true` can be used to
 recreate the current primitives even when no slice or layout value changed.
-`flipElevation` is configured independently and only changes vertical data ordering.
+`flipElevation` is configured independently and only changes vertical data-plane placement.
+An `elevationIndex` passed to `updateSlices` always selects that same source data plane;
+when flipping is enabled, the selected plane is rendered at the opposite vertical position.
+
+Elevation placement preserves the source coordinate order. In `height` mode,
+height is `elevation * verticalExaggeration`. In `depth` mode, height is
+`(elevation - maximumElevation) * verticalExaggeration`, translating the cube
+below sea level without reversing its data-plane indices.
 
 ---
 

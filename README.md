@@ -77,26 +77,6 @@ npm install zarr-cesium
 
 `zarr-cesium` supports CesiumJS 1.119 and newer, including CesiumJS 1.142+.
 
-## Run the demo website locally
-
-To run the demo website locally, clone the repository:
-
-```bash
-git clone https://github.com/noc-oi/zarr-cesium.git
-cd zarr-cesium/demo
-```
-
-Install dependencies and start the development server:
-
-```bash
-npm install
-npm run dev
-```
-
-The demo site will be available at `http://localhost:5173` by default.
-
-If you want to use your own Zarr datasets, you can modify the demo code in [`demo/src/application/data/layers-json.ts`](https://github.com/NOC-OI/zarr-cesium/blob/dev/demo/src/application/data/layers-json.ts) to point to your data URLs. You may need to adjust variable names, bounds, and other parameters accordingly.
-
 ---
 
 ## Providers
@@ -147,9 +127,8 @@ refresh credentials when a transformed request returns HTTP 400 or 401.
 
 For more details, see the [Zarr-Cesium documentation](https://noc-oi.github.io/zarr-cesium/docs/).
 
-https://github.com/user-attachments/assets/33fc6dd2-38fa-4b20-a346-0a175f90eba1
+![Example of visualizing a Zarr dataset in a CesiumJS map using Zarr-Cesium. You can easily change the timestamp, colormap, and scale.](https://github.com/NOC-OI/zarr-cesium/releases/download/readme-assets-v1/layer_provider.gif)
 
-> Example of visualizing a Zarr dataset in a CesiumJS map using Zarr-Cesium. You can easily change the timestamp, colormap, and scale.
 
 ---
 
@@ -180,9 +159,7 @@ Like the 2D provider, cubes accept a custom Zarrita `Readable` store for Icechun
 
 For more details, see the [Zarr-Cesium documentation](https://noc-oi.github.io/zarr-cesium/docs/).
 
-https://github.com/user-attachments/assets/8b066725-c6c7-4b7a-9fc0-d632b623937c
-
-> Example of visualizing a 4D Zarr dataset in a CesiumJS map as a 3D cube using Zarr-Cesium. You can easily change slices and view the cube in different ways, styles, and scales.
+![Example of visualizing a 4D Zarr dataset in a CesiumJS map as a 3D cube using Zarr-Cesium. You can easily change slices and view the cube in different ways, styles, and scales.](https://github.com/NOC-OI/zarr-cesium/releases/download/readme-assets-v1/cube_provider.gif)
 
 ---
 
@@ -219,9 +196,9 @@ Velocity fields support custom stores through `stores.u` and `stores.v`. URL-bac
 
 For more details, see the [Zarr-Cesium documentation](https://noc-oi.github.io/zarr-cesium/docs/).
 
-https://github.com/user-attachments/assets/a54ddd70-9b00-4a3e-9cb9-41025cceffd0
+![Example of visualizing ocean currents in the Atlantic from Zarr in a CesiumJS map using Zarr-Cesium. You can easily change the timestamp, colormap, and particle speed.](https://github.com/NOC-OI/zarr-cesium/releases/download/readme-assets-v1/velocity_provider.gif)
 
-> Example of visualizing wind-speed vector data from Zarr in a CesiumJS map using Zarr-Cesium. This dataset is from Hurricane Florence, which occurred in 2018. You can easily change the timestamp, colormap, and particle speed.
+![Example of visualizing wind-speed vector data from Zarr in a CesiumJS map using Zarr-Cesium. This dataset is from Hurricane Florence, which occurred in 2018.](https://github.com/NOC-OI/zarr-cesium/releases/download/readme-assets-v1/cube_velocity_provider.gif)
 
 ---
 
@@ -242,9 +219,9 @@ const transect = await cube.getTransect([-5, 50], [-3, 51], undefined, {
 });
 ```
 
-Query positions use WGS84 longitude/latitude. Query options support abort
-signals, coordinate omission, resolution selection, transect sample count, and
-concurrency limits.
+Query positions use WGS84 longitude/latitude. Query options support abort signals, coordinate omission, resolution selection, transect sample count, and concurrency limits.
+
+![Example of data querying.](https://github.com/NOC-OI/zarr-cesium/releases/download/readme-assets-v1/query.gif)
 
 ---
 

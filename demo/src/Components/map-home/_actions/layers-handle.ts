@@ -3,6 +3,7 @@ import { DEFAULT_BOUNDS } from '../../../lib/map-layers/utils';
 import type { LayersJsonType, SelectedLayersType, ZarrCesiumRefs } from '../../../types';
 import {
   generateSelectedLayer,
+  getLowestElevationIndex,
   getSelectedLayerWithDimensions,
   getTerrainElevationMode,
   viewerMap
@@ -173,7 +174,14 @@ export function updateSeaLevelLayerReference(
       gebcoTerrainEnabled
     );
     if (elevationMode === undefined) continue;
-    provider.updateSlices({ elevationMode });
+    const options = selectedLayers[provider.id]?.params as CubeOptions | undefined;
+    provider.updateSlices({
+      elevationMode,
+      elevationIndex: getLowestElevationIndex(
+        provider.cubeDimensionValues.elevation,
+        options?.flipElevation
+      )
+    });
     updates.push({
       name: provider.id,
       layer: getSelectedLayerWithDimensions(provider, provider.id, selectedLayers, true)

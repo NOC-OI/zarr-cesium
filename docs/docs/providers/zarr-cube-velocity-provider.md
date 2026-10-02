@@ -109,7 +109,7 @@ interface VelocityOptions {
 
 `latIsAscending` controls the north/south orientation of rows and is inferred from latitude
 coordinates by default. It is not a replacement for `flipElevation`: that option reverses only
-the elevation data/index ordering while leaving elevation coordinates in place. `elevationMode` independently selects whether positive
+the vertical placement of elevation data planes without changing their source indices. `elevationMode` independently selects whether positive
 coordinates are heights or depths. Use orientation overrides only for datasets whose metadata is
 absent or wrong.
 
@@ -370,6 +370,10 @@ This:
 - Applies the new vertical-layout parameters without rereading the cube
 
 All the parameters are optional. If not provided, the current value is retained.
+Changing `elevationMode` only changes vertical placement. In `height` mode,
+height is `elevation * verticalExaggeration`; in `depth` mode, height is
+`(elevation - maximumElevation) * verticalExaggeration`. U/V values, latitude,
+longitude, and elevation-to-data-plane index pairings are unchanged.
 
 ---
 

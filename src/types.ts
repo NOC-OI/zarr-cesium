@@ -59,7 +59,7 @@ export interface CubeOptions {
   colorScale?: [number, number, number][];
   multiscaleLevel?: number;
   zarrVersion?: 2 | 3;
-  /** Reverse the elevation data/index ordering without changing height/depth placement. */
+  /** Reverse vertical data-plane placement without changing source elevation indices. */
   flipElevation?: boolean;
   scale?: [number, number];
   colormap?: ColorMapName;
@@ -111,7 +111,7 @@ export interface VelocityOptions {
   /** Whether latitude coordinate values increase with their array index. */
   latIsAscending?: boolean;
   verticalExaggeration?: number;
-  /** Reverse the elevation data/index ordering without changing height/depth placement. */
+  /** Reverse vertical data-plane placement without changing source elevation indices. */
   flipElevation?: boolean;
   sliceSpacing?: number;
   /** Render positive vertical coordinates above sea level or as depths below it. */

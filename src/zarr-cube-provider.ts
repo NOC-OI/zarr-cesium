@@ -125,6 +125,7 @@ export class ZarrCubeProvider {
   private dimensionNames: DimensionNamesProps;
   private multiscaleFormat: MultiscaleFormat = 'auto';
   private verticalExaggeration: number;
+  private maximumElevationValue = 0;
   private opacity: number;
   private showHorizontalSlices: boolean;
   private showVerticalSlices: boolean;
@@ -267,6 +268,9 @@ export class ZarrCubeProvider {
     }).load();
     this.dimensionValues = cube.dimensionValues;
     this.cubeDimensionValues = cube.cubeDimensionValues;
+    const elevationValues = Array.from(this.cubeDimensionValues.elevation ?? [], Number);
+    this.maximumElevationValue =
+      elevationValues.length > 0 ? globalThis.Math.max(...elevationValues) : 0;
     this.selectors = cube.selectors;
     this.loadedOrigin = cube.origin;
     this.longitudeIndices = cube.coordinates.x;
@@ -861,9 +865,6 @@ export class ZarrCubeProvider {
     const outputCanvas = this.createCanvas(nx, ny);
     const { canvas, ctx } = outputCanvas;
     let imgData = outputCanvas.imgData;
-    const elevationSliceIndex = this.flipElevation
-      ? nz - 1 - this.elevationSliceIndex
-      : this.elevationSliceIndex;
     for (let y = 0; y < ny; y++) {
       for (let x = 0; x < nx; x++) {
         const coord: Record<string, number> = {
@@ -871,7 +872,7 @@ export class ZarrCubeProvider {
           // Rectangle image textures use canvas row 0 at the geographic north edge.
           // Convert that north-to-south canvas row to the dataset latitude index.
           lat: this.getLatitudeDataIndex(ny - 1 - y, ny),
-          elevation: elevationSliceIndex
+          elevation: this.elevationSliceIndex
         };
         const idx =
           coord[indicesOrder[0]] * strides[indicesOrder[0]] +
@@ -883,7 +884,10 @@ export class ZarrCubeProvider {
       }
     }
     ctx.putImageData(imgData, 0, 0);
-    const elevationValue = this.cubeDimensionValues.elevation[this.elevationSliceIndex];
+    const placementElevationIndex = this.flipElevation
+      ? nz - 1 - this.elevationSliceIndex
+      : this.elevationSliceIndex;
+    const elevationValue = this.cubeDimensionValues.elevation[placementElevationIndex];
     const heightMeters = this.calculateElevationHeight(elevationValue as number);
 
     const primitive = new Primitive({
@@ -1013,8 +1017,9 @@ export class ZarrCubeProvider {
 
   /** Converts one vertical coordinate to its Cesium height independently of data ordering. */
   private calculateElevationHeight(elevationValue: number): number {
-    const magnitude = globalThis.Math.abs(elevationValue) * this.verticalExaggeration;
-    return this.elevationMode === 'depth' ? -magnitude : elevationValue * this.verticalExaggeration;
+    return this.elevationMode === 'depth'
+      ? (elevationValue - this.maximumElevationValue) * this.verticalExaggeration
+      : elevationValue * this.verticalExaggeration;
   }
 
   private createLonSlicePrimitive(latIndex: number) {

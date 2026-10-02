@@ -220,7 +220,7 @@ optional verticalExaggeration: number;
 optional windOptions: VelocityWindOptions;
 ```
 
-Particle styling. Height is derived from the selected Zarr elevation.
+Particle styling; height is derived from the selected Zarr elevation.
 
 ***
 

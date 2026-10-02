@@ -129,9 +129,9 @@ The currently loaded array remains in memory. Call [load](#load) or
 
 ```ts
 getFullTransect(
-   start,
-   end,
-   selectors?,
+   start, 
+   end, 
+   selectors?, 
 options?): Promise<FullTransectResult>;
 ```
 
@@ -192,8 +192,8 @@ lonSliceIndex: number;
 
 ```ts
 getTimeSeries(
-   position,
-   selectors?,
+   position, 
+   selectors?, 
 options?): Promise<QueryResult>;
 ```
 
@@ -219,9 +219,9 @@ A result ordered by the time coordinate.
 
 ```ts
 getTransect(
-   start,
-   end,
-   selectors?,
+   start, 
+   end, 
+   selectors?, 
 options?): Promise<TransectResult>;
 ```
 
@@ -248,8 +248,8 @@ Positions, distances, and values along the transect.
 
 ```ts
 getVerticalProfile(
-   position,
-   selectors?,
+   position, 
+   selectors?, 
 options?): Promise<QueryResult>;
 ```
 
@@ -307,13 +307,13 @@ Calling `load` again replaces the in-memory subset. Use
 
 ```ts
 queryData(
-   geometry,
-   selectors?,
+   geometry, 
+   selectors?, 
 options?): Promise<QueryResult>;
 ```
 
 Queries a voxel or vertical profile from the cube subset currently held in memory.
-A scalar elevation selector returns one voxel. An elevation range returns a profile.
+A scalar elevation selector returns one voxel; an elevation range returns a profile.
 
 #### Parameters
 

@@ -18,6 +18,19 @@ export function getTerrainElevationMode(
   return gebcoTerrainEnabled ? 'depth' : 'height';
 }
 
+export function getLowestElevationIndex(
+  elevations: ArrayLike<number | string>,
+  flipElevation = false
+): number {
+  let lowestIndex = 0;
+  for (let index = 1; index < elevations.length; index++) {
+    if (Number(elevations[index]) < Number(elevations[lowestIndex])) {
+      lowestIndex = index;
+    }
+  }
+  return flipElevation ? elevations.length - 1 - lowestIndex : lowestIndex;
+}
+
 export function viewerMap(viewerRef: React.RefObject<Viewer | null>, dataType: string) {
   const relationship: keyable = {
     'zarr-cesium': viewerRef.current?.imageryLayers
@@ -146,13 +159,22 @@ export async function getZarrCube(
   gebcoTerrainEnabled: boolean
 ) {
   const options = structuredClone(layerName.params) as CubeOptions;
-  options.elevationMode = getTerrainElevationMode(
+  const terrainElevationMode = getTerrainElevationMode(
     actualLayer,
     gebcoTerrainEnabled
-  ) ?? options.elevationMode;
+  );
+  options.elevationMode = terrainElevationMode ?? options.elevationMode;
   const layer = new ZarrCubeProvider(viewerRef.current, options);
   layer.id = actualLayer;
   await layer.load();
+  if (terrainElevationMode !== undefined && layer.cubeDimensions) {
+    layer.updateSlices({
+      elevationIndex: getLowestElevationIndex(
+        layer.cubeDimensionValues.elevation,
+        options.flipElevation
+      )
+    });
+  }
   cubeRefs.current[actualLayer]?.destroy();
   cubeRefs.current[actualLayer] = layer;
   return layer;

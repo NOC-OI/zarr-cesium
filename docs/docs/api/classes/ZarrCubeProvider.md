@@ -339,7 +339,7 @@ selector indices outside the loaded subset.
 ### updateSelectors()
 
 ```ts
-updateSelectors(options): void;
+updateSelectors(options): Promise<void>;
 ```
 
 Updates the dimension selectors, multiscale level, and bounds.
@@ -357,7 +357,7 @@ Updates the dimension selectors, multiscale level, and bounds.
 
 `void`
 
-Nothing. Reloading continues asynchronously after a change.
+A promise that resolves after any required reload completes.
 
 #### Remarks
 

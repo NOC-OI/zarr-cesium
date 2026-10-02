@@ -143,7 +143,7 @@ export async function changeMapPyramidLevels(
     layerInfo.dataType === 'zarr-cube'
       ? zarrCesiumRefs.cubeRefs.current[actualLayer]
       : zarrCesiumRefs.velocityCubeRefs.current[actualLayer];
-  ref?.updateSelectors({ multiscaleLevel: params.multiscaleLevel });
+  await ref?.updateSelectors({ multiscaleLevel: params.multiscaleLevel });
   return getSelectedLayerWithDimensions(ref, actualLayer, selectedLayers, true);
 }
 
@@ -158,7 +158,7 @@ export async function changeMapBounds(
     layerInfo.dataType === 'zarr-cube'
       ? zarrCesiumRefs.cubeRefs.current[actualLayer]
       : zarrCesiumRefs.velocityCubeRefs.current[actualLayer];
-  ref?.updateSelectors({ bounds: params.bounds });
+  await ref?.updateSelectors({ bounds: params.bounds });
   return getSelectedLayerWithDimensions(ref, actualLayer, selectedLayers, true);
 }
 
@@ -213,7 +213,7 @@ export async function changeMapDimensions(
   const layers = viewerMap(viewerRef, layerInfo.dataType) || null;
   if (layerInfo.dataType === 'zarr-cube') {
     const provider = zarrCesiumRefs.cubeRefs.current[actualLayer];
-    provider?.updateSelectors({ selectors: layerInfo.params.selectors });
+    await provider?.updateSelectors({ selectors: layerInfo.params.selectors });
     return getSelectedLayerWithDimensions(
       provider,
       actualLayer,

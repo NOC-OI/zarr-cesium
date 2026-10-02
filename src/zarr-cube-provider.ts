@@ -716,10 +716,10 @@ export class ZarrCubeProvider {
    *
    * @param options - Partial data-selection update. Changed selectors, level,
    * or bounds cause the current primitives to be destroyed and reloaded.
-   * @returns Nothing. Reloading continues asynchronously after a change.
+   * @returns A promise that resolves after any required reload completes.
    * @remarks Bounds are validated against geographic latitude limits.
    */
-  updateSelectors({
+  async updateSelectors({
     selectors,
     multiscaleLevel,
     bounds
@@ -727,7 +727,7 @@ export class ZarrCubeProvider {
     selectors?: { [key: string]: ZarrSelectorsProps };
     multiscaleLevel?: number;
     bounds?: BoundsProps;
-  }): void {
+  }): Promise<void> {
     let updateLayer = false;
     if (selectors !== undefined) {
       for (const key of Object.keys(selectors)) {
@@ -756,7 +756,7 @@ export class ZarrCubeProvider {
     }
     if (updateLayer) {
       this.destroy();
-      this.load(true);
+      await this.load(true);
     }
   }
 

@@ -45,9 +45,20 @@ export function MapHome() {
   const transectEntitiesRef = useRef<Cesium.Entity[]>([]);
   const transectPositionsRef = useRef<QueryPosition[]>([]);
   const transectLayerRef = useRef('');
+  const crossSectionLayerRef = useRef('');
+  const crossSectionCaptureLayerRef = useRef('');
+  const crossSectionPositionsRef = useRef<QueryPosition[]>([]);
+  const crossSectionEntitiesRef = useRef<Cesium.Entity[]>([]);
 
-  const { setFlashMessage, setInfoButtonBox, setLoading, transectLayerName, setTransectLayerName } =
-    useContextHandle();
+  const {
+    setFlashMessage,
+    setInfoButtonBox,
+    setLoading,
+    transectLayerName,
+    setTransectLayerName,
+    crossSectionRequest,
+    setCrossSectionRequest
+  } = useContextHandle();
   Cesium.Camera.DEFAULT_VIEW_RECTANGLE = CESIUM_START_COORDINATES;
 
   const clearTransect = useCallback(() => {
@@ -66,6 +77,20 @@ export function MapHome() {
     if (viewer && queryMarkerRef.current) viewer.entities.remove(queryMarkerRef.current);
     queryMarkerRef.current = null;
     queryMarkerLayerRef.current = '';
+  }, []);
+
+  const clearCrossSection = useCallback((removeSlice = true) => {
+    const viewer = viewerRef.current;
+    if (viewer) {
+      crossSectionEntitiesRef.current.forEach(entity => viewer.entities.remove(entity));
+    }
+    if (removeSlice && crossSectionLayerRef.current) {
+      cubeRefs.current[crossSectionLayerRef.current]?.clearCrossSection();
+    }
+    crossSectionEntitiesRef.current = [];
+    crossSectionPositionsRef.current = [];
+    crossSectionLayerRef.current = '';
+    crossSectionCaptureLayerRef.current = '';
   }, []);
 
   const registerTransectCapture = useCallback(
@@ -113,6 +138,66 @@ export function MapHome() {
           const position = Cesium.Cartographic.fromCartesian(cartesian);
           const longitude = Cesium.Math.toDegrees(position.longitude);
           const latitude = Cesium.Math.toDegrees(position.latitude);
+          if (crossSectionCaptureLayerRef.current) {
+            const provider = cubeRefs.current[crossSectionCaptureLayerRef.current];
+            if (!provider) {
+              clearCrossSection(false);
+              return;
+            }
+            if (
+              longitude < provider.bounds.west ||
+              longitude > provider.bounds.east ||
+              latitude < provider.bounds.south ||
+              latitude > provider.bounds.north
+            ) {
+              setFlashMessage({
+                messageType: 'error',
+                content: 'Cross-section points must be inside the selected cube.'
+              });
+              return;
+            }
+            const queryPosition: QueryPosition = [longitude, latitude];
+            crossSectionPositionsRef.current.push(queryPosition);
+            crossSectionEntitiesRef.current.push(
+              viewer.entities.add({
+                position: cartesian,
+                point: {
+                  pixelSize: 11,
+                  color: Cesium.Color.LIME,
+                  outlineColor: Cesium.Color.BLACK,
+                  outlineWidth: 2,
+                  disableDepthTestDistance: Number.POSITIVE_INFINITY
+                }
+              })
+            );
+            if (crossSectionPositionsRef.current.length === 2) {
+              const [start, end] = crossSectionPositionsRef.current;
+              try {
+                provider.setCrossSection(start, end);
+                crossSectionEntitiesRef.current.push(
+                  viewer.entities.add({
+                    polyline: {
+                      positions: [start, end].map(([lon, lat]) =>
+                        Cesium.Cartesian3.fromDegrees(lon, lat)
+                      ),
+                      width: 3,
+                      material: Cesium.Color.LIME,
+                      clampToGround: true
+                    }
+                  })
+                );
+                crossSectionCaptureLayerRef.current = '';
+                setCrossSectionRequest(null);
+              } catch (error) {
+                setFlashMessage({
+                  messageType: 'error',
+                  content: error instanceof Error ? error.message : String(error)
+                });
+                clearCrossSection(false);
+              }
+            }
+            return;
+          }
           if (transectCaptureRef.current) {
             const queryPosition: QueryPosition = [longitude, latitude];
             transectPositionsRef.current.push(queryPosition);
@@ -156,12 +241,13 @@ export function MapHome() {
           }
           const cubeProvider = Object.keys(selectedLayersRef.current)
             .map(layerName => velocityCubeRefs.current[layerName] ?? cubeRefs.current[layerName])
-            .find(candidate =>
-              candidate &&
-              longitude >= candidate.bounds.west &&
-              longitude <= candidate.bounds.east &&
-              latitude >= candidate.bounds.south &&
-              latitude <= candidate.bounds.north
+            .find(
+              candidate =>
+                candidate &&
+                longitude >= candidate.bounds.west &&
+                longitude <= candidate.bounds.east &&
+                latitude >= candidate.bounds.south &&
+                latitude <= candidate.bounds.north
             );
           if (!queryLayer && !cubeProvider) return;
           if (queryMarkerRef.current) {
@@ -169,12 +255,13 @@ export function MapHome() {
             queryMarkerRef.current = null;
             queryMarkerLayerRef.current = '';
           }
-          const provider = cubeProvider ??
-            (queryLayer?.imageryProvider as ZarrLayerProvider | undefined);
+          const provider =
+            cubeProvider ?? (queryLayer?.imageryProvider as ZarrLayerProvider | undefined);
           if (!provider) return;
           const layerName =
             provider instanceof ZarrCubeProvider || provider instanceof ZarrCubeVelocityProvider
-              ? provider.id || (provider instanceof ZarrCubeProvider ? 'Zarr cube' : 'Zarr velocity cube')
+              ? provider.id ||
+                (provider instanceof ZarrCubeProvider ? 'Zarr cube' : 'Zarr velocity cube')
               : ((queryLayer as Cesium.ImageryLayer & { id?: string }).id ?? 'Zarr layer');
           queryMarkerRef.current = viewer.entities.add({
             position: cartesian,
@@ -238,7 +325,15 @@ export function MapHome() {
         }
       }
     },
-    [clearQueryMarker, dispatch, setFlashMessage, setInfoButtonBox, setLoading]
+    [
+      clearCrossSection,
+      clearQueryMarker,
+      dispatch,
+      setCrossSectionRequest,
+      setFlashMessage,
+      setInfoButtonBox,
+      setLoading
+    ]
   );
 
   useEffect(() => {
@@ -247,8 +342,31 @@ export function MapHome() {
       queryHandlerRef.current = null;
       clearQueryMarker();
       clearTransect();
+      clearCrossSection();
     };
-  }, [clearQueryMarker, clearTransect]);
+  }, [clearCrossSection, clearQueryMarker, clearTransect]);
+
+  useEffect(() => {
+    if (!crossSectionRequest) return;
+    const provider = cubeRefs.current[crossSectionRequest.layerName];
+    if (!provider) {
+      setCrossSectionRequest(null);
+      return;
+    }
+    clearCrossSection(crossSectionRequest.action === 'clear');
+    if (crossSectionRequest.action === 'draw') {
+      provider.clearCrossSection();
+      crossSectionLayerRef.current = crossSectionRequest.layerName;
+      crossSectionCaptureLayerRef.current = crossSectionRequest.layerName;
+      setFlashMessage({
+        messageType: 'info',
+        content: 'Click two points inside the cube to draw a vertical cross-section.'
+      });
+    } else {
+      provider.clearCrossSection();
+      setCrossSectionRequest(null);
+    }
+  }, [clearCrossSection, crossSectionRequest, setCrossSectionRequest, setFlashMessage]);
 
   useEffect(() => {
     if (!transectLayerName || !viewerRef.current) return;
@@ -346,7 +464,9 @@ export function MapHome() {
     let removeTerrainReadyListener: (() => void) | undefined;
     let removeProviderErrorListener: (() => void) | undefined;
     if (gebcoTerrainEnabled) {
-      const terrainUrl = import.meta.env.VITE_TERRAIN_URL || "https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/terrain/gebco/gebco-2026-vertexnormals/"
+      const terrainUrl =
+        import.meta.env.VITE_TERRAIN_URL ||
+        'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/terrain/gebco/gebco-2026-vertexnormals/';
 
       const terrain = new Cesium.Terrain(
         Cesium.CesiumTerrainProvider.fromUrl(terrainUrl, {
@@ -414,6 +534,9 @@ export function MapHome() {
     }
     if (transectLayerRef.current && !selectedLayers[transectLayerRef.current]) {
       clearTransect();
+    }
+    if (crossSectionLayerRef.current && !selectedLayers[crossSectionLayerRef.current]) {
+      clearCrossSection(false);
     }
     const zarrCesiumRefs = {
       cubeRefs,

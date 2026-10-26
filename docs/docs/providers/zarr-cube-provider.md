@@ -12,7 +12,7 @@ It allows you to explore scalar volumes (e.g., temperature, salinity, density, c
 - **Vertical longitude slices**
 - **Vertical latitude slices**
 
-Each slice is rendered using a **GPU-accelerated colormap shader** and draped as a Cesium `Primitive` at the correct geographic position and height.
+Each slice is rendered using a **GPU-accelerated colormap shader** at the correct geographic position and height. When the cube would exceed the device's maximum texture size, the provider automatically uses its compatibility renderer. The compatibility path creates RGBA canvas textures on the CPU and preserves the same public API and query behaviour.
 
 This provider supports:
 
@@ -20,6 +20,7 @@ This provider supports:
 - Legacy ndpyramid and GeoZarr multiscale layouts
 - CRS detection (EPSG:4326 / EPSG:3857)
 - Dynamic dimension slicing
+- Arbitrary two-point vertical cross-sections
 - CF-compliant time decoding for selectors
 - Vertical exaggeration
 - Below-sea-level rendering
@@ -89,6 +90,23 @@ cube.updateSlices({
 ```
 
 This creates a **stack of slice primitives**: horizontal, vertical longitude, and vertical latitude.
+
+### Arbitrary vertical cross-sections
+
+Create a vertical slice between any two geographic positions inside the loaded cube:
+
+```ts
+cube.setCrossSection([-8.5, 48.0], [-2.0, 54.0]);
+```
+
+The endpoints are `[longitude, latitude]` coordinates in degrees. The plane follows the globe between the points and samples the cube in the GPU shader, including projected EPSG:3857 datasets. Remove it without affecting the three standard slices:
+
+```ts
+cube.clearCrossSection();
+```
+
+Arbitrary cross-sections require the GPU renderer. If the device falls back to CPU slice rendering, `setCrossSection` throws an explanatory error.
+
 
 ---
 

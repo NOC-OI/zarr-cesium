@@ -11,10 +11,12 @@ import {
 } from 'zarr-cesium';
 import type { ColorMapName } from 'zarr-maps-colormap';
 import { ColormapSelect } from 'zarr-maps-explorer';
+import { useContextHandle } from '../../application/use-context';
 
 export function CubeOptionsSelector({ layerLegendName }: LayerLegendBoxProps) {
   const selectedLayers = useAppSelector(state => state.layers.selectedLayers);
   const dispatch = useAppDispatch();
+  const { setCrossSectionRequest } = useContextHandle();
   const [latSlice, setLatSlice] = useState<number>(
     selectedLayers[layerLegendName]?.slices?.latIndex || 0
   );
@@ -97,9 +99,7 @@ export function CubeOptionsSelector({ layerLegendName }: LayerLegendBoxProps) {
         <p className="text-[11px] font-bold">
           Elevation Slice:{' '}
           {selectedLayer.dimensions!.elevation
-            ? (
-                selectedLayer.dimensions!.elevation.values[elevationSlice] as number
-              ).toFixed(2)
+            ? (selectedLayer.dimensions!.elevation.values[elevationSlice] as number).toFixed(2)
             : elevationSlice}{' '}
           m
         </p>
@@ -112,6 +112,29 @@ export function CubeOptionsSelector({ layerLegendName }: LayerLegendBoxProps) {
           className="clickable"
         />
         <p className="text-[10px] text-gray-300">Lon × Lat plane</p>
+      </div>
+
+      <div className="flex flex-col gap-2 border-t border-white/10 pt-3">
+        <p className="text-[11px] font-bold">Arbitrary Cross Section</p>
+        <p className="text-[10px] text-gray-300">
+          Select two points on the globe to create a vertical slice.
+        </p>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            className="clickable flex-1 rounded-md bg-emerald-700 px-3 py-2 text-[11px] font-semibold hover:bg-emerald-600"
+            onClick={() => setCrossSectionRequest({ layerName: layerLegendName, action: 'draw' })}
+          >
+            Draw section
+          </button>
+          <button
+            type="button"
+            className="clickable rounded-md bg-white/10 px-3 py-2 text-[11px] font-semibold hover:bg-white/20"
+            onClick={() => setCrossSectionRequest({ layerName: layerLegendName, action: 'clear' })}
+          >
+            Clear
+          </button>
+        </div>
       </div>
 
       <div className="flex flex-col gap-1">

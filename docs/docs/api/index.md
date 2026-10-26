@@ -4,6 +4,7 @@
 
 | Class | Description |
 | ------ | ------ |
+| [CubeGpuRenderer](classes/CubeGpuRenderer.md) | Low-level Cesium primitive that keeps cube values and colormapping on the GPU. |
 | [ZarrCubeDataProvider](classes/ZarrCubeDataProvider.md) | Loads and spatially subsets a three-dimensional Zarr variable without rendering it. |
 | [ZarrCubeProvider](classes/ZarrCubeProvider.md) | Provides rendering of volumetric (3D) Zarr datasets as Cesium primitives. |
 | [ZarrCubeVelocityProvider](classes/ZarrCubeVelocityProvider.md) | Provider responsible for loading and rendering 3D velocity fields (U and V components) from Zarr datasets as animated Cesium `WindLayer`s. |
@@ -18,6 +19,7 @@
 | [BoundsProps](interfaces/BoundsProps.md) | Geographic bounding box definition (degrees). |
 | [ColorMapInfo](interfaces/ColorMapInfo.md) | Structure of the global color map registry. |
 | [ColorScaleProps](interfaces/ColorScaleProps.md) | Numerical range and colors used to render a scalar field. |
+| [CubeGpuRendererOptions](interfaces/CubeGpuRendererOptions.md) | - |
 | [CubeOptions](interfaces/CubeOptions.md) | - |
 | [CubeVelocityProps](interfaces/CubeVelocityProps.md) | - |
 | [DataSliceProps](interfaces/DataSliceProps.md) | Describes a slice of a multidimensional array. |
@@ -98,6 +100,7 @@
 | [CFCalendar](type-aliases/CFCalendar.md) | Supported CF calendar types. |
 | [ColorMapName](type-aliases/ColorMapName.md) | Name of a bundled Matplotlib-inspired colormap. |
 | [CRS](type-aliases/CRS.md) | Supported Coordinate Reference Systems. |
+| [CubeCrossSectionPoint](type-aliases/CubeCrossSectionPoint.md) | - |
 | [ElevationMode](type-aliases/ElevationMode.md) | Controls whether vertical coordinates are interpreted as heights or depths. |
 | [MultiscaleFormat](type-aliases/MultiscaleFormat.md) | Supported conventions for discovering multiscale Zarr levels. |
 | [OnAuthError](type-aliases/OnAuthError.md) | - |

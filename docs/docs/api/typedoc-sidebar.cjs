@@ -421,6 +421,11 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "api/type-aliases/CubeCrossSectionPoint",
+          label: "CubeCrossSectionPoint"
+        },
+        {
+          type: "doc",
           id: "api/type-aliases/ElevationMode",
           label: "ElevationMode"
         },

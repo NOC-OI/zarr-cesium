@@ -6,11 +6,12 @@ import type {
   CRS,
   DimensionNamesProps,
   DimensionValues,
+  DimIndicesProps,
   MultiscaleFormat,
   TileCacheOptions,
   ZarrSelectorsProps
 } from 'zarr-maps-tiling';
-import type { ColorMapName } from 'zarr-maps-colormap';
+import type { ColorMapName, ColorScaleProps } from 'zarr-maps-colormap';
 import type { OnAuthError, RequestOverrides, TransformRequest } from 'zarr-maps-tiling';
 import type * as zarr from 'zarrita';
 
@@ -149,4 +150,32 @@ export interface CubeVelocityProps {
   height: number;
   elevation: number;
   dimensionValues: DimensionValues;
+}
+
+export type CubeCrossSectionPoint = [longitude: number, latitude: number];
+
+export interface CubeGpuRendererOptions {
+  scene: any;
+  data: ndarray.NdArray<any>;
+  dimensions: [number, number, number];
+  dimensionIndices: DimIndicesProps;
+  dimensionElevations: ArrayLike<number | string>;
+  bounds: BoundsProps;
+  latIsAscending: boolean;
+  flipElevation: boolean;
+  verticalExaggeration: number;
+  elevationMode: ElevationMode;
+  scaleFactor: number;
+  addOffset: number;
+  fillValue?: number;
+  useFillValue: boolean;
+  noDataMin?: number;
+  noDataMax?: number;
+  colors: ColorScaleProps['colors'];
+  colorMin: number;
+  colorMax: number;
+  opacity: number;
+  showHorizontal: boolean;
+  showVertical: boolean;
+  projectedCrs: boolean;
 }

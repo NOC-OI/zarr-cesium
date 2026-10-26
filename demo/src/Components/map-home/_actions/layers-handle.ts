@@ -169,10 +169,7 @@ export function updateSeaLevelLayerReference(
 ) {
   const updates = [];
   for (const provider of Object.values(zarrCesiumRefs.cubeRefs.current)) {
-    const elevationMode = getTerrainElevationMode(
-      provider.id,
-      gebcoTerrainEnabled
-    );
+    const elevationMode = getTerrainElevationMode(provider.id, gebcoTerrainEnabled);
     if (elevationMode === undefined) continue;
     const options = selectedLayers[provider.id]?.params as CubeOptions | undefined;
     provider.updateSlices({
@@ -188,10 +185,7 @@ export function updateSeaLevelLayerReference(
     });
   }
   for (const provider of Object.values(zarrCesiumRefs.velocityCubeRefs.current)) {
-    const elevationMode = getTerrainElevationMode(
-      provider.id,
-      gebcoTerrainEnabled
-    );
+    const elevationMode = getTerrainElevationMode(provider.id, gebcoTerrainEnabled);
     if (elevationMode === undefined) continue;
     provider.updateSlices({ elevationMode });
     updates.push({
@@ -214,23 +208,13 @@ export async function changeMapDimensions(
   if (layerInfo.dataType === 'zarr-cube') {
     const provider = zarrCesiumRefs.cubeRefs.current[actualLayer];
     await provider?.updateSelectors({ selectors: layerInfo.params.selectors });
-    return getSelectedLayerWithDimensions(
-      provider,
-      actualLayer,
-      selectedLayers,
-      true
-    );
+    return getSelectedLayerWithDimensions(provider, actualLayer, selectedLayers, true);
   } else if (layerInfo.dataType === 'zarr-cube-velocity') {
     const provider = zarrCesiumRefs.velocityCubeRefs.current[actualLayer];
     await provider?.updateSelectors({
       selectors: layerInfo.params.selectors
     });
-    return getSelectedLayerWithDimensions(
-      provider,
-      actualLayer,
-      selectedLayers,
-      true
-    );
+    return getSelectedLayerWithDimensions(provider, actualLayer, selectedLayers, true);
   } else if (layerInfo.dataType === 'zarr-cesium') {
     const layer = layers?._layers.find((candidate: any) => actualLayer === candidate.id);
     if (layer) {

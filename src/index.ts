@@ -1,5 +1,6 @@
 export * from './types';
 export * from './cesium-utils';
+export * from './cube-gpu-renderer';
 export * from 'zarr-maps-tiling';
 export * from 'zarr-maps-colormap';
 export * from './zarr-layer-provider';

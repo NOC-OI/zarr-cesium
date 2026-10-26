@@ -106,6 +106,20 @@ can be recreated with [updateSlices](#updateslices).
 
 ***
 
+### clearCrossSection()
+
+```ts
+clearCrossSection(): void;
+```
+
+Removes the arbitrary cross-section while retaining the standard cube slices.
+
+#### Returns
+
+`void`
+
+***
+
 ### destroy()
 
 ```ts
@@ -122,6 +136,29 @@ Removes all Cesium primitives owned by this provider.
 
 The currently loaded array remains in memory. Call [load](#load) or
 [updateSelectors](#updateselectors) to render it again.
+
+***
+
+### getCrossSection()
+
+```ts
+getCrossSection():
+  | {
+  end: CubeCrossSectionPoint;
+  start: CubeCrossSectionPoint;
+}
+  | null;
+```
+
+Returns the active arbitrary cross-section, if one is displayed.
+
+#### Returns
+
+  \| \{
+  `end`: [`CubeCrossSectionPoint`](../type-aliases/CubeCrossSectionPoint.md);
+  `start`: [`CubeCrossSectionPoint`](../type-aliases/CubeCrossSectionPoint.md);
+\}
+  \| `null`
 
 ***
 
@@ -287,7 +324,7 @@ Loads the Zarr dataset and initializes the cube data and metadata.
 
 #### Returns
 
-`Promise`\<`void`\>
+`void`
 
 A promise that resolves after metadata, coordinates, the selected
 subset, and its Cesium primitives have loaded.
@@ -336,6 +373,31 @@ selector indices outside the loaded subset.
 
 ***
 
+### setCrossSection()
+
+```ts
+setCrossSection(start, end): void;
+```
+
+Displays an arbitrary vertical cross-section between two geographic points.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `start` | [`CubeCrossSectionPoint`](../type-aliases/CubeCrossSectionPoint.md) | Starting `[longitude, latitude]` coordinate in degrees. |
+| `end` | [`CubeCrossSectionPoint`](../type-aliases/CubeCrossSectionPoint.md) | Ending `[longitude, latitude]` coordinate in degrees. |
+
+#### Returns
+
+`void`
+
+#### Throws
+
+When an endpoint is invalid, outside the loaded bounds, or GPU rendering is unavailable.
+
+***
+
 ### updateSelectors()
 
 ```ts
@@ -355,7 +417,7 @@ Updates the dimension selectors, multiscale level, and bounds.
 
 #### Returns
 
-`void`
+`Promise`\<`void`\>
 
 A promise that resolves after any required reload completes.
 

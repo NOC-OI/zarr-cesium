@@ -98,6 +98,7 @@
 | [CFCalendar](type-aliases/CFCalendar.md) | Supported CF calendar types. |
 | [ColorMapName](type-aliases/ColorMapName.md) | Name of a bundled Matplotlib-inspired colormap. |
 | [CRS](type-aliases/CRS.md) | Supported Coordinate Reference Systems. |
+| [CubeCrossSectionPoint](type-aliases/CubeCrossSectionPoint.md) | - |
 | [ElevationMode](type-aliases/ElevationMode.md) | Controls whether vertical coordinates are interpreted as heights or depths. |
 | [MultiscaleFormat](type-aliases/MultiscaleFormat.md) | Supported conventions for discovering multiscale Zarr levels. |
 | [OnAuthError](type-aliases/OnAuthError.md) | - |

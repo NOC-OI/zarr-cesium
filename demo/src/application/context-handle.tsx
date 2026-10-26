@@ -16,6 +16,10 @@ export const ContextHandleProvider: React.FC<ContextHandleProviderProps> = ({ ch
   });
   const [infoButtonBox, setInfoButtonBox] = useState<InfoButtonBoxType>({});
   const [transectLayerName, setTransectLayerName] = useState('');
+  const [crossSectionRequest, setCrossSectionRequest] = useState<{
+    layerName: string;
+    action: 'draw' | 'clear';
+  } | null>(null);
 
   useEffect(() => {
     if (flashMessage.messageType) {
@@ -35,7 +39,9 @@ export const ContextHandleProvider: React.FC<ContextHandleProviderProps> = ({ ch
         infoButtonBox,
         setInfoButtonBox,
         transectLayerName,
-        setTransectLayerName
+        setTransectLayerName,
+        crossSectionRequest,
+        setCrossSectionRequest
       }}
     >
       {children}

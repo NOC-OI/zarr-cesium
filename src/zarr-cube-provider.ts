@@ -32,7 +32,8 @@ import {
   type DimIndicesProps,
   type MultiscaleFormat,
   type ZarrLevelMetadata,
-  type ZarrSelectorsProps
+  type ZarrSelectorsProps,
+  CubeCrossSectionPoint
 } from './types';
 import { colormapBuilder, type ColorMapName, type ColorScaleProps } from 'zarr-maps-colormap';
 import { updateImgData } from 'zarr-maps-tiling';
@@ -54,12 +55,11 @@ import {
   Math
 } from 'cesium';
 import ndarray from 'ndarray';
-import {
-  DEFAULT_VERTICAL_EXAGGERATION
-} from './cesium-utils';
+import { DEFAULT_VERTICAL_EXAGGERATION } from './cesium-utils';
 import { DEFAULT_COLORMAP, DEFAULT_OPACITY, DEFAULT_SCALE } from 'zarr-maps-tiling';
 import type { RequestOverrides } from 'zarr-maps-tiling';
 import { createFetchStore, createTransformedFetch } from './zarr-store-utils';
+import { CubeGpuRenderer } from './cube-gpu-renderer';
 
 /**
  * Provides rendering of volumetric (3D) Zarr datasets as Cesium primitives.
@@ -167,6 +167,9 @@ export class ZarrCubeProvider {
   private horizontalPrimitives: Primitive | null = null;
   private verticalLonPrimitives: Primitive | null = null;
   private verticalLatPrimitives: Primitive | null = null;
+  private gpuRenderer: CubeGpuRenderer | null = null;
+  private gpuFallbackReason: string | null = null;
+  private crossSection: { start: CubeCrossSectionPoint; end: CubeCrossSectionPoint } | null = null;
   /**
    * Creates a new instance of {@link ZarrCubeProvider}.
    *
@@ -278,6 +281,7 @@ export class ZarrCubeProvider {
     this.elevationShape = this.zarrArray.shape[this.dimIndices.elevation.index];
     this.volumeData = cube.data;
     this.cubeDimensions = cube.dimensions;
+    this.initializeGpuRenderer();
     this.updateSlices({
       latIndex: this.latIsAscending ? this.cubeDimensions[1] - 1 : 0,
       lonIndex: 0,
@@ -303,7 +307,9 @@ export class ZarrCubeProvider {
     options: QueryOptions = {}
   ): Promise<QueryResult> {
     if (geometry.type !== 'Point') {
-      throw new Error(`Query geometry ${geometry.type} is not implemented; only Point is supported`);
+      throw new Error(
+        `Query geometry ${geometry.type} is not implemented; only Point is supported`
+      );
     }
     if (!this.volumeData || !this.cubeDimensions) {
       throw new Error('ZarrCubeProvider must be loaded before it can be queried');
@@ -335,7 +341,13 @@ export class ZarrCubeProvider {
     if (!lonValues || !latValues || !elevationValues) {
       throw new Error('Cube spatial coordinate values are unavailable');
     }
-    const [lonIndex, latIndex] = cubePointIndices(lonValues, latValues, longitude, latitude, this.crs);
+    const [lonIndex, latIndex] = cubePointIndices(
+      lonValues,
+      latValues,
+      longitude,
+      latitude,
+      this.crs
+    );
 
     const timeKey = this.dimIndices.time?.name ?? 'time';
     const requestedTime = selectors?.time ?? selectors?.[timeKey];
@@ -356,7 +368,9 @@ export class ZarrCubeProvider {
     for (const [requestedDimension, selector] of Object.entries(selectors ?? {})) {
       const dimension = this.dimIndices[requestedDimension]
         ? requestedDimension
-        : Object.keys(this.dimIndices).find(key => this.dimIndices[key].name === requestedDimension);
+        : Object.keys(this.dimIndices).find(
+            key => this.dimIndices[key].name === requestedDimension
+          );
       if (!dimension || dimension === 'lon' || dimension === 'lat') {
         throw new Error(`Unknown or spatial selector dimension: ${requestedDimension}`);
       }
@@ -372,10 +386,11 @@ export class ZarrCubeProvider {
 
     const loadedElevation = this.selectors.elevation?.selected;
     const globalElevationOffset = Array.isArray(loadedElevation) ? Number(loadedElevation[0]) : 0;
-    const selection = requestedElevation ?? this.selectors.elevation ?? {
-      selected: globalElevationOffset,
-      type: 'index' as const
-    };
+    const selection = requestedElevation ??
+      this.selectors.elevation ?? {
+        selected: globalElevationOffset,
+        type: 'index' as const
+      };
     let elevationIndices: number[];
     if (Array.isArray(selection.selected)) {
       let start: number;
@@ -394,9 +409,10 @@ export class ZarrCubeProvider {
       }
       elevationIndices = Array.from({ length: end - start }, (_, index) => start + index);
     } else {
-      const index = selection.type === 'value'
-        ? calculateNearestIndex(elevationValues, selection.selected)
-        : Number(selection.selected) - globalElevationOffset;
+      const index =
+        selection.type === 'value'
+          ? calculateNearestIndex(elevationValues, selection.selected)
+          : Number(selection.selected) - globalElevationOffset;
       if (!Number.isInteger(index) || index < 0 || index >= elevationValues.length) {
         throw new RangeError('Elevation selector is outside the loaded cube bounds');
       }
@@ -417,7 +433,8 @@ export class ZarrCubeProvider {
         (this.useFillValue && rawValue === this.fillValue) ||
         (this.noDataMin !== undefined && value < this.noDataMin) ||
         (this.noDataMax !== undefined && value > this.noDataMax)
-      ) continue;
+      )
+        continue;
       values.push(value);
       validElevations.push(elevationValues[elevationIndex]);
     }
@@ -578,7 +595,12 @@ export class ZarrCubeProvider {
     selection[this.dimIndices.elevation.index] = this.loadedOrigin.elevation + localElevationIndex;
     selection[this.dimIndices.time.index] = zarr.slice(timeStart, timeEnd);
     for (const [dimension, dimInfo] of Object.entries(this.dimIndices)) {
-      if (dimension === 'lon' || dimension === 'lat' || dimension === 'elevation' || dimension === 'time') {
+      if (
+        dimension === 'lon' ||
+        dimension === 'lat' ||
+        dimension === 'elevation' ||
+        dimension === 'time'
+      ) {
         continue;
       }
       const requested = selectors[dimension] ?? selectors[dimInfo.name];
@@ -587,9 +609,13 @@ export class ZarrCubeProvider {
       }
       const selected = requested ?? this.selectors[dimension];
       if (selected) {
-        selection[dimInfo.index] = selected.type === 'value'
-          ? calculateNearestIndex(this.dimensionValues[dimension], selected.selected as number | string)
-          : Number(selected.selected);
+        selection[dimInfo.index] =
+          selected.type === 'value'
+            ? calculateNearestIndex(
+                this.dimensionValues[dimension],
+                selected.selected as number | string
+              )
+            : Number(selected.selected);
       }
     }
 
@@ -680,6 +706,15 @@ export class ZarrCubeProvider {
     if (latIndex === undefined) latIndex = this.latSliceIndex;
     if (lonIndex === undefined) lonIndex = this.lonSliceIndex;
     if (elevationIndex === undefined) elevationIndex = this.elevationSliceIndex;
+    if (this.gpuRenderer) {
+      this.latSliceIndex = latIndex;
+      this.lonSliceIndex = lonIndex;
+      this.elevationSliceIndex = elevationIndex;
+      this.gpuRenderer.setVerticalLayout(this.verticalExaggeration, this.elevationMode);
+      this.gpuRenderer.setSlices(latIndex, lonIndex, elevationIndex);
+      this.viewer.scene.requestRender?.();
+      return;
+    }
     if (this.showHorizontalSlices) {
       if (elevationIndex !== this.elevationSliceIndex || force) {
         this.createElevationSlicePrimitive(elevationIndex);
@@ -709,6 +744,53 @@ export class ZarrCubeProvider {
       lonSliceIndex: this.lonSliceIndex,
       elevationSliceIndex: this.elevationSliceIndex
     };
+  }
+
+  /**
+   * Displays an arbitrary vertical cross-section between two geographic points.
+   *
+   * @param start - Starting `[longitude, latitude]` coordinate in degrees.
+   * @param end - Ending `[longitude, latitude]` coordinate in degrees.
+   * @throws When an endpoint is invalid, outside the loaded bounds, or GPU rendering is unavailable.
+   */
+  setCrossSection(start: CubeCrossSectionPoint, end: CubeCrossSectionPoint): void {
+    const validate = ([longitude, latitude]: CubeCrossSectionPoint) =>
+      Number.isFinite(longitude) &&
+      Number.isFinite(latitude) &&
+      longitude >= this.bounds.west &&
+      longitude <= this.bounds.east &&
+      latitude >= this.bounds.south &&
+      latitude <= this.bounds.north;
+    if (!validate(start) || !validate(end)) {
+      throw new RangeError('Cross-section endpoints must be inside the loaded cube bounds');
+    }
+    if (start[0] === end[0] && start[1] === end[1]) {
+      throw new RangeError('Cross-section endpoints must be different');
+    }
+    if (!this.gpuRenderer) {
+      throw new Error(
+        `Arbitrary cross-sections require GPU rendering${
+          this.gpuFallbackReason ? `: ${this.gpuFallbackReason}` : ''
+        }`
+      );
+    }
+    this.crossSection = { start: [...start], end: [...end] };
+    this.gpuRenderer.setCrossSection(start, end);
+    this.viewer.scene.requestRender?.();
+  }
+
+  /** Removes the arbitrary cross-section while retaining the standard cube slices. */
+  clearCrossSection(): void {
+    this.crossSection = null;
+    this.gpuRenderer?.clearCrossSection();
+    this.viewer.scene.requestRender?.();
+  }
+
+  /** Returns the active arbitrary cross-section, if one is displayed. */
+  getCrossSection(): { start: CubeCrossSectionPoint; end: CubeCrossSectionPoint } | null {
+    return this.crossSection
+      ? { start: [...this.crossSection.start], end: [...this.crossSection.end] }
+      : null;
   }
 
   /**
@@ -796,6 +878,16 @@ export class ZarrCubeProvider {
       changed = true;
     }
     if (!changed) return;
+    if (this.gpuRenderer) {
+      this.gpuRenderer.setStyle(
+        this.colorScale.colors,
+        this.colorScale.min,
+        this.colorScale.max,
+        this.opacity
+      );
+      this.viewer.scene.requestRender?.();
+      return;
+    }
     this.updateSlices({
       latIndex: this.latSliceIndex,
       lonIndex: this.lonSliceIndex,
@@ -835,7 +927,59 @@ export class ZarrCubeProvider {
     return { viewer, nx, ny, nz, indicesOrder, strides, rect };
   }
 
-
+  /** Creates the GPU atlas renderer when the current Cesium context can support it. */
+  private initializeGpuRenderer(): void {
+    if (!this.volumeData || !this.cubeDimensions) return;
+    if (this.gpuRenderer) {
+      (this.viewer.scene.primitives as any).remove(this.gpuRenderer);
+      this.gpuRenderer.destroy();
+      this.gpuRenderer = null;
+    }
+    const reason = CubeGpuRenderer.supportReason(this.viewer.scene, this.cubeDimensions);
+    this.gpuFallbackReason = reason;
+    if (reason) {
+      console.warn(`ZarrCubeProvider is using the CPU slice renderer: ${reason}.`);
+      return;
+    }
+    try {
+      this.gpuRenderer = new CubeGpuRenderer({
+        scene: this.viewer.scene,
+        data: this.volumeData,
+        dimensions: this.cubeDimensions,
+        dimensionIndices: this.dimIndices,
+        dimensionElevations: this.cubeDimensionValues.elevation ?? [],
+        bounds: this.bounds,
+        latIsAscending: this.latIsAscending,
+        flipElevation: this.flipElevation,
+        verticalExaggeration: this.verticalExaggeration,
+        elevationMode: this.elevationMode,
+        scaleFactor: this.scaleFactor,
+        addOffset: this.addOffset,
+        fillValue: this.fillValue,
+        useFillValue: this.useFillValue,
+        noDataMin: this.noDataMin,
+        noDataMax: this.noDataMax,
+        colors: this.colorScale.colors,
+        colorMin: this.colorScale.min,
+        colorMax: this.colorScale.max,
+        opacity: this.opacity,
+        showHorizontal: this.showHorizontalSlices,
+        showVertical: this.showVerticalSlices,
+        projectedCrs: this.crs === 'EPSG:3857'
+      });
+      if (this.crossSection) {
+        this.gpuRenderer.setCrossSection(this.crossSection.start, this.crossSection.end);
+      }
+      (this.viewer.scene.primitives as any).add(this.gpuRenderer);
+    } catch (error) {
+      this.gpuFallbackReason = error instanceof Error ? error.message : String(error);
+      this.gpuRenderer?.destroy();
+      this.gpuRenderer = null;
+      console.warn(
+        `ZarrCubeProvider could not initialize GPU rendering; using CPU slices: ${this.gpuFallbackReason}.`
+      );
+    }
+  }
 
   /** Converts a south-to-north display index into the dataset latitude index. */
   private getLatitudeDataIndex(displayIndex: number, height: number): number {
@@ -1104,6 +1248,11 @@ export class ZarrCubeProvider {
    * can be recreated with {@link updateSlices}.
    */
   clear(): void {
+    if (this.gpuRenderer) {
+      (this.viewer.scene.primitives as any).remove(this.gpuRenderer);
+      this.gpuRenderer.destroy();
+      this.gpuRenderer = null;
+    }
     this.viewer.scene.primitives.remove(this.verticalLonPrimitives);
     this.verticalLonPrimitives = null;
     this.viewer.scene.primitives.remove(this.verticalLatPrimitives);

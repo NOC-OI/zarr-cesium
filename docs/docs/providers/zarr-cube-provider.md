@@ -87,26 +87,12 @@ cube.updateSlices({
   lonIndex: 15,
   elevationIndex: 5
 });
-```
 
-This creates a **stack of slice primitives**: horizontal, vertical longitude, and vertical latitude.
-
-### Arbitrary vertical cross-sections
-
-Create a vertical slice between any two geographic positions inside the loaded cube:
-
-```ts
+// Create an arbitrary vertical cross-section between two geographic points
 cube.setCrossSection([-8.5, 48.0], [-2.0, 54.0]);
 ```
 
-The endpoints are `[longitude, latitude]` coordinates in degrees. The plane follows the globe between the points and samples the cube in the GPU shader, including projected EPSG:3857 datasets. Remove it without affecting the three standard slices:
-
-```ts
-cube.clearCrossSection();
-```
-
-Arbitrary cross-sections require the GPU renderer. If the device falls back to CPU slice rendering, `setCrossSection` throws an explanatory error.
-
+This creates a **stack of slice primitives**: horizontal, vertical longitude, and vertical latitude. And also creates a **cross-section** between the two points.
 
 ---
 
@@ -428,6 +414,24 @@ Elevation placement preserves the source coordinate order. In `height` mode,
 height is `elevation * verticalExaggeration`. In `depth` mode, height is
 `(elevation - maximumElevation) * verticalExaggeration`, translating the cube
 below sea level without reversing its data-plane indices.
+
+---
+
+### Generate Arbitrary vertical cross-sections
+
+Create a vertical slice between any two geographic positions inside the loaded cube:
+
+```ts
+cube.setCrossSection([-8.5, 48.0], [-2.0, 54.0]);
+```
+
+The endpoints are `[longitude, latitude]` coordinates in degrees. The plane follows the globe between the points and samples the cube in the GPU shader, including projected EPSG:3857 datasets. Remove it without affecting the three standard slices:
+
+```ts
+cube.clearCrossSection();
+```
+
+Arbitrary cross-sections require the GPU renderer. If the device falls back to CPU slice rendering, `setCrossSection` throws an explanatory error.
 
 ---
 

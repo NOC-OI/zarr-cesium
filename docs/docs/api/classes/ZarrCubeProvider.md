@@ -142,7 +142,7 @@ The currently loaded array remains in memory. Call [load](#load) or
 ### getCrossSection()
 
 ```ts
-getCrossSection():
+getCrossSection(): 
   | {
   end: CubeCrossSectionPoint;
   start: CubeCrossSectionPoint;
@@ -324,7 +324,7 @@ Loads the Zarr dataset and initializes the cube data and metadata.
 
 #### Returns
 
-`void`
+`Promise`\<`void`\>
 
 A promise that resolves after metadata, coordinates, the selected
 subset, and its Cesium primitives have loaded.

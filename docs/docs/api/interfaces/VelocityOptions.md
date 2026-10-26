@@ -50,7 +50,7 @@ Render positive vertical coordinates above sea level or as depths below it.
 optional flipElevation: boolean;
 ```
 
-Reverse the elevation data/index ordering without changing height/depth placement.
+Reverse vertical data-plane placement without changing source elevation indices.
 
 ***
 

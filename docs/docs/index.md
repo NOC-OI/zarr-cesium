@@ -102,4 +102,9 @@ Built with:
 - [zarrita.js](https://zarrita.dev/)
 - [`cube-cesium-wind-layer`](https://www.npmjs.com/package/cube-cesium-wind-layer) ([NOC-OI source](https://github.com/NOC-OI/cesium-wind-layer), forked from [hongfaqiu/cesium-wind-layer](https://github.com/hongfaqiu/cesium-wind-layer))
 
+Design inspiration and prior art:
+
+- [IWFGARA](https://www.iwfgara.com/) inspired the high-level design of the cube slices and interactive arbitrary cross-sections.
+- CarbonPlan's [`zarr-layer`](https://github.com/carbonplan/zarr-layer) inspired the approach used by the data-query APIs.
+
 **Developed at the [National Oceanography Centre (NOC)](https://www.noc.ac.uk/) as part of the [Atlantis](https://atlantis.ac.uk/) project.**

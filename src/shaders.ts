@@ -75,6 +75,12 @@ float mercatorY(float latitude) {
   return log(tan(0.7853981633974483 + radians(clampedLatitude) * 0.5));
 }
 
+float latitudeAtFraction(float fraction) {
+  if (u_projectedCrs < 0.5) return mix(u_bounds.y, u_bounds.w, fraction);
+  float projected = mix(mercatorY(u_bounds.y), mercatorY(u_bounds.w), fraction);
+  return degrees(2.0 * atan(exp(projected)) - 1.5707963267948966);
+}
+
 void main() {
   float longitude;
   float latitude;
@@ -82,21 +88,19 @@ void main() {
 
   if (u_orientation < 0.5) {
     longitude = mix(u_bounds.x, u_bounds.z, st.x);
-    latitude = mix(u_bounds.y, u_bounds.w, st.y);
+    latitude = latitudeAtFraction(st.y);
     height = u_horizontalHeight;
     float dataLatitude = u_latAscending > 0.5 ? st.y : 1.0 - st.y;
     v_volumePosition = vec3(st.x, dataLatitude, u_slice.z);
   } else if (u_orientation < 1.5) {
     longitude = mix(u_bounds.x, u_bounds.z, st.x);
-    latitude = u_latAscending > 0.5
-      ? mix(u_bounds.y, u_bounds.w, u_slice.x)
-      : mix(u_bounds.w, u_bounds.y, u_slice.x);
+    latitude = latitudeAtFraction(u_latAscending > 0.5 ? u_slice.x : 1.0 - u_slice.x);
     height = a_height;
     float dataElevation = u_flipElevation > 0.5 ? 1.0 - st.y : st.y;
     v_volumePosition = vec3(st.x, u_slice.x, dataElevation);
   } else if (u_orientation < 2.5) {
     longitude = mix(u_bounds.x, u_bounds.z, u_slice.y);
-    latitude = mix(u_bounds.y, u_bounds.w, st.x);
+    latitude = latitudeAtFraction(st.x);
     height = a_height;
     float dataLatitude = u_latAscending > 0.5 ? st.x : 1.0 - st.x;
     float dataElevation = u_flipElevation > 0.5 ? 1.0 - st.y : st.y;

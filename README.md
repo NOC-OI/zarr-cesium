@@ -242,4 +242,9 @@ This tool is built with:
 - [`cube-cesium-wind-layer`](https://www.npmjs.com/package/cube-cesium-wind-layer) ([NOC-OI source](https://github.com/NOC-OI/cesium-wind-layer), forked from [hongfaqiu/cesium-wind-layer](https://github.com/hongfaqiu/cesium-wind-layer))
 - [jscolormaps](https://github.com/timothygebhard/js-colormaps)
 
+Design inspiration and prior art:
+
+- [IWFGARA](https://www.iwfgara.com/) inspired the high-level design of GPU-rendered cube slices and interactive arbitrary cross-sections. Zarr-Cesium's implementation is independently written for its Cesium and Zarr architecture.
+- CarbonPlan's [`zarr-layer`](https://github.com/carbonplan/zarr-layer) inspired the approach used by the data-query APIs.
+
 This work is part of the [Atlantis project](https://atlantis.ac.uk/), a UK initiative supporting long-term ocean observations and marine science in the Atlantic. The project is led by the [National Oceanography Centre (NOC)](https://noc.ac.uk/).

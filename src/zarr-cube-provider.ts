@@ -38,13 +38,10 @@ import {
 import { colormapBuilder, type ColorMapName, type ColorScaleProps } from 'zarr-maps-colormap';
 import { updateImgData } from 'zarr-maps-tiling';
 import {
-  Rectangle,
   Primitive,
   GeometryInstance,
   Material,
   MaterialAppearance,
-  EllipsoidSurfaceAppearance,
-  RectangleGeometry,
   Geometry,
   GeometryAttribute,
   GeometryAttributes,
@@ -918,13 +915,33 @@ export class ZarrCubeProvider {
       this.dimIndices
     );
 
-    const rect = Rectangle.fromDegrees(
-      this.bounds.west,
-      this.bounds.south,
-      this.bounds.east,
-      this.bounds.north
-    );
-    return { viewer, nx, ny, nz, indicesOrder, strides, rect };
+    return { viewer, nx, ny, nz, indicesOrder, strides };
+  }
+
+  /** Geographic coverage that can actually be represented by the source CRS. */
+  private getRenderBounds(): BoundsProps {
+    if (this.crs !== 'EPSG:3857') return this.bounds;
+    const maximumMercatorLatitude = 85.05112878;
+    return {
+      ...this.bounds,
+      south: globalThis.Math.max(this.bounds.south, -maximumMercatorLatitude),
+      north: globalThis.Math.min(this.bounds.north, maximumMercatorLatitude)
+    };
+  }
+
+  /** Converts a south-to-north data fraction into its geographic latitude. */
+  private latitudeAtFraction(fraction: number, bounds = this.getRenderBounds()): number {
+    if (this.crs !== 'EPSG:3857') {
+      return bounds.south + fraction * (bounds.north - bounds.south);
+    }
+    const radians = (degrees: number) => degrees * globalThis.Math.PI / 180;
+    const mercator = (latitude: number) =>
+      globalThis.Math.log(globalThis.Math.tan(globalThis.Math.PI / 4 + radians(latitude) / 2));
+    const south = mercator(bounds.south);
+    const north = mercator(bounds.north);
+    const projected = south + fraction * (north - south);
+    return (2 * globalThis.Math.atan(globalThis.Math.exp(projected)) - globalThis.Math.PI / 2) *
+      180 / globalThis.Math.PI;
   }
 
   /** Creates the GPU atlas renderer when the current Cesium context can support it. */
@@ -948,7 +965,7 @@ export class ZarrCubeProvider {
         dimensions: this.cubeDimensions,
         dimensionIndices: this.dimIndices,
         dimensionElevations: this.cubeDimensionValues.elevation ?? [],
-        bounds: this.bounds,
+        bounds: this.getRenderBounds(),
         latIsAscending: this.latIsAscending,
         flipElevation: this.flipElevation,
         verticalExaggeration: this.verticalExaggeration,
@@ -1005,7 +1022,7 @@ export class ZarrCubeProvider {
       this.horizontalPrimitives = null;
     }
     this.elevationSliceIndex = elevationIndex;
-    const { viewer, nx, ny, nz, indicesOrder, strides, rect } = this.getSliceParameters();
+    const { viewer, nx, ny, nz, indicesOrder, strides } = this.getSliceParameters();
     const outputCanvas = this.createCanvas(nx, ny);
     const { canvas, ctx } = outputCanvas;
     let imgData = outputCanvas.imgData;
@@ -1013,7 +1030,7 @@ export class ZarrCubeProvider {
       for (let x = 0; x < nx; x++) {
         const coord: Record<string, number> = {
           lon: x,
-          // Rectangle image textures use canvas row 0 at the geographic north edge.
+          // Image textures use canvas row 0 at the geographic north edge.
           // Convert that north-to-south canvas row to the dataset latitude index.
           lat: this.getLatitudeDataIndex(ny - 1 - y, ny),
           elevation: this.elevationSliceIndex
@@ -1034,31 +1051,66 @@ export class ZarrCubeProvider {
     const elevationValue = this.cubeDimensionValues.elevation[placementElevationIndex];
     const heightMeters = this.calculateElevationHeight(elevationValue as number);
 
-    const primitive = new Primitive({
-      geometryInstances: new GeometryInstance({
-        geometry: new RectangleGeometry({
-          rectangle: rect,
-          height: heightMeters,
-          vertexFormat: EllipsoidSurfaceAppearance.VERTEX_FORMAT
-        })
-      }),
-      appearance: new EllipsoidSurfaceAppearance({
-        material: new Material({
-          fabric: {
-            type: 'Image',
-            uniforms: {
-              image: canvas
-            }
-          }
-        }),
-        aboveGround: false
-      }),
-      asynchronous: false
-    });
+    const primitive = this.createHorizontalPrimitive(canvas, heightMeters);
 
     viewer.scene.primitives.add(primitive);
 
     this.horizontalPrimitives = primitive;
+  }
+
+  private createHorizontalPrimitive(canvas: HTMLCanvasElement, height: number): Primitive {
+    const bounds = this.getRenderBounds();
+    const horizontalSegments = 64;
+    const verticalSegments = 64;
+    const positions: number[] = [];
+    const sts: number[] = [];
+    const indices: number[] = [];
+    for (let y = 0; y <= verticalSegments; y++) {
+      const latitudeFraction = y / verticalSegments;
+      const latitude = this.latitudeAtFraction(latitudeFraction, bounds);
+      for (let x = 0; x <= horizontalSegments; x++) {
+        const longitudeFraction = x / horizontalSegments;
+        const longitude = bounds.west + longitudeFraction * (bounds.east - bounds.west);
+        const position = Cartesian3.fromDegrees(longitude, latitude, height);
+        positions.push(position.x, position.y, position.z);
+        sts.push(longitudeFraction, latitudeFraction);
+      }
+    }
+    const rowWidth = horizontalSegments + 1;
+    for (let y = 0; y < verticalSegments; y++) {
+      for (let x = 0; x < horizontalSegments; x++) {
+        const lowerLeft = y * rowWidth + x;
+        const lowerRight = lowerLeft + 1;
+        const upperLeft = lowerLeft + rowWidth;
+        const upperRight = upperLeft + 1;
+        indices.push(lowerLeft, upperLeft, lowerRight, lowerRight, upperLeft, upperRight);
+      }
+    }
+    const geometry = new Geometry({
+      attributes: {
+        position: new GeometryAttribute({
+          componentDatatype: ComponentDatatype.DOUBLE,
+          componentsPerAttribute: 3,
+          values: new Float64Array(positions)
+        }),
+        st: new GeometryAttribute({
+          componentDatatype: ComponentDatatype.FLOAT,
+          componentsPerAttribute: 2,
+          values: new Float32Array(sts)
+        })
+      } as GeometryAttributes,
+      indices: new Uint16Array(indices),
+      primitiveType: PrimitiveType.TRIANGLES,
+      boundingSphere: BoundingSphere.fromVertices(positions)
+    });
+    return new Primitive({
+      geometryInstances: new GeometryInstance({ geometry }),
+      appearance: new MaterialAppearance({
+        material: new Material({ fabric: { type: 'Image', uniforms: { image: canvas } } }),
+        faceForward: false
+      }),
+      asynchronous: false
+    });
   }
 
   private calculatePrimitive(
@@ -1072,13 +1124,11 @@ export class ZarrCubeProvider {
     const sliceIndex = sliceType === 'lon' ? this.latSliceIndex : this.lonSliceIndex;
     const fraction = sliceIndex / (nValue - 1);
 
-    const bounds = this.bounds;
+    const bounds = this.getRenderBounds();
 
     const slice =
       sliceType === 'lon'
-        ? this.latIsAscending
-          ? bounds.south + fraction * (bounds.north - bounds.south)
-          : bounds.north - fraction * (bounds.north - bounds.south)
+        ? this.latitudeAtFraction(this.latIsAscending ? fraction : 1 - fraction, bounds)
         : bounds.west + fraction * (bounds.east - bounds.west);
 
     const positions = [];
@@ -1098,7 +1148,7 @@ export class ZarrCubeProvider {
         const latOrlon =
           sliceType === 'lon'
             ? bounds.west + otherFraction * (bounds.east - bounds.west)
-            : bounds.south + otherFraction * (bounds.north - bounds.south);
+            : this.latitudeAtFraction(otherFraction, bounds);
 
         const cart =
           sliceType === 'lon'

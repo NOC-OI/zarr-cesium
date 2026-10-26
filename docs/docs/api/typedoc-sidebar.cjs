@@ -8,6 +8,11 @@ const typedocSidebar = {
       items: [
         {
           type: "doc",
+          id: "api/classes/CubeGpuRenderer",
+          label: "CubeGpuRenderer"
+        },
+        {
+          type: "doc",
           id: "api/classes/ZarrCubeDataProvider",
           label: "ZarrCubeDataProvider"
         },
@@ -56,6 +61,11 @@ const typedocSidebar = {
           type: "doc",
           id: "api/interfaces/ColorScaleProps",
           label: "ColorScaleProps"
+        },
+        {
+          type: "doc",
+          id: "api/interfaces/CubeGpuRendererOptions",
+          label: "CubeGpuRendererOptions"
         },
         {
           type: "doc",

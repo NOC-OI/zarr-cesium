@@ -1,0 +1,35 @@
+---
+config:
+  securityLevel: loose
+  flowchart:
+    htmlLabels: true
+  theme: base
+---
+
+flowchart LR
+    A["<b>Data sources</b><br/>Zarr v2/v3, Icechunk, cloud storage"]
+    B["<b>Shared data-access layer</b><br/>Zarrita · zarr-maps-tiling · ZarrCubeDataProvider"]
+
+    C["<b>2D imagery</b><br/>GPU colour mapping"]
+    D["<b>3D scalar cubes</b><br/>GPU sections and cross-sections"]
+    E["<b>Vector fields</b><br/>Particle animation"]
+
+    F["<b>CesiumJS</b><br/>Interactive geographic visualisation"]
+
+    A --> B
+    B --> C
+    B --> D
+    B --> E
+    C --> F
+    D --> F
+    E --> F
+
+    classDef source fill:#f8fafc,stroke:#cbd5e1,color:#17202a,stroke-width:1.5px
+    classDef access fill:#edf7f7,stroke:#9bc9c9,color:#17202a,stroke-width:1.5px
+    classDef provider fill:#f5f3ff,stroke:#c4b5fd,color:#17202a,stroke-width:1.5px
+    classDef output fill:#f8fafc,stroke:#cbd5e1,color:#17202a,stroke-width:1.5px
+
+    class A source
+    class B access
+    class C,D,E provider
+    class F output

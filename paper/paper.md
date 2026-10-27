@@ -1,91 +1,83 @@
 ---
-title: 'Zarr-Cesium: Client-side interactive 2D and 3D visualization of large multidimensional Zarr datasets in the browser'
+title: 'Zarr-Cesium: Browser-native visualization of multidimensional geospatial Zarr data'
 tags:
   - visualization
   - zarr
   - cesium
-  - webgl
   - geospatial
   - multidimensional data
+  - TypeScript
 authors:
-  - surname: Ferreira
-    given-names: Tobias
-    orcid: 'https://orcid.org/0000-0002-0888-9751'
+  - given-names: Tobias
+    surname: Ferreira
+    orcid: 0000-0002-0888-9751
     affiliation: 1
+    corresponding: true
 affiliations:
-  - name: National Oceanography Centre, UK
+  - name: National Oceanography Centre, United Kingdom
     index: 1
-date: 11 February 2026
 bibliography: paper.bib
 ---
 
 # Summary
 
-Environmental sciences increasingly rely on multidimensional datasets describing oceanic, atmospheric, and terrestrial systems across space, depth, and time. Numerical models and remote sensing products routinely produce terabyte-scale data cubes with dimensions such as longitude, latitude, elevation, and time [@era5; @cmip6]. These datasets are commonly stored in chunked, cloud-optimized formats such as Zarr [@zarr], enabling scalable storage and parallel analysis.
+Ocean and atmospheric scientists work with datasets that vary across latitude, longitude, depth, and time. Although these data can be stored efficiently as multidimensional arrays, making them explorable on an interactive map often requires a separate service that transforms the data into images. This adds infrastructure and can limit users to a set of predefined views.
 
-Although storage and computational frameworks have evolved to support these multidimensional data structures [@zarr; @abernathey2021cloud], visualization workflows often transform them into two-dimensional raster products for web delivery, separating rendered outputs from the underlying data cube.
+`Zarr-Cesium` is an open-source TypeScript library for visualizing cloud-hosted Zarr arrays [@zarr] in CesiumJS [@cesiumjs]. It reads relevant chunks in the browser and displays scalar fields on a globe, GPU-rendered horizontal and vertical sections through three-dimensional datasets, arbitrary vertical cross-sections, and animated vector fields. Users can change variables, times, depths, and visual styling while working with the underlying multidimensional data rather than a pre-rendered collection of map images. The library supports Zarr v2 and v3, common Climate and Forecast (CF) metadata conventions [@cfconventions], suitable single-scale and multiscale arrays, and geographic and Web Mercator coordinate reference systems. It is intended for developers building research-oriented, interactive applications, particularly in oceanography, meteorology, and environmental data dissemination.
 
-`Zarr-Cesium` is a TypeScript library that addresses these limitations. It enables interactive, browser-native visualization of multidimensional Zarr datasets within a 3D geospatial environment using CesiumJS [@cesiumjs]. The software streams chunked array data directly from object storage into the browser and renders it using WebGL2, without requiring backend services, tile-generation pipelines, or intermediate raster products.
+# Statement of need
 
-The toolkit supports 2D scalar fields, 3D volumetric slicing, and animated vector fields. It is compatible with Zarr v2 and v3, multiscale pyramids [@geozarr; @ndpyramid], and CF-compliant metadata conventions [@cfconventions]. By integrating cloud-native data access with GPU-accelerated rendering, `Zarr-Cesium` enables interactive exploration of large scientific datasets directly from their cloud-hosted storage.
+Environmental simulations and observations frequently describe processes that evolve in several dimensions. Ocean temperature, for example, may change substantially with depth, while ocean currents have distinct horizontal components and temporal variability. Large reanalyses and climate-model archives illustrate both the scale and scientific importance of these data [@era5; @cmip6]. Zarr enables chunked access to selected portions of such arrays without retrieving an entire dataset [@zarr; @abernathey2021cloud]. However, efficient storage alone does not provide a way to explore these data in a web-based geographical context.
 
-# Statement of Need
+A common publication workflow serves raster images through a Web Map Service (WMS) or another tile endpoint. These architectures remain useful, especially for centralized processing, access control, or broad client compatibility, but their deployment and maintenance can be disproportionate for projects already distributing suitably structured arrays from object storage. Pre-generating images also introduces derived products that must be managed when datasets or presentation choices change.
 
-Although storage and computation frameworks have matured, visualization workflows remain fragmented across several partially overlapping ecosystems.
+`Zarr-Cesium` addresses developers of environmental data portals, research infrastructures, and exploratory scientific tools who need interactive geographic views of multiple dimensions without maintaining a dedicated rasterization service. Its objective is not to replace numerical analysis tools, but to connect cloud-native scientific arrays to interactive 2D and 3D visualization and exploratory queries for points, time series, vertical profiles, and transects.
 
-Scientific communication frequently relies on static figures or screenshots, which flatten inherently multidimensional systems into fixed two-dimensional views. Server-side tile-generation platforms convert datasets into raster products through Web Map Service (WMS) [@ogcwms] or custom APIs, requiring persistent backend infrastructure, preprocessing steps, and operational maintenance. These workflows also duplicate data into derived tile products, increasing storage requirements and separating rendered output from its canonical source.
+# State of the field
 
-Three-dimensional visualization is frequently essential for scientific interpretation. Many environmental processes exhibit strong vertical structure, including ocean stratification and thermocline variability, mixed-layer dynamics, and large-scale overturning circulation [@pickard1990]. Atmospheric systems similarly depend on vertical structure, including boundary layer evolution and convection [@stull1988]. Horizontal maps alone can obscure depth-dependent gradients, vertical shear, and subsurface anomalies that are central to physical interpretation. Interpretation of velocity fields further requires contextualizing transport pathways and circulation patterns across depth and time [@marshall1961atmosphere].
+Several established tools cover complementary parts of this workflow. GeoServer and ncWMS provide server-managed map services for geospatial and multidimensional environmental data [@geoserver; @blower2013ncwms]. TiTiler and related xarray-based services generate map tiles from cloud-hosted raster data or multidimensional arrays [@titiler; @titilerxarray; @xpublishtiles]. These are appropriate where server-side rendering, transformation, and centralized control are desired; they do not eliminate the rendering service itself.
 
-As multidimensional datasets become standard in operational modeling and reanalysis systems, there is a need for visualization approaches that preserve their native structure rather than flattening or duplicating them into derived products.
+Other tools bring the processing closer to the client. Zarrita provides JavaScript access to Zarr arrays [@zarrita], while CesiumJS supplies a mature geographical rendering engine [@cesiumjs]. Neither alone supplies the combined workflow of resolving multidimensional scientific coordinates, selecting array subsets from a geographic view, and rendering those subsets as Cesium imagery and 3D sections. Browser-based Zarr visualization projects also exist, including the CarbonPlan `zarr-layer` and Development Seed `deck.gl-raster`, but target different rendering environments or narrower visualization tasks [@carbonplanzarrlayer][@developmentseeddeckglraster].
 
-# Statement of the Field
+We developed `Zarr-Cesium` as an integration layer rather than implementing a new data format, array reader, or 3D globe. It builds on Zarrita, CesiumJS, and reusable Zarr mapping components. The distinctive contribution is the coordinated handling of scientific dimensions, selective retrieval, visualization-specific data preparation, and Cesium rendering through a consistent library interface. This makes it possible to add multidimensional Zarr visualization to an existing Cesium application without first designing and operating a custom tile API.
 
-Existing visualization ecosystems address parts of this problem but do not provide a unified client-side solution for multidimensional Zarr datasets.
+# Software design
 
-Server-side tile-generation platforms convert multidimensional datasets into raster products exposed through WMS endpoints or custom APIs. Systems such as GeoServer [@geoserver] and ncWMS [@blower2013ncwms] enable serving NetCDF-based datasets as map layers but require persistent backend infrastructure and preprocessing steps to generate tiles.
+Zarr-Cesium separates data access, scientific coordinate interpretation, and CesiumJS rendering. Three public providers offer complementary visualization modes: `ZarrLayerProvider` renders two-dimensional scalar fields as imagery; `ZarrCubeProvider` displays geographic horizontal and vertical sections through three-dimensional scalar arrays; and `ZarrCubeVelocityProvider` animates vector fields using particle advection. Rather than implementing a new array reader or geographic engine, the package combines Zarr-compatible data access with Cesium imagery layers and scene primitives.
 
-Cloud-native raster ecosystems based on Cloud-Optimized GeoTIFFs (COGs) [@ogccog2023] enable efficient streaming of large two-dimensional imagery products. Tools such as TiTiler [@titiler] provide scalable server-side generation of map tiles directly from COGs. However, these approaches are fundamentally oriented toward two-dimensional raster data. Extending them to higher-dimensional data cubes typically requires precomputed slicing, separate endpoints for each non-spatial dimension, or additional backend logic to manage depth and time selection.
+The two-dimensional processing pathway shares data selection and tiling logic with Leaflet [@leaflet] and OpenLayers [@openlayers] integrations through `zarr-maps-tiling` [@zarrmapstiling]. The separate `zarr-maps-colormap` package supplies reusable palette definitions and colour-ramp utilities [@zarrmapscolormap]. For three-dimensional datasets, both cube providers use the exported, non-rendering `ZarrCubeDataProvider` to resolve dimensions and selectors, select geographic bounds, load a data subset, and normalize coordinate ordering. Separating this loader from scene rendering allows applications to use the selected array and its coordinates without relying on Cesium-specific visualization classes.
 
-For Zarr datasets, backend tile-generation solutions such as titiler-xarray [@titilerxarray] and xpublish-tiles [@xpublishtiles] expose Zarr-backed arrays through tile APIs. While these tools allow dynamic slicing of multidimensional data, they still depend on server-side infrastructure to perform array access, rasterization, and tile generation. Visualization therefore remains mediated by backend services, and rendered products are transmitted as image tiles rather than structured array subsets.
+The overall architecture is summarised in \autoref{fig:architecture}, showing how Zarr-compatible stores and shared data-access components feed the three Cesium-facing visualization providers. This separation allows data retrieval and scientific coordinate handling to be reused independently of individual rendering modes.
 
-Client-side geospatial engines such as CesiumJS [@cesiumjs] provide powerful 3D globe visualization but do not natively support streaming and slicing of multidimensional chunked array formats such as Zarr. Conversely, browser-based Zarr libraries such as Zarrita [@zarrita] enable direct access to chunked arrays in JavaScript but do not provide geospatial integration, volumetric slicing, or GPU-based colormapping pipelines.
+![High-level architecture of Zarr-Cesium showing cloud-native
+data sources, the shared data-access layer and the three
+visualisation pathways in CesiumJS.
+\label{fig:architecture}](assets/architecture.png)
 
-Consequently, no general-purpose framework currently supports direct streaming of multidimensional Zarr arrays from object storage, automatic interpretation of CF-compliant metadata, dynamic slice computation in the browser, GPU-based rendering of scalar and vector fields, and fully static deployment without backend services. `Zarr-Cesium` fills this gap by integrating these capabilities into a coherent client-side architecture.
+The providers read Zarr v2 and v3 arrays through Zarrita-compatible readable stores [@zarrita]. They can access publicly hosted HTTP datasets, custom readable stores such as Icechunk, and restricted stores through request credentials, per-object header transformations, proxies, or signed URLs. Support for CF-style coordinate metadata [@cfconventions], configurable dimension names, and coordinate reference systems EPSG:4326 and EPSG:3857 connects array indices to geographic positions. Single-scale data and GeoZarr multiscale layouts [@geozarr] are supported, although access patterns and performance depend on data layout and the chosen resolution. Scientific query methods expose sampled values, time series, vertical profiles, and transects in addition to the visual layers.
 
-# Software Design
+For two-dimensional imagery, WebGL textures and shader-driven colour mapping separate many styling operations from data retrieval. Zarr-Cesium v0.4.0 extends GPU-based rendering to scalar cube sections. Its `CubeGpuRenderer` retains cube values and colour mapping on the GPU and draws horizontal, latitude, and longitude sections using Cesium primitives. It also supports user-defined vertical cross-sections between two geographic coordinates, including projected EPSG:3857 datasets. The renderer updates selected sections, colour scales, opacity, and vertical layout without requiring a new Zarr read when the loaded subset is unchanged. If the cube exceeds the device's supported texture size, `ZarrCubeProvider` uses a CPU-based compatibility renderer that creates RGBA textures. This fallback preserves the principal slice APIs but does not support arbitrary two-point cross-sections. Vector-field animation uses a Cesium wind-layer implementation adapted to three-dimensional cube data [@cesiumwindlayer].
 
-`Zarr-Cesium` is implemented in TypeScript and organized around three primary provider classes: `ZarrLayerProvider` for 2D scalar fields, `ZarrCubeProvider` for 3D volumetric slicing, and `ZarrCubeVelocityProvider` for animated vector fields. These providers encapsulate data access, multidimensional slicing logic, and rendering integration.
+For tiled scalar imagery, the CPU-to-GPU processing sequence is illustrated in \autoref{fig:tile-workflow}. After a tile request, selected Zarr chunks are fetched and decoded on the CPU; numerical values and rendering parameters are then supplied to WebGL, which applies the shader-based colour mapping and produces the image consumed by CesiumJS. This figure describes the two-dimensional tile pathway, not the separate GPU cube renderer.
 
-All providers access Zarr datasets via a browser-based `FetchStore`, supporting HTTP range requests, consolidated metadata, and both Zarr v2 and v3 specifications. Multiscale pyramid datasets are detected through `multiscales` metadata, and resolution levels are selected dynamically based on view scale. A lightweight in-memory cache maintains recently accessed multiscale levels.
+![Two-dimensional tile-rendering workflow in Zarr-Cesium: requested Zarr chunks are decoded into numerical arrays on the CPU, transferred to WebGL for shader-based colour mapping, and supplied as imagery to CesiumJS.\label{fig:tile-workflow}](assets/package_workflow.png)
 
-Dimension identification is performed automatically using CF `standard_name` attributes [@cfconventions] and configurable alias mappings. Geographic bounds from Cesium tiles or camera extents are translated into array index ranges, with automatic CRS detection between EPSG:4326 and EPSG:3857. Zarr slice arguments are constructed dynamically, and value-based selectors (e.g., timestamps or depths) are converted to nearest-index selections.
+These choices move substantial data selection and rendering work into the browser, making it possible to deploy a scientific viewer as static application assets alongside an accessible Zarr store without operating a dedicated raster tile server. They also impose constraints: source data must be chunked appropriately, browser memory and GPU texture limits bound the size of interactive cubes, HTTP access must permit cross-origin requests, and very large datasets may benefit from server-assisted processing. GPU-rendered cube slices are not equivalent to full volumetric ray casting; they provide interactive sections through a loaded subset.
 
-To maintain interactivity, the system limits concurrent chunk requests and uses `AbortController` instances to cancel stale requests during rapid navigation. Only visible spatial subsets are requested, and multiscale level selection reduces resolution at broader zoom levels.
+# Research impact statement
 
-Rendering is performed using WebGL2. For scalar fields, float32 array subsets are uploaded as `R32F` textures and processed in fragment shaders that apply scale-factor correction, normalization, no-data masking, and dynamic colormapping. Because scaling and colormapping occur on the GPU, visual parameters can be adjusted without re-fetching data.
+`Zarr-Cesium` was developed for the AtlantiS environmental visualization platform at the National Oceanography Centre. In that application, it provides browser-based views of multidimensional oceanographic and related environmental datasets in a geographic context [@atlantisvis]. This constitutes an application within a research infrastructure project, rather than evidence of independent adoption.
 
-For volumetric cubes, array subsets are reshaped into ndarray structures and horizontal or vertical slices are generated dynamically. Textured Cesium `Primitive` geometries are constructed, and elevation values are converted into globe-compatible heights with optional vertical exaggeration or subsurface offsets. Slices are regenerated when dimension selectors or styling parameters change.
+Independent integration is documented in GeoLibre, an open-source geospatial application maintained outside the original development team. GeoLibre declares `zarr-cesium` as a dependency and uses `ZarrLayerProvider` to display Zarr data on its Cesium globe [@geolibre]. Its maintenance notes describe the integration, compatibility tests, and limitations concerning colormap options and dimension aliases [@geolibremaintenance]. These details offer evidence that a downstream developer has exercised the library's interfaces and identify concrete opportunities for upstream improvements. They do not, on their own, establish a peer-reviewed scientific result produced with the software.
 
-Velocity fields are handled by loading U and V components from separate Zarr stores, extracting elevation slices, and passing the data to the `cesium-wind-layer` library [@cesiumwindlayer] for particle-based animation. Multiple elevation layers can be rendered simultaneously, enabling stacked three-dimensional flow visualizations.
-
-By combining selective chunk loading, multiscale resolution management, GPU-based rendering, and minimal data duplication, the architecture enables interactive exploration of datasets significantly larger than browser memory limits. Performance is constrained primarily by chunk size and network bandwidth rather than total dataset size.
-
-![Representation of the workflow of the Zarr-Cesium package, from tile request to
-WebGL layer generation on the map.](assets/package_workflow.png)
-
-# Research Impact Statement
-
-`Zarr-Cesium` integrates cloud-native chunked storage access, CF-aware dimension resolution, multiscale pyramid handling, and GPU-based rendering into a unified client-side architecture. The software was developed to meet an operational need for interactive visualization of multidimensional Zarr datasets stored in object storage without server-side infrastructure. It serves as the core rendering engine of the AtlantiS visualisation tool at the National Oceanography Centre, enabling browser-based exploration of multidimensional oceanographic datasets in a 3D geospatial environment through fully client-side streaming and rendering. It has been released as an open-source TypeScript library to enable broader adoption across the environmental sciences and related domains.
-
-`Zarr-Cesium` fills a clear gap in the ecosystem. No existing framework integrates client-side multidimensional slicing, CF-aware metadata interpretation, WebGL2-based GPU rendering, and CesiumJS 3D geospatial visualization into a unified, backend-free system. Beyond reducing infrastructure complexity, this architecture supports more transparent and exploratory analysis of inherently multidimensional environmental systems. Interactive slicing and dynamic rendering allow datasets to be examined in their full spatial and temporal structure rather than as predefined two-dimensional views. As cloud-native storage formats such as Zarr v3 and GeoZarr gain adoption, coupling scalable object storage with browser-native visualization becomes an essential component of modern scientific data dissemination. `Zarr-Cesium` provides such a component, lowering barriers to interactive publication and enabling reproducible, infrastructure-light access to large environmental datasets.
+The library is also described in Development Seed's *Datacube Guide* alongside other approaches to visualizing cloud-native arrays [@datacubeguide]. This independent technical documentation demonstrates recognition and discoverability, but is not counted here as a separate scientific deployment. Together, AtlantiS and GeoLibre demonstrate research-oriented application and external software uptake.
 
 # AI usage disclosure
 
-Portions of this manuscript were edited with the assistance of a large language model for clarity and structure. All technical content, software design decisions, and scientific claims were written and verified by the author. No AI-generated code was included in the software without manual review and testing.
+Generative AI tools, including OpenAI ChatGPT (GPT-5.6 and GPT-6), were used to assist with the organisation, editing, and refinement of this manuscript, as well as the development and integration of GPU-based rendering for three-dimensional cube visualisation. All software architecture decisions, technical implementations, and scientific claims were reviewed and validated by the author. Any AI-assisted code was manually reviewed, tested, and verified before being incorporated into the software.
 
 # Acknowledgements
 
-This work builds upon the open-source efforts of the CesiumJS, Zarrita, and cesium-wind-layer communities. Storage and testing infrastructure were supported by JASMIN, the UK’s environmental data analysis facility. The project forms part of the AtlantiS initiative led by the National Oceanography Centre.
+The author acknowledges the CesiumJS, Zarrita, and related open-source communities. The project was developed in the context of the National Oceanography Centre's AtlantiS initiative. JASMIN provided storage and testing infrastructure.
 
 # References

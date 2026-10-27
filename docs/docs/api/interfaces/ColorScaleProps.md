@@ -1,13 +1,13 @@
 # ColorScaleProps
 
-Describes a numerical-to-color mapping for visualizing scalar fields.
+Numerical range and colors used to render a scalar field.
 
 ## Properties
 
 ### colors
 
 ```ts
-colors: number[][] | string[];
+colors: string[] | number[][];
 ```
 
 ***

@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react';
-import type { FlashMessageType } from '../types';
+import type { FlashMessageType, InfoButtonBoxType } from '../types';
 
 interface ContextHandleContextType {
   loading: boolean;
@@ -8,6 +8,14 @@ interface ContextHandleContextType {
   setShowFlash: React.Dispatch<React.SetStateAction<boolean>>;
   flashMessage: FlashMessageType;
   setFlashMessage: React.Dispatch<React.SetStateAction<FlashMessageType>>;
+  infoButtonBox: InfoButtonBoxType;
+  setInfoButtonBox: React.Dispatch<React.SetStateAction<InfoButtonBoxType>>;
+  transectLayerName: string;
+  setTransectLayerName: React.Dispatch<React.SetStateAction<string>>;
+  crossSectionRequest: { layerName: string; action: 'draw' | 'clear' } | null;
+  setCrossSectionRequest: React.Dispatch<
+    React.SetStateAction<{ layerName: string; action: 'draw' | 'clear' } | null>
+  >;
 }
 
 export const ContextHandleContext = createContext<ContextHandleContextType | undefined>(undefined);

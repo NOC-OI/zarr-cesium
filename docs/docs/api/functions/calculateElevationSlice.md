@@ -9,9 +9,7 @@ function calculateElevationSlice(
    root, 
    levelInfo, 
    zarrVersion): Promise<{
-  dimensionValuesWithElevation: {
-   [key: string]: number[] | Float64Array<ArrayBufferLike>;
-  };
+  dimensionValuesWithElevation: DimensionValues;
   elevationSlice: [number, number];
 }>;
 ```
@@ -39,17 +37,15 @@ Behavior:
 | `dimInfo.index` | `number` | - |
 | `dimInfo.name` | `string` | - |
 | `selectorsElevation` | [`ZarrSelectorsProps`](../interfaces/ZarrSelectorsProps.md) \| `undefined` | User-provided elevation selector. See [ZarrSelectorsProps](../interfaces/ZarrSelectorsProps.md). |
-| `dimensionValuesWithElevation` | \{ \[`key`: `string`\]: `number`[] \| `Float64Array`\<`ArrayBufferLike`\>; \} | Cache of already-loaded coordinate arrays (mutated by this function). |
-| `root` | `Location`\<`FetchStore`\> | Root Zarr group location. |
+| `dimensionValuesWithElevation` | [`DimensionValues`](../interfaces/DimensionValues.md) | Cache of already-loaded coordinate arrays (mutated by this function). |
+| `root` | `Location`\<`Readable`\> | Root Zarr group location. |
 | `levelInfo` | `string` \| `null` | Optional multiscale subpath. |
-| `zarrVersion` | `2` \| `3` \| `null` | Zarr version (2 or 3). |
+| `zarrVersion` | `3` \| `2` \| `null` | Zarr version (2 or 3). |
 
 ## Returns
 
 `Promise`\<\{
-  `dimensionValuesWithElevation`: \{
-   \[`key`: `string`\]: `number`[] \| `Float64Array`\<`ArrayBufferLike`\>;
-  \};
+  `dimensionValuesWithElevation`: [`DimensionValues`](../interfaces/DimensionValues.md);
   `elevationSlice`: \[`number`, `number`\];
 \}\>
 

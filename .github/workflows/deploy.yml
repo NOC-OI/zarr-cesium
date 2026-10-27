@@ -18,38 +18,34 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
-
-      - name: Inject Cesium token
-        run: echo "VITE_CESIUM_TOKEN=${{ secrets.VITE_CESIUM_TOKEN }}" >> $GITHUB_ENV
+          cache-dependency-path: |
+            package-lock.json
+            demo/package-lock.json
+            docs/package-lock.json
 
       - name: Install root dependencies
-        run: npm install
+        run: npm ci
+
+      - name: Build library package
+        run: npm run build
 
       - name: Install demo dependencies
-        run: |
-          cd demo
-          npm install
+        run: npm ci --prefix demo
 
       - name: Build demo
         env:
-          VITE_CESIUM_TOKEN: ${{ secrets.VITE_CESIUM_TOKEN }}
-        run: |
-          cd demo
-          npm run build
+          VITE_TERRAIN_URL: https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/terrain/gebco/gebco-2026-vertexnormals/
+        run: npm run build --prefix demo
 
       - name: Install docs dependencies
-        run: |
-          cd docs
-          npm install
+        run: npm ci --prefix docs
 
       - name: Build docs
-        run: |
-          cd docs
-          npm run build
+        run: npm run build --prefix docs
 
       - name: Prepare deployment folder
         run: |

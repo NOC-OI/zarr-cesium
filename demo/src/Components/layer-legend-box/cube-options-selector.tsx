@@ -1,22 +1,22 @@
-import { useEffect, useState } from 'react';
-import { useLayersManagementHandle } from '../../application/use-layers';
+import { useEffect, useRef, useState } from 'react';
+import { useAppDispatch, useAppSelector } from '../../application/use-layers';
+import { layersActions } from '../../application/store';
 import type { LayerLegendBoxProps, SelectedLayer } from '../../types';
 import Slider from '@mui/material/Slider';
 import {
-  allColorScales,
   DEFAULT_COLORMAP,
   DEFAULT_SCALE,
   DEFAULT_VERTICAL_EXAGGERATION,
-  type ColorMapName,
   type CubeOptions
 } from 'zarr-cesium';
-import FormControl from '@mui/material/FormControl';
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
+import type { ColorMapName } from 'zarr-maps-colormap';
+import { ColormapSelect } from 'zarr-maps-explorer';
+import { useContextHandle } from '../../application/use-context';
 
 export function CubeOptionsSelector({ layerLegendName }: LayerLegendBoxProps) {
-  const { selectedLayers, setSelectedLayers, setLayerAction, setActualLayer } =
-    useLayersManagementHandle();
+  const selectedLayers = useAppSelector(state => state.layers.selectedLayers);
+  const dispatch = useAppDispatch();
+  const { setCrossSectionRequest } = useContextHandle();
   const [latSlice, setLatSlice] = useState<number>(
     selectedLayers[layerLegendName]?.slices?.latIndex || 0
   );
@@ -26,6 +26,7 @@ export function CubeOptionsSelector({ layerLegendName }: LayerLegendBoxProps) {
   const [elevationSlice, setElevationSlice] = useState<number>(
     selectedLayers[layerLegendName]?.slices?.elevationIndex || 0
   );
+  const synchronizingSlices = useRef(false);
   const [selectedLayer, setSelectedLayer] = useState<SelectedLayer>(
     selectedLayers[layerLegendName]
   );
@@ -40,54 +41,65 @@ export function CubeOptionsSelector({ layerLegendName }: LayerLegendBoxProps) {
     setParams(selectedLayer.params as CubeOptions);
   }, [selectedLayer]);
 
+  useEffect(() => {
+    if (!selectedLayer.slices) return;
+    if (
+      selectedLayer.slices.latIndex === latSlice &&
+      selectedLayer.slices.lonIndex === lonSlice &&
+      selectedLayer.slices.elevationIndex === elevationSlice
+    ) {
+      return;
+    }
+    synchronizingSlices.current = true;
+    setLatSlice(selectedLayer.slices.latIndex);
+    setLonSlice(selectedLayer.slices.lonIndex);
+    setElevationSlice(selectedLayer.slices.elevationIndex);
+    // Slice state changes are dispatched separately. This effect only reacts to
+    // a new provider/Redux slice snapshot.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedLayer.slices]);
+
   const handleUpdateParams = (newParams: Partial<CubeOptions>) => {
-    setLayerAction('update-cube-params');
-    setActualLayer(layerLegendName);
+    dispatch(layersActions.setLayerAction('update-cube-params'));
+    dispatch(layersActions.setActualLayer(layerLegendName));
     const updatedParams = { ...params, ...newParams };
-    setSelectedLayers(prev => {
-      const updatedLayer = {
-        ...prev[layerLegendName],
-        params: updatedParams
-      };
-      return { ...prev, [layerLegendName]: updatedLayer };
-    });
+    dispatch(
+      layersActions.updateSelectedLayer({
+        name: layerLegendName,
+        layer: { ...selectedLayers[layerLegendName], params: updatedParams }
+      })
+    );
   };
   useEffect(() => {
-    setLayerAction('update-cube-slices');
-    setActualLayer(layerLegendName);
-    setSelectedLayers(prev => {
-      const slices = {
-        latIndex: latSlice,
-        lonIndex: lonSlice,
-        elevationIndex: elevationSlice
-      };
-      const updatedLayer = { ...selectedLayer, slices };
-      const updated = { ...prev };
-      updated[layerLegendName] = updatedLayer;
-      return updated;
-    });
+    if (synchronizingSlices.current) {
+      synchronizingSlices.current = false;
+      return;
+    }
+    dispatch(layersActions.setLayerAction('update-cube-slices'));
+    dispatch(layersActions.setActualLayer(layerLegendName));
+    dispatch(
+      layersActions.updateSelectedLayer({
+        name: layerLegendName,
+        layer: {
+          ...selectedLayer,
+          slices: {
+            latIndex: latSlice,
+            lonIndex: lonSlice,
+            elevationIndex: elevationSlice
+          }
+        }
+      })
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [latSlice, lonSlice, elevationSlice]);
 
   return (
-    <div
-      className="
-      mt-3 p-3 rounded-2xl
-      bg-[rgba(17,17,17,0.6)] text-white
-      shadow-[0px_4px_4px_rgba(0,0,0,1)]
-      flex flex-col gap-3 px-4"
-    >
+    <div className="flex flex-col gap-4 rounded-xl border border-white/12 bg-white/[.035] p-4 text-white">
       <div className="flex flex-col gap-1">
         <p className="text-[11px] font-bold">
           Elevation Slice:{' '}
           {selectedLayer.dimensions!.elevation
-            ? (
-                selectedLayer.dimensions!.elevation.values[
-                  params.flipElevation
-                    ? selectedLayer.dimensions!.elevation.values.length - 1 - elevationSlice
-                    : elevationSlice
-                ] as number
-              ).toFixed(2)
+            ? (selectedLayer.dimensions!.elevation.values[elevationSlice] as number).toFixed(2)
             : elevationSlice}{' '}
           m
         </p>
@@ -100,6 +112,29 @@ export function CubeOptionsSelector({ layerLegendName }: LayerLegendBoxProps) {
           className="clickable"
         />
         <p className="text-[10px] text-gray-300">Lon × Lat plane</p>
+      </div>
+
+      <div className="flex flex-col gap-2 border-t border-white/10 pt-3">
+        <p className="text-[11px] font-bold">Arbitrary Cross Section</p>
+        <p className="text-[10px] text-gray-300">
+          Select two points on the globe to create a vertical slice.
+        </p>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            className="clickable flex-1 rounded-md bg-emerald-700 px-3 py-2 text-[11px] font-semibold hover:bg-emerald-600"
+            onClick={() => setCrossSectionRequest({ layerName: layerLegendName, action: 'draw' })}
+          >
+            Draw section
+          </button>
+          <button
+            type="button"
+            className="clickable rounded-md bg-white/10 px-3 py-2 text-[11px] font-semibold hover:bg-white/20"
+            onClick={() => setCrossSectionRequest({ layerName: layerLegendName, action: 'clear' })}
+          >
+            Clear
+          </button>
+        </div>
       </div>
 
       <div className="flex flex-col gap-1">
@@ -154,25 +189,10 @@ export function CubeOptionsSelector({ layerLegendName }: LayerLegendBoxProps) {
       </div>
       <div className="flex flex-col gap-1">
         <p className="text-[11px] font-bold">Color Map</p>
-        <FormControl fullWidth size="small">
-          <Select
-            value={params.colormap || DEFAULT_COLORMAP}
-            onChange={e => handleUpdateParams({ colormap: e.target.value as ColorMapName })}
-            className="text-white clickable"
-            sx={{
-              color: 'white',
-              '.MuiOutlinedInput-notchedOutline': { borderColor: 'white' },
-              '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'white' },
-              '.MuiSvgIcon-root': { color: 'white' }
-            }}
-          >
-            {allColorScales.map(c => (
-              <MenuItem key={c} value={c}>
-                {c.charAt(0).toUpperCase() + c.slice(1)}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+        <ColormapSelect
+          value={(params.colormap || DEFAULT_COLORMAP) as ColorMapName}
+          onChange={colormap => handleUpdateParams({ colormap })}
+        />
       </div>
 
       <div className="flex flex-col gap-1">
@@ -189,7 +209,10 @@ export function CubeOptionsSelector({ layerLegendName }: LayerLegendBoxProps) {
               max={params.scale ? params.scale[1] + 10 : DEFAULT_SCALE[1] + 10}
               disableSwap
               step={0.1}
-              onChange={(_, v) => handleUpdateParams({ scale: v as [number, number] })}
+              onChange={(_, v) => {
+                if (!Array.isArray(v)) return;
+                handleUpdateParams({ scale: [v[0], v[1]] });
+              }}
               className="clickable"
               color="success"
             />

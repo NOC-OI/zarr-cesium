@@ -7,7 +7,7 @@ slug: /
 
 # Zarr-Cesium
 
-**High-performance CesiumJS providers for interactive 2D and 3D visualization of environmental and atmospheric data stored in Zarr.**
+**CesiumJS providers for interactive 2D and 3D visualization of environmental and atmospheric data stored in Zarr.**
 
 - **Demo:** https://noc-oi.github.io/zarr-cesium/
 - **GitHub:** https://github.com/NOC-OI/zarr-cesium
@@ -15,16 +15,6 @@ slug: /
 Zarr-Cesium enables **direct, client-side visualization of scientific datasets** stored in the [Zarr](https://zarr.dev) format. No preprocessing. No tile servers. No backend.
 
 It provides a set of **CesiumJS data providers** that stream and render multidimensional geospatial datasets directly from HTTP/S3/GCS object storage.
-
-## Why Zarr-Cesium?
-
-Traditional NetCDF/GeoTIFF-based visualization pipelines require:
-
-- preprocessing,
-- tile generation,
-- custom server infrastructure.
-
-**Zarr-Cesium removes all of that**, streaming chunked scientific arrays directly into WebGL shaders for real-time exploration.
 
 ## Screenshots
 
@@ -61,12 +51,16 @@ Traditional NetCDF/GeoTIFF-based visualization pipelines require:
 ## Features
 
 - **Zarr v2 and v3 support**
-- **Single-scale and multiscale datasets** (using [ndpyramid](https://github.com/carbonplan/ndpyramid))
+- **Single-scale and multiscale datasets** (following the format generated using [ndpyramid](https://github.com/carbonplan/ndpyramid))
+- **Legacy ndpyramid and GeoZarr pyramid layouts**
+- **Icechunk and custom Zarrita-readable stores** across the 2D, cube, and velocity providers
+- **Private-store requests** with static options or per-object URL/header transformation
 - **2D scalar, 3D volumetric, and 3D vector field visualization**
 - **Automatic resolution selection** for multiscale datasets
 - **CRS-aware** (EPSG:4326 & EPSG:3857)
 - **WebGL-accelerated rendering**
 - **Dynamic styling** (colormap, opacity, scaling, slices, animation)
+- **Point, time-series, vertical-profile, and transect queries**
 
 ---
 
@@ -84,11 +78,13 @@ Traditional NetCDF/GeoTIFF-based visualization pipelines require:
 
 ```
 
-Zarr Store (HTTP / S3 / GCS)
+Zarr or Icechunk Store (HTTP / S3 / GCS / custom Readable)
 ↓
 zarrita.js (Zarr client)
 ↓
-Zarr-Cesium Providers
+zarr-maps-tiling + zarr-maps-colormap
+↓
+Zarr-Cesium Providers and query APIs
 ↓
 CesiumJS (WebGL)
 ↓
@@ -102,9 +98,13 @@ CesiumJS (WebGL)
 
 Built with:
 
-- CesiumJS
-- Zarr / zarrita
-- cesium-wind-layer
-- ndpyramid
+- [CesiumJS](https://cesium.com/platform/cesiumjs/)
+- [zarrita.js](https://zarrita.dev/)
+- [`cube-cesium-wind-layer`](https://www.npmjs.com/package/cube-cesium-wind-layer) ([NOC-OI source](https://github.com/NOC-OI/cesium-wind-layer), forked from [hongfaqiu/cesium-wind-layer](https://github.com/hongfaqiu/cesium-wind-layer))
 
-**Developed at the `National Oceanography Centre (NOC)` as part of the `Atlantis` project.**
+Design inspiration and prior art:
+
+- [IWFGARA](https://www.iwfgara.com/) inspired the high-level design of the cube slices and interactive arbitrary cross-sections.
+- CarbonPlan's [`zarr-layer`](https://github.com/carbonplan/zarr-layer) inspired the approach used by the data-query APIs.
+
+**Developed at the [National Oceanography Centre (NOC)](https://www.noc.ac.uk/) as part of the [Atlantis](https://atlantis.ac.uk/) project.**

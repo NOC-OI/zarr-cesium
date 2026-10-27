@@ -1,7 +1,5 @@
 # CubeVelocityProps
 
-Represents the in-memory structure of a velocity field slice.
-
 ## Properties
 
 ### array

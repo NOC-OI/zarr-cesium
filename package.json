@@ -1,6 +1,6 @@
 {
   "name": "zarr-cesium",
-  "version": "0.1.4",
+  "version": "0.4.0",
   "description": "A Cesium integration library for visualizing Zarr datasets in 2D and 3D.",
   "author": "Tobias <tobias.ferreira@noc.ac.uk>",
   "license": "MIT",
@@ -19,32 +19,38 @@
     "dist"
   ],
   "scripts": {
-    "dev": "tsup src/index.ts --format cjs,esm --dts --sourcemap --watch",
-    "build": "tsup src/index.ts --format esm --dts --sourcemap --external cesium",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --sourcemap --external cube-cesium-wind-layer --external zarrita --external zarr-maps-colormap --watch",
+    "build": "tsup src/index.ts --format esm --dts --sourcemap --external cesium --external cube-cesium-wind-layer --external zarrita --external zarr-maps-colormap",
     "clean": "rm -rf dist",
-    "docs": "typedoc",
+    "docs": "npm --prefix docs run build",
+    "serve:docs": "npm --prefix docs run serve",
     "start:demo": "cd demo && npm run dev"
   },
   "peerDependencies": {
-    "cesium": "*"
+    "cesium": ">=1.119.0 <2"
+  },
+  "dependencies": {
+    "cube-cesium-wind-layer": "^0.12.4",
+    "zarr-maps-colormap": "^0.3.0",
+    "zarr-maps-tiling": "^0.3.2",
+    "zarrita": "^0.7.4"
   },
   "devDependencies": {
-    "@zarrita/ndarray": "^0.1.5",
-    "cesium-wind-layer": "^0.10.0",
+    "@types/ndarray": "^1.0.14",
+    "cesium": "1.142.0",
     "ndarray": "^1.0.19",
     "proj4": "^2.19.10",
     "tsup": "^8.0.2",
     "typedoc": "^0.28.14",
     "typedoc-plugin-markdown": "^4.9.0",
-    "typescript": "^5.6.3",
-    "zarrita": "^0.5.4"
+    "typescript": "^5.6.3"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/noc-oi/zarr-cesium.git"
+    "url": "git+https://github.com/NOC-OI/zarr-cesium.git"
   },
   "bugs": {
-    "url": "https://github.com/noc-oi/zarr-cesium/issues"
+    "url": "https://github.com/NOC-OI/zarr-cesium/issues"
   },
   "homepage": "https://noc-oi.github.io/zarr-cesium",
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"

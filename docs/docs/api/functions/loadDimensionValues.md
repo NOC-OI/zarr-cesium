@@ -7,7 +7,7 @@ function loadDimensionValues(
    dimIndices, 
    root, 
    zarrVersion, 
-slice?): Promise<number[] | Float64Array<ArrayBufferLike>>;
+slice?): Promise<string[] | number[] | Float64Array<ArrayBufferLike>>;
 ```
 
 Loads the coordinate values for a specific dimension.
@@ -23,18 +23,18 @@ Behavior:
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `dimensionValues` | `Record`\<`string`, `Float64Array` \| `number`[]\> | Cache of already-loaded coordinate arrays. |
+| `dimensionValues` | [`DimensionValues`](../interfaces/DimensionValues.md) | Cache of already-loaded coordinate arrays. |
 | `levelInfo` | `string` \| `null` | Optional multiscale subpath. |
 | `dimIndices` | \{ `array`: `Array`\<`any`, `Readable`\> \| `null`; `index`: `number`; `name`: `string`; \} | Dimension index info. See [DimIndicesProps](../interfaces/DimIndicesProps.md). |
 | `dimIndices.array` | `Array`\<`any`, `Readable`\> \| `null` | - |
 | `dimIndices.index` | `number` | - |
 | `dimIndices.name` | `string` | - |
-| `root?` | `Location`\<`FetchStore`\> | Root Zarr group location. |
-| `zarrVersion?` | `2` \| `3` \| `null` | Zarr version (2 or 3). |
+| `root?` | `Location`\<`Readable`\> | Root Zarr group location. |
+| `zarrVersion?` | `3` \| `2` \| `null` | Zarr version (2 or 3). |
 | `slice?` | \[`number`, `number`\] | Optional index range `[start, end]` to slice the loaded values. |
 
 ## Returns
 
-`Promise`\<`number`[] \| `Float64Array`\<`ArrayBufferLike`\>\>
+`Promise`\<`string`[] \| `number`[] \| `Float64Array`\<`ArrayBufferLike`\>\>
 
 The loaded coordinate array for the dimension.

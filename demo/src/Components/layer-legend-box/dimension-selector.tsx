@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useLayersManagementHandle } from '../../application/use-layers';
+import { useAppDispatch, useAppSelector } from '../../application/use-layers';
+import { layersActions } from '../../application/store';
 import type { DimensionSelectorProps } from '../../types';
 import Slider from '@mui/material/Slider';
 import type { CubeOptions, VelocityOptions } from 'zarr-cesium';
@@ -31,17 +32,21 @@ export default function DimensionSelector({
     if (dimension === 'time' && typeof value === 'string' && value.length > 10) {
       return value.slice(0, 13);
     }
+    if (dimension === 'elevation' || dimension === 'depth') {
+      const numericValue = Number(value);
+      return Number.isFinite(numericValue) ? numericValue.toFixed(3) : String(value);
+    }
     return String(value).replace(/(\.\d+)?$/, '');
   };
 
-  const { setSelectedLayers, setLayerAction, setActualLayer, selectedLayers } =
-    useLayersManagementHandle();
+  const selectedLayers = useAppSelector(state => state.layers.selectedLayers);
+  const dispatch = useAppDispatch();
   if (dimension === 'lat' || dimension === 'lon') {
     return null;
   }
   const handleChangeDimension = async (value: number | string | [number, number]) => {
-    setActualLayer(layerLegendName);
-    setLayerAction('update-dimensions');
+    dispatch(layersActions.setActualLayer(layerLegendName));
+    dispatch(layersActions.setLayerAction('update-dimensions'));
 
     const newSelectedLayer = selectedLayers[layerLegendName];
     const dimensionValues = newSelectedLayer.dimensions || {};
@@ -59,59 +64,60 @@ export default function DimensionSelector({
       }
       newSelectedValue = idx;
     }
-    setSelectedLayers(prev => {
-      const layer = prev[layerLegendName];
+    const layer = selectedLayers[layerLegendName];
+    const newDimensions = {
+      ...layer.dimensions,
+      [dimension]: {
+        ...layer.dimensions![dimension],
+        selected: newSelectedValue
+      }
+    };
 
-      const newDimensions = {
-        ...layer.dimensions,
-        [dimension]: {
-          ...layer.dimensions![dimension],
-          selected: newSelectedValue
-        }
-      };
+    const newParams = {
+      ...layer.params,
+      selectors: {
+        ...(layer.params.selectors || {}),
+        [dimension]: { selected: newSelectedValue }
+      }
+    };
 
-      const newParams = {
-        ...layer.params,
-        selectors: {
-          ...(layer.params.selectors || {}),
-          [dimension]: { selected: newSelectedValue }
-        }
-      };
-
-      return {
-        ...prev,
-        [layerLegendName]: {
+    dispatch(
+      layersActions.updateSelectedLayer({
+        name: layerLegendName,
+        layer: {
           ...layer,
           dimensions: newDimensions,
           params: newParams,
           slices: layer.slices ? { latIndex: 0, lonIndex: 0, elevationIndex: 0 } : undefined
         }
-      };
-    });
+      })
+    );
   };
 
   const handleChangePyramidLevel = async (value: string) => {
-    setActualLayer(layerLegendName);
-    setLayerAction('update-pyramid-levels');
+    dispatch(layersActions.setActualLayer(layerLegendName));
+    dispatch(layersActions.setLayerAction('update-pyramid-levels'));
 
     const newSelectedLayer = selectedLayers[layerLegendName];
     const params = newSelectedLayer.params as CubeOptions | VelocityOptions;
-    params.multiscaleLevel = parseInt(value);
-    newSelectedLayer.params = params;
-    setSelectedLayers(prev => {
-      const updated = { ...prev };
-      updated[layerLegendName] = newSelectedLayer;
-      return updated;
-    });
+    dispatch(
+      layersActions.updateSelectedLayer({
+        name: layerLegendName,
+        layer: {
+          ...newSelectedLayer,
+          params: { ...params, multiscaleLevel: parseInt(value) }
+        }
+      })
+    );
   };
 
   return (
-    <div className="p-1 flex justify-between w-full items-center gap-4">
-      <p className="text-md font-bold text-white text-center">
+    <div className="grid w-full grid-cols-[72px_minmax(0,1fr)] items-center gap-2.5 py-1">
+      <p className="text-[10px] font-semibold leading-tight text-[#b8b8b8]">
         {dimension.charAt(0).toUpperCase() + dimension.slice(1)}:
       </p>
 
-      <div className="flex flex-col items-center gap-0 w-full">
+      <div className="flex min-w-0 items-center gap-2">
         {dimension === 'elevation' && totalShape ? (
           <div className="w-full flex items-center gap-2">
             <Slider
@@ -129,7 +135,9 @@ export default function DimensionSelector({
               color="success"
             />
             <button
-              className=" text-white rounded-md hover:opacity-100 opacity-70 clickable p-0"
+              type="button"
+              title="Apply elevation range"
+              className="layer-control-apply clickable"
               onClick={() => handleChangeDimension(pendingRange)}
             >
               <CheckCircleIcon />
@@ -140,7 +148,7 @@ export default function DimensionSelector({
             <select
               value={values[pendingValue as number]}
               onChange={e => setPendingValue(e.target.value)}
-              className="clickable bg-black bg-opacity-20 border border-black text-white text-sm rounded-lg block w-full p-2 hover:bg-opacity-80"
+              className="layer-control-select clickable"
             >
               {values.map((value, idx) => (
                 <option
@@ -153,7 +161,9 @@ export default function DimensionSelector({
               ))}
             </select>
             <button
-              className=" text-white rounded-md hover:opacity-100 opacity-70 clickable p-0"
+              type="button"
+              title="Apply pyramid level"
+              className="layer-control-apply clickable"
               onClick={() => handleChangePyramidLevel(pendingValue as string)}
             >
               <CheckCircleIcon />
@@ -164,7 +174,7 @@ export default function DimensionSelector({
             <select
               value={values[pendingValue as number]}
               onChange={e => setPendingValue(e.target.value)}
-              className="clickable bg-black bg-opacity-20 border border-black text-white text-sm rounded-lg block w-full p-2 hover:bg-opacity-80"
+              className="layer-control-select clickable"
             >
               {values.map((value, idx) => (
                 <option
@@ -177,7 +187,9 @@ export default function DimensionSelector({
               ))}
             </select>
             <button
-              className=" text-white rounded-md hover:opacity-100 opacity-70 clickable p-0"
+              type="button"
+              title={`Apply ${dimension}`}
+              className="layer-control-apply clickable"
               onClick={() => handleChangeDimension(pendingValue)}
             >
               <CheckCircleIcon />

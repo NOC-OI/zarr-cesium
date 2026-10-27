@@ -9,10 +9,14 @@ The **ZarrLayerProvider** allows you to render **2D raster data from Zarr datase
 It handles:
 
 - Reading Zarr metadata and multiscale pyramids
+- Legacy ndpyramid and GeoZarr multiscale layouts
 - WebGL rendering of tiles (fast GPU-based color mapping)
 - Dynamic slicing of dimensions (e.g., time, elevation)
+- CF-compliant time decoding
 - Runtime style updates (colormap, scale, opacity)
 - CRS detection (`EPSG:4326` / `EPSG:3857`)
+- Ascending or descending latitude axes and wrapped `0…360` longitude grids
+- Custom fetch options for authenticated or protected stores
 - Smooth integration with Cesium’s `ImageryLayer` collection
 
 This provider works as a drop-in replacement for Cesium imagery layers, enabling you to visualize 2D scalar fields (e.g., temperature, salinity, chlorophyll) stored in Zarr format, without any server-side preprocessing or conversion.
@@ -38,7 +42,7 @@ If you need:
 
 ```ts
 import { Viewer } from 'cesium';
-import { ZarrLayerProvider } from '@noc-oi/zarr-cesium';
+import { ZarrLayerProvider } from 'zarr-cesium';
 
 const viewer = new Viewer('cesiumContainer');
 
@@ -49,19 +53,30 @@ const options = {
   scale: [30, 40]
 };
 
-const layer = await ZarrLayerProvider.createLayer(viewer, options);
+const zbLayer = await ZarrLayerProvider.createLayer(viewer, options);
 
-viewer.imageryLayers.add(layer);
+viewer.imageryLayers.add(zbLayer);
 ```
 
-## Layer Options
+This method:
+
+1. Creates the provider
+2. Loads Zarr metadata
+3. Detects CRS
+4. Sets tiling scheme
+5. Loads the first dimension slice
+6. Returns a ready-to-use `ZarrImageryLayer`
+
+## Options
 
 ```ts
 export interface LayerOptions {
-  url: string; // Public Zarr store
+  url?: string; // Zarr URL. Required unless store is provided
+  store?: Readable; // Custom Zarrita store, e.g. IcechunkStore
   variable: string; // Zarr array name
+  latIsAscending?: boolean; // Optional override for latitude ordering (south->north if true)
   scale?: [number, number]; // Min/max for color scaling
-  colormap?: ColorMapName; // Name from jsColormaps, based on matplotlib colormaps
+  colormap?: ColorMapName; // Name provided by zarr-maps-colormap
   opacity?: number; // Imagery opacity (0–1)
   tileWidth?: number; // Cesium tile size (default 256)
   tileHeight?: number; // Cesium tile size (default 256)
@@ -73,8 +88,18 @@ export interface LayerOptions {
   crs?: 'EPSG:4326' | 'EPSG:3857'; // Force CRS (auto-detected if not set)
   noDataMin?: number; // Custom no-data minimum value. Overrides _FillValue/missing_value.
   noDataMax?: number; // Custom no-data maximum value. Overrides _FillValue/missing_value.
+  requestOverrides?: RequestOverrides; // Serializable static fetch options
+  transformRequest?: TransformRequest; // Per-object URL/header transformation
+  onAuthError?: (status: number) => void; // Called once for HTTP 400/401
+  multiscaleFormat?: MultiscaleFormat; // Metadata layout. Defaults to 'auto'.
 }
 ```
+
+`latIsAscending` is optional. If omitted, the provider infers latitude orientation from the coordinate values loaded at startup.
+
+Time coordinates with CF units such as `hours since 2000-01-01 00:00:00`
+are exposed as ISO date strings in `dimensionValues`. This allows a time
+selector to use either an index or a decoded value.
 
 ---
 
@@ -85,6 +110,7 @@ If your Zarr dataset has dimensions like: `time`, `level` related (e.g. `depth`,
 You can set an initial slice using:
 
 ```ts
+// LayerOptions
 selectors: {
   time: { type: 'index', selected: 0 },
   elevation: { type: 'index', selected: 10 }
@@ -94,6 +120,7 @@ selectors: {
 Or slice by **value** instead of index:
 
 ```ts
+// LayerOptions
 selectors: {
   time: { type: 'value', selected: '2020-01-01T00:00Z' },
   elevation: { type: 'value', selected: 50 } // meters
@@ -104,23 +131,158 @@ The provider automatically converts value→index using nearest-neighbor lookup.
 
 ---
 
-## Creating a Layer
+## Supported CRS
 
-### Static constructor
+Zarr datasets may store coordinate values in:
+
+- `EPSG:4326` (lat, lon degrees)
+- `EPSG:3857` (Web Mercator meters)
+
+The provider detects the CRS automatically using:
+
+- Zarr metadata
+- consolidated metadata
+- coordinate ranges (West/East > 360 → Web Mercator)
+
+For example, you can set the CRS explicitly:
 
 ```ts
-const imageryLayer = await ZarrLayerProvider.createLayer(viewer, options);
-viewer.imageryLayers.add(imageryLayer);
+// set CRS to Web Mercator in LayerOptions
+crs: 'EPSG:3857';
 ```
 
-This method:
+Regular global `EPSG:4326` grids using either `-180…180` or `0…360`
+longitudes are supported. A global `0…360` domain is exposed to Cesium as
+full-world coverage and tile requests are mapped back to the wrapped source
+coordinates. Latitude orientation is inferred automatically. Use
+`latIsAscending` only when the coordinate metadata is missing or incorrect.
 
-1. Creates the provider
-2. Loads Zarr metadata
-3. Detects CRS
-4. Sets tiling scheme
-5. Loads the first dimension slice
-6. Returns a ready-to-use `ZarrImageryLayer`
+---
+
+## Multiscale Support
+
+If the dataset contains Zarr multiscale metadata (generated by [ndpyramid](https://github.com/carbonplan/ndpyramid)):
+
+```json
+"multiscales": [
+  {
+    "datasets": [
+      {"path": "0"}, {"path": "1"}, {"path": "2"}
+    ]
+  }
+]
+```
+
+The provider automatically:
+
+- chooses the best level based on Cesium zoom
+- caches levels (LRU = 3)
+- correctly slices each level
+- uses metadata-supported shapes for accurate scaling
+
+By default, `multiscaleFormat: 'auto'` detects level paths from either the
+original ndpyramid-style metadata or GeoZarr metadata. Set the format
+explicitly for GeoZarr pyramids so automatic zoom selection also uses
+their full-to-coarse level ordering:
+
+```ts
+const options = {
+  // ...
+  multiscaleFormat: 'geozarr' // 'auto' | 'legacy' | 'geozarr'
+};
+```
+
+GeoZarr uses a `layout` array with `asset` paths instead of the
+legacy `datasets` array with `path` values. They also commonly place full
+resolution at level `0`, the opposite of the legacy layout. With
+`multiscaleFormat: 'geozarr'`, the provider maps that ordering
+correctly when selecting a level for a Cesium zoom.
+
+For example, GeoZarr-style metadata is shaped like:
+
+```json
+{
+  "multiscales": {
+    "layout": [
+      { "asset": "0" },
+      { "asset": "1" },
+      { "asset": "2" }
+    ]
+  }
+}
+```
+
+## Protected Stores and Request Options
+
+Use `requestOverrides` to pass standard `RequestInit` options to requests made
+for the Zarr store. This is useful for credentials or authorization headers:
+
+```ts
+const options = {
+  url: 'https://example.com/protected.zarr',
+  variable: 'temperature',
+  requestOverrides: {
+    credentials: 'include',
+    headers: { Authorization: `Bearer ${token}` }
+  }
+};
+```
+
+For credentials that must be generated per object, use `transformRequest`:
+
+```ts
+const options = {
+  url: 'https://example.com/private.zarr',
+  variable: 'temperature',
+  transformRequest: async url => ({
+    url: await createSignedUrl(url),
+    headers: { 'X-Application': 'ocean-viewer' }
+  }),
+  onAuthError: status => refreshCredentials(status)
+};
+```
+
+### Icechunk
+
+Open Icechunk with its client and pass the resulting Zarrita-compatible store:
+
+```ts
+import { IcechunkStore } from 'icechunk-js';
+
+const store = await IcechunkStore.open(icechunkUrl, {
+  branch: 'main',
+  formatVersion: 'v1'
+});
+
+const layer = await ZarrLayerProvider.createLayer(viewer, {
+  store,
+  variable: 'IMERG_PRECTOT',
+  zarrVersion: 3,
+  scale: [0, 10]
+});
+```
+
+Coordinate values are resolved per pyramid level, including Icechunk stores
+without consolidated root metadata.
+
+---
+
+## No-data Handling
+
+Automatically applies:
+
+- `_FillValue`
+- `missing_value`
+- `valid_min` / `valid_max`
+- or custom range
+
+Example of custom range:
+
+```ts
+// LayerOptions
+noDataMin: -9999, // defaults is to Zarr attributes and then -9999
+noDataMax: 9999 // defaults is to Zarr attributes and then 9999
+```
 
 ---
 
@@ -194,6 +356,25 @@ selectors = {
 
 And with that, you can build UI controls (sliders, dropdowns) to update the layer dynamically.
 
+### Query API
+
+Query methods operate directly on Zarr data and return values with their
+coordinate labels:
+
+```ts
+const provider = zbLayer.imageryProvider;
+
+await provider.queryData({ type: 'Point', coordinates: [-4.2, 50.1] });
+await provider.getTimeSeries([-4.2, 50.1]);
+await provider.getVerticalProfile([-4.2, 50.1]);
+await provider.getTransect([-5, 50], [-3, 51], undefined, { samples: 100 });
+await provider.getFullTransect([-5, 50], [-3, 51], undefined, { samples: 100 });
+```
+
+Queries use the finest level by default. Supply `{ level: number }` to query a
+coarser level, `{ includeSpatialCoordinates: false }` for smaller results, or
+`{ signal }` to support cancellation.
+
 ### Remove Layer
 
 To remove the layer and free resources:
@@ -204,96 +385,3 @@ zbLayer.destroy();
 ```
 
 It is important to call `destroy()` after removing the layer from the viewer, because this cleans up all internal resources (abort pending requests, etc.).
-
-### Supported CRS
-
-Zarr datasets may store coordinate values in:
-
-- `EPSG:4326` (lat, lon degrees)
-- `EPSG:3857` (Web Mercator meters)
-
-The provider detects the CRS automatically using:
-
-- Zarr metadata
-- consolidated metadata
-- coordinate ranges (West/East > 360 → Web Mercator)
-
----
-
-### Multiscale (Pyramidal) Zarr
-
-If the dataset contains Zarr multiscale metadata (generated by [ndpyramid](https://github.com/carbonplan/ndpyramid)):
-
-```json
-"multiscales": [
-  {
-    "datasets": [
-      {"path": "0"}, {"path": "1"}, {"path": "2"}
-    ]
-  }
-]
-```
-
-The provider automatically:
-
-- chooses the best level based on Cesium zoom
-- caches levels (LRU = 3)
-- correctly slices each level
-- uses metadata-supported shapes for accurate scaling
-
-No extra configuration is required.
-
----
-
-### No-data Handling
-
-Automatically applies:
-
-- `_FillValue`
-- `missing_value`
-- `valid_min` / `valid_max`
-- or custom range
-
-Example of custom range:
-
-```ts
-noDataMin: -9999, // defaults is to Zarr attributes and then -9999
-noDataMax: 9999 // defaults is to Zarr attributes and then 9999
-```
-
----
-
-## Performance Notes
-
-- WebGL tile rendering is extremely fast
-- Multiscale/pyramid datasets dramatically improve speed
-- `ImageBitmap` acceleration is used when available
-- Uses internal concurrency throttling (4 parallel reads)
-
----
-
-## Summary
-
-| Feature             | Supported |
-| ------------------- | --------- |
-| 2D raster Zarr      | ✔️        |
-| Zarr v2 & v3        | ✔️        |
-| Time dimension      | ✔️        |
-| Elevation/depth     | ✔️        |
-| Multiscale pyramids | ✔️        |
-| WebGL GPU shading   | ✔️        |
-| Colormap updates    | ✔️        |
-| Dynamic slicing     | ✔️        |
-| CRS auto-detection  | ✔️        |
-
----
-
-## Next Steps
-
-- **[ZarrCubeProvider](./zarr-cube-provider.md)** – render 3D volumes
-- **[ZarrCubeVelocityProvider](./zarr-cube-velocity-provider.md)** – render vector fields
-- **[Data Preparation](../data.md)** – Prepare Zarr datasets for the browser
-
-```
-
-```

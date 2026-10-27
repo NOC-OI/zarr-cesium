@@ -1,8 +1,16 @@
 # LayerOptions
 
-Configuration for a 2D raster (image) layer visualization.
-
 ## Properties
+
+### cache?
+
+```ts
+optional cache: boolean | TileCacheOptions;
+```
+
+Decoded numeric tile cache. Enabled by default and scoped to this layer.
+
+***
 
 ### colormap?
 
@@ -36,6 +44,14 @@ optional dimensionNames: DimensionNamesProps;
 
 ***
 
+### latIsAscending?
+
+```ts
+optional latIsAscending: boolean;
+```
+
+***
+
 ### maximumLevel?
 
 ```ts
@@ -48,6 +64,14 @@ optional maximumLevel: number;
 
 ```ts
 optional minimumLevel: number;
+```
+
+***
+
+### multiscaleFormat?
+
+```ts
+optional multiscaleFormat: MultiscaleFormat;
 ```
 
 ***
@@ -68,10 +92,26 @@ optional noDataMin: number;
 
 ***
 
+### onAuthError?
+
+```ts
+optional onAuthError: OnAuthError;
+```
+
+***
+
 ### opacity?
 
 ```ts
 optional opacity: number;
+```
+
+***
+
+### requestOverrides?
+
+```ts
+optional requestOverrides: RequestOverrides;
 ```
 
 ***
@@ -87,14 +127,18 @@ optional scale: [number, number];
 ### selectors?
 
 ```ts
-optional selectors: object;
+optional selectors: Record<string, ZarrSelectorsProps>;
 ```
 
-#### Index Signature
+***
+
+### store?
 
 ```ts
-[key: string]: ZarrSelectorsProps
+optional store: Readable;
 ```
+
+Custom Zarrita-compatible store, including an IcechunkStore.
 
 ***
 
@@ -114,11 +158,21 @@ optional tileWidth: number;
 
 ***
 
-### url
+### transformRequest?
 
 ```ts
-url: string;
+optional transformRequest: TransformRequest;
 ```
+
+***
+
+### url?
+
+```ts
+optional url: string;
+```
+
+URL to a Zarr store. Required unless `store` is provided.
 
 ***
 
@@ -133,5 +187,5 @@ variable: string;
 ### zarrVersion?
 
 ```ts
-optional zarrVersion: 2 | 3;
+optional zarrVersion: 3 | 2;
 ```

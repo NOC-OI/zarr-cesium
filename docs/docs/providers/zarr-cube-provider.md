@@ -12,19 +12,27 @@ It allows you to explore scalar volumes (e.g., temperature, salinity, density, c
 - **Vertical longitude slices**
 - **Vertical latitude slices**
 
-Each slice is rendered using a **GPU-accelerated colormap shader** and draped as a Cesium `Primitive` at the correct geographic position and height.
+Each slice is rendered using a **GPU-accelerated colormap shader** at the correct geographic position and height. When the cube would exceed the device's maximum texture size, the provider automatically uses its compatibility renderer. The compatibility path creates RGBA canvas textures on the CPU and preserves the same public API and query behaviour.
 
 This provider supports:
 
 - Multiscale Zarr pyramids
+- Legacy ndpyramid and GeoZarr multiscale layouts
 - CRS detection (EPSG:4326 / EPSG:3857)
 - Dynamic dimension slicing
+- Arbitrary two-point vertical cross-sections
+- CF-compliant time decoding for selectors
 - Vertical exaggeration
 - Below-sea-level rendering
 - Interactive styling (opacity, scale, colormap)
 - High-resolution GPU-based rendering of 2D slices from 3D arrays
 
 Use this provider when you need to visualize **3D fields** rather than 2D rasters.
+
+Cube loading and coordinate subsetting are implemented by the exported `ZarrCubeDataProvider`.
+It can also be used without Cesium when an integration needs the normalized in-memory cube,
+loaded-subset dimensions, coordinate values, and global index origin but will provide its own
+renderer.
 
 ## When to Use ZarrCubeProvider
 
@@ -55,7 +63,7 @@ If your need is:
 
 ```ts
 import { Viewer } from 'cesium';
-import { ZarrCubeProvider } from '@noc-oi/zarr-cesium';
+import { ZarrCubeProvider } from 'zarr-cesium';
 
 const viewer = new Viewer('cesiumContainer');
 
@@ -79,7 +87,12 @@ cube.updateSlices({
   lonIndex: 15,
   elevationIndex: 5
 });
+
+// Create an arbitrary vertical cross-section between two geographic points
+cube.setCrossSection([-8.5, 48.0], [-2.0, 54.0]);
 ```
+
+This creates a **stack of slice primitives**: horizontal, vertical longitude, and vertical latitude. And also creates a **cross-section** between the two points.
 
 ---
 
@@ -87,12 +100,14 @@ cube.updateSlices({
 
 ```ts
 interface CubeOptions {
-  url: string; // Public Zarr store
+  url?: string; // Zarr URL. Required unless store is supplied
+  store?: Readable; // Custom Zarrita-compatible store, including IcechunkStore
   variable: string; // Zarr array name
   bounds: BoundsProps; // geographic rectangle
+  latIsAscending?: boolean; // Override latitude array orientation when metadata is incorrect
   selectors?: { [key: string]: ZarrSelectorsProps }; // Initial dimension slices
   dimensionNames?: DimensionNamesProps; // Custom dimension names. If not provided, defaults will be used or identified automatically based on CF conventions.
-  multiscaleLevel?: number; // If the dataset is multiscale, which level to load. Default is the lowest resolution (0)
+  multiscaleLevel?: number; // Index in the metadata's level list. Defaults to 0
   zarrVersion?: 2 | 3; // Zarr version (auto-detected if not set)
   colormap?: ColorMapName; // Name from jsColormaps, based on matplotlib colormaps
   scale?: [number, number]; // Min/max for color scaling
@@ -100,11 +115,66 @@ interface CubeOptions {
   verticalExaggeration?: number; // Vertical exaggeration factor
   showHorizontalSlices?: boolean; // Show horizontal (XY) slice
   showVerticalSlices?: boolean; // Show vertical (XZ and YZ) slices
-  belowSeaLevel?: boolean; // If true, allows rendering below sea level
-  flipElevation?: boolean; // If true, flips the elevation axis
+  elevationMode?: 'height' | 'depth'; // Positive coordinates render above or below sea level
+  flipElevation?: boolean; // Reverse only the elevation data/index ordering
   crs?: CRS; // Force CRS (auto-detected if not set)
+  multiscaleFormat?: MultiscaleFormat; // 'auto' (default), 'legacy', or 'geozarr'
+  requestOverrides?: RequestOverrides; // Static fetch credentials, headers, and options
+  transformRequest?: TransformRequest; // Per-request auth, proxy, or signed URL transform
+  onAuthError?: OnAuthError; // Called once for HTTP 400/401 responses
 }
 ```
+
+`latIsAscending` and `flipElevation` describe different axes. `latIsAscending` controls how rows
+in each horizontal slice map to south/north and is normally inferred from the latitude coordinate
+values. `flipElevation` reverses only the vertical placement of elevation data planes and does not determine
+whether coordinates render above or below sea level. Use `elevationMode: 'depth'` for positive
+depth coordinates and `'height'` for height coordinates. Set orientation overrides only when the
+coordinate metadata does not describe the stored array correctly.
+
+---
+
+## Icechunk and Custom Stores
+
+Pass a Zarrita-compatible `Readable` store instead of `url`. This keeps the cube provider independent of a particular Icechunk client:
+
+```ts
+import { IcechunkStore } from 'icechunk-js';
+import { ZarrCubeProvider } from 'zarr-cesium';
+
+const store = await IcechunkStore.open(repositoryUrl, {
+  branch: 'main',
+  formatVersion: 'v1'
+});
+
+const cube = new ZarrCubeProvider(viewer, {
+  store,
+  variable: 'temperature',
+  bounds: { west: -20, south: 30, east: 10, north: 60 }
+});
+
+await cube.load();
+```
+
+## Private HTTP Stores
+
+Use `requestOverrides` for fixed request settings. Use `transformRequest` when headers or signed URLs must be produced for every Zarr object:
+
+```ts
+const cube = new ZarrCubeProvider(viewer, {
+  url: 'https://data.example.com/private-cube.zarr',
+  variable: 'temperature',
+  bounds,
+  transformRequest: async url => ({
+    url,
+    credentials: 'include',
+    headers: { Authorization: `Bearer ${await getAccessToken()}` }
+  }),
+  onAuthError: status => refreshSession(status)
+});
+```
+
+`onAuthError` is invoked once when a transformed request returns HTTP 400 or 401.
 
 ---
 
@@ -127,6 +197,11 @@ This step performs:
 
 Once loaded, the cube can render immediately.
 
+`dimensionValues` contains the complete coordinate axes from the selected Zarr level.
+`cubeDimensionValues` and `cubeDimensions` describe only the geographic and elevation subset that
+was loaded. Use the cube-specific values when building slice controls. Otherwise a control can
+offer indices that are outside the in-memory cube.
+
 ---
 
 ## Slice Types
@@ -140,7 +215,7 @@ Rendered as a textured Cesium `RectangleGeometry`:
 - Height computed from elevation coordinate values
 
 ```ts
-// Cube options
+// set the following Cube options to true
 showHorizontalSlices: true;
 ```
 
@@ -152,9 +227,64 @@ A vertical wall following a **constant latitude** or **constant longitude**.
 - Surface extrudes between bottom and top
 
 ```ts
-// Cube options
+// set the following Cube options to true
 showVerticalSlices: true;
 ```
+
+---
+
+## Supported CRS
+
+Zarr datasets may store coordinate values in:
+
+- `EPSG:4326` (lat, lon degrees)
+- `EPSG:3857` (Web Mercator meters)
+
+The provider detects the CRS automatically using:
+
+- Zarr metadata
+- consolidated metadata
+- coordinate ranges (West/East > 360 → Web Mercator)
+
+For example, you can set the CRS explicitly:
+
+```ts
+// set CRS to Web Mercator in LayerOptions
+crs: 'EPSG:3857';
+```
+
+---
+
+## Multiscale Support
+
+If the dataset defines Zarr multiscale pyramids, e.g.:
+
+```json
+"multiscales": [
+  { "datasets": [ {"path": "0"}, {"path": "1"}, {"path": "2"} ] }
+]
+```
+
+Then:
+
+- The provider loads the requested `multiscaleLevel`
+- `multiscaleFormat: 'auto'` detects legacy and GeoZarr-style level paths
+- Set `multiscaleFormat` explicitly if the metadata does not identify its layout
+- `multiscaleLevel` follows the order stored in the metadata
+- Resolution, W×H×Z, and bounding box adapt
+- Switching levels triggers a reload
+
+For a GeoZarr store whose level `0` is full resolution:
+
+```ts
+multiscaleFormat: 'geozarr',
+multiscaleLevel: 0 // loads the GeoZarr full-resolution level
+```
+
+Legacy ndpyramid stores commonly use the opposite order, with level `0` as the
+coarsest resolution. Inspect `cube.levelInfos` when choosing a level.
+GeoZarr metadata supplies levels through `multiscales.layout[].asset`,
+whereas legacy metadata uses `multiscales[0].datasets[].path`.
 
 ---
 
@@ -172,11 +302,7 @@ cube.updateSlices({
 });
 ```
 
-All parameters are optional:
-
-```ts
-cube.updateSlices({ elevationIndex: 20 });
-```
+All the parameters are optional. If not provided, the current value is retained.
 
 Internally this updates:
 
@@ -220,6 +346,10 @@ cube.updateSelectors({
 
 This triggers a full reload of the cube.
 
+CF time coordinates are decoded to ISO strings in `cube.dimensionValues`.
+Selectors may therefore use either an array index or a decoded time value, for
+example `{ type: 'value', selected: '2020-01-01T00:00:00.000Z' }`.
+
 All the parameters are optional. If not provided, the current value is retained.
 
 To get the current selectors, multiscale level, all multiscale levels, and dimensions values, use:
@@ -260,13 +390,57 @@ And with that, you can build UI controls (sliders, dropdowns) to update the laye
 
 ---
 
+### Update Slice Rendering
+
+Change slice indices and vertical placement without reloading the Zarr data:
+
+```ts
+cube.updateSlices({
+  latIndex: 20,
+  lonIndex: 30,
+  elevationIndex: 4,
+  verticalExaggeration: 8,
+  elevationMode: 'depth'
+});
+```
+
+`verticalExaggeration` must be greater than zero. `force: true` can be used to
+recreate the current primitives even when no slice or layout value changed.
+`flipElevation` is configured independently and only changes vertical data-plane placement.
+An `elevationIndex` passed to `updateSlices` always selects that same source data plane;
+when flipping is enabled, the selected plane is rendered at the opposite vertical position.
+
+Elevation placement preserves the source coordinate order. In `height` mode,
+height is `elevation * verticalExaggeration`. In `depth` mode, height is
+`(elevation - maximumElevation) * verticalExaggeration`, translating the cube
+below sea level without reversing its data-plane indices.
+
+---
+
+### Generate Arbitrary vertical cross-sections
+
+Create a vertical slice between any two geographic positions inside the loaded cube:
+
+```ts
+cube.setCrossSection([-8.5, 48.0], [-2.0, 54.0]);
+```
+
+The endpoints are `[longitude, latitude]` coordinates in degrees. The plane follows the globe between the points and samples the cube in the GPU shader, including projected EPSG:3857 datasets. Remove it without affecting the three standard slices:
+
+```ts
+cube.clearCrossSection();
+```
+
+Arbitrary cross-sections require the GPU renderer. If the device falls back to CPU slice rendering, `setCrossSection` throws an explanatory error.
+
+---
+
 ### Update Style
 
-Change color scale, vertical exaggeration, opacity, etc.
+Change color scale, opacity, and colormap:
 
 ```ts
 cube.updateStyle({
-  verticalExaggeration: 8,
   opacity: 0.85,
   scale: [5, 15], // data min/max
   colormap: 'inferno'
@@ -275,54 +449,37 @@ cube.updateStyle({
 
 The provider automatically re-renders all slice primitives, but without reloading data.
 
+The full list of supported colormaps is available in the [Colormaps section](../api/type-aliases/ColorMapName.md).
+
 ---
 
-### Remove Layers
+### Query Data
 
-To remove all slice primitives from the scene:
+Point, profile, time-series, and transect queries operate on the currently
+loaded geographic subset:
 
 ```ts
-cube.destroy();
+const point = await cube.queryData({
+  type: 'Point',
+  coordinates: [-4.2, 50.1]
+});
+
+const profile = await cube.getVerticalProfile([-4.2, 50.1]);
+const series = await cube.getTimeSeries([-4.2, 50.1]);
+const transect = await cube.getTransect([-5, 50], [-3, 51], undefined, {
+  samples: 100
+});
+const section = await cube.getFullTransect([-5, 50], [-3, 51]);
 ```
 
-This frees all resources.
+Queries outside `cube.bounds` return an empty result. Point input is always
+WGS84 longitude/latitude, even when the source cube uses EPSG:3857. Use
+`queryIndexOffsets` when correlating local subset indices with the original
+global elevation dimension.
 
 ---
 
-### Multiscale Support
-
-If the dataset defines Zarr multiscale pyramids, e.g.:
-
-```json
-"multiscales": [
-  { "datasets": [ {"path": "0"}, {"path": "1"}, {"path": "2"} ] }
-]
-```
-
-Then:
-
-- The provider loads the requested `multiscaleLevel`
-- Resolution, W×H×Z, and bounding box adapt
-- Switching levels triggers a reload
-
----
-
-### Supported CRS
-
-Zarr datasets may store coordinate values in:
-
-- `EPSG:4326` (lat, lon degrees)
-- `EPSG:3857` (Web Mercator meters)
-
-The provider detects the CRS automatically using:
-
-- Zarr metadata
-- consolidated metadata
-- coordinate ranges (West/East > 360 → Web Mercator)
-
----
-
-### Clearing & Destroying
+### Remove Layers, Clearing & Destroying
 
 Remove all slice primitives:
 
@@ -335,39 +492,3 @@ Destroy and free resources:
 ```ts
 cube.destroy();
 ```
-
----
-
-## Performance Features
-
-- GPU-accelerated pixel shading
-- Concurrency throttling (4 parallel Zarr reads)
-- Windowed 3D slicing based on bounds
-- Efficient `ndarray` stride-based lookup
-- Reuse of Cesium textures
-- Only changed slices rerender
-
----
-
-# Summary
-
-| Feature                   | Supported |
-| ------------------------- | --------- |
-| 3D Zarr volume            | ✔️        |
-| Zarr v2 and v3            | ✔️        |
-| Horizontal slices         | ✔️        |
-| Vertical latitude slices  | ✔️        |
-| Vertical longitude slices | ✔️        |
-| Multiscale pyramids       | ✔️        |
-| Dynamic dimension slicing | ✔️        |
-| GPU colormap rendering    | ✔️        |
-| Vertical exaggeration     | ✔️        |
-| Below-sea-level display   | ✔️        |
-
----
-
-## Next Steps
-
-- **[ZarrLayerProvider](./zarr-layer-provider.md)** – 2D raster rendering
-- **[ZarrCubeVelocityProvider](./zarr-cube-velocity-provider.md)** – 3D vector fields
-- **[Data Preparation](../data.md)** – Preparing Zarr datasets for browser visualization

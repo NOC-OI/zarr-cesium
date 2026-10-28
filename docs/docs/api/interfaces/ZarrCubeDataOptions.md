@@ -10,18 +10,10 @@ array: Array<any>;
 
 ***
 
-### bounds
+### bounds?
 
 ```ts
-bounds: BoundsProps;
-```
-
-***
-
-### crs
-
-```ts
-crs: CRS | null;
+optional bounds: BoundsProps;
 ```
 
 ***
@@ -46,6 +38,14 @@ optional latIsAscending: boolean;
 
 ```ts
 level: string | null;
+```
+
+***
+
+### projection
+
+```ts
+projection: ResolvedCRS;
 ```
 
 ***

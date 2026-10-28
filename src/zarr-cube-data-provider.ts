@@ -3,13 +3,14 @@ import * as zarr from 'zarrita';
 import {
   calculateElevationSlice,
   calculateSliceArgs,
-  getZarrData
+  getZarrData,
+  sourceBoundsToGeographic
 } from 'zarr-maps-tiling';
 import type {
   BoundsProps,
-  CRS,
   DimensionValues,
   DimIndicesProps,
+  ResolvedCRS,
   ZarrSelectorsProps
 } from './types';
 import {
@@ -27,8 +28,8 @@ export interface ZarrCubeDataOptions {
   level: string | null;
   zarrVersion: 2 | 3 | null;
   selectors: { [key: string]: ZarrSelectorsProps };
-  bounds: BoundsProps;
-  crs: CRS | null;
+  bounds?: BoundsProps;
+  projection: ResolvedCRS;
   latIsAscending?: boolean;
 }
 
@@ -40,6 +41,7 @@ export interface ZarrCubeData {
   coordinates: CubeCoordinates;
   dimensions: [number, number, number];
   origin: { x: number; y: number; elevation: number };
+  bounds: BoundsProps;
 }
 
 /** Loads and spatially subsets a three-dimensional Zarr variable without rendering it. */
@@ -55,7 +57,7 @@ export class ZarrCubeDataProvider {
       zarrVersion,
       selectors,
       bounds,
-      crs,
+      projection,
       latIsAscending
     } = this.options;
     if (!dimensions.elevation) {
@@ -73,11 +75,22 @@ export class ZarrCubeDataProvider {
       null,
       zarrVersion
     );
+    const longitude = Array.from(dimensionValues.lon, Number);
+    const latitude = Array.from(dimensionValues.lat, Number);
+    const effectiveBounds = bounds ?? sourceBoundsToGeographic(
+      {
+        xMin: Math.min(...longitude),
+        xMax: Math.max(...longitude),
+        yMin: Math.min(...latitude),
+        yMax: Math.max(...latitude)
+      },
+      projection
+    );
     const coordinates = selectCubeCoordinates(
-      Array.from(dimensionValues.lon, Number),
-      Array.from(dimensionValues.lat, Number),
-      bounds,
-      crs,
+      longitude,
+      latitude,
+      effectiveBounds,
+      projection,
       latIsAscending
     );
     const startX = coordinates.x.reduce((a, b) => Math.min(a, b), Infinity);
@@ -105,7 +118,7 @@ export class ZarrCubeDataProvider {
     sliceResult.dimensionValues.lon = coordinates.longitude;
     sliceResult.dimensionValues.lat = coordinates.latitude;
 
-    const rawData = await getZarrData(array, sliceResult.sliceArgs);
+    const rawData = await getZarrData(array as any, sliceResult.sliceArgs);
     const data = reorderCubeLongitude(
       ndarray(rawData.data, rawData.shape, rawData.stride),
       coordinates,
@@ -120,7 +133,8 @@ export class ZarrCubeDataProvider {
       selectors: sliceResult.selectors,
       coordinates,
       dimensions: [coordinates.x.length, endY - startY, elevationSlice[1] - elevationSlice[0]],
-      origin: { x: startX, y: startY, elevation: elevationSlice[0] }
+      origin: { x: startX, y: startY, elevation: elevationSlice[0] },
+      bounds: effectiveBounds
     };
   }
 }

@@ -13,6 +13,11 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "api/classes/TileDataCache",
+          label: "TileDataCache"
+        },
+        {
+          type: "doc",
           id: "api/classes/ZarrCubeDataProvider",
           label: "ZarrCubeDataProvider"
         },
@@ -149,6 +154,11 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "api/interfaces/ResolvedCRS",
+          label: "ResolvedCRS"
+        },
+        {
+          type: "doc",
           id: "api/interfaces/TileCacheOptions",
           label: "TileCacheOptions"
         },
@@ -250,11 +260,6 @@ const typedocSidebar = {
         },
         {
           type: "doc",
-          id: "api/functions/calculateXYFromBounds",
-          label: "calculateXYFromBounds"
-        },
-        {
-          type: "doc",
           id: "api/functions/colormapBuilder",
           label: "colormapBuilder"
         },
@@ -262,6 +267,11 @@ const typedocSidebar = {
           type: "doc",
           id: "api/functions/createColorRampTexture",
           label: "createColorRampTexture"
+        },
+        {
+          type: "doc",
+          id: "api/functions/createFetchStore",
+          label: "createFetchStore"
         },
         {
           type: "doc",
@@ -275,8 +285,18 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "api/functions/createTransformedFetch",
+          label: "createTransformedFetch"
+        },
+        {
+          type: "doc",
           id: "api/functions/decodeCFTime",
           label: "decodeCFTime"
+        },
+        {
+          type: "doc",
+          id: "api/functions/defaultTileCacheBytes",
+          label: "defaultTileCacheBytes"
         },
         {
           type: "doc",
@@ -375,6 +395,11 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "api/functions/resolveCRS",
+          label: "resolveCRS"
+        },
+        {
+          type: "doc",
           id: "api/functions/resolveNoDataRange",
           label: "resolveNoDataRange"
         },
@@ -382,6 +407,11 @@ const typedocSidebar = {
           type: "doc",
           id: "api/functions/sampleTransectPositions",
           label: "sampleTransectPositions"
+        },
+        {
+          type: "doc",
+          id: "api/functions/sourceBoundsToGeographic",
+          label: "sourceBoundsToGeographic"
         },
         {
           type: "doc",
@@ -428,6 +458,11 @@ const typedocSidebar = {
           type: "doc",
           id: "api/type-aliases/CRS",
           label: "CRS"
+        },
+        {
+          type: "doc",
+          id: "api/type-aliases/CRSDefinition",
+          label: "CRSDefinition"
         },
         {
           type: "doc",

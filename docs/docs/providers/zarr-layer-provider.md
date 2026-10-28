@@ -14,7 +14,7 @@ It handles:
 - Dynamic slicing of dimensions (e.g., time, elevation)
 - CF-compliant time decoding
 - Runtime style updates (colormap, scale, opacity)
-- CRS detection (`EPSG:4326` / `EPSG:3857`)
+- CRS detection and client-side reprojection for regular rectilinear grids
 - Ascending or descending latitude axes and wrapped `0…360` longitude grids
 - Custom fetch options for authenticated or protected stores
 - Smooth integration with Cesium’s `ImageryLayer` collection
@@ -85,7 +85,8 @@ export interface LayerOptions {
   dimensionNames?: DimensionNamesProps; // Custom dimension names. If not provided, defaults will be used or identified automatically based on CF conventions.
   selectors?: Record<string, ZarrSelectorsProps>; // Initial dimension slices
   zarrVersion?: 2 | 3; // Zarr version (auto-detected if not set)
-  crs?: 'EPSG:4326' | 'EPSG:3857'; // Force CRS (auto-detected if not set)
+  crs?: string; // Force a proj4-registered CRS (auto-detected if not set)
+  proj4?: string | Record<string, unknown>; // Definition for an unregistered CRS
   noDataMin?: number; // Custom no-data minimum value. Overrides _FillValue/missing_value.
   noDataMax?: number; // Custom no-data maximum value. Overrides _FillValue/missing_value.
   requestOverrides?: RequestOverrides; // Serializable static fetch options
@@ -135,14 +136,20 @@ The provider automatically converts value→index using nearest-neighbor lookup.
 
 Zarr datasets may store coordinate values in:
 
-- `EPSG:4326` (lat, lon degrees)
-- `EPSG:3857` (Web Mercator meters)
+- `EPSG:4326` and `EPSG:3857`
+- CRS identifiers already registered with proj4, including WGS84 UTM zones
+- Custom CRS definitions supplied as proj4, WKT2, or PROJJSON
+
+Spatial coordinates must be separate one-dimensional x and y axes. Two-dimensional
+curvilinear longitude/latitude coordinates are rejected explicitly.
 
 The provider detects the CRS automatically using:
 
-- Zarr metadata
+- GeoZarr/CF projection metadata (`proj:code`, proj4, WKT2, PROJJSON,
+  `spatial_ref`, or `crs_wkt`)
+- root or array `crs` metadata
 - consolidated metadata
-- coordinate ranges (West/East > 360 → Web Mercator)
+- a legacy coordinate-range fallback for metadata-free 4326/3857 stores
 
 For example, you can set the CRS explicitly:
 
@@ -151,11 +158,20 @@ For example, you can set the CRS explicitly:
 crs: 'EPSG:3857';
 ```
 
+For an unregistered CRS, provide both its identifier and definition:
+
+```ts
+crs: 'EPSG:27700',
+proj4: '+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 ...'
+```
+
 Regular global `EPSG:4326` grids using either `-180…180` or `0…360`
 longitudes are supported. A global `0…360` domain is exposed to Cesium as
 full-world coverage and tile requests are mapped back to the wrapped source
 coordinates. Latitude orientation is inferred automatically. Use
 `latIsAscending` only when the coordinate metadata is missing or incorrect.
+Cesium's geographic output tiling convention is selected internally; source
+`crs` does not change the Cesium scene or tiling scheme.
 
 ---
 

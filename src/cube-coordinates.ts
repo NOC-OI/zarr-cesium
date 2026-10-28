@@ -1,7 +1,7 @@
 import * as zarr from 'zarrita';
 import ndarray from 'ndarray';
-import { loadDimensionValues, latDegToMercY, lonDegToMercX } from 'zarr-maps-tiling';
-import type { BoundsProps, CRS, DimIndicesProps, DimensionValues } from './types';
+import { loadDimensionValues } from 'zarr-maps-tiling';
+import type { BoundsProps, DimIndicesProps, DimensionValues, ResolvedCRS } from './types';
 
 /** Coordinate selection shared by scalar and velocity cubes. */
 export interface CubeCoordinates {
@@ -23,10 +23,8 @@ export function longitudeInBounds(longitude: number, bounds: BoundsProps): numbe
 }
 
 export function cubePointIndices(lon: ArrayLike<number | string>, lat: ArrayLike<number | string>,
-  longitude: number, latitude: number, crs: CRS | null): [number, number] {
-  const projected = crs === 'EPSG:3857';
-  const x = projected ? lonDegToMercX(longitude) : longitude;
-  const y = projected ? latDegToMercY(latitude) : latitude;
+  longitude: number, latitude: number, projection: ResolvedCRS): [number, number] {
+  const [x, y] = projection.forward([longitude, latitude]);
   const nearest = (values: ArrayLike<number | string>, target: number, cyclic: boolean) => {
     let best = 0, distance = Infinity;
     for (let i = 0; i < values.length; i++) {
@@ -36,11 +34,11 @@ export function cubePointIndices(lon: ArrayLike<number | string>, lat: ArrayLike
     }
     return best;
   };
-  return [nearest(lon, x, !projected), nearest(lat, y, false)];
+  return [nearest(lon, x, projection.geographic), nearest(lat, y, false)];
 }
 
 export function selectCubeCoordinates(longitude: number[], latitude: number[], bounds: BoundsProps,
-  crs: CRS | null, latOverride?: boolean): CubeCoordinates {
+  projection: ResolvedCRS, latOverride?: boolean): CubeCoordinates {
   if (!validateCubeBounds(bounds)) throw new RangeError('Invalid cube geographic bounds');
   for (const values of [longitude, latitude]) {
     if (!values.length || !values.every(Number.isFinite)) throw new Error('Cube coordinates must be finite and non-empty');
@@ -49,13 +47,23 @@ export function selectCubeCoordinates(longitude: number[], latitude: number[], b
       throw new Error('Cube coordinate axes must be strictly monotonic');
     }
   }
-  const projected = crs === 'EPSG:3857';
-  const west = projected ? lonDegToMercX(bounds.west) : bounds.west;
-  const east = projected ? lonDegToMercX(bounds.east) : bounds.east;
-  const south = projected ? latDegToMercY(bounds.south) : bounds.south;
-  const north = projected ? latDegToMercY(bounds.north) : bounds.north;
+  const projectedBounds: [number, number][] = [];
+  const segments = 64;
+  for (let row = 0; row <= segments; row++) {
+    const lat = bounds.south + row / segments * (bounds.north - bounds.south);
+    for (let column = 0; column <= segments; column++) {
+      const lon = bounds.west + column / segments * (bounds.east - bounds.west);
+      const point = projection.forward([lon, lat]);
+      if (point.every(Number.isFinite)) projectedBounds.push(point);
+    }
+  }
+  if (!projectedBounds.length) throw new RangeError('Cube bounds cannot be transformed to the source CRS');
+  const west = Math.min(...projectedBounds.map(point => point[0]));
+  const east = Math.max(...projectedBounds.map(point => point[0]));
+  const south = Math.min(...projectedBounds.map(point => point[1]));
+  const north = Math.max(...projectedBounds.map(point => point[1]));
   const columns = longitude.map((value, index) => ({ index,
-    value: projected ? value : value + 360 * Math.ceil((west - value) / 360) }))
+    value: projection.geographic ? value + 360 * Math.ceil((west - value) / 360) : value }))
     .filter(({ value }) => value >= west && value <= east)
     .sort((a, b) => a.value - b.value);
   const rows = latitude.map((value, index) => ({ value, index }))

@@ -98,6 +98,36 @@ export const layersJson: LayersJsonType = {
           zarrVersion: 3,
           crs: 'EPSG:4326'
         }
+      },
+      sea_ice_age_epsg3408: {
+        dataType: 'zarr-cesium',
+        dataDescription: ['Sea ice age', 'years'],
+        tags: ['V3', 'polar', 'epsg:3408', 'proj4'],
+        content:
+          'NSIDC sea-ice age data on a north-polar Lambert azimuthal equal-area grid. This example exercises client-side reprojection from EPSG:3408 into Cesium geographic tiles.',
+        params: {
+          url: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/openday/age_of_sea_ice.zarr',
+          variable: 'age_of_sea_ice',
+          zarrVersion: 3,
+          crs: 'EPSG:3408',
+          proj4:
+            '+proj=laea +lat_0=90 +lon_0=0 +x_0=0 +y_0=0 +a=6371228 +b=6371228 +units=m +no_defs',
+          colormap: 'cool',
+          scale: [0, 5],
+          noDataMin: 0.5,
+          noDataMax: 19.5,
+          selectors: {
+            time: {
+              selected: 0,
+              type: 'index'
+            }
+          },
+          dimensionNames: {
+            lon: 'x',
+            lat: 'y',
+            time: 'time'
+          }
+        }
       }
     }
   },
@@ -258,8 +288,77 @@ export const layersJson: LayersJsonType = {
           elevationMode: undefined,
           dimensionNames: undefined
         }
-      }
-    }
+      },
+      hrrr_temperature_projected_cube: {
+        dataType: 'zarr-cube',
+        dataDescription: ['HRRR forecast temperature', 'K'],
+        tags: ['V2', 'cube', 'Lambert Conformal Conic', 'proj4'],
+        content:
+          'Projection implementation example only, not a real physical 3D dataset demonstration. NOAA HRRR 2 m temperature is displayed as a projected space-time cube over Colorado; the vertical axis represents 36 forecast hours rather than atmospheric height.',
+        params: {
+          url: 'https://hrrrzarr.s3.amazonaws.com/sfc/20200903/20200903_00z_fcst.zarr/2m_above_ground/TMP',
+          variable: '2m_above_ground/TMP',
+          zarrVersion: 2,
+          crs: 'HRRR:LCC',
+          proj4:
+            '+proj=lcc +lat_1=38.5 +lat_2=38.5 +lat_0=38.5 +lon_0=-97.5 +x_0=0 +y_0=0 +R=6371229 +units=m +no_defs',
+          dimensionNames: {
+            lon: 'projection_x_coordinate',
+            lat: 'projection_y_coordinate',
+            elevation: 'time'
+          },
+          selectors: {
+            elevation: {
+              selected: [0, 36],
+              type: 'index'
+            }
+          },
+          bounds: { west: -107, south: 38, east: -103, north: 42 },
+          scale: [250, 310],
+          colormap: 'hot',
+          elevationMode: 'depth',
+          verticalExaggeration: 1000,
+          showHorizontalSlices: true,
+          showVerticalSlices: true,
+          latIsAscending: true
+        }
+      },
+      sea_ice_age_projected_cube: {
+        dataType: 'zarr-cube',
+        dataDescription: ['Sea ice age', 'years'],
+        tags: ['V3', 'cube', 'polar', 'epsg:3408', 'proj4'],
+        content:
+          'Projection implementation example only, not a real physical 3D dataset demonstration. NSIDC sea-ice age is displayed as a projected space-time cube; the vertical axis represents the first 8 observation times rather than physical elevation.',
+        params: {
+          url: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/openday/age_of_sea_ice.zarr',
+          variable: 'age_of_sea_ice',
+          zarrVersion: 3,
+          crs: 'EPSG:3408',
+          proj4:
+            '+proj=laea +lat_0=90 +lon_0=0 +x_0=0 +y_0=0 +a=6371228 +b=6371228 +units=m +no_defs',
+          dimensionNames: {
+            lon: 'x',
+            lat: 'y',
+            elevation: 'time'
+          },
+          selectors: {
+            elevation: {
+              selected: [0, 8],
+              type: 'index'
+            }
+          },
+          scale: [0, 5],
+          colormap: 'cool',
+          noDataMin: 0.5,
+          noDataMax: 19.5,
+          elevationMode: 'depth',
+          verticalExaggeration: 20000,
+          showHorizontalSlices: true,
+          showVerticalSlices: true,
+          latIsAscending: true
+        }
+      },
+    },
   },
   '3D Cube Velocity Visualisation': {
     layerNames: {
@@ -458,7 +557,54 @@ export const layersJson: LayersJsonType = {
             lineLength: { min: 0, max: 400 }
           }
         }
-      }
+      },
+      sea_ice_age_projected_velocity: {
+        dataType: 'zarr-cube-velocity',
+        dataDescription: ['Synthetic projected vectors', 'arbitrary units'],
+        tags: ['V3', 'polar', 'epsg:3408', 'proj4', 'synthetic'],
+        content:
+          'Projection implementation example only, not a real velocity dataset demonstration. The sea-ice-age scalar is deliberately used as both the grid-relative U and V component to exercise projected-grid resampling and vector rotation. The resulting particle directions and speeds have no scientific meaning.',
+        params: {
+          urls: {
+            u: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/openday/age_of_sea_ice.zarr',
+            v: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/openday/age_of_sea_ice.zarr'
+          },
+          variables: {
+            u: 'age_of_sea_ice',
+            v: 'age_of_sea_ice'
+          },
+          zarrVersion: 3,
+          crs: 'EPSG:3408',
+          proj4:
+            '+proj=laea +lat_0=90 +lon_0=0 +x_0=0 +y_0=0 +a=6371228 +b=6371228 +units=m +no_defs',
+          dimensionNames: {
+            lon: 'x',
+            lat: 'y',
+            elevation: 'time'
+          },
+          selectors: {
+            elevation: {
+              selected: 0,
+              type: 'index'
+            }
+          },
+          latIsAscending: true,
+          scale: [0, 7],
+          colormap: 'cool',
+          elevationMode: 'height',
+          verticalExaggeration: 0,
+          windOptions: {
+            particlesTextureSize: 120,
+            lineWidth: { min: 1, max: 4 },
+            lineLength: { min: 0, max: 300 },
+            speedFactor: 0.02,
+            dropRate: 0.003,
+            dropRateBump: 0.01,
+            useViewerBounds: false,
+            dynamic: true
+          }
+        }
+      },
     }
   }
 };

@@ -16,10 +16,17 @@ This page summarises the full workflow used for preparing large ocean model data
 
 ---
 
-# 1. Reprojecting Curvilinear / Rotated-Pole Grids
+# 1. Coordinate Systems and Curvilinear Grids
 
 Many ocean and climate models (e.g., NEMO, MOM6) use curvilinear or rotated-pole grids (`nav_lat`, `nav_lon`).
-Browsers expect **EPSG:4326** or **EPSG:3857**.
+Zarr-Cesium can reproject any **regular rectilinear** source grid understood by
+proj4. So projected one-dimensional X/Y axes do not need to be converted to
+EPSG:4326 or EPSG:3857 first, for example. Publish the CRS in GeoZarr/CF metadata, register
+it with proj4, or pass `crs` and `proj4` to the provider.
+
+Two-dimensional longitude/latitude coordinate arrays are curvilinear rather
+than rectilinear and remain unsupported. Regrid those datasets onto separate
+one-dimensional X and Y axes before browser visualization.
 
 Use [`iris`](https://scitools-iris.readthedocs.io/) or [`xESMF`](https://xesmf.readthedocs.io/en/) to reproject:
 
@@ -111,7 +118,7 @@ multiscale.zarr/
 └── ...
 ```
 
-Zarr-Cesium’s 2D provider automatically selects levels based on zoom. For the 3D providers, you can specify the desired level.
+Zarr-Cesium’s 2D provider automatically selects levels based on zoom. For the 3D providers, you can specify the desired level. Cube geographic bounds are optional: when omitted, they are derived from the projected X/Y coverage; provide bounds to load a smaller subset.
 
 [`ndpyramid`](https://github.com/carbonplan/ndpyramid) remains supported for existing
 stores, but its legacy metadata layout is not recommended for new datasets. If the

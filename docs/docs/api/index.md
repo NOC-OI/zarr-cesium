@@ -5,6 +5,7 @@
 | Class | Description |
 | ------ | ------ |
 | [CubeGpuRenderer](classes/CubeGpuRenderer.md) | Low-level Cesium primitive that keeps cube values and colormapping on the GPU. |
+| [TileDataCache](classes/TileDataCache.md) | A simple LRU cache for tile data. The cache is keyed by a string, which is typically a combination of the layer ID and tile coordinates. |
 | [ZarrCubeDataProvider](classes/ZarrCubeDataProvider.md) | Loads and spatially subsets a three-dimensional Zarr variable without rendering it. |
 | [ZarrCubeProvider](classes/ZarrCubeProvider.md) | Provides rendering of volumetric (3D) Zarr datasets as Cesium primitives. |
 | [ZarrCubeVelocityProvider](classes/ZarrCubeVelocityProvider.md) | Provider responsible for loading and rendering 3D velocity fields (U and V components) from Zarr datasets as animated Cesium `WindLayer`s. |
@@ -36,6 +37,7 @@
 | [QueryResult](interfaces/QueryResult.md) | Values and coordinates returned from a shared Zarr query. |
 | [RequestOverrides](interfaces/RequestOverrides.md) | Serializable static fetch options suitable for application state and FetchStore. |
 | [RequestParameters](interfaces/RequestParameters.md) | - |
+| [ResolvedCRS](interfaces/ResolvedCRS.md) | Validated transformation between WGS84 and a rectilinear source grid. |
 | [TileCacheOptions](interfaces/TileCacheOptions.md) | Controls the in-memory cache used to recolor tiles without reading Zarr data again. |
 | [TileCacheStats](interfaces/TileCacheStats.md) | Runtime counters for a provider's decoded tile cache. |
 | [TransectQueryOptions](interfaces/TransectQueryOptions.md) | Sampling controls for one-level and full-depth transects. |
@@ -60,12 +62,14 @@
 | [calculateNearestIndex](functions/calculateNearestIndex.md) | Finds the index of the value in `values` nearest to `target`. |
 | [calculateSliceArgs](functions/calculateSliceArgs.md) | Constructs Zarr slice arguments for extracting a subregion of a multidimensional array. |
 | [calculateSliceArgsRequestImage](functions/calculateSliceArgsRequestImage.md) | Constructs Zarr slice arguments for extracting a subregion of a multidimensional array. |
-| [calculateXYFromBounds](functions/calculateXYFromBounds.md) | Converts geographic bounds (lat/lon) to pixel-space indices for slicing Zarr arrays. Supports both EPSG:4326 and EPSG:3857 projections. |
 | [colormapBuilder](functions/colormapBuilder.md) | Builds a color ramp (discrete or continuous) from a specified colormap. |
 | [createColorRampTexture](functions/createColorRampTexture.md) | Creates a flexible 1D color-ramp texture supporting either normalized (0–1) or integer (0–255) color definitions. |
+| [createFetchStore](functions/createFetchStore.md) | Creates a Zarrita FetchStore with optional static and dynamic request settings. |
 | [createProgram](functions/createProgram.md) | Creates and links a WebGL program using the specified vertex and fragment shaders. |
 | [createShader](functions/createShader.md) | Creates and compiles a WebGL shader from source code. |
+| [createTransformedFetch](functions/createTransformedFetch.md) | Creates a fetch implementation that applies dynamic request configuration. |
 | [decodeCFTime](functions/decodeCFTime.md) | Decodes CF-compliant time coordinate values into ISO date strings. |
+| [defaultTileCacheBytes](functions/defaultTileCacheBytes.md) | Selects a conservative per-layer budget while allowing up to five active layers. `deviceMemory` is deliberately treated as a hint, not an allowance. |
 | [deriveRectangleAndScheme](functions/deriveRectangleAndScheme.md) | Computes a Cesium [Rectangle](https://cesium.com/learn/cesiumjs/ref-doc/Rectangle.html) and [TilingScheme](https://cesium.com/learn/cesiumjs/ref-doc/TilingScheme.html) for a Zarr dataset. |
 | [detectBrowser](functions/detectBrowser.md) | Detects the current browser based on the user agent string. |
 | [detectCRS](functions/detectCRS.md) | Detects the coordinate reference system (CRS) of a Zarr dataset based on metadata or coordinate range. Defaults to EPSG:4326 (WGS84) if uncertain. |
@@ -85,8 +89,10 @@
 | [lonDegToMercX](functions/lonDegToMercX.md) | - |
 | [openLevelArray](functions/openLevelArray.md) | Opens and caches a specific multiscale level array. Keeps a small LRU-style cache of up to three levels. |
 | [parseCFUnits](functions/parseCFUnits.md) | Parses a CF-compliant units string into its components. |
+| [resolveCRS](functions/resolveCRS.md) | Resolve an explicit or metadata-declared rectilinear source CRS. |
 | [resolveNoDataRange](functions/resolveNoDataRange.md) | Resolves the no-data value range for masking dataset values. |
 | [sampleTransectPositions](functions/sampleTransectPositions.md) | Builds evenly spaced WGS84 samples along the shortest longitude path. |
+| [sourceBoundsToGeographic](functions/sourceBoundsToGeographic.md) | Transform a source rectangle to WGS84 by sampling a regular interior grid. |
 | [updateImgData](functions/updateImgData.md) | Updates an [ImageData](https://developer.mozilla.org/en-US/docs/Web/API/ImageData) object with a new pixel color derived from a numeric value and a [ColorScaleProps](interfaces/ColorScaleProps.md) colormap. |
 | [validateBounds](functions/validateBounds.md) | Validates whether geographic bounds are logically consistent. |
 
@@ -99,7 +105,8 @@
 | [CesiumHost](type-aliases/CesiumHost.md) | - |
 | [CFCalendar](type-aliases/CFCalendar.md) | Supported CF calendar types. |
 | [ColorMapName](type-aliases/ColorMapName.md) | Name of a bundled Matplotlib-inspired colormap. |
-| [CRS](type-aliases/CRS.md) | Supported Coordinate Reference Systems. |
+| [CRS](type-aliases/CRS.md) | CRS identifier understood by proj4 (for example `EPSG:4326` or `EPSG:32630`). |
+| [CRSDefinition](type-aliases/CRSDefinition.md) | Projection definition accepted by proj4. |
 | [CubeCrossSectionPoint](type-aliases/CubeCrossSectionPoint.md) | - |
 | [ElevationMode](type-aliases/ElevationMode.md) | Controls whether vertical coordinates are interpreted as heights or depths. |
 | [MultiscaleFormat](type-aliases/MultiscaleFormat.md) | Supported conventions for discovering multiscale Zarr levels. |

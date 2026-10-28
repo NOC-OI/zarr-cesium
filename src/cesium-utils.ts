@@ -16,8 +16,6 @@ import {
   Math,
   Rectangle,
   TilingScheme,
-  Cartesian3,
-  WebMercatorTilingScheme,
   GeographicTilingScheme
 } from 'cesium';
 import {
@@ -29,6 +27,7 @@ import {
 } from './types';
 import * as zarr from 'zarrita';
 import { WindLayerOptions } from 'cube-cesium-wind-layer';
+import { resolveCRS, sourceBoundsToGeographic } from 'zarr-maps-tiling';
 
 /**
  * Global Web Mercator projection instance used for coordinate conversions.
@@ -120,26 +119,17 @@ export const DEFAULT_WIND_OPTIONS: Partial<WindLayerOptions> = {
  * ```
  */
 /**
- * Normalizes longitude to the [-180, 180) interval.
- */
-function normalizeLongitudeTo180(lonDeg: number): number {
-  return ((((lonDeg + 180) % 360) + 360) % 360) - 180;
-}
-
-/**
  * Computes a Cesium {@link Rectangle} and {@link TilingScheme} for a Zarr dataset.
  *
  * @remarks
  * Behavior notes:
  * - The rectangle is expanded by half a pixel in all directions to avoid edge clipping.
  * - Pixel resolution is estimated from either `levelMetadata.get(0)` or the Zarr array shape.
- * - For EPSG:3857, the function interprets `xyLimits` as Web Mercator meters and uses
- *   `WebMercatorProjection.unproject` to obtain geographic radians.
- * - If any computation fails, the function falls back to a full-world tiling scheme
- *   (WebMercator or Geographic).
+ * - Source bounds are densified and transformed through the shared proj4 resolver.
+ * - If any computation fails, the function falls back to a full-world geographic scheme.
  * - If latitude limits are reversed, they are swapped automatically.
  *
- * @param crs - CRS code (`EPSG:4326` or `EPSG:3857`). See {@link CRS}.
+ * @param crs - A CRS identifier registered with proj4. See {@link CRS}.
  * @param xyLimits - Min/max X/Y values in the dataset's CRS. See {@link XYLimitsProps}.
  * @param levelMetadata - Per-resolution metadata (width/height).
  * @param zarrArray - The Zarr array containing the data.
@@ -169,48 +159,19 @@ export function deriveRectangleAndScheme(
     const dy =
       (yMax - yMin) / (levelMetadata.get(0)?.height ?? zarrArray.shape[dimIndices.lat.index] - 1);
 
-    if (crs === 'EPSG:4326') {
-      const span = xMax - xMin;
-      const globalSpanTolerance = 1e-3;
-      const wrapsZeroTo360 = xMin >= -globalSpanTolerance && xMax <= 360 + globalSpanTolerance;
-      const touchesPrimeWrap =
-        xMin <= dx + globalSpanTolerance && xMax >= 360 - dx - globalSpanTolerance;
-
-      // Treat wrapped global domains (e.g. 0..360 or center-sampled 0..359) as full-world coverage.
-      if (span >= 360 - globalSpanTolerance || (wrapsZeroTo360 && touchesPrimeWrap)) {
-        xMin = -180;
-        xMax = 180;
-      } else if (xMin > 180 || xMax > 180) {
-        xMin = normalizeLongitudeTo180(xMin);
-        xMax = normalizeLongitudeTo180(xMax);
-        if (xMin > xMax) {
-          const temp = xMin;
-          xMin = xMax;
-          xMax = temp;
-        }
-      }
-    }
-
-    const epsilon = crs === 'EPSG:3857' ? 1 : 1e-6;
+    const projection = resolveCRS(crs);
+    const epsilon = projection.geographic ? 1e-6 : 1;
     xMin = xMin - dx / 2 - epsilon;
     xMax = xMax + dx / 2 + epsilon;
     yMin = yMin - dy / 2 - epsilon;
     yMax = yMax + dy / 2 + epsilon;
 
-    if (crs === 'EPSG:3857') {
-      const proj = new WebMercatorProjection();
-      const sw = proj.unproject(new Cartesian3(xMin, yMin, 0));
-      const ne = proj.unproject(new Cartesian3(xMax, yMax, 0));
-      rectangle = Rectangle.fromRadians(sw.longitude, sw.latitude, ne.longitude, ne.latitude);
-      tilingScheme = new WebMercatorTilingScheme();
-    } else {
-      rectangle = Rectangle.fromDegrees(xMin, yMin, xMax, yMax);
-      tilingScheme = new GeographicTilingScheme();
-    }
+    const bounds = sourceBoundsToGeographic({ xMin, xMax, yMin, yMax }, projection);
+    rectangle = Rectangle.fromDegrees(bounds.west, bounds.south, bounds.east, bounds.north);
+    tilingScheme = new GeographicTilingScheme();
   } catch (e) {
     console.warn('Rectangle derivation failed — falling back to default.', e);
-    tilingScheme =
-      crs === 'EPSG:3857' ? new WebMercatorTilingScheme() : new GeographicTilingScheme();
+    tilingScheme = new GeographicTilingScheme();
     rectangle = tilingScheme.rectangle;
   }
   return { rectangle, tilingScheme };

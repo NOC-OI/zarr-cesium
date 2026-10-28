@@ -1,7 +1,7 @@
 # CRS
 
 ```ts
-type CRS = "EPSG:4326" | "EPSG:3857";
+type CRS = string;
 ```
 
-Supported Coordinate Reference Systems.
+CRS identifier understood by proj4 (for example `EPSG:4326` or `EPSG:32630`).

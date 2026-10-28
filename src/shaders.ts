@@ -2,6 +2,8 @@
 export const  cubeVertexShaderSource = `
 in vec2 st;
 in float a_height;
+in vec2 a_lonLat;
+in vec3 a_volumePosition;
 
 uniform float u_orientation;
 uniform vec4 u_bounds;
@@ -11,6 +13,7 @@ uniform float u_latAscending;
 uniform float u_flipElevation;
 uniform float u_projectedCrs;
 uniform vec4 u_crossSection;
+uniform float u_warpedGeometry;
 
 out vec3 v_volumePosition;
 
@@ -86,7 +89,12 @@ void main() {
   float latitude;
   float height;
 
-  if (u_orientation < 0.5) {
+  if (u_warpedGeometry > 0.5) {
+    longitude = a_lonLat.x;
+    latitude = a_lonLat.y;
+    height = u_orientation < 0.5 ? u_horizontalHeight : a_height;
+    v_volumePosition = a_volumePosition;
+  } else if (u_orientation < 0.5) {
     longitude = mix(u_bounds.x, u_bounds.z, st.x);
     latitude = latitudeAtFraction(st.y);
     height = u_horizontalHeight;

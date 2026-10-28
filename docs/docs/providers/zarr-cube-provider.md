@@ -18,7 +18,7 @@ This provider supports:
 
 - Multiscale Zarr pyramids
 - Legacy ndpyramid and GeoZarr multiscale layouts
-- CRS detection (EPSG:4326 / EPSG:3857)
+- CRS detection and rectilinear-grid reprojection through proj4
 - Dynamic dimension slicing
 - Arbitrary two-point vertical cross-sections
 - CF-compliant time decoding for selectors
@@ -103,7 +103,7 @@ interface CubeOptions {
   url?: string; // Zarr URL. Required unless store is supplied
   store?: Readable; // Custom Zarrita-compatible store, including IcechunkStore
   variable: string; // Zarr array name
-  bounds: BoundsProps; // geographic rectangle
+  bounds?: BoundsProps; // geographic subset; full source coverage when omitted
   latIsAscending?: boolean; // Override latitude array orientation when metadata is incorrect
   selectors?: { [key: string]: ZarrSelectorsProps }; // Initial dimension slices
   dimensionNames?: DimensionNamesProps; // Custom dimension names. If not provided, defaults will be used or identified automatically based on CF conventions.
@@ -111,6 +111,8 @@ interface CubeOptions {
   zarrVersion?: 2 | 3; // Zarr version (auto-detected if not set)
   colormap?: ColorMapName; // Name from jsColormaps, based on matplotlib colormaps
   scale?: [number, number]; // Min/max for color scaling
+  noDataMin?: number; // Values below this decoded threshold are transparent
+  noDataMax?: number; // Values above this decoded threshold are transparent
   opacity?: number; // Slice opacity (0–1)
   verticalExaggeration?: number; // Vertical exaggeration factor
   showHorizontalSlices?: boolean; // Show horizontal (XY) slice
@@ -118,6 +120,7 @@ interface CubeOptions {
   elevationMode?: 'height' | 'depth'; // Positive coordinates render above or below sea level
   flipElevation?: boolean; // Reverse only the elevation data/index ordering
   crs?: CRS; // Force CRS (auto-detected if not set)
+  proj4?: string | Record<string, unknown>; // Definition for an unregistered source CRS
   multiscaleFormat?: MultiscaleFormat; // 'auto' (default), 'legacy', or 'geozarr'
   requestOverrides?: RequestOverrides; // Static fetch credentials, headers, and options
   transformRequest?: TransformRequest; // Per-request auth, proxy, or signed URL transform
@@ -235,22 +238,36 @@ showVerticalSlices: true;
 
 ## Supported CRS
 
-Zarr datasets may store coordinate values in:
-
-- `EPSG:4326` (lat, lon degrees)
-- `EPSG:3857` (Web Mercator meters)
+Zarr cubes may use any regular rectilinear source CRS understood by proj4. Slice
+geometry is warped into WGS84 before it is added to Cesium. Curvilinear grids
+with two-dimensional coordinate arrays are not supported.
 
 The provider detects the CRS automatically using:
 
-- Zarr metadata
+- GeoZarr/CF projection metadata or root/array `crs` attributes
 - consolidated metadata
-- coordinate ranges (West/East > 360 → Web Mercator)
+- coordinate ranges when metadata is absent
+
+`bounds` is optional. When omitted, the provider transforms the complete source
+X/Y extent to WGS84 and loads that coverage. Supplying bounds limits loading to
+a geographic subset, which is recommended for very large cubes.
 
 For example, you can set the CRS explicitly:
 
 ```ts
-// set CRS to Web Mercator in LayerOptions
-crs: 'EPSG:3857';
+crs: 'EPSG:3408',
+proj4: '+proj=laea +lat_0=90 +lon_0=0 +x_0=0 +y_0=0 +a=6371228 +b=6371228 +units=m +no_defs'
+```
+Or you can just supply the proj4 definition for an unregistered CRS:
+
+```ts
+proj4: '+proj=laea +lat_0=90 +lon_0=0 +x_0=0 +y_0=0 +a=6371228 +b=6371228 +units=m +no_defs'
+```
+
+Or you just pass the CRS code when you are using a registered CRS (e.g., EPSG:4326, EPSG:3857:
+
+```ts
+crs: 'EPSG:4326'
 ```
 
 ---
@@ -425,7 +442,7 @@ Create a vertical slice between any two geographic positions inside the loaded c
 cube.setCrossSection([-8.5, 48.0], [-2.0, 54.0]);
 ```
 
-The endpoints are `[longitude, latitude]` coordinates in degrees. The plane follows the globe between the points and samples the cube in the GPU shader, including projected EPSG:3857 datasets. Remove it without affecting the three standard slices:
+The endpoints are `[longitude, latitude]` coordinates in degrees. The plane follows the globe between the points and samples the cube in the GPU shader, including arbitrary projected rectilinear datasets. Remove it without affecting the three standard slices:
 
 ```ts
 cube.clearCrossSection();

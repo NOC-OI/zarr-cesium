@@ -26,7 +26,7 @@ optional colormap: string;
 ### crs?
 
 ```ts
-optional crs: CRS | null;
+optional crs: string | null;
 ```
 
 ***
@@ -86,6 +86,16 @@ optional onAuthError: OnAuthError;
 ```
 
 Called once when a transformed request returns an expired-credential status.
+
+***
+
+### proj4?
+
+```ts
+optional proj4: CRSDefinition;
+```
+
+Proj4, WKT2, or PROJJSON definition for a CRS not registered by proj4.
 
 ***
 

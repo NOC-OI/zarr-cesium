@@ -57,7 +57,7 @@ It provides a set of **CesiumJS data providers** that stream and render multidim
 - **Private-store requests** with static options or per-object URL/header transformation
 - **2D scalar, 3D volumetric, and 3D vector field visualization**
 - **Automatic resolution selection** for multiscale datasets
-- **CRS-aware** (EPSG:4326 & EPSG:3857)
+- **CRS-aware** for regular rectilinear grids in any source CRS understood by proj4
 - **WebGL-accelerated rendering**
 - **Dynamic styling** (colormap, opacity, scaling, slices, animation)
 - **Point, time-series, vertical-profile, and transect queries**

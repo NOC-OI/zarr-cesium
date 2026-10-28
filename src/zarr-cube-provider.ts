@@ -3,6 +3,8 @@ import { ZarrCubeDataProvider } from './zarr-cube-data-provider';
 import * as zarr from 'zarrita';
 import {
   calculateNearestIndex,
+  createFetchStore,
+  createTransformedFetch,
   detectCRS,
   extractNoDataMetadata,
   getZarrData,
@@ -12,6 +14,7 @@ import {
   getTransect as queryTransect,
   getVerticalProfile as queryVerticalProfile,
   initZarrDataset,
+  resolveCRS,
   type QueryGeometry,
   type QueryOptions,
   type QueryPosition,
@@ -55,7 +58,6 @@ import ndarray from 'ndarray';
 import { DEFAULT_VERTICAL_EXAGGERATION } from './cesium-utils';
 import { DEFAULT_COLORMAP, DEFAULT_OPACITY, DEFAULT_SCALE } from 'zarr-maps-tiling';
 import type { RequestOverrides } from 'zarr-maps-tiling';
-import { createFetchStore, createTransformedFetch } from './zarr-store-utils';
 import { CubeGpuRenderer } from './cube-gpu-renderer';
 
 /**
@@ -107,7 +109,7 @@ export class ZarrCubeProvider {
   /** Current multiscale level to load. */
   public multiscaleLevel: number = 0;
   /** Configuration defining the geographic bounds of the cube. */
-  public bounds: BoundsProps;
+  public bounds: BoundsProps = { west: -180, south: -90, east: 180, north: 90 };
   private viewer: CesiumHost;
   private zarrVersion: 2 | 3 | null = null;
   private flipElevation: boolean = false;
@@ -117,12 +119,17 @@ export class ZarrCubeProvider {
   private transformedFetch?: typeof fetch;
   private variable: string;
   private crs: CRS | null = null;
+  private requestedBounds?: BoundsProps;
+  private projectionDefinition?: string | Record<string, unknown>;
+  private projection: import('zarr-maps-tiling').ResolvedCRS | null = null;
   private latIsAscendingOverride?: boolean;
   private latIsAscending: boolean = false;
   private dimensionNames: DimensionNamesProps;
   private multiscaleFormat: MultiscaleFormat = 'auto';
   private verticalExaggeration: number;
   private maximumElevationValue = 0;
+  /** Numeric coordinates used only for plane placement; labels remain unchanged. */
+  private renderingElevationValues: number[] = [];
   private opacity: number;
   private showHorizontalSlices: boolean;
   private showVerticalSlices: boolean;
@@ -186,16 +193,18 @@ export class ZarrCubeProvider {
       ? createTransformedFetch(options.transformRequest, options.onAuthError)
       : undefined;
     this.variable = options.variable;
-    this.bounds = { ...options.bounds };
+    this.requestedBounds = options.bounds ? { ...options.bounds } : undefined;
+    if (this.requestedBounds) this.bounds = { ...this.requestedBounds };
     this.dimensionNames = options.dimensionNames ?? {};
     this.crs = options.crs || null;
+    this.projectionDefinition = options.proj4;
     this.latIsAscendingOverride = options.latIsAscending;
     if (options.latIsAscending !== undefined) {
       this.latIsAscending = options.latIsAscending;
     }
     this.multiscaleFormat = options.multiscaleFormat ?? 'auto';
     this.multiscaleLevel = options.multiscaleLevel ?? 0;
-    this.selectors = { ...(options.selectors ?? {}) };
+    this.selectors = structuredClone(options.selectors ?? {});
     this.verticalExaggeration = options.verticalExaggeration ?? DEFAULT_VERTICAL_EXAGGERATION;
     this.opacity = options.opacity ?? DEFAULT_OPACITY;
     this.showHorizontalSlices = options.showHorizontalSlices ?? true;
@@ -203,6 +212,8 @@ export class ZarrCubeProvider {
     this.elevationMode = options.elevationMode ?? 'height';
     this.zarrVersion = options.zarrVersion ?? null;
     this.flipElevation = options.flipElevation ?? false;
+    this.noDataMin = options.noDataMin;
+    this.noDataMax = options.noDataMax;
     const [min, max] = options.scale ?? DEFAULT_SCALE;
     this.colormap = options.colormap ?? DEFAULT_COLORMAP;
     const colors = colormapBuilder(this.colormap);
@@ -237,7 +248,7 @@ export class ZarrCubeProvider {
     if (multiscaleLevel !== undefined) {
       this.multiscaleLevel = multiscaleLevel;
     }
-    this.zarrArray = zarrArray as zarr.Array<any>;
+    this.zarrArray = zarrArray as unknown as zarr.Array<any>;
     this.dimIndices = dimIndices;
     this.levelInfos = levelInfos;
     this.scaleFactor = attrs.scale_factor ?? 1;
@@ -245,10 +256,13 @@ export class ZarrCubeProvider {
     const noDataMetadata = extractNoDataMetadata(zarrArray);
     this.fillValue = noDataMetadata.fillValue;
     this.useFillValue = noDataMetadata.useFillValue;
-    this.noDataMin = noDataMetadata.metadataMin;
-    this.noDataMax = noDataMetadata.metadataMax;
+    this.noDataMin ??= noDataMetadata.metadataMin;
+    this.noDataMax ??= noDataMetadata.metadataMax;
 
-    this.crs = this.crs || (await detectCRS(attrs, zarrArray));
+    this.crs = this.crs || (this.projectionDefinition ? 'CUSTOM:SOURCE' : null) ||
+      (await detectCRS(attrs, zarrArray));
+    this.projection = resolveCRS(this.crs, this.projectionDefinition, attrs, zarrArray.attrs);
+    this.crs = this.projection.code;
 
     if (!this.dimIndices.elevation) {
       console.warn('No elevation dimension found in Zarr array.');
@@ -262,15 +276,24 @@ export class ZarrCubeProvider {
       level: levelInfo,
       zarrVersion: this.zarrVersion,
       selectors: this.selectors,
-      bounds: this.bounds,
-      crs: this.crs,
+      bounds: this.requestedBounds,
+      projection: this.projection,
       latIsAscending: this.latIsAscendingOverride
     }).load();
     this.dimensionValues = cube.dimensionValues;
     this.cubeDimensionValues = cube.cubeDimensionValues;
-    const elevationValues = Array.from(this.cubeDimensionValues.elevation ?? [], Number);
-    this.maximumElevationValue =
-      elevationValues.length > 0 ? globalThis.Math.max(...elevationValues) : 0;
+    this.bounds = cube.bounds;
+    const elevationCoordinates = this.cubeDimensionValues.elevation ?? [];
+    this.renderingElevationValues = Array.from(
+      { length: elevationCoordinates.length },
+      (_, index) => {
+        const value = elevationCoordinates[index];
+        return typeof value === 'number' && Number.isFinite(value) ? value : index;
+      }
+    );
+    this.maximumElevationValue = this.renderingElevationValues.length > 0
+      ? globalThis.Math.max(...this.renderingElevationValues)
+      : 0;
     this.selectors = cube.selectors;
     this.loadedOrigin = cube.origin;
     this.longitudeIndices = cube.coordinates.x;
@@ -343,7 +366,7 @@ export class ZarrCubeProvider {
       latValues,
       longitude,
       latitude,
-      this.crs
+      this.projection!
     );
 
     const timeKey = this.dimIndices.time?.name ?? 'time';
@@ -618,7 +641,7 @@ export class ZarrCubeProvider {
 
     this.throwIfQueryAborted(options.signal);
     const data = await getZarrData(
-      this.zarrArray,
+      this.zarrArray as any,
       selection,
       options.signal ? { opts: { signal: options.signal } } : undefined
     );
@@ -814,7 +837,7 @@ export class ZarrCubeProvider {
           !this.selectors[key] ||
           JSON.stringify(this.selectors[key]) !== JSON.stringify(selectors[key])
         ) {
-          this.selectors[key] = selectors[key];
+          this.selectors[key] = structuredClone(selectors[key]);
           updateLayer = true;
         }
       }
@@ -830,6 +853,7 @@ export class ZarrCubeProvider {
           south: bounds.south,
           north: bounds.north
         };
+        this.requestedBounds = { ...this.bounds };
         updateLayer = true;
       }
     }
@@ -929,6 +953,27 @@ export class ZarrCubeProvider {
     };
   }
 
+  /** Map a source-grid fraction to WGS84 for projected cube geometry. */
+  private geographicAtSourceFraction(xFraction: number, yFraction: number): [number, number] {
+    if (!this.projection) throw new Error('Cube projection is not initialized');
+    const xValues = Array.from(this.cubeDimensionValues.lon ?? [], Number);
+    const yValues = Array.from(this.cubeDimensionValues.lat ?? [], Number);
+    if (!xValues.length || !yValues.length) throw new Error('Cube spatial coordinates are unavailable');
+    const interpolate = (values: number[], fraction: number) => {
+      const position = globalThis.Math.max(
+        0,
+        globalThis.Math.min(values.length - 1, fraction * (values.length - 1))
+      );
+      const lower = globalThis.Math.floor(position);
+      const upper = globalThis.Math.min(values.length - 1, lower + 1);
+      return values[lower] + (position - lower) * (values[upper] - values[lower]);
+    };
+    const x = interpolate(xValues, xFraction);
+    const sourceYFraction = this.latIsAscending ? yFraction : 1 - yFraction;
+    const y = interpolate(yValues, sourceYFraction);
+    return this.projection.inverse([x, y]);
+  }
+
   /** Converts a south-to-north data fraction into its geographic latitude. */
   private latitudeAtFraction(fraction: number, bounds = this.getRenderBounds()): number {
     if (this.crs !== 'EPSG:3857') {
@@ -964,7 +1009,7 @@ export class ZarrCubeProvider {
         data: this.volumeData,
         dimensions: this.cubeDimensions,
         dimensionIndices: this.dimIndices,
-        dimensionElevations: this.cubeDimensionValues.elevation ?? [],
+        dimensionElevations: this.renderingElevationValues,
         bounds: this.getRenderBounds(),
         latIsAscending: this.latIsAscending,
         flipElevation: this.flipElevation,
@@ -982,7 +1027,10 @@ export class ZarrCubeProvider {
         opacity: this.opacity,
         showHorizontal: this.showHorizontalSlices,
         showVertical: this.showVerticalSlices,
-        projectedCrs: this.crs === 'EPSG:3857'
+        projectedCrs: this.crs === 'EPSG:3857',
+        projection: this.projection ?? undefined,
+        dimensionX: this.cubeDimensionValues.lon,
+        dimensionY: this.cubeDimensionValues.lat
       });
       if (this.crossSection) {
         this.gpuRenderer.setCrossSection(this.crossSection.start, this.crossSection.end);
@@ -1048,8 +1096,8 @@ export class ZarrCubeProvider {
     const placementElevationIndex = this.flipElevation
       ? nz - 1 - this.elevationSliceIndex
       : this.elevationSliceIndex;
-    const elevationValue = this.cubeDimensionValues.elevation[placementElevationIndex];
-    const heightMeters = this.calculateElevationHeight(elevationValue as number);
+    const elevationValue = this.renderingElevationValues[placementElevationIndex] ?? placementElevationIndex;
+    const heightMeters = this.calculateElevationHeight(elevationValue);
 
     const primitive = this.createHorizontalPrimitive(canvas, heightMeters);
 
@@ -1070,8 +1118,11 @@ export class ZarrCubeProvider {
       const latitude = this.latitudeAtFraction(latitudeFraction, bounds);
       for (let x = 0; x <= horizontalSegments; x++) {
         const longitudeFraction = x / horizontalSegments;
-        const longitude = bounds.west + longitudeFraction * (bounds.east - bounds.west);
-        const position = Cartesian3.fromDegrees(longitude, latitude, height);
+        const [longitude, renderedLatitude] =
+          this.crs === 'EPSG:4326' || this.crs === 'EPSG:3857'
+            ? [bounds.west + longitudeFraction * (bounds.east - bounds.west), latitude]
+            : this.geographicAtSourceFraction(longitudeFraction, latitudeFraction);
+        const position = Cartesian3.fromDegrees(longitude, renderedLatitude, height);
         positions.push(position.x, position.y, position.z);
         sts.push(longitudeFraction, latitudeFraction);
       }
@@ -1140,8 +1191,8 @@ export class ZarrCubeProvider {
 
     for (let iz = 0; iz <= segmentsZ; iz++) {
       const heightFraction = iz / segmentsZ;
-      const elevationValue = this.cubeDimensionValues.elevation[iz];
-      const height = this.calculateElevationHeight(elevationValue as number);
+      const elevationValue = this.renderingElevationValues[iz] ?? iz;
+      const height = this.calculateElevationHeight(elevationValue);
 
       for (let iN = 0; iN <= segments; iN++) {
         const otherFraction = iN / segments;
@@ -1150,10 +1201,19 @@ export class ZarrCubeProvider {
             ? bounds.west + otherFraction * (bounds.east - bounds.west)
             : this.latitudeAtFraction(otherFraction, bounds);
 
-        const cart =
-          sliceType === 'lon'
-            ? Cartesian3.fromDegrees(latOrlon, slice, height)
-            : Cartesian3.fromDegrees(slice, latOrlon, height);
+        let longitude: number;
+        let latitude: number;
+        if (this.crs === 'EPSG:4326' || this.crs === 'EPSG:3857') {
+          [longitude, latitude] = sliceType === 'lon' ? [latOrlon, slice] : [slice, latOrlon];
+        } else {
+          [longitude, latitude] = sliceType === 'lon'
+            ? this.geographicAtSourceFraction(
+                otherFraction,
+                this.latIsAscending ? fraction : 1 - fraction
+              )
+            : this.geographicAtSourceFraction(fraction, otherFraction);
+        }
+        const cart = Cartesian3.fromDegrees(longitude, latitude, height);
         positions.push(cart.x, cart.y, cart.z);
         if (sliceType === 'lon') {
           sts.push(otherFraction, heightFraction);

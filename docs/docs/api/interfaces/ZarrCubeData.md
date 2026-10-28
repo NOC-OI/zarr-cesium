@@ -2,6 +2,14 @@
 
 ## Properties
 
+### bounds
+
+```ts
+bounds: BoundsProps;
+```
+
+***
+
 ### coordinates
 
 ```ts

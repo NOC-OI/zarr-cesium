@@ -2,11 +2,13 @@
 
 ## Properties
 
-### bounds
+### bounds?
 
 ```ts
-bounds: BoundsProps;
+optional bounds: BoundsProps;
 ```
+
+Geographic subset. When omitted, coverage is derived from the source X/Y axes.
 
 ***
 
@@ -29,7 +31,7 @@ optional colorScale: [number, number, number][];
 ### crs?
 
 ```ts
-optional crs: CRS | null;
+optional crs: string | null;
 ```
 
 ***
@@ -88,6 +90,26 @@ optional multiscaleLevel: number;
 
 ***
 
+### noDataMax?
+
+```ts
+optional noDataMax: number;
+```
+
+Maximum valid decoded value; larger values are treated as no-data.
+
+***
+
+### noDataMin?
+
+```ts
+optional noDataMin: number;
+```
+
+Minimum valid decoded value; smaller values are treated as no-data.
+
+***
+
 ### onAuthError?
 
 ```ts
@@ -103,6 +125,16 @@ Called once when a transformed request returns HTTP 400 or 401.
 ```ts
 optional opacity: number;
 ```
+
+***
+
+### proj4?
+
+```ts
+optional proj4: string | Record<string, unknown>;
+```
+
+Proj4, WKT2, or PROJJSON definition for an arbitrary rectilinear source CRS.
 
 ***
 

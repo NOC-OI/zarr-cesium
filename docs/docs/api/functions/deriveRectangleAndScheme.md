@@ -15,7 +15,7 @@ Computes a Cesium [Rectangle](https://cesium.com/learn/cesiumjs/ref-doc/Rectangl
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `crs` | [`CRS`](../type-aliases/CRS.md) | CRS code (`EPSG:4326` or `EPSG:3857`). See [CRS](../type-aliases/CRS.md). |
+| `crs` | `string` | A CRS identifier registered with proj4. See [CRS](../type-aliases/CRS.md). |
 | `xyLimits` | [`XYLimitsProps`](../interfaces/XYLimitsProps.md) | Min/max X/Y values in the dataset's CRS. See [XYLimitsProps](../interfaces/XYLimitsProps.md). |
 | `levelMetadata` | `Map`\<`number`, [`ZarrLevelMetadata`](../interfaces/ZarrLevelMetadata.md)\> | Per-resolution metadata (width/height). |
 | `zarrArray` | `Array`\<`any`\> | The Zarr array containing the data. |
@@ -44,8 +44,6 @@ tilingScheme: TilingScheme;
 Behavior notes:
 - The rectangle is expanded by half a pixel in all directions to avoid edge clipping.
 - Pixel resolution is estimated from either `levelMetadata.get(0)` or the Zarr array shape.
-- For EPSG:3857, the function interprets `xyLimits` as Web Mercator meters and uses
-  `WebMercatorProjection.unproject` to obtain geographic radians.
-- If any computation fails, the function falls back to a full-world tiling scheme
-  (WebMercator or Geographic).
+- Source bounds are densified and transformed through the shared proj4 resolver.
+- If any computation fails, the function falls back to a full-world geographic scheme.
 - If latitude limits are reversed, they are swapped automatically.

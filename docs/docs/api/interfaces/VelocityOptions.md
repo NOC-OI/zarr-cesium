@@ -2,11 +2,13 @@
 
 ## Properties
 
-### bounds
+### bounds?
 
 ```ts
-bounds: BoundsProps;
+optional bounds: BoundsProps;
 ```
+
+Geographic subset shared by U/V. When omitted, source coverage is derived.
 
 ***
 
@@ -21,7 +23,7 @@ optional colormap: string;
 ### crs?
 
 ```ts
-optional crs: CRS | null;
+optional crs: string | null;
 ```
 
 ***
@@ -95,6 +97,16 @@ Called once when a transformed request returns HTTP 400 or 401.
 ```ts
 optional opacity: number;
 ```
+
+***
+
+### proj4?
+
+```ts
+optional proj4: string | Record<string, unknown>;
+```
+
+Proj4, WKT2, or PROJJSON definition shared by the U and V source grids.
 
 ***
 

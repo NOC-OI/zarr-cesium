@@ -13,6 +13,12 @@ import type { ColorMapName } from 'zarr-maps-colormap';
 import { ColormapSelect } from 'zarr-maps-explorer';
 import { useContextHandle } from '../../application/use-context';
 
+function formatDimensionValue(value: unknown): string {
+  if (typeof value === 'number' && Number.isFinite(value)) return value.toFixed(2);
+  if (value instanceof Date) return value.toISOString();
+  return value == null ? '' : String(value);
+}
+
 export function CubeOptionsSelector({ layerLegendName }: LayerLegendBoxProps) {
   const selectedLayers = useAppSelector(state => state.layers.selectedLayers);
   const dispatch = useAppDispatch();
@@ -31,6 +37,8 @@ export function CubeOptionsSelector({ layerLegendName }: LayerLegendBoxProps) {
     selectedLayers[layerLegendName]
   );
   const [params, setParams] = useState<CubeOptions>(selectedLayer.params as CubeOptions);
+  const elevationValue = selectedLayer.dimensions?.elevation?.values[elevationSlice];
+  const sourceIsProjected = Boolean(params.crs && params.crs !== 'EPSG:4326');
 
   useEffect(() => {
     setSelectedLayer(selectedLayers[layerLegendName]);
@@ -99,9 +107,9 @@ export function CubeOptionsSelector({ layerLegendName }: LayerLegendBoxProps) {
         <p className="text-[11px] font-bold">
           Elevation Slice:{' '}
           {selectedLayer.dimensions!.elevation
-            ? (selectedLayer.dimensions!.elevation.values[elevationSlice] as number).toFixed(2)
-            : elevationSlice}{' '}
-          m
+            ? formatDimensionValue(elevationValue)
+            : elevationSlice}
+          {typeof elevationValue === 'number' ? ' m' : ''}
         </p>
         <Slider
           value={elevationSlice}
@@ -139,11 +147,11 @@ export function CubeOptionsSelector({ layerLegendName }: LayerLegendBoxProps) {
 
       <div className="flex flex-col gap-1">
         <p className="text-[11px] font-bold">
-          Latitude Slice:{' '}
+          {sourceIsProjected ? 'Source Y Slice: ' : 'Latitude Slice: '}
           {selectedLayer.dimensions!.lat
-            ? (selectedLayer.dimensions!.lat.values[latSlice] as number).toFixed(2)
+            ? formatDimensionValue(selectedLayer.dimensions!.lat.values[latSlice])
             : latSlice}
-          °
+          {sourceIsProjected ? ' m' : '°'}
         </p>
         <Slider
           value={latSlice}
@@ -158,11 +166,11 @@ export function CubeOptionsSelector({ layerLegendName }: LayerLegendBoxProps) {
 
       <div className="flex flex-col gap-1">
         <p className="text-[11px] font-bold">
-          Longitude Slice:{' '}
+          {sourceIsProjected ? 'Source X Slice: ' : 'Longitude Slice: '}
           {selectedLayer.dimensions!.lon
-            ? (selectedLayer.dimensions!.lon.values[lonSlice] as number).toFixed(2)
+            ? formatDimensionValue(selectedLayer.dimensions!.lon.values[lonSlice])
             : lonSlice}
-          °
+          {sourceIsProjected ? ' m' : '°'}
         </p>
         <Slider
           value={lonSlice}

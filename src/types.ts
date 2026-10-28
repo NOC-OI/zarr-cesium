@@ -8,6 +8,7 @@ import type {
   DimensionValues,
   DimIndicesProps,
   MultiscaleFormat,
+  ResolvedCRS,
   TileCacheOptions,
   ZarrSelectorsProps
 } from 'zarr-maps-tiling';
@@ -26,6 +27,7 @@ export type {
   DimensionNamesProps,
   DimensionValues,
   MultiscaleFormat,
+  ResolvedCRS,
   SliceArgs,
   XYLimits,
   XYLimitsProps,
@@ -45,8 +47,11 @@ export interface CubeOptions {
   /** Custom Zarrita-compatible store, including an IcechunkStore. */
   store?: zarr.Readable;
   variable: string;
-  bounds: BoundsProps;
+  /** Geographic subset. When omitted, coverage is derived from the source X/Y axes. */
+  bounds?: BoundsProps;
   crs?: CRS | null;
+  /** Proj4, WKT2, or PROJJSON definition for an arbitrary rectilinear source CRS. */
+  proj4?: string | Record<string, unknown>;
   /** Whether latitude coordinate values increase with their array index. */
   latIsAscending?: boolean;
   verticalExaggeration?: number;
@@ -64,6 +69,10 @@ export interface CubeOptions {
   flipElevation?: boolean;
   scale?: [number, number];
   colormap?: ColorMapName;
+  /** Minimum valid decoded value; smaller values are treated as no-data. */
+  noDataMin?: number;
+  /** Maximum valid decoded value; larger values are treated as no-data. */
+  noDataMax?: number;
   multiscaleFormat?: MultiscaleFormat;
   /** Static fetch options for URL-backed stores. */
   requestOverrides?: RequestOverrides;
@@ -80,6 +89,8 @@ export interface LayerOptions {
   store?: zarr.Readable;
   variable: string;
   crs?: CRS | null;
+  /** Proj4, WKT2, or PROJJSON definition for an arbitrary rectilinear source CRS. */
+  proj4?: string | Record<string, unknown>;
   latIsAscending?: boolean;
   tileWidth?: number;
   tileHeight?: number;
@@ -108,7 +119,8 @@ export interface VelocityOptions {
   /** Custom Zarrita-compatible stores for U and V, including IcechunkStore instances. */
   stores?: { u?: zarr.Readable; v?: zarr.Readable };
   variables: { u: string; v: string };
-  bounds: BoundsProps;
+  /** Geographic subset shared by U/V. When omitted, source coverage is derived. */
+  bounds?: BoundsProps;
   /** Whether latitude coordinate values increase with their array index. */
   latIsAscending?: boolean;
   verticalExaggeration?: number;
@@ -122,6 +134,8 @@ export interface VelocityOptions {
   multiscaleLevel?: number;
   opacity?: number;
   crs?: CRS | null;
+  /** Proj4, WKT2, or PROJJSON definition shared by the U and V source grids. */
+  proj4?: string | Record<string, unknown>;
   scale?: [number, number];
   colormap?: ColorMapName;
   zarrVersion?: 2 | 3;
@@ -178,4 +192,10 @@ export interface CubeGpuRendererOptions {
   showHorizontal: boolean;
   showVertical: boolean;
   projectedCrs: boolean;
+  /** Resolved source transform used to prepare warped arbitrary-CRS meshes. */
+  projection?: ResolvedCRS;
+  /** Source X coordinates represented by the loaded cube. */
+  dimensionX?: ArrayLike<number | string>;
+  /** Source Y coordinates represented by the loaded cube. */
+  dimensionY?: ArrayLike<number | string>;
 }

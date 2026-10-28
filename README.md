@@ -33,7 +33,7 @@ The **Zarr-Cesium Visualization Toolkit** provides **CesiumJS data providers** f
   Render gridded scalar, vector, and volumetric data directly in CesiumJS.
 
 - **CRS-aware**
-  Supports EPSG:4326 (Geographic) and EPSG:3857 (Web Mercator) coordinate systems with automatic detection and transformation.
+  Reprojects regular rectilinear grids from any CRS understood by proj4. EPSG:4326 and EPSG:3857 work without configuration; other definitions can come from GeoZarr/CF metadata, `proj4.defs`, or the `proj4` provider option.
 
 - **On-demand streaming**
   Tiles and slices are fetched and decoded dynamically — no conversion to imagery tiles required.
@@ -103,6 +103,30 @@ const layer = await ZarrLayerProvider.createLayer(viewer, options);
 
 viewer.imageryLayers.add(layer);
 ```
+
+Regular rectilinear source grids can use any CRS understood by proj4. `crs`
+describes the source coordinates; Cesium's geographic output tiling is selected
+internally:
+
+```ts
+const polarLayer = await ZarrLayerProvider.createLayer(viewer, {
+  url: 'https://example.com/polar.zarr',
+  variable: 'temperature',
+  crs: 'EPSG:3408',
+  proj4:
+    '+proj=laea +lat_0=90 +lon_0=0 +x_0=0 +y_0=0 +a=6371228 +b=6371228 +units=m +no_defs',
+  dimensionNames: { lon: 'x', lat: 'y' },
+  colormap: 'viridis'
+});
+
+viewer.imageryLayers.add(polarLayer);
+```
+
+The definition may instead be discovered from GeoZarr/CF metadata or registered
+with `proj4.defs`. The same `crs` and `proj4` options are accepted by the cube
+and velocity providers; their geographic bounds are derived automatically unless
+an explicit subset is requested. Horizontal coordinate axes must be monotonic
+one-dimensional arrays—curvilinear grids are not currently supported.
 
 For Icechunk or another custom storage backend, pass any Zarrita-compatible readable store:
 

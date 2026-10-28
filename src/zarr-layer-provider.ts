@@ -10,8 +10,7 @@ import {
   type ImageryProvider,
   Rectangle,
   type Request,
-  type TilingScheme,
-  WebMercatorTilingScheme
+  type TilingScheme
 } from 'cesium';
 import {
   ZarrTileProvider,
@@ -122,6 +121,7 @@ export class ZarrLayerProvider implements ImageryProvider {
       store: options.store,
       variable: options.variable,
       crs: options.crs,
+      proj4: options.proj4,
       tileSize: this._tileWidth,
       maxZoom: this._maximumLevel,
       scale: options.scale,
@@ -147,10 +147,7 @@ export class ZarrLayerProvider implements ImageryProvider {
     const ready = await this.source.readyPromise;
     if (!ready || !this.source.coverageBoundsDeg) return false;
 
-    this._tilingScheme =
-      this.source.crs === 'EPSG:3857'
-        ? new WebMercatorTilingScheme()
-        : new GeographicTilingScheme();
+    this._tilingScheme = new GeographicTilingScheme();
 
     const bounds = this.source.coverageBoundsDeg;
     this._rectangle = Rectangle.fromDegrees(bounds.west, bounds.south, bounds.east, bounds.north);

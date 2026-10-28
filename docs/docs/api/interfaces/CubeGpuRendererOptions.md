@@ -74,6 +74,26 @@ dimensions: [number, number, number];
 
 ***
 
+### dimensionX?
+
+```ts
+optional dimensionX: ArrayLike<string | number>;
+```
+
+Source X coordinates represented by the loaded cube.
+
+***
+
+### dimensionY?
+
+```ts
+optional dimensionY: ArrayLike<string | number>;
+```
+
+Source Y coordinates represented by the loaded cube.
+
+***
+
 ### elevationMode
 
 ```ts
@@ -135,6 +155,16 @@ opacity: number;
 ```ts
 projectedCrs: boolean;
 ```
+
+***
+
+### projection?
+
+```ts
+optional projection: ResolvedCRS;
+```
+
+Resolved source transform used to prepare warped arbitrary-CRS meshes.
 
 ***
 

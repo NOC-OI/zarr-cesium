@@ -4,7 +4,7 @@
 function detectCRS(
    attrs, 
    arr, 
-xyLimits?): Promise<CRS>;
+xyLimits?): Promise<string>;
 ```
 
 Detects the coordinate reference system (CRS) of a Zarr dataset based on metadata or coordinate range.
@@ -20,6 +20,6 @@ Defaults to EPSG:4326 (WGS84) if uncertain.
 
 ## Returns
 
-`Promise`\<[`CRS`](../type-aliases/CRS.md)\>
+`Promise`\<`string`\>
 
 Detected  CRS as a string (e.g., 'EPSG:4326' or 'EPSG:3857'. See [CRS](../type-aliases/CRS.md)).

@@ -79,6 +79,7 @@ export class CubeGpuRenderer {
       longitude: nx <= 1 ? 0 : longitude / (nx - 1),
       elevation: nz <= 1 ? 0 : elevation / (nz - 1)
     };
+    if (this.isWarped) this.geometryDirty = true;
   }
 
   /**
@@ -125,7 +126,7 @@ export class CubeGpuRenderer {
   setCrossSection(start: CubeCrossSectionPoint, end: CubeCrossSectionPoint): void {
     const wasVisible = this.crossSection !== null;
     this.crossSection = { start: [...start], end: [...end] };
-    if (!wasVisible) this.geometryDirty = true;
+    if (!wasVisible || this.isWarped) this.geometryDirty = true;
   }
 
   /**
@@ -284,12 +285,12 @@ export class CubeGpuRenderer {
     const vertexArray = Renderer.VertexArray.fromGeometry({
       context: this.context,
       geometry,
-      attributeLocations: { st: 0, a_height: 1 },
+      attributeLocations: { st: 0, a_height: 1, a_lonLat: 2, a_volumePosition: 3 },
       bufferUsage: Renderer.BufferUsage.STATIC_DRAW
     });
     const shaderProgram = Renderer.ShaderProgram.fromCache({
       context: this.context,
-      attributeLocations: { st: 0, a_height: 1 },
+      attributeLocations: { st: 0, a_height: 1, a_lonLat: 2, a_volumePosition: 3 },
       vertexShaderSource: cubeVertexShaderSource,
       fragmentShaderSource: cubeFragmentShaderSource
     });
@@ -323,6 +324,7 @@ export class CubeGpuRenderer {
           section?.end[1] ?? 0
         );
       },
+      u_warpedGeometry: () => (this.isWarped ? 1 : 0),
       u_volume: () => this.volumeTexture,
       u_colormap: () => this.colormapTexture,
       u_dimensions: () => new Cesium.Cartesian3(...this.options.dimensions),
@@ -355,6 +357,13 @@ export class CubeGpuRenderer {
   }
 
   private createHorizontalGeometry(): any {
+    if (this.isWarped) {
+      return this.createWarpedGridGeometry(64, 64, (u, v) => ({
+        lonLat: this.geographicAtDataFraction(u, this.options.latIsAscending ? v : 1 - v),
+        volume: [u, this.options.latIsAscending ? v : 1 - v, this.slices.elevation],
+        height: 0
+      }));
+    }
     return this.createGridGeometry(32, 32, () => 0);
   }
 
@@ -363,7 +372,44 @@ export class CubeGpuRenderer {
     const horizontalSize = _orientation === 1 ? nx : _orientation === 2 ? ny : 257;
     const horizontalSegments = Math.max(1, Math.min(horizontalSize - 1, 256));
     const maximumElevation = this.elevationValues.length ? Math.max(...this.elevationValues) : 0;
-    return this.createGridGeometry(horizontalSegments, Math.max(nz - 1, 1), (_x, y) => {
+    const verticalSegments = Math.max(nz - 1, 1);
+    if (this.isWarped) {
+      return this.createWarpedGridGeometry(horizontalSegments, verticalSegments, (u, v) => {
+        const dataElevation = this.options.flipElevation ? 1 - v : v;
+        const elevationIndex = Math.round(v * Math.max(nz - 1, 0));
+        const height = this.elevationHeight(
+          this.elevationValues[elevationIndex] ?? 0,
+          maximumElevation
+        );
+        if (_orientation === 1) {
+          return {
+            lonLat: this.geographicAtDataFraction(u, this.slices.latitude),
+            volume: [u, this.slices.latitude, dataElevation],
+            height
+          };
+        }
+        if (_orientation === 2) {
+          const dataLatitude = this.options.latIsAscending ? u : 1 - u;
+          return {
+            lonLat: this.geographicAtDataFraction(this.slices.longitude, dataLatitude),
+            volume: [this.slices.longitude, dataLatitude, dataElevation],
+            height
+          };
+        }
+        const lonLat = this.interpolateCrossSection(u);
+        const [sourceX, sourceY] = this.options.projection!.forward(lonLat);
+        return {
+          lonLat,
+          volume: [
+            this.coordinateFraction(this.sourceX, sourceX),
+            this.coordinateFraction(this.sourceY, sourceY),
+            dataElevation
+          ],
+          height
+        };
+      });
+    }
+    return this.createGridGeometry(horizontalSegments, verticalSegments, (_x, y) => {
       const index = Math.round(y * Math.max(nz - 1, 0));
       return this.elevationHeight(this.elevationValues[index] ?? 0, maximumElevation);
     });
@@ -410,11 +456,155 @@ export class CubeGpuRenderer {
           componentDatatype: Renderer.ComponentDatatype.FLOAT,
           componentsPerAttribute: 1,
           values: new Float32Array(heights)
+        }),
+        a_lonLat: new Renderer.GeometryAttribute({
+          componentDatatype: Renderer.ComponentDatatype.FLOAT,
+          componentsPerAttribute: 2,
+          values: new Float32Array(sts.length)
+        }),
+        a_volumePosition: new Renderer.GeometryAttribute({
+          componentDatatype: Renderer.ComponentDatatype.FLOAT,
+          componentsPerAttribute: 3,
+          values: new Float32Array(sts.length / 2 * 3)
         })
       },
       indices: indexArray,
       primitiveType: Renderer.PrimitiveType.TRIANGLES,
       boundingSphere: new Cesium.BoundingSphere(center, Cesium.Ellipsoid.WGS84.maximumRadius * 2)
+    });
+  }
+
+  private get isWarped(): boolean {
+    const code = this.options.projection?.code;
+    return Boolean(code && code !== 'EPSG:4326' && code !== 'EPSG:3857');
+  }
+
+  private get sourceX(): number[] {
+    return Array.from(this.options.dimensionX ?? [], Number);
+  }
+
+  private get sourceY(): number[] {
+    return Array.from(this.options.dimensionY ?? [], Number);
+  }
+
+  private coordinateAtFraction(values: number[], fraction: number): number {
+    if (!values.length) throw new Error('Projected cube coordinates are unavailable');
+    const position = Math.max(0, Math.min(values.length - 1, fraction * (values.length - 1)));
+    const lower = Math.floor(position);
+    const upper = Math.min(values.length - 1, lower + 1);
+    return values[lower] + (position - lower) * (values[upper] - values[lower]);
+  }
+
+  private coordinateFraction(values: number[], target: number): number {
+    if (values.length <= 1) return 0;
+    const ascending = values[values.length - 1] >= values[0];
+    if (target <= Math.min(values[0], values[values.length - 1])) return ascending ? 0 : 1;
+    if (target >= Math.max(values[0], values[values.length - 1])) return ascending ? 1 : 0;
+    let lower = 0;
+    let upper = values.length - 1;
+    while (upper - lower > 1) {
+      const middle = (lower + upper) >> 1;
+      if ((values[middle] <= target) === ascending) lower = middle;
+      else upper = middle;
+    }
+    const span = values[upper] - values[lower];
+    return (lower + (span === 0 ? 0 : (target - values[lower]) / span)) /
+      (values.length - 1);
+  }
+
+  private geographicAtDataFraction(xFraction: number, yFraction: number): [number, number] {
+    const x = this.coordinateAtFraction(this.sourceX, xFraction);
+    const y = this.coordinateAtFraction(this.sourceY, yFraction);
+    return this.options.projection!.inverse([x, y]);
+  }
+
+  private interpolateCrossSection(fraction: number): [number, number] {
+    const section = this.crossSection!;
+    const start = Cesium.Cartesian3.normalize(
+      Cesium.Cartesian3.fromDegrees(section.start[0], section.start[1]),
+      new Cesium.Cartesian3()
+    );
+    const end = Cesium.Cartesian3.normalize(
+      Cesium.Cartesian3.fromDegrees(section.end[0], section.end[1]),
+      new Cesium.Cartesian3()
+    );
+    const angle = Cesium.Cartesian3.angleBetween(start, end);
+    if (angle < 1e-8) return [...section.start];
+    const denominator = Math.sin(angle);
+    const point = Cesium.Cartesian3.add(
+      Cesium.Cartesian3.multiplyByScalar(start, Math.sin((1 - fraction) * angle) / denominator, new Cesium.Cartesian3()),
+      Cesium.Cartesian3.multiplyByScalar(end, Math.sin(fraction * angle) / denominator, new Cesium.Cartesian3()),
+      new Cesium.Cartesian3()
+    );
+    Cesium.Cartesian3.normalize(point, point);
+    return [
+      Cesium.Math.toDegrees(Math.atan2(point.y, point.x)),
+      Cesium.Math.toDegrees(Math.asin(Math.max(-1, Math.min(1, point.z))))
+    ];
+  }
+
+  private createWarpedGridGeometry(
+    horizontalSegments: number,
+    verticalSegments: number,
+    vertexAt: (u: number, v: number) => {
+      lonLat: [number, number];
+      volume: [number, number, number];
+      height: number;
+    }
+  ): any {
+    const sts: number[] = [];
+    const heights: number[] = [];
+    const lonLats: number[] = [];
+    const volumePositions: number[] = [];
+    const cartesianPositions: Cesium.Cartesian3[] = [];
+    const indices: number[] = [];
+    for (let y = 0; y <= verticalSegments; y++) {
+      const v = y / verticalSegments;
+      for (let x = 0; x <= horizontalSegments; x++) {
+        const u = x / horizontalSegments;
+        const vertex = vertexAt(u, v);
+        sts.push(u, v);
+        heights.push(vertex.height);
+        lonLats.push(...vertex.lonLat);
+        volumePositions.push(...vertex.volume);
+        cartesianPositions.push(Cesium.Cartesian3.fromDegrees(...vertex.lonLat, vertex.height));
+      }
+    }
+    const row = horizontalSegments + 1;
+    for (let y = 0; y < verticalSegments; y++) {
+      for (let x = 0; x < horizontalSegments; x++) {
+        const lowerLeft = y * row + x;
+        indices.push(lowerLeft, lowerLeft + 1, lowerLeft + row);
+        indices.push(lowerLeft + 1, lowerLeft + row + 1, lowerLeft + row);
+      }
+    }
+    const indexArray = sts.length / 2 > 65535 ? new Uint32Array(indices) : new Uint16Array(indices);
+    return new Renderer.Geometry({
+      attributes: {
+        st: new Renderer.GeometryAttribute({
+          componentDatatype: Renderer.ComponentDatatype.FLOAT,
+          componentsPerAttribute: 2,
+          values: new Float32Array(sts)
+        }),
+        a_height: new Renderer.GeometryAttribute({
+          componentDatatype: Renderer.ComponentDatatype.FLOAT,
+          componentsPerAttribute: 1,
+          values: new Float32Array(heights)
+        }),
+        a_lonLat: new Renderer.GeometryAttribute({
+          componentDatatype: Renderer.ComponentDatatype.FLOAT,
+          componentsPerAttribute: 2,
+          values: new Float32Array(lonLats)
+        }),
+        a_volumePosition: new Renderer.GeometryAttribute({
+          componentDatatype: Renderer.ComponentDatatype.FLOAT,
+          componentsPerAttribute: 3,
+          values: new Float32Array(volumePositions)
+        })
+      },
+      indices: indexArray,
+      primitiveType: Renderer.PrimitiveType.TRIANGLES,
+      boundingSphere: Cesium.BoundingSphere.fromPoints(cartesianPositions)
     });
   }
 

@@ -31,7 +31,7 @@ optional colorScale: [number, number, number][];
 ### crs?
 
 ```ts
-optional crs: CRS | null;
+optional crs: string | null;
 ```
 
 ***
@@ -105,6 +105,16 @@ optional onAuthError: OnAuthError;
 ```ts
 optional opacity: number;
 ```
+
+***
+
+### proj4?
+
+```ts
+optional proj4: string | Record<string, unknown>;
+```
+
+Proj4, WKT2, or PROJJSON definition for an arbitrary rectilinear source CRS.
 
 ***
 

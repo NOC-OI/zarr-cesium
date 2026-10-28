@@ -85,7 +85,7 @@ interface VelocityOptions {
   urls?: { u?: string; v?: string }; // URLs. Each is required unless its store is supplied
   stores?: { u?: Readable; v?: Readable }; // Custom U/V stores, including IcechunkStore
   variables: { u: string; v: string }; // Zarr array names for U and V
-  bounds: BoundsProps; // geographic rectangle
+  bounds?: BoundsProps; // geographic subset; full source coverage when omitted
   latIsAscending?: boolean; // Override latitude array orientation when metadata is incorrect
   dimensionNames?: DimensionNamesProps; // Custom dimension names. If not provided, defaults will be used or identified automatically based on CF conventions.
   selectors?: Record<string, ZarrSelectorsProps>; // Initial dimension slices
@@ -100,6 +100,7 @@ interface VelocityOptions {
   scale?: [number, number]; // Min/max for color scaling
   windOptions?: Partial<WindLayerOptions>; // Additional WindLayer configuration
   crs?: CRS; // Force CRS (auto-detected if not set)
+  proj4?: string | Record<string, unknown>; // Definition shared by the U/V grids
   multiscaleFormat?: MultiscaleFormat; // 'auto' (default), 'legacy', or 'geozarr'
   requestOverrides?: RequestOverrides; // Static options shared by URL-backed U/V stores
   transformRequest?: TransformRequest; // Per-request auth, proxy, or signed URL transform
@@ -240,22 +241,39 @@ Plus user-configurable **particle system settings**:
 
 ## Supported CRS
 
-Zarr datasets may store coordinate values in:
-
-- `EPSG:4326` (lat, lon degrees)
-- `EPSG:3857` (Web Mercator meters)
+Regular rectilinear velocity grids may use any source CRS understood by proj4.
+Projected grids are resampled onto the configured geographic bounds and their
+grid-relative U/V vectors are rotated into local east/north components before
+being passed to the wind renderer. U and V must use the same CRS and coordinate
+grid. Curvilinear grids are not supported.
 
 The provider detects the CRS automatically using:
 
-- Zarr metadata
+- GeoZarr/CF projection metadata or root/array `crs` attributes
 - consolidated metadata
-- coordinate ranges (West/East > 360 → Web Mercator)
+- coordinate ranges when metadata is absent
+
+`bounds` is optional. When omitted, coverage is derived from the full projected
+X/Y axes. Supplying bounds limits both U and V to the same geographic subset
+and reduces the cost of resampling projected vectors.
+
 
 For example, you can set the CRS explicitly:
 
 ```ts
-// set CRS to Web Mercator in LayerOptions
-crs: 'EPSG:3857';
+crs: 'EPSG:3408',
+proj4: '+proj=laea +lat_0=90 +lon_0=0 +x_0=0 +y_0=0 +a=6371228 +b=6371228 +units=m +no_defs'
+```
+Or you can just supply the proj4 definition for an unregistered CRS:
+
+```ts
+proj4: '+proj=laea +lat_0=90 +lon_0=0 +x_0=0 +y_0=0 +a=6371228 +b=6371228 +units=m +no_defs'
+```
+
+Or you just pass the CRS code when you are using a registered CRS (e.g., EPSG:4326, EPSG:3857:
+
+```ts
+crs: 'EPSG:4326'
 ```
 
 ---

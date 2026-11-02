@@ -4,6 +4,7 @@ Controls a shared Zarr data query.
 
 ## Extended by
 
+- [`QueryStreamOptions`](QueryStreamOptions.md)
 - [`TransectQueryOptions`](TransectQueryOptions.md)
 
 ## Properties
@@ -11,7 +12,7 @@ Controls a shared Zarr data query.
 ### includeSpatialCoordinates?
 
 ```ts
-optional includeSpatialCoordinates: boolean;
+includeSpatialCoordinates?: boolean;
 ```
 
 Include the queried WGS84 position in the result. Defaults to true.
@@ -21,7 +22,7 @@ Include the queried WGS84 position in the result. Defaults to true.
 ### level?
 
 ```ts
-optional level: number | "finest";
+level?: number | "finest";
 ```
 
 Map zoom to query. The finest available resolution is used by default.
@@ -31,7 +32,7 @@ Map zoom to query. The finest available resolution is used by default.
 ### signal?
 
 ```ts
-optional signal: AbortSignal;
+signal?: AbortSignal;
 ```
 
 Cancels both the remote Zarr read and result processing.

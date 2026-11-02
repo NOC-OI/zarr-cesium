@@ -13,15 +13,22 @@ import {
   getTimeSeries as queryTimeSeries,
   getTransect as queryTransect,
   getVerticalProfile as queryVerticalProfile,
+  streamFullTransect as queryFullTransectStream,
+  streamTimeSeries as queryTimeSeriesStream,
+  streamTransect as queryTransectStream,
+  streamVerticalProfile as queryVerticalProfileStream,
   initZarrDataset,
   resolveCRS,
   type QueryGeometry,
   type QueryOptions,
+  type QueryStreamOptions,
   type QueryPosition,
   type QueryResult,
   type FullTransectResult,
+  type FullTransectStreamChunk,
   type TransectQueryOptions,
   type TransectResult,
+  type TransectStreamChunk,
   type ZarrSelectors
 } from 'zarr-maps-tiling';
 import {
@@ -508,6 +515,22 @@ export class ZarrCubeProvider {
     return queryVerticalProfile(this, position, selectors, options);
   }
 
+  streamTimeSeries(
+    position: QueryPosition,
+    selectors?: ZarrSelectors,
+    options?: QueryStreamOptions
+  ) {
+    return queryTimeSeriesStream(this, position, selectors, options);
+  }
+
+  streamVerticalProfile(
+    position: QueryPosition,
+    selectors?: ZarrSelectors,
+    options?: QueryStreamOptions
+  ) {
+    return queryVerticalProfileStream(this, position, selectors, options);
+  }
+
   /**
    * Samples one selected elevation along a WGS84 line.
    *
@@ -542,6 +565,24 @@ export class ZarrCubeProvider {
     options?: TransectQueryOptions
   ): Promise<FullTransectResult> {
     return queryFullTransect(this, start, end, selectors, options);
+  }
+
+  streamTransect(
+    start: QueryPosition,
+    end: QueryPosition,
+    selectors?: ZarrSelectors,
+    options?: TransectQueryOptions & { chunkSize?: number }
+  ): AsyncGenerator<TransectStreamChunk> {
+    return queryTransectStream(this, start, end, selectors, options);
+  }
+
+  streamFullTransect(
+    start: QueryPosition,
+    end: QueryPosition,
+    selectors?: ZarrSelectors,
+    options?: TransectQueryOptions & { chunkSize?: number }
+  ): AsyncGenerator<FullTransectStreamChunk> {
+    return queryFullTransectStream(this, start, end, selectors, options);
   }
 
   private throwIfQueryAborted(signal?: AbortSignal): void {

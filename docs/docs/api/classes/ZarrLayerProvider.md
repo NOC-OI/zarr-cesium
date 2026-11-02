@@ -26,9 +26,7 @@ Dataset attribution exposed to Cesium.
 
 #### Implementation of
 
-```ts
-ImageryProvider.credit
-```
+`ImageryProvider.credit`
 
 ***
 
@@ -64,9 +62,7 @@ Cesium imagery-provider error event.
 
 #### Implementation of
 
-```ts
-ImageryProvider.errorEvent
-```
+`ImageryProvider.errorEvent`
 
 ***
 
@@ -86,9 +82,7 @@ Whether rendered tiles contain alpha values. Always `true`.
 
 #### Implementation of
 
-```ts
-ImageryProvider.hasAlphaChannel
-```
+`ImageryProvider.hasAlphaChannel`
 
 ***
 
@@ -108,9 +102,7 @@ Maximum imagery level requested by Cesium.
 
 #### Implementation of
 
-```ts
-ImageryProvider.maximumLevel
-```
+`ImageryProvider.maximumLevel`
 
 ***
 
@@ -130,9 +122,7 @@ Minimum imagery level requested by Cesium.
 
 #### Implementation of
 
-```ts
-ImageryProvider.minimumLevel
-```
+`ImageryProvider.minimumLevel`
 
 ***
 
@@ -184,9 +174,7 @@ Geographic coverage of the dataset.
 
 #### Implementation of
 
-```ts
-ImageryProvider.rectangle
-```
+`ImageryProvider.rectangle`
 
 ***
 
@@ -238,9 +226,7 @@ Height of rendered imagery tiles in pixels.
 
 #### Implementation of
 
-```ts
-ImageryProvider.tileHeight
-```
+`ImageryProvider.tileHeight`
 
 ***
 
@@ -260,9 +246,7 @@ Width of rendered imagery tiles in pixels.
 
 #### Implementation of
 
-```ts
-ImageryProvider.tileWidth
-```
+`ImageryProvider.tileWidth`
 
 ***
 
@@ -282,9 +266,7 @@ Cesium tiling scheme selected from the detected dataset CRS.
 
 #### Implementation of
 
-```ts
-ImageryProvider.tilingScheme
-```
+`ImageryProvider.tilingScheme`
 
 ## Constructors
 
@@ -344,10 +326,11 @@ Aborts pending reads and releases tile-renderer resources.
 
 ```ts
 getFullTransect(
-   start, 
-   end, 
-   selectors?, 
-options?): Promise<FullTransectResult>;
+   start,
+   end,
+   selectors?,
+   options?
+): Promise<FullTransectResult>;
 ```
 
 Samples all elevation levels along a line between two WGS84 positions.
@@ -383,9 +366,7 @@ Credit entries associated with every rendered tile.
 
 #### Implementation of
 
-```ts
-ImageryProvider.getTileCredits
-```
+`ImageryProvider.getTileCredits`
 
 ***
 
@@ -393,9 +374,10 @@ ImageryProvider.getTileCredits
 
 ```ts
 getTimeSeries(
-   position, 
-   selectors?, 
-options?): Promise<QueryResult>;
+   position,
+   selectors?,
+   options?
+): Promise<QueryResult>;
 ```
 
 Reads every time value at one WGS84 position.
@@ -420,10 +402,11 @@ A query result ordered by the time coordinate.
 
 ```ts
 getTransect(
-   start, 
-   end, 
-   selectors?, 
-options?): Promise<TransectResult>;
+   start,
+   end,
+   selectors?,
+   options?
+): Promise<TransectResult>;
 ```
 
 Samples one selected level along a line between two WGS84 positions.
@@ -449,9 +432,10 @@ Distances, positions, and scalar values along the transect.
 
 ```ts
 getVerticalProfile(
-   position, 
-   selectors?, 
-options?): Promise<QueryResult>;
+   position,
+   selectors?,
+   options?
+): Promise<QueryResult>;
 ```
 
 Reads every elevation value at one WGS84 position.
@@ -476,11 +460,12 @@ A query result ordered by the elevation coordinate.
 
 ```ts
 pickFeatures(
-   _x, 
-   _y, 
-   level, 
-   longitude, 
-latitude): Promise<ImageryLayerFeatureInfo[]>;
+   _x,
+   _y,
+   level,
+   longitude,
+   latitude
+): Promise<ImageryLayerFeatureInfo[]>;
 ```
 
 Queries the feature underneath a Cesium imagery pick position.
@@ -503,9 +488,7 @@ Zero or one feature containing the queried value and coordinates.
 
 #### Implementation of
 
-```ts
-ImageryProvider.pickFeatures
-```
+`ImageryProvider.pickFeatures`
 
 ***
 
@@ -513,9 +496,10 @@ ImageryProvider.pickFeatures
 
 ```ts
 queryData(
-   geometry, 
-   selectors?, 
-options?): Promise<QueryResult>;
+   geometry,
+   selectors?,
+   options?
+): Promise<QueryResult>;
 ```
 
 Queries the nearest raster cell for a WGS84 GeoJSON point.
@@ -544,10 +528,11 @@ For unsupported geometries, invalid selectors, or failed reads.
 
 ```ts
 requestImage(
-   x, 
-   y, 
-   level, 
-_request?): Promise<HTMLCanvasElement | ImageBitmap>;
+   x,
+   y,
+   level,
+   _request?
+): Promise<HTMLCanvasElement | ImageBitmap>;
 ```
 
 Renders one Cesium imagery tile.
@@ -569,9 +554,107 @@ A vertically oriented canvas or image bitmap suitable for Cesium.
 
 #### Implementation of
 
+`ImageryProvider.requestImage`
+
+***
+
+### streamFullTransect()
+
 ```ts
-ImageryProvider.requestImage
+streamFullTransect(
+   start,
+   end,
+   selectors?,
+   options?
+): AsyncGenerator<FullTransectStreamChunk>;
 ```
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `start` | [`QueryPosition`](../type-aliases/QueryPosition.md) |
+| `end` | [`QueryPosition`](../type-aliases/QueryPosition.md) |
+| `selectors?` | [`ZarrSelectors`](../interfaces/ZarrSelectors.md) |
+| `options?` | [`TransectQueryOptions`](../interfaces/TransectQueryOptions.md) & `object` |
+
+#### Returns
+
+`AsyncGenerator`\<[`FullTransectStreamChunk`](../interfaces/FullTransectStreamChunk.md)\>
+
+***
+
+### streamTimeSeries()
+
+```ts
+streamTimeSeries(
+   position,
+   selectors?,
+   options?
+): AsyncGenerator<QueryResult, any, any>;
+```
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `position` | [`QueryPosition`](../type-aliases/QueryPosition.md) |
+| `selectors?` | [`ZarrSelectors`](../interfaces/ZarrSelectors.md) |
+| `options?` | [`QueryStreamOptions`](../interfaces/QueryStreamOptions.md) |
+
+#### Returns
+
+`AsyncGenerator`\<[`QueryResult`](../interfaces/QueryResult.md), `any`, `any`\>
+
+***
+
+### streamTransect()
+
+```ts
+streamTransect(
+   start,
+   end,
+   selectors?,
+   options?
+): AsyncGenerator<TransectStreamChunk>;
+```
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `start` | [`QueryPosition`](../type-aliases/QueryPosition.md) |
+| `end` | [`QueryPosition`](../type-aliases/QueryPosition.md) |
+| `selectors?` | [`ZarrSelectors`](../interfaces/ZarrSelectors.md) |
+| `options?` | [`TransectQueryOptions`](../interfaces/TransectQueryOptions.md) & `object` |
+
+#### Returns
+
+`AsyncGenerator`\<[`TransectStreamChunk`](../interfaces/TransectStreamChunk.md)\>
+
+***
+
+### streamVerticalProfile()
+
+```ts
+streamVerticalProfile(
+   position,
+   selectors?,
+   options?
+): AsyncGenerator<QueryResult, any, any>;
+```
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `position` | [`QueryPosition`](../type-aliases/QueryPosition.md) |
+| `selectors?` | [`ZarrSelectors`](../interfaces/ZarrSelectors.md) |
+| `options?` | [`QueryStreamOptions`](../interfaces/QueryStreamOptions.md) |
+
+#### Returns
+
+`AsyncGenerator`\<[`QueryResult`](../interfaces/QueryResult.md), `any`, `any`\>
 
 ***
 
@@ -670,9 +753,7 @@ Gets the proxy used by this provider.
 
 #### Implementation of
 
-```ts
-ImageryProvider.proxy
-```
+`ImageryProvider.proxy`
 
 ***
 
@@ -688,6 +769,4 @@ returns undefined, no tiles are filtered.
 
 #### Implementation of
 
-```ts
-ImageryProvider.tileDiscardPolicy
-```
+`ImageryProvider.tileDiscardPolicy`

@@ -16,13 +16,16 @@ import {
   ZarrTileProvider,
   type DimensionValues,
   type FullTransectResult,
+  type FullTransectStreamChunk,
   type QueryGeometry,
   type QueryOptions,
+  type QueryStreamOptions,
   type QueryPosition,
   type QueryResult,
   type TileCacheStats,
   type TransectQueryOptions,
   type TransectResult,
+  type TransectStreamChunk,
   type ZarrSelectors,
   type ZarrSelectorsProps
 } from 'zarr-maps-tiling';
@@ -265,6 +268,22 @@ export class ZarrLayerProvider implements ImageryProvider {
     return this.source.getVerticalProfile(position, selectors, options);
   }
 
+  streamTimeSeries(
+    position: QueryPosition,
+    selectors?: ZarrSelectors,
+    options?: QueryStreamOptions
+  ) {
+    return this.source.streamTimeSeries(position, selectors, options);
+  }
+
+  streamVerticalProfile(
+    position: QueryPosition,
+    selectors?: ZarrSelectors,
+    options?: QueryStreamOptions
+  ) {
+    return this.source.streamVerticalProfile(position, selectors, options);
+  }
+
   /**
    * Samples one selected level along a line between two WGS84 positions.
    *
@@ -299,6 +318,24 @@ export class ZarrLayerProvider implements ImageryProvider {
     options?: TransectQueryOptions
   ): Promise<FullTransectResult> {
     return this.source.getFullTransect(start, end, selectors, options);
+  }
+
+  streamTransect(
+    start: QueryPosition,
+    end: QueryPosition,
+    selectors?: ZarrSelectors,
+    options?: TransectQueryOptions & { chunkSize?: number }
+  ): AsyncGenerator<TransectStreamChunk> {
+    return this.source.streamTransect(start, end, selectors, options);
+  }
+
+  streamFullTransect(
+    start: QueryPosition,
+    end: QueryPosition,
+    selectors?: ZarrSelectors,
+    options?: TransectQueryOptions & { chunkSize?: number }
+  ): AsyncGenerator<FullTransectStreamChunk> {
+    return this.source.streamFullTransect(start, end, selectors, options);
   }
 
   /**

@@ -142,7 +142,7 @@ The currently loaded array remains in memory. Call [load](#load) or
 ### getCrossSection()
 
 ```ts
-getCrossSection(): 
+getCrossSection():
   | {
   end: CubeCrossSectionPoint;
   start: CubeCrossSectionPoint;
@@ -166,10 +166,11 @@ Returns the active arbitrary cross-section, if one is displayed.
 
 ```ts
 getFullTransect(
-   start, 
-   end, 
-   selectors?, 
-options?): Promise<FullTransectResult>;
+   start,
+   end,
+   selectors?,
+   options?
+): Promise<FullTransectResult>;
 ```
 
 Samples every loaded elevation along a WGS84 line.
@@ -229,9 +230,10 @@ lonSliceIndex: number;
 
 ```ts
 getTimeSeries(
-   position, 
-   selectors?, 
-options?): Promise<QueryResult>;
+   position,
+   selectors?,
+   options?
+): Promise<QueryResult>;
 ```
 
 Queries all available time coordinates at one WGS84 position.
@@ -256,10 +258,11 @@ A result ordered by the time coordinate.
 
 ```ts
 getTransect(
-   start, 
-   end, 
-   selectors?, 
-options?): Promise<TransectResult>;
+   start,
+   end,
+   selectors?,
+   options?
+): Promise<TransectResult>;
 ```
 
 Samples one selected elevation along a WGS84 line.
@@ -285,9 +288,10 @@ Positions, distances, and values along the transect.
 
 ```ts
 getVerticalProfile(
-   position, 
-   selectors?, 
-options?): Promise<QueryResult>;
+   position,
+   selectors?,
+   options?
+): Promise<QueryResult>;
 ```
 
 Queries all loaded elevation coordinates at one WGS84 position.
@@ -311,7 +315,7 @@ A result ordered by elevation.
 ### load()
 
 ```ts
-load(force): Promise<void>;
+load(force?): Promise<void>;
 ```
 
 Loads the Zarr dataset and initializes the cube data and metadata.
@@ -320,7 +324,7 @@ Loads the Zarr dataset and initializes the cube data and metadata.
 
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
-| `force` | `boolean` | `false` | Recreate slice primitives even when their indices did not change. |
+| `force?` | `boolean` | `false` | Recreate slice primitives even when their indices did not change. |
 
 #### Returns
 
@@ -344,9 +348,10 @@ Calling `load` again replaces the in-memory subset. Use
 
 ```ts
 queryData(
-   geometry, 
-   selectors?, 
-options?): Promise<QueryResult>;
+   geometry,
+   selectors?,
+   options?
+): Promise<QueryResult>;
 ```
 
 Queries a voxel or vertical profile from the cube subset currently held in memory.
@@ -395,6 +400,106 @@ Displays an arbitrary vertical cross-section between two geographic points.
 #### Throws
 
 When an endpoint is invalid, outside the loaded bounds, or GPU rendering is unavailable.
+
+***
+
+### streamFullTransect()
+
+```ts
+streamFullTransect(
+   start,
+   end,
+   selectors?,
+   options?
+): AsyncGenerator<FullTransectStreamChunk>;
+```
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `start` | [`QueryPosition`](../type-aliases/QueryPosition.md) |
+| `end` | [`QueryPosition`](../type-aliases/QueryPosition.md) |
+| `selectors?` | [`ZarrSelectors`](../interfaces/ZarrSelectors.md) |
+| `options?` | [`TransectQueryOptions`](../interfaces/TransectQueryOptions.md) & `object` |
+
+#### Returns
+
+`AsyncGenerator`\<[`FullTransectStreamChunk`](../interfaces/FullTransectStreamChunk.md)\>
+
+***
+
+### streamTimeSeries()
+
+```ts
+streamTimeSeries(
+   position,
+   selectors?,
+   options?
+): AsyncGenerator<QueryResult, any, any>;
+```
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `position` | [`QueryPosition`](../type-aliases/QueryPosition.md) |
+| `selectors?` | [`ZarrSelectors`](../interfaces/ZarrSelectors.md) |
+| `options?` | [`QueryStreamOptions`](../interfaces/QueryStreamOptions.md) |
+
+#### Returns
+
+`AsyncGenerator`\<[`QueryResult`](../interfaces/QueryResult.md), `any`, `any`\>
+
+***
+
+### streamTransect()
+
+```ts
+streamTransect(
+   start,
+   end,
+   selectors?,
+   options?
+): AsyncGenerator<TransectStreamChunk>;
+```
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `start` | [`QueryPosition`](../type-aliases/QueryPosition.md) |
+| `end` | [`QueryPosition`](../type-aliases/QueryPosition.md) |
+| `selectors?` | [`ZarrSelectors`](../interfaces/ZarrSelectors.md) |
+| `options?` | [`TransectQueryOptions`](../interfaces/TransectQueryOptions.md) & `object` |
+
+#### Returns
+
+`AsyncGenerator`\<[`TransectStreamChunk`](../interfaces/TransectStreamChunk.md)\>
+
+***
+
+### streamVerticalProfile()
+
+```ts
+streamVerticalProfile(
+   position,
+   selectors?,
+   options?
+): AsyncGenerator<QueryResult, any, any>;
+```
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `position` | [`QueryPosition`](../type-aliases/QueryPosition.md) |
+| `selectors?` | [`ZarrSelectors`](../interfaces/ZarrSelectors.md) |
+| `options?` | [`QueryStreamOptions`](../interfaces/QueryStreamOptions.md) |
+
+#### Returns
+
+`AsyncGenerator`\<[`QueryResult`](../interfaces/QueryResult.md), `any`, `any`\>
 
 ***
 

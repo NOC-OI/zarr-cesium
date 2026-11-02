@@ -106,9 +106,10 @@ Loaded U/V arrays and selectors remain in memory. Call
 
 ```ts
 getTimeSeries(
-   position, 
-   selectors?, 
-options?): Promise<QueryResult>;
+   position,
+   selectors?,
+   options?
+): Promise<QueryResult>;
 ```
 
 Queries all time values and vector components at one position.
@@ -133,9 +134,10 @@ Speed and component values ordered by time.
 
 ```ts
 getVerticalProfile(
-   position, 
-   selectors?, 
-options?): Promise<QueryResult>;
+   position,
+   selectors?,
+   options?
+): Promise<QueryResult>;
 ```
 
 Queries all loaded elevation values and vector components at one position.
@@ -185,9 +187,10 @@ U and V must describe compatible grids.
 
 ```ts
 queryData(
-   geometry, 
-   selectors, 
-options): Promise<VelocityQueryResult>;
+   geometry,
+   selectors?,
+   options?
+): Promise<VelocityQueryResult>;
 ```
 
 Queries velocity components and derived speed at a WGS84 point.
@@ -197,8 +200,8 @@ Queries velocity components and derived speed at a WGS84 point.
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `geometry` | [`QueryGeometry`](../type-aliases/QueryGeometry.md) | Point geometry in `[longitude, latitude]` degrees. |
-| `selectors` | [`ZarrSelectors`](../interfaces/ZarrSelectors.md) | Optional time/elevation selectors for this query. |
-| `options` | [`QueryOptions`](../interfaces/QueryOptions.md) | Cancellation and coordinate-output controls. |
+| `selectors?` | [`ZarrSelectors`](../interfaces/ZarrSelectors.md) | Optional time/elevation selectors for this query. |
+| `options?` | [`QueryOptions`](../interfaces/QueryOptions.md) | Cancellation and coordinate-output controls. |
 
 #### Returns
 
@@ -214,6 +217,54 @@ For unsupported geometries, invalid selectors, or failed reads.
 
 A ranged elevation selector returns a vertical profile; a ranged
 time selector reads the source arrays instead of only the rendered layers.
+
+***
+
+### streamTimeSeries()
+
+```ts
+streamTimeSeries(
+   position,
+   selectors?,
+   options?
+): AsyncGenerator<QueryResult, any, any>;
+```
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `position` | [`QueryPosition`](../type-aliases/QueryPosition.md) |
+| `selectors?` | [`ZarrSelectors`](../interfaces/ZarrSelectors.md) |
+| `options?` | [`QueryStreamOptions`](../interfaces/QueryStreamOptions.md) |
+
+#### Returns
+
+`AsyncGenerator`\<[`QueryResult`](../interfaces/QueryResult.md), `any`, `any`\>
+
+***
+
+### streamVerticalProfile()
+
+```ts
+streamVerticalProfile(
+   position,
+   selectors?,
+   options?
+): AsyncGenerator<QueryResult, any, any>;
+```
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `position` | [`QueryPosition`](../type-aliases/QueryPosition.md) |
+| `selectors?` | [`ZarrSelectors`](../interfaces/ZarrSelectors.md) |
+| `options?` | [`QueryStreamOptions`](../interfaces/QueryStreamOptions.md) |
+
+#### Returns
+
+`AsyncGenerator`\<[`QueryResult`](../interfaces/QueryResult.md), `any`, `any`\>
 
 ***
 

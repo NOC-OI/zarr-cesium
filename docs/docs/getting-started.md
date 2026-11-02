@@ -106,6 +106,32 @@ const transect = await cube.getTransect([-5, 50], [-3, 51], undefined, {
 Input positions use WGS84 longitude/latitude. Pass an `AbortSignal` through
 query options to cancel long-running reads.
 
+For progressive results, use the streaming methods. Each returns an async
+iterable and yields ordered chunks as data is read:
+
+```ts
+for await (const chunk of layer.imageryProvider.streamTimeSeries(
+  [-4.2, 50.1],
+  {},
+  { chunkSize: 32 }
+)) {
+  updateChart(chunk);
+}
+
+for await (const chunk of cube.streamTransect(
+  [-5, 50],
+  [-3, 51],
+  undefined,
+  { samples: 100, chunkSize: 16 }
+)) {
+  updateTransectChart(chunk);
+}
+```
+
+The available methods are `streamTimeSeries`, `streamVerticalProfile`,
+`streamTransect`, and `streamFullTransect`. Existing promise-based methods
+remain available when a complete result is preferred.
+
 ---
 
 ## Rendering 3D Volumes (ZarrCubeProvider)

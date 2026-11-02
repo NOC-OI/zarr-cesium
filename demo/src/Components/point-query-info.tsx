@@ -46,9 +46,9 @@ export function PointQueryInfo({ provider, layerName, longitude, latitude }: Poi
   const position = useMemo<[number, number]>(() => [longitude, latitude], [longitude, latitude]);
   const query = useCallback(
     (mode: PointQueryMode, signal: AbortSignal) => {
-      const options = { level: 'finest' as const, signal };
-      if (mode === 'profile') return provider.getVerticalProfile(position, selectors, options);
-      if (mode === 'time') return provider.getTimeSeries(position, selectors, options);
+      const options = { level: 'finest' as const, signal, chunkSize: 32 };
+      if (mode === 'profile') return provider.streamVerticalProfile(position, selectors, options);
+      if (mode === 'time') return provider.streamTimeSeries(position, selectors, options);
       return provider.queryData({ type: 'Point', coordinates: position }, selectors, options);
     },
     [position, provider, selectors]

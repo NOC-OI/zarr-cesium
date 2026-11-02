@@ -11,6 +11,8 @@ import {
   getZarrData,
   getTimeSeries as queryTimeSeries,
   getVerticalProfile as queryVerticalProfile,
+  streamTimeSeries as queryTimeSeriesStream,
+  streamVerticalProfile as queryVerticalProfileStream,
   initZarrDataset,
   resolveCRS
 } from 'zarr-maps-tiling';
@@ -33,6 +35,7 @@ import type {
   QueryOptions,
   QueryPosition,
   QueryResult,
+  QueryStreamOptions,
   ZarrSelectors
 } from 'zarr-maps-tiling';
 import { colormapBuilder } from 'zarr-maps-colormap';
@@ -691,6 +694,14 @@ export class ZarrCubeVelocityProvider {
     return queryVerticalProfile(this, position, selectors, options);
   }
 
+  streamVerticalProfile(
+    position: QueryPosition,
+    selectors?: ZarrSelectors,
+    options?: QueryStreamOptions
+  ) {
+    return queryVerticalProfileStream(this, position, selectors, options);
+  }
+
   /** Query all times at the first (lowest-index) loaded Zarr elevation. */
   /**
    * Queries all time values and vector components at one position.
@@ -706,6 +717,14 @@ export class ZarrCubeVelocityProvider {
     options?: QueryOptions
   ): Promise<QueryResult> {
     return queryTimeSeries(this, position, selectors, options);
+  }
+
+  streamTimeSeries(
+    position: QueryPosition,
+    selectors?: ZarrSelectors,
+    options?: QueryStreamOptions
+  ) {
+    return queryTimeSeriesStream(this, position, selectors, options);
   }
 
   private resolveElevationIndices(selection?: ZarrSelectorsProps): number[] {

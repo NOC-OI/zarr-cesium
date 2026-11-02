@@ -243,6 +243,19 @@ const transect = await cube.getTransect([-5, 50], [-3, 51], undefined, {
 });
 ```
 
+Long-running queries can be consumed progressively with the streaming methods:
+
+```ts
+for await (const chunk of cube.streamTransect(
+  [-5, 50],
+  [-3, 51],
+  undefined,
+  { samples: 100, chunkSize: 16 }
+)) {
+  updateChart(chunk);
+}
+```
+
 Query positions use WGS84 longitude/latitude. Query options support abort signals, coordinate omission, resolution selection, transect sample count, and concurrency limits.
 
 ![Example of data querying.](https://github.com/NOC-OI/zarr-cesium/releases/download/readme-assets-v1/query.gif)

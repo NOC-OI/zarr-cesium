@@ -38,8 +38,8 @@ export function TransectQueryInfo({
     ) => {
       const options = { samples, concurrency: 6, signal };
       return full
-        ? provider.getFullTransect(start, end, undefined, options)
-        : provider.getTransect(start, end, undefined, options);
+        ? provider.streamFullTransect(start, end, undefined, { ...options, chunkSize: 2 })
+        : provider.streamTransect(start, end, undefined, { ...options, chunkSize: 16 });
     },
     [provider]
   );

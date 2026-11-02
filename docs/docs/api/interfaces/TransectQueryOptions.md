@@ -11,7 +11,7 @@ Sampling controls for one-level and full-depth transects.
 ### concurrency?
 
 ```ts
-optional concurrency: number;
+concurrency?: number;
 ```
 
 Maximum point queries in flight. Defaults to 6.
@@ -21,7 +21,7 @@ Maximum point queries in flight. Defaults to 6.
 ### includeSpatialCoordinates?
 
 ```ts
-optional includeSpatialCoordinates: boolean;
+includeSpatialCoordinates?: boolean;
 ```
 
 Include the queried WGS84 position in the result. Defaults to true.
@@ -35,7 +35,7 @@ Include the queried WGS84 position in the result. Defaults to true.
 ### level?
 
 ```ts
-optional level: number | "finest";
+level?: number | "finest";
 ```
 
 Map zoom to query. The finest available resolution is used by default.
@@ -49,7 +49,7 @@ Map zoom to query. The finest available resolution is used by default.
 ### samples?
 
 ```ts
-optional samples: number;
+samples?: number;
 ```
 
 Number of evenly spaced points, including both endpoints. Defaults to 64.
@@ -59,7 +59,7 @@ Number of evenly spaced points, including both endpoints. Defaults to 64.
 ### signal?
 
 ```ts
-optional signal: AbortSignal;
+signal?: AbortSignal;
 ```
 
 Cancels both the remote Zarr read and result processing.

@@ -391,6 +391,21 @@ Queries use the finest level by default. Supply `{ level: number }` to query a
 coarser level, `{ includeSpatialCoordinates: false }` for smaller results, or
 `{ signal }` to support cancellation.
 
+Long-running queries can also be consumed progressively:
+
+```ts
+for await (const chunk of provider.streamTimeSeries(
+  [-4.2, 50.1],
+  undefined,
+  { chunkSize: 32, signal }
+)) {
+  updateChart(chunk);
+}
+```
+
+`streamVerticalProfile`, `streamTransect`, and `streamFullTransect` are also
+available. Use `chunkSize` to control the amount of data yielded per iteration.
+
 ### Remove Layer
 
 To remove the layer and free resources:

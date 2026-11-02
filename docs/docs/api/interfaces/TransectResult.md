@@ -2,6 +2,10 @@
 
 A one-level transect. Values preserve no-data gaps as null.
 
+## Extended by
+
+- [`TransectStreamChunk`](TransectStreamChunk.md)
+
 ## Properties
 
 ### distancesKm

@@ -8,9 +8,10 @@ Minimal interface required by the framework-neutral convenience queries.
 
 ```ts
 queryData(
-   geometry, 
-   selectors?, 
-options?): Promise<QueryResult>;
+   geometry,
+   selectors?,
+   options?
+): Promise<QueryResult>;
 ```
 
 #### Parameters
@@ -30,10 +31,11 @@ options?): Promise<QueryResult>;
 ### queryPoints()?
 
 ```ts
-optional queryPoints(
-   positions, 
-   selectors?, 
-options?): Promise<QueryResult[]>;
+queryPoints?(
+   positions,
+   selectors?,
+   options?
+): Promise<QueryResult[]>;
 ```
 
 Optional chunk-aware batch lookup used by transects.
@@ -63,7 +65,7 @@ dimensionValues: DimensionValues;
 ### queryDimensionValues?
 
 ```ts
-readonly optional queryDimensionValues: DimensionValues;
+readonly queryDimensionValues?: DimensionValues;
 ```
 
 Coordinate values addressable by the current in-memory query backend.
@@ -75,7 +77,7 @@ narrower set without hiding the complete dataset coordinates.
 ### queryIndexOffsets?
 
 ```ts
-readonly optional queryIndexOffsets: Record<string, number>;
+readonly queryIndexOffsets?: Record<string, number>;
 ```
 
 Global index represented by local coordinate index zero, for subset-backed providers.

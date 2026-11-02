@@ -109,6 +109,11 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "api/interfaces/FullTransectStreamChunk",
+          label: "FullTransectStreamChunk"
+        },
+        {
+          type: "doc",
           id: "api/interfaces/LayerOptions",
           label: "LayerOptions"
         },
@@ -144,6 +149,11 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "api/interfaces/QueryStreamOptions",
+          label: "QueryStreamOptions"
+        },
+        {
+          type: "doc",
           id: "api/interfaces/RequestOverrides",
           label: "RequestOverrides"
         },
@@ -176,6 +186,11 @@ const typedocSidebar = {
           type: "doc",
           id: "api/interfaces/TransectResult",
           label: "TransectResult"
+        },
+        {
+          type: "doc",
+          id: "api/interfaces/TransectStreamChunk",
+          label: "TransectStreamChunk"
         },
         {
           type: "doc",
@@ -412,6 +427,26 @@ const typedocSidebar = {
           type: "doc",
           id: "api/functions/sourceBoundsToGeographic",
           label: "sourceBoundsToGeographic"
+        },
+        {
+          type: "doc",
+          id: "api/functions/streamFullTransect",
+          label: "streamFullTransect"
+        },
+        {
+          type: "doc",
+          id: "api/functions/streamTimeSeries",
+          label: "streamTimeSeries"
+        },
+        {
+          type: "doc",
+          id: "api/functions/streamTransect",
+          label: "streamTransect"
+        },
+        {
+          type: "doc",
+          id: "api/functions/streamVerticalProfile",
+          label: "streamVerticalProfile"
         },
         {
           type: "doc",

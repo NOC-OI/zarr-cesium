@@ -28,6 +28,7 @@
 | [DimensionValues](interfaces/DimensionValues.md) | Mapping of dimension names to their corresponding coordinate arrays. |
 | [DimIndicesProps](interfaces/DimIndicesProps.md) | Maps dimension keys to their indices and associated coordinate arrays. |
 | [FullTransectResult](interfaces/FullTransectResult.md) | A distance-by-elevation transect. Values are indexed [elevation][position]. |
+| [FullTransectStreamChunk](interfaces/FullTransectStreamChunk.md) | A streamed full-depth transect chunk. |
 | [LayerOptions](interfaces/LayerOptions.md) | - |
 | [QueryBackend](interfaces/QueryBackend.md) | Minimal interface required by the framework-neutral convenience queries. |
 | [QueryMultiPolygonGeometry](interfaces/QueryMultiPolygonGeometry.md) | GeoJSON multipolygon geometry, reserved for region-query support. |
@@ -35,6 +36,7 @@
 | [QueryPointGeometry](interfaces/QueryPointGeometry.md) | GeoJSON point geometry expressed as WGS84 longitude and latitude. |
 | [QueryPolygonGeometry](interfaces/QueryPolygonGeometry.md) | GeoJSON polygon geometry, reserved for region-query support. |
 | [QueryResult](interfaces/QueryResult.md) | Values and coordinates returned from a shared Zarr query. |
+| [QueryStreamOptions](interfaces/QueryStreamOptions.md) | Controls how many coordinates are returned by each streamed query chunk. |
 | [RequestOverrides](interfaces/RequestOverrides.md) | Serializable static fetch options suitable for application state and FetchStore. |
 | [RequestParameters](interfaces/RequestParameters.md) | - |
 | [ResolvedCRS](interfaces/ResolvedCRS.md) | Validated transformation between WGS84 and a rectilinear source grid. |
@@ -42,6 +44,7 @@
 | [TileCacheStats](interfaces/TileCacheStats.md) | Runtime counters for a provider's decoded tile cache. |
 | [TransectQueryOptions](interfaces/TransectQueryOptions.md) | Sampling controls for one-level and full-depth transects. |
 | [TransectResult](interfaces/TransectResult.md) | A one-level transect. Values preserve no-data gaps as null. |
+| [TransectStreamChunk](interfaces/TransectStreamChunk.md) | A streamed one-level transect chunk. |
 | [VelocityOptions](interfaces/VelocityOptions.md) | - |
 | [VelocityQueryResult](interfaces/VelocityQueryResult.md) | Values and coordinates returned from a shared Zarr query. |
 | [XYLimits](interfaces/XYLimits.md) | Describes the XY coordinate boundaries of a dataset. |
@@ -93,6 +96,10 @@
 | [resolveNoDataRange](functions/resolveNoDataRange.md) | Resolves the no-data value range for masking dataset values. |
 | [sampleTransectPositions](functions/sampleTransectPositions.md) | Builds evenly spaced WGS84 samples along the shortest longitude path. |
 | [sourceBoundsToGeographic](functions/sourceBoundsToGeographic.md) | Transform a source rectangle to WGS84 by sampling a regular interior grid. |
+| [streamFullTransect](functions/streamFullTransect.md) | Streams full-depth transect rows as they are read from the backend. |
+| [streamTimeSeries](functions/streamTimeSeries.md) | Streams time-series chunks as they are read from the backend. |
+| [streamTransect](functions/streamTransect.md) | Streams ordered chunks of a one-level transect. |
+| [streamVerticalProfile](functions/streamVerticalProfile.md) | Streams vertical-profile chunks as they are read from the backend. |
 | [updateImgData](functions/updateImgData.md) | Updates an [ImageData](https://developer.mozilla.org/en-US/docs/Web/API/ImageData) object with a new pixel color derived from a numeric value and a [ColorScaleProps](interfaces/ColorScaleProps.md) colormap. |
 | [validateBounds](functions/validateBounds.md) | Validates whether geographic bounds are logically consistent. |
 

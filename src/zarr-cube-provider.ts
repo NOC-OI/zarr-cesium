@@ -6,7 +6,6 @@ import {
   createFetchStore,
   createTransformedFetch,
   detectCRS,
-  extractNoDataMetadata,
   getZarrData,
   getCubeDimensions,
   getFullTransect as queryFullTransect,
@@ -18,6 +17,7 @@ import {
   streamTransect as queryTransectStream,
   streamVerticalProfile as queryVerticalProfileStream,
   initZarrDataset,
+  resolveValueMetadata,
   resolveCRS,
   type QueryGeometry,
   type QueryOptions,
@@ -258,13 +258,17 @@ export class ZarrCubeProvider {
     this.zarrArray = zarrArray as unknown as zarr.Array<any>;
     this.dimIndices = dimIndices;
     this.levelInfos = levelInfos;
-    this.scaleFactor = attrs.scale_factor ?? 1;
-    this.addOffset = attrs.add_offset ?? 0;
-    const noDataMetadata = extractNoDataMetadata(zarrArray);
-    this.fillValue = noDataMetadata.fillValue;
-    this.useFillValue = noDataMetadata.useFillValue;
-    this.noDataMin ??= noDataMetadata.metadataMin;
-    this.noDataMax ??= noDataMetadata.metadataMax;
+    const valueMetadata = resolveValueMetadata(
+      [attrs, zarrArray.attrs as Record<string, unknown>],
+      this.noDataMin,
+      this.noDataMax
+    );
+    this.scaleFactor = valueMetadata.scaleFactor;
+    this.addOffset = valueMetadata.addOffset;
+    this.fillValue = valueMetadata.fillValue;
+    this.useFillValue = valueMetadata.useFillValue;
+    this.noDataMin = valueMetadata.noDataMin;
+    this.noDataMax = valueMetadata.noDataMax;
 
     this.crs = this.crs || (this.projectionDefinition ? 'CUSTOM:SOURCE' : null) ||
       (await detectCRS(attrs, zarrArray));

@@ -14,6 +14,7 @@ import {
   streamTimeSeries as queryTimeSeriesStream,
   streamVerticalProfile as queryVerticalProfileStream,
   initZarrDataset,
+  resolveValueMetadata,
   resolveCRS
 } from 'zarr-maps-tiling';
 import {
@@ -140,6 +141,16 @@ export class ZarrCubeVelocityProvider {
   private windOptions: Partial<WindLayerOptions>;
   private zarrArrays: Partial<Record<'u' | 'v', zarr.Array<any>>> = {};
   private validityData: Partial<Record<'u' | 'v', Uint8Array>> = {};
+  private componentMetadata: Partial<Record<'u' | 'v', {
+    scaleFactor: number;
+    addOffset: number;
+    fillValue?: number;
+    useFillValue: boolean;
+    noDataMin: number;
+    noDataMax: number;
+  }>> = {};
+  private noDataMin?: number;
+  private noDataMax?: number;
   private dimIndices: DimIndicesProps = {};
   private longitudeIndices: number[] = [];
   private loadedOrigin = { x: 0, y: 0, elevation: 0 };
@@ -184,6 +195,8 @@ export class ZarrCubeVelocityProvider {
     this.zarrVersion = options.zarrVersion ?? null;
     const [min, max] = options.scale ?? [-3, 3];
     this.colormap = options.colormap || DEFAULT_COLORMAP;
+    this.noDataMin = options.noDataMin;
+    this.noDataMax = options.noDataMax;
     const colors = colormapBuilder(this.colormap, 'css', 255, this.opacity);
     this.colorScale = { min, max, colors };
     this.flipElevation = options.flipElevation ?? false;
@@ -257,6 +270,12 @@ export class ZarrCubeVelocityProvider {
     this.crs = projection.code;
 
     this.zarrArrays[component] = zarrArray as unknown as zarr.Array<any>;
+    const metadata = resolveValueMetadata(
+      [attrs, zarrArray.attrs as Record<string, unknown>],
+      this.noDataMin,
+      this.noDataMax
+    );
+    this.componentMetadata[component] = metadata;
     if (component === 'u') this.dimIndices = dimIndices;
 
     if (!dimIndices.elevation) {
@@ -298,7 +317,12 @@ export class ZarrCubeVelocityProvider {
       for (let lat = 0; lat < cube.dimensions[1]; lat++) {
         for (let lon = 0; lon < cube.dimensions[0]; lon++) {
           const position: Record<string, number> = { lon, lat, elevation };
-          arr[outputIndex++] = Number(cube.data.get(...spatialOrder.map(name => position[name])));
+          const rawValue = Number(cube.data.get(...spatialOrder.map(name => position[name])));
+          const value = rawValue * metadata.scaleFactor + metadata.addOffset;
+          const valid = Number.isFinite(value) &&
+            (!metadata.useFillValue || rawValue !== metadata.fillValue) &&
+            value >= metadata.noDataMin && value <= metadata.noDataMax;
+          arr[outputIndex++] = valid ? value : Number.NaN;
         }
       }
     }
@@ -413,6 +437,8 @@ export class ZarrCubeVelocityProvider {
     const targetV = new Float32Array(sourceV.length);
     const uValid = this.validityData.u;
     const vValid = this.validityData.v;
+    const targetUValid = new Uint8Array(sourceU.length);
+    const targetVValid = new Uint8Array(sourceV.length);
 
     const interval = (values: number[], target: number): [number, number, number] | null => {
       const ascending = values[values.length - 1] >= values[0];
@@ -434,7 +460,7 @@ export class ZarrCubeVelocityProvider {
       level: number,
       x: [number, number, number],
       y: [number, number, number]
-    ): number => {
+    ): { value: number; valid: boolean } => {
       const [x0, x1, tx] = x;
       const [y0, y1, ty] = y;
       const indices = [
@@ -443,10 +469,10 @@ export class ZarrCubeVelocityProvider {
         level * width * height + y1 * width + x0,
         level * width * height + y1 * width + x1
       ];
-      if (validity && indices.some(index => !validity[index])) return 0;
+      if (validity && indices.some(index => !validity[index])) return { value: 0, valid: false };
       const north = values[indices[0]] * (1 - tx) + values[indices[1]] * tx;
       const south = values[indices[2]] * (1 - tx) + values[indices[3]] * tx;
-      return north * (1 - ty) + south * ty;
+      return { value: north * (1 - ty) + south * ty, valid: true };
     };
     const delta = globalThis.Math.max(
       1,
@@ -468,18 +494,21 @@ export class ZarrCubeVelocityProvider {
         for (let level = 0; level < elevation; level++) {
           const u = sample(sourceU, uValid, level, xInterval, yInterval);
           const v = sample(sourceV, vValid, level, xInterval, yInterval);
+          const index = level * width * height + row * width + column;
+          if (!u.valid || !v.valid) continue;
           const [east, north] = this.rotateProjectedVector(
-            u,
-            v,
+            u.value,
+            v.value,
             x,
             y,
             longitude,
             latitude,
             delta
           );
-          const index = level * width * height + row * width + column;
           targetU[index] = east;
           targetV[index] = north;
+          targetUValid[index] = 1;
+          targetVValid[index] = 1;
         }
       }
     }
@@ -490,6 +519,8 @@ export class ZarrCubeVelocityProvider {
       lat: Float64Array.from({ length: height }, (_, index) =>
         this.bounds.south + index / globalThis.Math.max(1, height - 1) * (this.bounds.north - this.bounds.south))
     };
+    this.validityData.u = targetUValid;
+    this.validityData.v = targetVValid;
     return {
       uCube: { ...uCube, array: ndarray(targetU, [elevation, height, width]), dimensionValues },
       vCube: { ...vCube, array: ndarray(targetV, [elevation, height, width]), dimensionValues }
@@ -514,6 +545,12 @@ export class ZarrCubeVelocityProvider {
     const renderedV = this.flipElevation
       ? this.reverseElevationLevels(vArray, width * height, elevation)
       : vArray;
+    const validity = Uint8Array.from(this.validityData.u!, (valid, index) =>
+      valid && this.validityData.v?.[index] ? 1 : 0
+    );
+    const renderedValidity = this.flipElevation
+      ? this.reverseElevationLevels(validity, width * height, elevation)
+      : validity;
     const sourceElevations = Array.from<number | string>(
       dimensionValues.elevation as ArrayLike<number | string>
     );
@@ -524,6 +561,7 @@ export class ZarrCubeVelocityProvider {
     const windData = {
       u: { array: renderedU, min: -0.5, max: 0.5 },
       v: { array: renderedV, min: -0.5, max: 0.5 },
+      validity: renderedValidity,
       width,
       height,
       depth: elevation,
@@ -560,8 +598,20 @@ export class ZarrCubeVelocityProvider {
     values: Float32Array,
     sliceSize: number,
     elevationCount: number
-  ): Float32Array {
-    const reversed = new Float32Array(values.length);
+  ): Float32Array;
+  private reverseElevationLevels(
+    values: Uint8Array,
+    sliceSize: number,
+    elevationCount: number
+  ): Uint8Array;
+  private reverseElevationLevels(
+    values: Float32Array | Uint8Array,
+    sliceSize: number,
+    elevationCount: number
+  ): Float32Array | Uint8Array {
+    const reversed = values instanceof Uint8Array
+      ? new Uint8Array(values.length)
+      : new Float32Array(values.length);
     for (let elevationIndex = 0; elevationIndex < elevationCount; elevationIndex++) {
       const sourceOffset = (elevationCount - 1 - elevationIndex) * sliceSize;
       reversed.set(values.subarray(sourceOffset, sourceOffset + sliceSize), elevationIndex * sliceSize);
@@ -842,9 +892,19 @@ export class ZarrCubeVelocityProvider {
       )
     );
     for (let index = 0; index < sampleCount; index++) {
-      const uValue = Number(uData.data[index]);
-      const vValue = Number(vData.data[index]);
-      if (!Number.isFinite(uValue) || !Number.isFinite(vValue)) continue;
+      const rawU = Number(uData.data[index]);
+      const rawV = Number(vData.data[index]);
+      const uMetadata = this.componentMetadata.u!;
+      const vMetadata = this.componentMetadata.v!;
+      const uValue = rawU * uMetadata.scaleFactor + uMetadata.addOffset;
+      const vValue = rawV * vMetadata.scaleFactor + vMetadata.addOffset;
+      const uValid = Number.isFinite(uValue) &&
+        (!uMetadata.useFillValue || rawU !== uMetadata.fillValue) &&
+        uValue >= uMetadata.noDataMin && uValue <= uMetadata.noDataMax;
+      const vValid = Number.isFinite(vValue) &&
+        (!vMetadata.useFillValue || rawV !== vMetadata.fillValue) &&
+        vValue >= vMetadata.noDataMin && vValue <= vMetadata.noDataMax;
+      if (!uValid || !vValid) continue;
       const [east, north] = this.rotateProjectedVector(
         uValue,
         vValue,

@@ -98,6 +98,8 @@ interface VelocityOptions {
   opacity?: number; // Layer opacity (0–1)
   colormap?: ColorMapName; // Name from jsColormaps, based on matplotlib colormaps
   scale?: [number, number]; // Min/max for color scaling
+  noDataMin?: number; // Shared minimum valid decoded U/V component value
+  noDataMax?: number; // Shared maximum valid decoded U/V component value
   windOptions?: Partial<WindLayerOptions>; // Additional WindLayer configuration
   crs?: CRS; // Force CRS (auto-detected if not set)
   proj4?: string | Record<string, unknown>; // Definition shared by the U/V grids
@@ -107,6 +109,11 @@ interface VelocityOptions {
   onAuthError?: OnAuthError; // Called once for HTTP 400/401 responses
 }
 ```
+
+Each U/V component resolves its own `scale_factor`, `add_offset`,
+`_FillValue`/`missing_value`, and valid-range metadata. Dataset/group attributes
+provide defaults and the component array's attributes take precedence. Invalid
+cells are excluded from queries, reprojection, interpolation, and particle flow.
 
 `latIsAscending` controls the north/south orientation of rows and is inferred from latitude
 coordinates by default. It is not a replacement for `flipElevation`: that option reverses only

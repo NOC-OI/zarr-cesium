@@ -138,6 +138,10 @@ export interface VelocityOptions {
   proj4?: string | Record<string, unknown>;
   scale?: [number, number];
   colormap?: ColorMapName;
+  /** Minimum valid decoded component value; smaller U/V values are no-data. */
+  noDataMin?: number;
+  /** Maximum valid decoded component value; larger U/V values are no-data. */
+  noDataMax?: number;
   zarrVersion?: 2 | 3;
   /** Particle styling; height is derived from the selected Zarr elevation. */
   windOptions?: VelocityWindOptions;

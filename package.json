@@ -30,9 +30,9 @@
     "cesium": ">=1.119.0 <2"
   },
   "dependencies": {
-    "cube-cesium-wind-layer": "^0.12.4",
+    "cube-cesium-wind-layer": "^0.12.5",
     "zarr-maps-colormap": "^0.3.0",
-    "zarr-maps-tiling": "^0.3.5",
+    "zarr-maps-tiling": "^0.3.6",
     "zarrita": "^0.7.4"
   },
   "devDependencies": {

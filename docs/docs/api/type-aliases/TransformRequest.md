@@ -1,4 +1,4 @@
-# TransformRequest()
+# TransformRequest
 
 ```ts
 type TransformRequest = (url, options?) => 

@@ -6,7 +6,8 @@ function openLevelArray(
    levelPath, 
    variable, 
    levelCache, 
-zarrVersion?): Promise<Array<any, Readable>>;
+   zarrVersion?
+): Promise<Array<any, Readable>>;
 ```
 
 Opens and caches a specific multiscale level array.

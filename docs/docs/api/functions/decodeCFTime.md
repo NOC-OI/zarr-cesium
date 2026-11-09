@@ -4,7 +4,8 @@
 function decodeCFTime(
    values, 
    units, 
-   calendar?): string[];
+   calendar?
+): string[];
 ```
 
 Decodes CF-compliant time coordinate values into ISO date strings.

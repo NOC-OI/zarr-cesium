@@ -4,7 +4,8 @@
 function identifyDimensionIndices(
    dimNames, 
    dimensionNames?, 
-   coordinates?): DimIndicesProps;
+   coordinates?
+): DimIndicesProps;
 ```
 
 Identify the indices of common dimensions (lat, lon, time, elevation)

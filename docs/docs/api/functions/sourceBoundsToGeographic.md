@@ -4,7 +4,8 @@
 function sourceBoundsToGeographic(
    bounds, 
    projection, 
-   segments?): BoundsProps;
+   segments?
+): BoundsProps;
 ```
 
 Transform a source rectangle to WGS84 by sampling a regular interior grid.

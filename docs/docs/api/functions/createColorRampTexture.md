@@ -4,7 +4,8 @@
 function createColorRampTexture(
    gl, 
    colors, 
-   opacity): 
+   opacity
+): 
   | WebGLTexture
   | null;
 ```

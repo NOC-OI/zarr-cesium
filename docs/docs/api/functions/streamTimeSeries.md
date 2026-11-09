@@ -2,9 +2,9 @@
 
 ```ts
 function streamTimeSeries(
-   backend,
-   position,
-   selectors?,
+   backend, 
+   position, 
+   selectors?, 
    options?
 ): AsyncGenerator<QueryResult>;
 ```

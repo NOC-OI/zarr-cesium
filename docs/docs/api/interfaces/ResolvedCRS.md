@@ -51,7 +51,7 @@ code: string;
 ### definition?
 
 ```ts
-optional definition: CRSDefinition;
+definition?: CRSDefinition;
 ```
 
 ***

@@ -1,5 +1,5 @@
 # CubeCrossSectionPoint
 
 ```ts
-type CubeCrossSectionPoint = [number, number];
+type CubeCrossSectionPoint = [longitude: number, latitude: number];
 ```

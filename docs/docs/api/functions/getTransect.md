@@ -6,7 +6,8 @@ function getTransect(
    start, 
    end, 
    selectors?, 
-options?): Promise<TransectResult>;
+   options?
+): Promise<TransectResult>;
 ```
 
 Queries one scalar level along a line between two WGS84 positions.

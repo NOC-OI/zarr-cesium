@@ -5,7 +5,8 @@ function getVerticalProfile(
    backend, 
    position, 
    selectors?, 
-options?): Promise<QueryResult>;
+   options?
+): Promise<QueryResult>;
 ```
 
 Queries every elevation coordinate at one point and the selected time.

@@ -7,7 +7,7 @@ Describes the mapping between dataset dimensions and their standardized names.
 ### elevation?
 
 ```ts
-optional elevation: string;
+elevation?: string;
 ```
 
 ***
@@ -15,7 +15,7 @@ optional elevation: string;
 ### lat?
 
 ```ts
-optional lat: string;
+lat?: string;
 ```
 
 ***
@@ -23,7 +23,7 @@ optional lat: string;
 ### lon?
 
 ```ts
-optional lon: string;
+lon?: string;
 ```
 
 ***
@@ -31,7 +31,7 @@ optional lon: string;
 ### others?
 
 ```ts
-optional others: string[];
+others?: string[];
 ```
 
 ***
@@ -39,5 +39,5 @@ optional others: string[];
 ### time?
 
 ```ts
-optional time: string;
+time?: string;
 ```

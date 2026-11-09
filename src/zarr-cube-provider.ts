@@ -133,6 +133,7 @@ export class ZarrCubeProvider {
   private latIsAscending: boolean = false;
   private dimensionNames: DimensionNamesProps;
   private multiscaleFormat: MultiscaleFormat = 'auto';
+  private initialMultiscaleLevel?: number;
   private verticalExaggeration: number;
   private maximumElevationValue = 0;
   /** Numeric coordinates used only for plane placement; labels remain unchanged. */
@@ -210,6 +211,7 @@ export class ZarrCubeProvider {
       this.latIsAscending = options.latIsAscending;
     }
     this.multiscaleFormat = options.multiscaleFormat ?? 'auto';
+    this.initialMultiscaleLevel = options.multiscaleLevel;
     this.multiscaleLevel = options.multiscaleLevel ?? 0;
     this.selectors = structuredClone(options.selectors ?? {});
     this.verticalExaggeration = options.verticalExaggeration ?? DEFAULT_VERTICAL_EXAGGERATION;
@@ -241,7 +243,15 @@ export class ZarrCubeProvider {
     this.store =
       this.customStore ?? createFetchStore(this.url!, this.requestOverrides, this.transformedFetch);
     this.root = zarr.root(this.store);
-    const { zarrArray, dimIndices, levelInfos, attrs, multiscaleLevel } = await initZarrDataset(
+    const {
+      zarrArray,
+      dimIndices,
+      levelInfos,
+      attrs,
+      finestLevelAttrs,
+      multiscaleLevel,
+      zarrVersion
+    } = await initZarrDataset(
       this.store,
       this.root,
       this.variable,
@@ -249,17 +259,20 @@ export class ZarrCubeProvider {
       this.levelMetadata,
       this.levelCache,
       this.zarrVersion,
-      this.multiscaleLevel,
+      this.initialMultiscaleLevel,
       this.multiscaleFormat
-    );
-    if (multiscaleLevel !== undefined) {
-      this.multiscaleLevel = multiscaleLevel;
-    }
+    ) as Awaited<ReturnType<typeof initZarrDataset>> & {
+      finestLevelAttrs: Record<string, unknown>;
+      zarrVersion: 2 | 3;
+    };
+    this.multiscaleLevel = multiscaleLevel ?? 0;
+    this.initialMultiscaleLevel = this.multiscaleLevel;
+    this.zarrVersion = zarrVersion;
     this.zarrArray = zarrArray as unknown as zarr.Array<any>;
     this.dimIndices = dimIndices;
     this.levelInfos = levelInfos;
     const valueMetadata = resolveValueMetadata(
-      [attrs, zarrArray.attrs as Record<string, unknown>],
+      [attrs, finestLevelAttrs, zarrArray.attrs as Record<string, unknown>],
       this.noDataMin,
       this.noDataMax
     );
@@ -889,6 +902,7 @@ export class ZarrCubeProvider {
     }
     if (multiscaleLevel !== undefined && this.multiscaleLevel !== multiscaleLevel) {
       this.multiscaleLevel = multiscaleLevel;
+      this.initialMultiscaleLevel = multiscaleLevel;
       updateLayer = true;
     }
     if (bounds !== undefined && JSON.stringify(this.bounds) !== JSON.stringify(bounds)) {

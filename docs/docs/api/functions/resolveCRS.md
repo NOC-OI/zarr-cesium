@@ -5,7 +5,8 @@ function resolveCRS(
    crs, 
    definition?, 
    attrs?, 
-   arrAttrs?): ResolvedCRS;
+   arrAttrs?
+): ResolvedCRS;
 ```
 
 Resolve an explicit or metadata-declared rectilinear source CRS.

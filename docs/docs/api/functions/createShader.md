@@ -4,7 +4,8 @@
 function createShader(
    gl, 
    type, 
-   source): 
+   source
+): 
   | WebGLShader
   | null;
 ```

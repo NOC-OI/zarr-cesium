@@ -169,6 +169,11 @@ const typedocSidebar = {
         },
         {
           type: "doc",
+          id: "api/interfaces/ResolvedValueMetadata",
+          label: "ResolvedValueMetadata"
+        },
+        {
+          type: "doc",
           id: "api/interfaces/TileCacheOptions",
           label: "TileCacheOptions"
         },
@@ -417,6 +422,11 @@ const typedocSidebar = {
           type: "doc",
           id: "api/functions/resolveNoDataRange",
           label: "resolveNoDataRange"
+        },
+        {
+          type: "doc",
+          id: "api/functions/resolveValueMetadata",
+          label: "resolveValueMetadata"
         },
         {
           type: "doc",

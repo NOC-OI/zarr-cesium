@@ -64,7 +64,8 @@ export interface CubeOptions {
   selectors?: Record<string, ZarrSelectorsProps>;
   colorScale?: [number, number, number][];
   multiscaleLevel?: number;
-  zarrVersion?: 2 | 3;
+  /** Zarr version. Defaults to null and is detected by trying v3 before v2. */
+  zarrVersion?: 2 | 3 | null;
   /** Reverse vertical data-plane placement without changing source elevation indices. */
   flipElevation?: boolean;
   scale?: [number, number];
@@ -101,7 +102,8 @@ export interface LayerOptions {
   colormap?: ColorMapName;
   colorScale?: [number, number, number][];
   selectors?: Record<string, ZarrSelectorsProps>;
-  zarrVersion?: 2 | 3;
+  /** Zarr version. Defaults to null and is detected by trying v3 before v2. */
+  zarrVersion?: 2 | 3 | null;
   dimensionNames?: DimensionNamesProps;
   noDataMin?: number;
   noDataMax?: number;
@@ -142,7 +144,8 @@ export interface VelocityOptions {
   noDataMin?: number;
   /** Maximum valid decoded component value; larger U/V values are no-data. */
   noDataMax?: number;
-  zarrVersion?: 2 | 3;
+  /** Zarr version. Defaults to null and is detected by trying v3 before v2. */
+  zarrVersion?: 2 | 3 | null;
   /** Particle styling; height is derived from the selected Zarr elevation. */
   windOptions?: VelocityWindOptions;
   multiscaleFormat?: MultiscaleFormat;

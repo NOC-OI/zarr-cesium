@@ -93,7 +93,8 @@ Updates the rendered slices based on the provided cross-section points.
 setSlices(
    latitude, 
    longitude, 
-   elevation): void;
+   elevation
+): void;
 ```
 
 Updates the rendered slices based on the provided indices.
@@ -119,7 +120,8 @@ setStyle(
    colors, 
    min, 
    max, 
-   opacity): void;
+   opacity
+): void;
 ```
 
 Updates the rendered style based on the provided color scale and opacity.

@@ -77,7 +77,7 @@ dimensions: [number, number, number];
 ### dimensionX?
 
 ```ts
-optional dimensionX: ArrayLike<string | number>;
+dimensionX?: ArrayLike<string | number>;
 ```
 
 Source X coordinates represented by the loaded cube.
@@ -87,7 +87,7 @@ Source X coordinates represented by the loaded cube.
 ### dimensionY?
 
 ```ts
-optional dimensionY: ArrayLike<string | number>;
+dimensionY?: ArrayLike<string | number>;
 ```
 
 Source Y coordinates represented by the loaded cube.
@@ -105,7 +105,7 @@ elevationMode: ElevationMode;
 ### fillValue?
 
 ```ts
-optional fillValue: number;
+fillValue?: number;
 ```
 
 ***
@@ -129,7 +129,7 @@ latIsAscending: boolean;
 ### noDataMax?
 
 ```ts
-optional noDataMax: number;
+noDataMax?: number;
 ```
 
 ***
@@ -137,7 +137,7 @@ optional noDataMax: number;
 ### noDataMin?
 
 ```ts
-optional noDataMin: number;
+noDataMin?: number;
 ```
 
 ***
@@ -161,7 +161,7 @@ projectedCrs: boolean;
 ### projection?
 
 ```ts
-optional projection: ResolvedCRS;
+projection?: ResolvedCRS;
 ```
 
 Resolved source transform used to prepare warped arbitrary-CRS meshes.

@@ -5,7 +5,7 @@
 ### cache?
 
 ```ts
-optional cache: boolean | TileCacheOptions;
+cache?: boolean | TileCacheOptions;
 ```
 
 Decoded numeric tile cache. Enabled by default and scoped to this layer.
@@ -15,7 +15,7 @@ Decoded numeric tile cache. Enabled by default and scoped to this layer.
 ### colormap?
 
 ```ts
-optional colormap: string;
+colormap?: string;
 ```
 
 ***
@@ -23,7 +23,7 @@ optional colormap: string;
 ### colorScale?
 
 ```ts
-optional colorScale: [number, number, number][];
+colorScale?: [number, number, number][];
 ```
 
 ***
@@ -31,7 +31,7 @@ optional colorScale: [number, number, number][];
 ### crs?
 
 ```ts
-optional crs: string | null;
+crs?: string | null;
 ```
 
 ***
@@ -39,7 +39,7 @@ optional crs: string | null;
 ### dimensionNames?
 
 ```ts
-optional dimensionNames: DimensionNamesProps;
+dimensionNames?: DimensionNamesProps;
 ```
 
 ***
@@ -47,7 +47,7 @@ optional dimensionNames: DimensionNamesProps;
 ### latIsAscending?
 
 ```ts
-optional latIsAscending: boolean;
+latIsAscending?: boolean;
 ```
 
 ***
@@ -55,7 +55,7 @@ optional latIsAscending: boolean;
 ### maximumLevel?
 
 ```ts
-optional maximumLevel: number;
+maximumLevel?: number;
 ```
 
 ***
@@ -63,7 +63,7 @@ optional maximumLevel: number;
 ### minimumLevel?
 
 ```ts
-optional minimumLevel: number;
+minimumLevel?: number;
 ```
 
 ***
@@ -71,7 +71,7 @@ optional minimumLevel: number;
 ### multiscaleFormat?
 
 ```ts
-optional multiscaleFormat: MultiscaleFormat;
+multiscaleFormat?: MultiscaleFormat;
 ```
 
 ***
@@ -79,7 +79,7 @@ optional multiscaleFormat: MultiscaleFormat;
 ### noDataMax?
 
 ```ts
-optional noDataMax: number;
+noDataMax?: number;
 ```
 
 ***
@@ -87,7 +87,7 @@ optional noDataMax: number;
 ### noDataMin?
 
 ```ts
-optional noDataMin: number;
+noDataMin?: number;
 ```
 
 ***
@@ -95,7 +95,7 @@ optional noDataMin: number;
 ### onAuthError?
 
 ```ts
-optional onAuthError: OnAuthError;
+onAuthError?: OnAuthError;
 ```
 
 ***
@@ -103,7 +103,7 @@ optional onAuthError: OnAuthError;
 ### opacity?
 
 ```ts
-optional opacity: number;
+opacity?: number;
 ```
 
 ***
@@ -111,7 +111,7 @@ optional opacity: number;
 ### proj4?
 
 ```ts
-optional proj4: string | Record<string, unknown>;
+proj4?: string | Record<string, unknown>;
 ```
 
 Proj4, WKT2, or PROJJSON definition for an arbitrary rectilinear source CRS.
@@ -121,7 +121,7 @@ Proj4, WKT2, or PROJJSON definition for an arbitrary rectilinear source CRS.
 ### requestOverrides?
 
 ```ts
-optional requestOverrides: RequestOverrides;
+requestOverrides?: RequestOverrides;
 ```
 
 ***
@@ -129,7 +129,7 @@ optional requestOverrides: RequestOverrides;
 ### scale?
 
 ```ts
-optional scale: [number, number];
+scale?: [number, number];
 ```
 
 ***
@@ -137,7 +137,7 @@ optional scale: [number, number];
 ### selectors?
 
 ```ts
-optional selectors: Record<string, ZarrSelectorsProps>;
+selectors?: Record<string, ZarrSelectorsProps>;
 ```
 
 ***
@@ -145,7 +145,7 @@ optional selectors: Record<string, ZarrSelectorsProps>;
 ### store?
 
 ```ts
-optional store: Readable;
+store?: Readable;
 ```
 
 Custom Zarrita-compatible store, including an IcechunkStore.
@@ -155,7 +155,7 @@ Custom Zarrita-compatible store, including an IcechunkStore.
 ### tileHeight?
 
 ```ts
-optional tileHeight: number;
+tileHeight?: number;
 ```
 
 ***
@@ -163,7 +163,7 @@ optional tileHeight: number;
 ### tileWidth?
 
 ```ts
-optional tileWidth: number;
+tileWidth?: number;
 ```
 
 ***
@@ -171,7 +171,7 @@ optional tileWidth: number;
 ### transformRequest?
 
 ```ts
-optional transformRequest: TransformRequest;
+transformRequest?: TransformRequest;
 ```
 
 ***
@@ -179,7 +179,7 @@ optional transformRequest: TransformRequest;
 ### url?
 
 ```ts
-optional url: string;
+url?: string;
 ```
 
 URL to a Zarr store. Required unless `store` is provided.
@@ -197,5 +197,7 @@ variable: string;
 ### zarrVersion?
 
 ```ts
-optional zarrVersion: 3 | 2;
+zarrVersion?: 3 | 2 | null;
 ```
+
+Zarr version. Defaults to null and is detected by trying v3 before v2.

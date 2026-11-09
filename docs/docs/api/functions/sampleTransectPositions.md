@@ -4,7 +4,8 @@
 function sampleTransectPositions(
    start, 
    end, 
-   samples?): QueryPosition[];
+   samples?
+): QueryPosition[];
 ```
 
 Builds evenly spaced WGS84 samples along the shortest longitude path.

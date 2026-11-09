@@ -40,6 +40,7 @@
 | [RequestOverrides](interfaces/RequestOverrides.md) | Serializable static fetch options suitable for application state and FetchStore. |
 | [RequestParameters](interfaces/RequestParameters.md) | - |
 | [ResolvedCRS](interfaces/ResolvedCRS.md) | Validated transformation between WGS84 and a rectilinear source grid. |
+| [ResolvedValueMetadata](interfaces/ResolvedValueMetadata.md) | Fully resolved packing and no-data metadata for a numeric Zarr variable. |
 | [TileCacheOptions](interfaces/TileCacheOptions.md) | Controls the in-memory cache used to recolor tiles without reading Zarr data again. |
 | [TileCacheStats](interfaces/TileCacheStats.md) | Runtime counters for a provider's decoded tile cache. |
 | [TransectQueryOptions](interfaces/TransectQueryOptions.md) | Sampling controls for one-level and full-depth transects. |
@@ -94,6 +95,7 @@
 | [parseCFUnits](functions/parseCFUnits.md) | Parses a CF-compliant units string into its components. |
 | [resolveCRS](functions/resolveCRS.md) | Resolve an explicit or metadata-declared rectilinear source CRS. |
 | [resolveNoDataRange](functions/resolveNoDataRange.md) | Resolves the no-data value range for masking dataset values. |
+| [resolveValueMetadata](functions/resolveValueMetadata.md) | Resolves numeric packing and no-data metadata from an ordered attribute hierarchy. |
 | [sampleTransectPositions](functions/sampleTransectPositions.md) | Builds evenly spaced WGS84 samples along the shortest longitude path. |
 | [sourceBoundsToGeographic](functions/sourceBoundsToGeographic.md) | Transform a source rectangle to WGS84 by sampling a regular interior grid. |
 | [streamFullTransect](functions/streamFullTransect.md) | Streams full-depth transect rows as they are read from the backend. |

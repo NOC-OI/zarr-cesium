@@ -7,7 +7,7 @@ Framework-neutral options for the shared 2D Zarr tile renderer.
 ### cache?
 
 ```ts
-optional cache: boolean | TileCacheOptions;
+cache?: boolean | TileCacheOptions;
 ```
 
 Decoded numeric tile cache. Enabled by default. Pass `false` to disable it,
@@ -18,7 +18,7 @@ or an options object to configure its per-provider byte budget.
 ### colormap?
 
 ```ts
-optional colormap: string;
+colormap?: string;
 ```
 
 ***
@@ -26,7 +26,7 @@ optional colormap: string;
 ### crs?
 
 ```ts
-optional crs: string | null;
+crs?: string | null;
 ```
 
 ***
@@ -34,7 +34,7 @@ optional crs: string | null;
 ### dimensionNames?
 
 ```ts
-optional dimensionNames: DimensionNamesProps;
+dimensionNames?: DimensionNamesProps;
 ```
 
 ***
@@ -42,7 +42,7 @@ optional dimensionNames: DimensionNamesProps;
 ### latIsAscending?
 
 ```ts
-optional latIsAscending: boolean;
+latIsAscending?: boolean;
 ```
 
 ***
@@ -50,7 +50,7 @@ optional latIsAscending: boolean;
 ### maxZoom?
 
 ```ts
-optional maxZoom: number;
+maxZoom?: number;
 ```
 
 ***
@@ -58,7 +58,7 @@ optional maxZoom: number;
 ### multiscaleFormat?
 
 ```ts
-optional multiscaleFormat: MultiscaleFormat;
+multiscaleFormat?: MultiscaleFormat;
 ```
 
 ***
@@ -66,7 +66,7 @@ optional multiscaleFormat: MultiscaleFormat;
 ### noDataMax?
 
 ```ts
-optional noDataMax: number;
+noDataMax?: number;
 ```
 
 ***
@@ -74,7 +74,7 @@ optional noDataMax: number;
 ### noDataMin?
 
 ```ts
-optional noDataMin: number;
+noDataMin?: number;
 ```
 
 ***
@@ -82,7 +82,7 @@ optional noDataMin: number;
 ### onAuthError?
 
 ```ts
-optional onAuthError: OnAuthError;
+onAuthError?: OnAuthError;
 ```
 
 Called once when a transformed request returns an expired-credential status.
@@ -92,7 +92,7 @@ Called once when a transformed request returns an expired-credential status.
 ### proj4?
 
 ```ts
-optional proj4: CRSDefinition;
+proj4?: CRSDefinition;
 ```
 
 Proj4, WKT2, or PROJJSON definition for a CRS not registered by proj4.
@@ -102,7 +102,7 @@ Proj4, WKT2, or PROJJSON definition for a CRS not registered by proj4.
 ### renderTarget?
 
 ```ts
-optional renderTarget: "cesium" | "web-map";
+renderTarget?: "cesium" | "web-map";
 ```
 
 Rendering convention used by the consuming map framework.
@@ -112,7 +112,7 @@ Rendering convention used by the consuming map framework.
 ### requestOverrides?
 
 ```ts
-optional requestOverrides: RequestOverrides;
+requestOverrides?: RequestOverrides;
 ```
 
 ***
@@ -120,7 +120,7 @@ optional requestOverrides: RequestOverrides;
 ### scale?
 
 ```ts
-optional scale: [number, number];
+scale?: [number, number];
 ```
 
 ***
@@ -128,7 +128,7 @@ optional scale: [number, number];
 ### selectors?
 
 ```ts
-optional selectors: ZarrSelectors;
+selectors?: ZarrSelectors;
 ```
 
 ***
@@ -136,7 +136,7 @@ optional selectors: ZarrSelectors;
 ### store?
 
 ```ts
-optional store: Readable;
+store?: Readable;
 ```
 
 Custom Zarrita-compatible store, such as an IcechunkStore.
@@ -146,7 +146,7 @@ Custom Zarrita-compatible store, such as an IcechunkStore.
 ### tileSize?
 
 ```ts
-optional tileSize: number;
+tileSize?: number;
 ```
 
 ***
@@ -154,7 +154,7 @@ optional tileSize: number;
 ### transformRequest?
 
 ```ts
-optional transformRequest: TransformRequest;
+transformRequest?: TransformRequest;
 ```
 
 Dynamically transform each FetchStore request (for auth, proxies, or signed URLs).
@@ -164,7 +164,7 @@ Dynamically transform each FetchStore request (for auth, proxies, or signed URLs
 ### url?
 
 ```ts
-optional url: string;
+url?: string;
 ```
 
 URL to a Zarr store. Required unless `store` is provided.
@@ -182,5 +182,7 @@ variable: string;
 ### zarrVersion?
 
 ```ts
-optional zarrVersion: 3 | 2;
+zarrVersion?: 3 | 2 | null;
 ```
+
+Zarr version. Defaults to null and is detected by trying v3 before v2.

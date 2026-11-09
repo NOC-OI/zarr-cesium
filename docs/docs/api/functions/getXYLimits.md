@@ -6,7 +6,8 @@ function getXYLimits(
    dimIndices, 
    levelInfos, 
    multiscale, 
-zarrVersion): Promise<XYLimitsProps>;
+   zarrVersion
+): Promise<XYLimitsProps>;
 ```
 
 Retrieve the geographic coordinate limits (min/max latitude/longitude) for a Zarr array.

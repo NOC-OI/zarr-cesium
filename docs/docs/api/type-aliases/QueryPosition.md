@@ -1,7 +1,7 @@
 # QueryPosition
 
 ```ts
-type QueryPosition = [number, number];
+type QueryPosition = [longitude: number, latitude: number];
 ```
 
 WGS84 longitude/latitude coordinate used by convenience query APIs.

@@ -5,7 +5,8 @@ function calculateSliceArgsRequestImage(
    shape, 
    dataSlice, 
    dimIndices, 
-   selectors): SliceArgs;
+   selectors
+): SliceArgs;
 ```
 
 Constructs Zarr slice arguments for extracting a subregion of a multidimensional array.

@@ -126,6 +126,7 @@ export class ZarrCubeVelocityProvider {
   private latIsAscending: boolean = false;
   private dimensionNames: DimensionNamesProps;
   private multiscaleFormat: MultiscaleFormat = 'auto';
+  private initialMultiscaleLevel?: number;
   private verticalExaggeration: number;
   private opacity: number;
   private sliceSpacing: number;
@@ -186,6 +187,7 @@ export class ZarrCubeVelocityProvider {
     }
     this.dimensionNames = options.dimensionNames ?? {};
     this.multiscaleFormat = options.multiscaleFormat ?? 'auto';
+    this.initialMultiscaleLevel = options.multiscaleLevel;
     this.multiscaleLevel = options.multiscaleLevel ?? 0;
     this.selectors = structuredClone(options.selectors ?? {});
     this.verticalExaggeration = options.verticalExaggeration ?? DEFAULT_VERTICAL_EXAGGERATION;
@@ -244,7 +246,15 @@ export class ZarrCubeVelocityProvider {
       createFetchStore(this.urls[component]!, this.requestOverrides, this.transformedFetch);
     const root = zarr.root(store);
 
-    const { zarrArray, dimIndices, levelInfos, attrs, multiscaleLevel } = await initZarrDataset(
+    const {
+      zarrArray,
+      dimIndices,
+      levelInfos,
+      attrs,
+      finestLevelAttrs,
+      multiscaleLevel,
+      zarrVersion
+    } = await initZarrDataset(
       store,
       root,
       variable,
@@ -252,12 +262,15 @@ export class ZarrCubeVelocityProvider {
       this.levelMetadata,
       this.levelCache,
       this.zarrVersion,
-      this.multiscaleLevel,
+      this.initialMultiscaleLevel,
       this.multiscaleFormat
-    );
-    if (multiscaleLevel !== undefined) {
-      this.multiscaleLevel = multiscaleLevel;
-    }
+    ) as Awaited<ReturnType<typeof initZarrDataset>> & {
+      finestLevelAttrs: Record<string, unknown>;
+      zarrVersion: 2 | 3;
+    };
+    this.multiscaleLevel = multiscaleLevel ?? 0;
+    this.initialMultiscaleLevel = this.multiscaleLevel;
+    this.zarrVersion = zarrVersion;
     this.levelInfos = levelInfos;
 
     const detectedCrs = this.crs || (this.projectionDefinition ? 'CUSTOM:SOURCE' : null) ||
@@ -271,7 +284,7 @@ export class ZarrCubeVelocityProvider {
 
     this.zarrArrays[component] = zarrArray as unknown as zarr.Array<any>;
     const metadata = resolveValueMetadata(
-      [attrs, zarrArray.attrs as Record<string, unknown>],
+      [attrs, finestLevelAttrs, zarrArray.attrs as Record<string, unknown>],
       this.noDataMin,
       this.noDataMax
     );
@@ -974,6 +987,7 @@ export class ZarrCubeVelocityProvider {
     }
     if (multiscaleLevel !== undefined && this.multiscaleLevel !== multiscaleLevel) {
       this.multiscaleLevel = multiscaleLevel;
+      this.initialMultiscaleLevel = multiscaleLevel;
       updateLayer = true;
     }
     if (bounds !== undefined && JSON.stringify(this.bounds) !== JSON.stringify(bounds)) {

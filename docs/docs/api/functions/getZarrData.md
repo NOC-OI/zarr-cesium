@@ -4,7 +4,8 @@
 function getZarrData(
    arr, 
    selection?, 
-options?): Promise<any>;
+   options?
+): Promise<any>;
 ```
 
 Reads an array with the same Zarrita module instance that opened it.

@@ -7,7 +7,7 @@ Describes a slice of a multidimensional array.
 ### endElevation?
 
 ```ts
-optional endElevation: number;
+endElevation?: number;
 ```
 
 ***
@@ -31,7 +31,7 @@ endY: number;
 ### startElevation?
 
 ```ts
-optional startElevation: number;
+startElevation?: number;
 ```
 
 ***

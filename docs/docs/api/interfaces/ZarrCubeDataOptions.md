@@ -13,7 +13,7 @@ array: Array<any>;
 ### bounds?
 
 ```ts
-optional bounds: BoundsProps;
+bounds?: BoundsProps;
 ```
 
 ***
@@ -29,7 +29,7 @@ dimensions: DimIndicesProps;
 ### latIsAscending?
 
 ```ts
-optional latIsAscending: boolean;
+latIsAscending?: boolean;
 ```
 
 ***

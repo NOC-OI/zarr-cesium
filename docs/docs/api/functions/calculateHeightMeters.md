@@ -6,7 +6,8 @@ function calculateHeightMeters(
    elevationArray, 
    verticalExaggeration, 
    belowSeaLevel, 
-   flipElevation?): number;
+   flipElevation?
+): number;
 ```
 
 Converts elevation index to Cesium height (meters),

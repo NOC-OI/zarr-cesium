@@ -142,7 +142,7 @@ The currently loaded array remains in memory. Call [load](#load) or
 ### getCrossSection()
 
 ```ts
-getCrossSection():
+getCrossSection(): 
   | {
   end: CubeCrossSectionPoint;
   start: CubeCrossSectionPoint;
@@ -166,9 +166,9 @@ Returns the active arbitrary cross-section, if one is displayed.
 
 ```ts
 getFullTransect(
-   start,
-   end,
-   selectors?,
+   start, 
+   end, 
+   selectors?, 
    options?
 ): Promise<FullTransectResult>;
 ```
@@ -230,8 +230,8 @@ lonSliceIndex: number;
 
 ```ts
 getTimeSeries(
-   position,
-   selectors?,
+   position, 
+   selectors?, 
    options?
 ): Promise<QueryResult>;
 ```
@@ -258,9 +258,9 @@ A result ordered by the time coordinate.
 
 ```ts
 getTransect(
-   start,
-   end,
-   selectors?,
+   start, 
+   end, 
+   selectors?, 
    options?
 ): Promise<TransectResult>;
 ```
@@ -288,8 +288,8 @@ Positions, distances, and values along the transect.
 
 ```ts
 getVerticalProfile(
-   position,
-   selectors?,
+   position, 
+   selectors?, 
    options?
 ): Promise<QueryResult>;
 ```
@@ -348,8 +348,8 @@ Calling `load` again replaces the in-memory subset. Use
 
 ```ts
 queryData(
-   geometry,
-   selectors?,
+   geometry, 
+   selectors?, 
    options?
 ): Promise<QueryResult>;
 ```
@@ -407,9 +407,9 @@ When an endpoint is invalid, outside the loaded bounds, or GPU rendering is unav
 
 ```ts
 streamFullTransect(
-   start,
-   end,
-   selectors?,
+   start, 
+   end, 
+   selectors?, 
    options?
 ): AsyncGenerator<FullTransectStreamChunk>;
 ```
@@ -433,8 +433,8 @@ streamFullTransect(
 
 ```ts
 streamTimeSeries(
-   position,
-   selectors?,
+   position, 
+   selectors?, 
    options?
 ): AsyncGenerator<QueryResult, any, any>;
 ```
@@ -457,9 +457,9 @@ streamTimeSeries(
 
 ```ts
 streamTransect(
-   start,
-   end,
-   selectors?,
+   start, 
+   end, 
+   selectors?, 
    options?
 ): AsyncGenerator<TransectStreamChunk>;
 ```
@@ -483,8 +483,8 @@ streamTransect(
 
 ```ts
 streamVerticalProfile(
-   position,
-   selectors?,
+   position, 
+   selectors?, 
    options?
 ): AsyncGenerator<QueryResult, any, any>;
 ```

@@ -2,6 +2,10 @@
 
 A distance-by-elevation transect. Values are indexed [elevation][position].
 
+## Extended by
+
+- [`FullTransectStreamChunk`](FullTransectStreamChunk.md)
+
 ## Properties
 
 ### distancesKm

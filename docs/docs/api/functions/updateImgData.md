@@ -6,7 +6,8 @@ function updateImgData(
    pixelIdx, 
    imgData, 
    colorScale, 
-   opacity): ImageData;
+   opacity
+): ImageData;
 ```
 
 Updates an [ImageData](https://developer.mozilla.org/en-US/docs/Web/API/ImageData) object with a new pixel color

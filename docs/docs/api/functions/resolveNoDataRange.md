@@ -5,7 +5,8 @@ function resolveNoDataRange(
    userMin, 
    userMax, 
    metadataMin, 
-   metadataMax): object;
+   metadataMax
+): object;
 ```
 
 Resolves the no-data value range for masking dataset values.

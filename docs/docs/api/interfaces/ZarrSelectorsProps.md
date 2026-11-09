@@ -15,7 +15,7 @@ Selected index, value, or range.
 ### type?
 
 ```ts
-optional type: "value" | "index";
+type?: "value" | "index";
 ```
 
 Selection mode: by index or by physical value.

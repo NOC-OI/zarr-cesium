@@ -27,9 +27,7 @@ new ZarrImageryLayer(imageryProvider?, options?): ZarrImageryLayer;
 
 #### Inherited from
 
-```ts
-ImageryLayer.constructor
-```
+`ImageryLayer.constructor`
 
 ## Methods
 
@@ -58,9 +56,7 @@ imageryLayer = imageryLayer && imageryLayer.destroy();
 
 #### Inherited from
 
-```ts
-ImageryLayer.destroy
-```
+`ImageryLayer.destroy`
 
 ***
 
@@ -91,9 +87,7 @@ scene.camera.flyTo({
 
 #### Inherited from
 
-```ts
-ImageryLayer.getImageryRectangle
-```
+`ImageryLayer.getImageryRectangle`
 
 ***
 
@@ -117,9 +111,7 @@ true if this is the base layer; otherwise, false.
 
 #### Inherited from
 
-```ts
-ImageryLayer.isBaseLayer
-```
+`ImageryLayer.isBaseLayer`
 
 ***
 
@@ -142,9 +134,7 @@ True if this object was destroyed; otherwise, false.
 
 #### Inherited from
 
-```ts
-ImageryLayer.isDestroyed
-```
+`ImageryLayer.isDestroyed`
 
 ***
 
@@ -265,9 +255,7 @@ imageryLayer.errorEvent.addEventListener(error => {
 
 #### Inherited from
 
-```ts
-ImageryLayer.fromProviderAsync
-```
+`ImageryLayer.fromProviderAsync`
 
 ***
 
@@ -327,9 +315,7 @@ const viewer = new Cesium.Viewer("cesiumContainer", {
 
 #### Inherited from
 
-```ts
-ImageryLayer.fromWorldImagery
-```
+`ImageryLayer.fromWorldImagery`
 
 ## Properties
 
@@ -344,9 +330,7 @@ The alpha blending value of this layer, with 0.0 representing fully transparent 
 
 #### Inherited from
 
-```ts
-ImageryLayer.alpha
-```
+`ImageryLayer.alpha`
 
 ***
 
@@ -361,9 +345,7 @@ makes the imagery darker while greater than 1.0 makes it brighter.
 
 #### Inherited from
 
-```ts
-ImageryLayer.brightness
-```
+`ImageryLayer.brightness`
 
 ***
 
@@ -377,9 +359,7 @@ Color value that should be set to transparent.
 
 #### Inherited from
 
-```ts
-ImageryLayer.colorToAlpha
-```
+`ImageryLayer.colorToAlpha`
 
 ***
 
@@ -393,9 +373,7 @@ Normalized (0-1) threshold for color-to-alpha.
 
 #### Inherited from
 
-```ts
-ImageryLayer.colorToAlphaThreshold
-```
+`ImageryLayer.colorToAlphaThreshold`
 
 ***
 
@@ -410,9 +388,7 @@ the contrast while greater than 1.0 increases it.
 
 #### Inherited from
 
-```ts
-ImageryLayer.contrast
-```
+`ImageryLayer.contrast`
 
 ***
 
@@ -426,9 +402,7 @@ Rectangle cutout in this layer of imagery.
 
 #### Inherited from
 
-```ts
-ImageryLayer.cutoutRectangle
-```
+`ImageryLayer.cutoutRectangle`
 
 ***
 
@@ -443,9 +417,7 @@ The alpha blending value of this layer on the day side of the globe, with 0.0 re
 
 #### Inherited from
 
-```ts
-ImageryLayer.dayAlpha
-```
+`ImageryLayer.dayAlpha`
 
 ***
 
@@ -461,9 +433,7 @@ are passed an instance of the thrown error.
 
 #### Inherited from
 
-```ts
-ImageryLayer.errorEvent
-```
+`ImageryLayer.errorEvent`
 
 ***
 
@@ -477,9 +447,7 @@ The gamma correction to apply to this layer.  1.0 uses the unmodified imagery co
 
 #### Inherited from
 
-```ts
-ImageryLayer.gamma
-```
+`ImageryLayer.gamma`
 
 ***
 
@@ -493,9 +461,7 @@ The hue of this layer in radians. 0.0 uses the unmodified imagery color.
 
 #### Inherited from
 
-```ts
-ImageryLayer.hue
-```
+`ImageryLayer.hue`
 
 ***
 
@@ -519,9 +485,7 @@ Strongly typed Zarr imagery provider associated with this layer.
 
 #### Overrides
 
-```ts
-ImageryLayer.imageryProvider
-```
+`ImageryLayer.imageryProvider`
 
 ***
 
@@ -540,9 +504,7 @@ Once a texture is loaded it won't be possible to change the texture filter used.
 
 #### Inherited from
 
-```ts
-ImageryLayer.magnificationFilter
-```
+`ImageryLayer.magnificationFilter`
 
 ***
 
@@ -561,9 +523,7 @@ Once a texture is loaded it won't be possible to change the texture filter used.
 
 #### Inherited from
 
-```ts
-ImageryLayer.minificationFilter
-```
+`ImageryLayer.minificationFilter`
 
 ***
 
@@ -578,9 +538,7 @@ The alpha blending value of this layer on the night side of the globe, with 0.0 
 
 #### Inherited from
 
-```ts
-ImageryLayer.nightAlpha
-```
+`ImageryLayer.nightAlpha`
 
 ***
 
@@ -594,9 +552,7 @@ Returns true when the terrain provider has been successfully created. Otherwise,
 
 #### Inherited from
 
-```ts
-ImageryLayer.ready
-```
+`ImageryLayer.ready`
 
 ***
 
@@ -611,9 +567,7 @@ are passed the created instance of [ImageryProvider](https://cesium.com/learn/ce
 
 #### Inherited from
 
-```ts
-ImageryLayer.readyEvent
-```
+`ImageryLayer.readyEvent`
 
 ***
 
@@ -628,9 +582,7 @@ Gets the rectangle of this layer.  If this rectangle is smaller than the rectang
 
 #### Inherited from
 
-```ts
-ImageryLayer.rectangle
-```
+`ImageryLayer.rectangle`
 
 ***
 
@@ -645,9 +597,7 @@ saturation while greater than 1.0 increases it.
 
 #### Inherited from
 
-```ts
-ImageryLayer.saturation
-```
+`ImageryLayer.saturation`
 
 ***
 
@@ -661,9 +611,7 @@ Determines if this layer is shown.
 
 #### Inherited from
 
-```ts
-ImageryLayer.show
-```
+`ImageryLayer.show`
 
 ***
 
@@ -677,16 +625,14 @@ The [SplitDirection](https://cesium.com/learn/cesiumjs/ref-doc/SplitDirection.ht
 
 #### Inherited from
 
-```ts
-ImageryLayer.splitDirection
-```
+`ImageryLayer.splitDirection`
 
 ***
 
 ### viewer?
 
 ```ts
-optional viewer: CesiumHost;
+viewer?: CesiumHost;
 ```
 
 Viewer or widget used to request a render after runtime updates.
@@ -704,9 +650,7 @@ during construction or by the imagery provider.
 
 #### Inherited from
 
-```ts
-ImageryLayer.DEFAULT_APPLY_COLOR_TO_ALPHA_THRESHOLD
-```
+`ImageryLayer.DEFAULT_APPLY_COLOR_TO_ALPHA_THRESHOLD`
 
 ***
 
@@ -721,9 +665,7 @@ or by the imagery provider. This value does not modify the brightness of the ima
 
 #### Inherited from
 
-```ts
-ImageryLayer.DEFAULT_BRIGHTNESS
-```
+`ImageryLayer.DEFAULT_BRIGHTNESS`
 
 ***
 
@@ -738,9 +680,7 @@ or by the imagery provider. This value does not modify the contrast of the image
 
 #### Inherited from
 
-```ts
-ImageryLayer.DEFAULT_CONTRAST
-```
+`ImageryLayer.DEFAULT_CONTRAST`
 
 ***
 
@@ -755,9 +695,7 @@ or by the imagery provider. This value does not modify the gamma of the imagery.
 
 #### Inherited from
 
-```ts
-ImageryLayer.DEFAULT_GAMMA
-```
+`ImageryLayer.DEFAULT_GAMMA`
 
 ***
 
@@ -772,9 +710,7 @@ or by the imagery provider. This value does not modify the hue of the imagery.
 
 #### Inherited from
 
-```ts
-ImageryLayer.DEFAULT_HUE
-```
+`ImageryLayer.DEFAULT_HUE`
 
 ***
 
@@ -789,9 +725,7 @@ during construction or by the imagery provider.
 
 #### Inherited from
 
-```ts
-ImageryLayer.DEFAULT_MAGNIFICATION_FILTER
-```
+`ImageryLayer.DEFAULT_MAGNIFICATION_FILTER`
 
 ***
 
@@ -806,9 +740,7 @@ during construction or by the imagery provider.
 
 #### Inherited from
 
-```ts
-ImageryLayer.DEFAULT_MINIFICATION_FILTER
-```
+`ImageryLayer.DEFAULT_MINIFICATION_FILTER`
 
 ***
 
@@ -823,9 +755,7 @@ or by the imagery provider. This value does not modify the saturation of the ima
 
 #### Inherited from
 
-```ts
-ImageryLayer.DEFAULT_SATURATION
-```
+`ImageryLayer.DEFAULT_SATURATION`
 
 ***
 
@@ -840,6 +770,4 @@ or by the imagery provider.
 
 #### Inherited from
 
-```ts
-ImageryLayer.DEFAULT_SPLIT
-```
+`ImageryLayer.DEFAULT_SPLIT`

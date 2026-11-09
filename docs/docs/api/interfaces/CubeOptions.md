@@ -5,7 +5,7 @@
 ### bounds?
 
 ```ts
-optional bounds: BoundsProps;
+bounds?: BoundsProps;
 ```
 
 Geographic subset. When omitted, coverage is derived from the source X/Y axes.
@@ -15,7 +15,7 @@ Geographic subset. When omitted, coverage is derived from the source X/Y axes.
 ### colormap?
 
 ```ts
-optional colormap: string;
+colormap?: string;
 ```
 
 ***
@@ -23,7 +23,7 @@ optional colormap: string;
 ### colorScale?
 
 ```ts
-optional colorScale: [number, number, number][];
+colorScale?: [number, number, number][];
 ```
 
 ***
@@ -31,7 +31,7 @@ optional colorScale: [number, number, number][];
 ### crs?
 
 ```ts
-optional crs: string | null;
+crs?: string | null;
 ```
 
 ***
@@ -39,7 +39,7 @@ optional crs: string | null;
 ### dimensionNames?
 
 ```ts
-optional dimensionNames: DimensionNamesProps;
+dimensionNames?: DimensionNamesProps;
 ```
 
 ***
@@ -47,7 +47,7 @@ optional dimensionNames: DimensionNamesProps;
 ### elevationMode?
 
 ```ts
-optional elevationMode: ElevationMode;
+elevationMode?: ElevationMode;
 ```
 
 Render positive vertical coordinates above sea level or as depths below it.
@@ -57,7 +57,7 @@ Render positive vertical coordinates above sea level or as depths below it.
 ### flipElevation?
 
 ```ts
-optional flipElevation: boolean;
+flipElevation?: boolean;
 ```
 
 Reverse vertical data-plane placement without changing source elevation indices.
@@ -67,7 +67,7 @@ Reverse vertical data-plane placement without changing source elevation indices.
 ### latIsAscending?
 
 ```ts
-optional latIsAscending: boolean;
+latIsAscending?: boolean;
 ```
 
 Whether latitude coordinate values increase with their array index.
@@ -77,7 +77,7 @@ Whether latitude coordinate values increase with their array index.
 ### multiscaleFormat?
 
 ```ts
-optional multiscaleFormat: MultiscaleFormat;
+multiscaleFormat?: MultiscaleFormat;
 ```
 
 ***
@@ -85,7 +85,7 @@ optional multiscaleFormat: MultiscaleFormat;
 ### multiscaleLevel?
 
 ```ts
-optional multiscaleLevel: number;
+multiscaleLevel?: number;
 ```
 
 ***
@@ -93,7 +93,7 @@ optional multiscaleLevel: number;
 ### noDataMax?
 
 ```ts
-optional noDataMax: number;
+noDataMax?: number;
 ```
 
 Maximum valid decoded value; larger values are treated as no-data.
@@ -103,7 +103,7 @@ Maximum valid decoded value; larger values are treated as no-data.
 ### noDataMin?
 
 ```ts
-optional noDataMin: number;
+noDataMin?: number;
 ```
 
 Minimum valid decoded value; smaller values are treated as no-data.
@@ -113,7 +113,7 @@ Minimum valid decoded value; smaller values are treated as no-data.
 ### onAuthError?
 
 ```ts
-optional onAuthError: OnAuthError;
+onAuthError?: OnAuthError;
 ```
 
 Called once when a transformed request returns HTTP 400 or 401.
@@ -123,7 +123,7 @@ Called once when a transformed request returns HTTP 400 or 401.
 ### opacity?
 
 ```ts
-optional opacity: number;
+opacity?: number;
 ```
 
 ***
@@ -131,7 +131,7 @@ optional opacity: number;
 ### proj4?
 
 ```ts
-optional proj4: string | Record<string, unknown>;
+proj4?: string | Record<string, unknown>;
 ```
 
 Proj4, WKT2, or PROJJSON definition for an arbitrary rectilinear source CRS.
@@ -141,7 +141,7 @@ Proj4, WKT2, or PROJJSON definition for an arbitrary rectilinear source CRS.
 ### requestOverrides?
 
 ```ts
-optional requestOverrides: RequestOverrides;
+requestOverrides?: RequestOverrides;
 ```
 
 Static fetch options for URL-backed stores.
@@ -151,7 +151,7 @@ Static fetch options for URL-backed stores.
 ### scale?
 
 ```ts
-optional scale: [number, number];
+scale?: [number, number];
 ```
 
 ***
@@ -159,7 +159,7 @@ optional scale: [number, number];
 ### selectors?
 
 ```ts
-optional selectors: Record<string, ZarrSelectorsProps>;
+selectors?: Record<string, ZarrSelectorsProps>;
 ```
 
 ***
@@ -167,7 +167,7 @@ optional selectors: Record<string, ZarrSelectorsProps>;
 ### showHorizontalSlices?
 
 ```ts
-optional showHorizontalSlices: boolean;
+showHorizontalSlices?: boolean;
 ```
 
 ***
@@ -175,7 +175,7 @@ optional showHorizontalSlices: boolean;
 ### showVerticalSlices?
 
 ```ts
-optional showVerticalSlices: boolean;
+showVerticalSlices?: boolean;
 ```
 
 ***
@@ -183,7 +183,7 @@ optional showVerticalSlices: boolean;
 ### store?
 
 ```ts
-optional store: Readable;
+store?: Readable;
 ```
 
 Custom Zarrita-compatible store, including an IcechunkStore.
@@ -193,7 +193,7 @@ Custom Zarrita-compatible store, including an IcechunkStore.
 ### transformRequest?
 
 ```ts
-optional transformRequest: TransformRequest;
+transformRequest?: TransformRequest;
 ```
 
 Dynamically transform requests for authentication, proxies, or signed URLs.
@@ -203,7 +203,7 @@ Dynamically transform requests for authentication, proxies, or signed URLs.
 ### url?
 
 ```ts
-optional url: string;
+url?: string;
 ```
 
 URL to a Zarr store. Required unless `store` is provided.
@@ -221,7 +221,7 @@ variable: string;
 ### verticalExaggeration?
 
 ```ts
-optional verticalExaggeration: number;
+verticalExaggeration?: number;
 ```
 
 ***
@@ -229,5 +229,7 @@ optional verticalExaggeration: number;
 ### zarrVersion?
 
 ```ts
-optional zarrVersion: 3 | 2;
+zarrVersion?: 3 | 2 | null;
 ```
+
+Zarr version. Defaults to null and is detected by trying v3 before v2.

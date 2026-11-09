@@ -6,7 +6,8 @@ function getFullTransect(
    start, 
    end, 
    selectors?, 
-options?): Promise<FullTransectResult>;
+   options?
+): Promise<FullTransectResult>;
 ```
 
 Queries all elevation levels along a line between two WGS84 positions.

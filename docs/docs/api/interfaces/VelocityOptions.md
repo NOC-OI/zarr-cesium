@@ -5,7 +5,7 @@
 ### bounds?
 
 ```ts
-optional bounds: BoundsProps;
+bounds?: BoundsProps;
 ```
 
 Geographic subset shared by U/V. When omitted, source coverage is derived.
@@ -15,7 +15,7 @@ Geographic subset shared by U/V. When omitted, source coverage is derived.
 ### colormap?
 
 ```ts
-optional colormap: string;
+colormap?: string;
 ```
 
 ***
@@ -23,7 +23,7 @@ optional colormap: string;
 ### crs?
 
 ```ts
-optional crs: string | null;
+crs?: string | null;
 ```
 
 ***
@@ -31,7 +31,7 @@ optional crs: string | null;
 ### dimensionNames?
 
 ```ts
-optional dimensionNames: DimensionNamesProps;
+dimensionNames?: DimensionNamesProps;
 ```
 
 ***
@@ -39,7 +39,7 @@ optional dimensionNames: DimensionNamesProps;
 ### elevationMode?
 
 ```ts
-optional elevationMode: ElevationMode;
+elevationMode?: ElevationMode;
 ```
 
 Render positive vertical coordinates above sea level or as depths below it.
@@ -49,7 +49,7 @@ Render positive vertical coordinates above sea level or as depths below it.
 ### flipElevation?
 
 ```ts
-optional flipElevation: boolean;
+flipElevation?: boolean;
 ```
 
 Reverse vertical data-plane placement without changing source elevation indices.
@@ -59,7 +59,7 @@ Reverse vertical data-plane placement without changing source elevation indices.
 ### latIsAscending?
 
 ```ts
-optional latIsAscending: boolean;
+latIsAscending?: boolean;
 ```
 
 Whether latitude coordinate values increase with their array index.
@@ -69,7 +69,7 @@ Whether latitude coordinate values increase with their array index.
 ### multiscaleFormat?
 
 ```ts
-optional multiscaleFormat: MultiscaleFormat;
+multiscaleFormat?: MultiscaleFormat;
 ```
 
 ***
@@ -77,15 +77,35 @@ optional multiscaleFormat: MultiscaleFormat;
 ### multiscaleLevel?
 
 ```ts
-optional multiscaleLevel: number;
+multiscaleLevel?: number;
 ```
+
+***
+
+### noDataMax?
+
+```ts
+noDataMax?: number;
+```
+
+Maximum valid decoded component value; larger U/V values are no-data.
+
+***
+
+### noDataMin?
+
+```ts
+noDataMin?: number;
+```
+
+Minimum valid decoded component value; smaller U/V values are no-data.
 
 ***
 
 ### onAuthError?
 
 ```ts
-optional onAuthError: OnAuthError;
+onAuthError?: OnAuthError;
 ```
 
 Called once when a transformed request returns HTTP 400 or 401.
@@ -95,7 +115,7 @@ Called once when a transformed request returns HTTP 400 or 401.
 ### opacity?
 
 ```ts
-optional opacity: number;
+opacity?: number;
 ```
 
 ***
@@ -103,7 +123,7 @@ optional opacity: number;
 ### proj4?
 
 ```ts
-optional proj4: string | Record<string, unknown>;
+proj4?: string | Record<string, unknown>;
 ```
 
 Proj4, WKT2, or PROJJSON definition shared by the U and V source grids.
@@ -113,7 +133,7 @@ Proj4, WKT2, or PROJJSON definition shared by the U and V source grids.
 ### requestOverrides?
 
 ```ts
-optional requestOverrides: RequestOverrides;
+requestOverrides?: RequestOverrides;
 ```
 
 Static fetch options shared by URL-backed U and V stores.
@@ -123,7 +143,7 @@ Static fetch options shared by URL-backed U and V stores.
 ### scale?
 
 ```ts
-optional scale: [number, number];
+scale?: [number, number];
 ```
 
 ***
@@ -131,7 +151,7 @@ optional scale: [number, number];
 ### selectors?
 
 ```ts
-optional selectors: Record<string, ZarrSelectorsProps>;
+selectors?: Record<string, ZarrSelectorsProps>;
 ```
 
 ***
@@ -139,7 +159,7 @@ optional selectors: Record<string, ZarrSelectorsProps>;
 ### sliceSpacing?
 
 ```ts
-optional sliceSpacing: number;
+sliceSpacing?: number;
 ```
 
 ***
@@ -147,7 +167,7 @@ optional sliceSpacing: number;
 ### stores?
 
 ```ts
-optional stores: object;
+stores?: object;
 ```
 
 Custom Zarrita-compatible stores for U and V, including IcechunkStore instances.
@@ -155,13 +175,13 @@ Custom Zarrita-compatible stores for U and V, including IcechunkStore instances.
 #### u?
 
 ```ts
-optional u: Readable;
+u?: Readable;
 ```
 
 #### v?
 
 ```ts
-optional v: Readable;
+v?: Readable;
 ```
 
 ***
@@ -169,7 +189,7 @@ optional v: Readable;
 ### transformRequest?
 
 ```ts
-optional transformRequest: TransformRequest;
+transformRequest?: TransformRequest;
 ```
 
 Dynamically transform U and V requests for authentication, proxies, or signed URLs.
@@ -179,7 +199,7 @@ Dynamically transform U and V requests for authentication, proxies, or signed UR
 ### urls?
 
 ```ts
-optional urls: object;
+urls?: object;
 ```
 
 URLs for the U and V stores. Each may be omitted when its custom store is supplied.
@@ -187,13 +207,13 @@ URLs for the U and V stores. Each may be omitted when its custom store is suppli
 #### u?
 
 ```ts
-optional u: string;
+u?: string;
 ```
 
 #### v?
 
 ```ts
-optional v: string;
+v?: string;
 ```
 
 ***
@@ -221,7 +241,7 @@ v: string;
 ### verticalExaggeration?
 
 ```ts
-optional verticalExaggeration: number;
+verticalExaggeration?: number;
 ```
 
 ***
@@ -229,7 +249,7 @@ optional verticalExaggeration: number;
 ### windOptions?
 
 ```ts
-optional windOptions: VelocityWindOptions;
+windOptions?: VelocityWindOptions;
 ```
 
 Particle styling; height is derived from the selected Zarr elevation.
@@ -239,5 +259,7 @@ Particle styling; height is derived from the selected Zarr elevation.
 ### zarrVersion?
 
 ```ts
-optional zarrVersion: 3 | 2;
+zarrVersion?: 3 | 2 | null;
 ```
+
+Zarr version. Defaults to null and is detected by trying v3 before v2.

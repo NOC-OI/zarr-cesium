@@ -1,4 +1,4 @@
-# OnAuthError()
+# OnAuthError
 
 ```ts
 type OnAuthError = (status) => void;

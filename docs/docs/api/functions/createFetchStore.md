@@ -4,7 +4,8 @@
 function createFetchStore(
    url, 
    requestOverrides?, 
-   transformedFetch?): FetchStore;
+   transformedFetch?
+): FetchStore;
 ```
 
 Creates a Zarrita FetchStore with optional static and dynamic request settings.

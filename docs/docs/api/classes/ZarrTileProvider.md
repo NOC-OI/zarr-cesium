@@ -148,9 +148,9 @@ Aborts outstanding tile requests and prevents further rendering work.
 
 ```ts
 getFullTransect(
-   start,
-   end,
-   selectors?,
+   start, 
+   end, 
+   selectors?, 
    options?
 ): Promise<FullTransectResult>;
 ```
@@ -176,8 +176,8 @@ Samples every vertical level along a line between two WGS84 positions.
 
 ```ts
 getTimeSeries(
-   position,
-   selectors?,
+   position, 
+   selectors?, 
    options?
 ): Promise<QueryResult>;
 ```
@@ -204,9 +204,9 @@ Values and their time coordinates.
 
 ```ts
 getTransect(
-   start,
-   end,
-   selectors?,
+   start, 
+   end, 
+   selectors?, 
    options?
 ): Promise<TransectResult>;
 ```
@@ -232,8 +232,8 @@ Samples one selected level along a line between two WGS84 positions.
 
 ```ts
 getVerticalProfile(
-   position,
-   selectors?,
+   position, 
+   selectors?, 
    options?
 ): Promise<QueryResult>;
 ```
@@ -260,8 +260,8 @@ Values and their vertical coordinates.
 
 ```ts
 queryData(
-   geometry,
-   selectors?,
+   geometry, 
+   selectors?, 
    options?
 ): Promise<QueryResult>;
 ```
@@ -296,8 +296,8 @@ One ranged non-spatial selector produces a profile or time series.
 
 ```ts
 queryPoints(
-   positions,
-   selectors?,
+   positions, 
+   selectors?, 
    options?
 ): Promise<QueryResult[]>;
 ```
@@ -328,8 +328,8 @@ Source chunks are deduplicated so transects do not fetch and decode a chunk per 
 
 ```ts
 renderTile(
-   boundsDeg,
-   z,
+   boundsDeg, 
+   z, 
    key
 ): Promise<HTMLCanvasElement | ImageBitmap>;
 ```
@@ -360,9 +360,9 @@ If initialization failed, the provider was destroyed, or rendering cannot comple
 
 ```ts
 streamFullTransect(
-   start,
-   end,
-   selectors?,
+   start, 
+   end, 
+   selectors?, 
    options?
 ): AsyncGenerator<FullTransectStreamChunk>;
 ```
@@ -386,8 +386,8 @@ streamFullTransect(
 
 ```ts
 streamTimeSeries(
-   position,
-   selectors?,
+   position, 
+   selectors?, 
    options?
 ): AsyncGenerator<QueryResult, any, any>;
 ```
@@ -410,9 +410,9 @@ streamTimeSeries(
 
 ```ts
 streamTransect(
-   start,
-   end,
-   selectors?,
+   start, 
+   end, 
+   selectors?, 
    options?
 ): AsyncGenerator<TransectStreamChunk>;
 ```
@@ -436,8 +436,8 @@ streamTransect(
 
 ```ts
 streamVerticalProfile(
-   position,
-   selectors?,
+   position, 
+   selectors?, 
    options?
 ): AsyncGenerator<QueryResult, any, any>;
 ```
@@ -505,7 +505,7 @@ Updates the data scale or colormap without reopening the dataset.
 ### coverageBoundsDeg
 
 ```ts
-coverageBoundsDeg:
+coverageBoundsDeg: 
   | {
   east: number;
   north: number;
@@ -520,7 +520,7 @@ coverageBoundsDeg:
 ### coverageBoundsMerc
 
 ```ts
-coverageBoundsMerc:
+coverageBoundsMerc: 
   | {
   xMax: number;
   xMin: number;

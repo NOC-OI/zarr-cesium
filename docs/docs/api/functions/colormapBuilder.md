@@ -5,7 +5,8 @@ function colormapBuilder(
    color, 
    convertTo?, 
    n?, 
-   opacity?): string[] | number[][];
+   opacity?
+): string[] | number[][];
 ```
 
 Builds a color ramp (discrete or continuous) from a specified colormap.

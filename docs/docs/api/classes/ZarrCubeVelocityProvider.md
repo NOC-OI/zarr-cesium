@@ -106,8 +106,8 @@ Loaded U/V arrays and selectors remain in memory. Call
 
 ```ts
 getTimeSeries(
-   position,
-   selectors?,
+   position, 
+   selectors?, 
    options?
 ): Promise<QueryResult>;
 ```
@@ -134,8 +134,8 @@ Speed and component values ordered by time.
 
 ```ts
 getVerticalProfile(
-   position,
-   selectors?,
+   position, 
+   selectors?, 
    options?
 ): Promise<QueryResult>;
 ```
@@ -187,8 +187,8 @@ U and V must describe compatible grids.
 
 ```ts
 queryData(
-   geometry,
-   selectors?,
+   geometry, 
+   selectors?, 
    options?
 ): Promise<VelocityQueryResult>;
 ```
@@ -224,8 +224,8 @@ time selector reads the source arrays instead of only the rendered layers.
 
 ```ts
 streamTimeSeries(
-   position,
-   selectors?,
+   position, 
+   selectors?, 
    options?
 ): AsyncGenerator<QueryResult, any, any>;
 ```
@@ -248,8 +248,8 @@ streamTimeSeries(
 
 ```ts
 streamVerticalProfile(
-   position,
-   selectors?,
+   position, 
+   selectors?, 
    options?
 ): AsyncGenerator<QueryResult, any, any>;
 ```

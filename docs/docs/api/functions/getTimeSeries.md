@@ -5,7 +5,8 @@ function getTimeSeries(
    backend, 
    position, 
    selectors?, 
-options?): Promise<QueryResult>;
+   options?
+): Promise<QueryResult>;
 ```
 
 Queries every time coordinate at one point and the selected elevation.

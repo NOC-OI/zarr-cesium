@@ -10,12 +10,14 @@ function initZarrDataset(
    levelCache, 
    zarrVersion, 
    multiscaleLevel?, 
-   multiscaleFormat?): Promise<{
+   multiscaleFormat?
+): Promise<{
   attrs: Record<string, any>;
   dimIndices: DimIndicesProps;
   levelInfos: string[];
   multiscaleLevel?: number;
   zarrArray: Array<any>;
+  zarrVersion: 2 | 3;
 }>;
 ```
 
@@ -48,6 +50,7 @@ Opens a Zarr variable (single-scale or multiscale pyramid) and prepares its meta
   `levelInfos`: `string`[];
   `multiscaleLevel?`: `number`;
   `zarrArray`: `Array`\<`any`\>;
+  `zarrVersion`: `2` \| `3`;
 \}\>
 
 - `zarrArray` — the opened array for the selected multiscale level.

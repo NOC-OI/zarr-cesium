@@ -130,7 +130,8 @@ export class ZarrLayerProvider implements ImageryProvider {
       scale: options.scale,
       colormap: options.colormap,
       selectors: options.selectors,
-      zarrVersion: options.zarrVersion,
+      // The shared provider treats null as auto-detect (v3 first, then v2).
+      zarrVersion: options.zarrVersion as 2 | 3 | undefined,
       dimensionNames: options.dimensionNames,
       noDataMin: options.noDataMin,
       noDataMax: options.noDataMax,

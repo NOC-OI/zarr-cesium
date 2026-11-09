@@ -8,7 +8,8 @@ function calculateElevationSlice(
    dimensionValuesWithElevation, 
    root, 
    levelInfo, 
-   zarrVersion): Promise<{
+   zarrVersion
+): Promise<{
   dimensionValuesWithElevation: DimensionValues;
   elevationSlice: [number, number];
 }>;

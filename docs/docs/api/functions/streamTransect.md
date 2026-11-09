@@ -2,10 +2,10 @@
 
 ```ts
 function streamTransect(
-   backend,
-   start,
-   end,
-   selectors?,
+   backend, 
+   start, 
+   end, 
+   selectors?, 
    options?
 ): AsyncGenerator<TransectStreamChunk>;
 ```

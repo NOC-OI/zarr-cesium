@@ -7,7 +7,7 @@ GeoJSON point geometry expressed as WGS84 longitude and latitude.
 ### coordinates
 
 ```ts
-coordinates: [number, number];
+coordinates: [longitude: number, latitude: number];
 ```
 
 ***

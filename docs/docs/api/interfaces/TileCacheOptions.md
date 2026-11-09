@@ -7,7 +7,7 @@ Controls the in-memory cache used to recolor tiles without reading Zarr data aga
 ### enabled?
 
 ```ts
-optional enabled: boolean;
+enabled?: boolean;
 ```
 
 Enable decoded tile caching. Defaults to `true`.
@@ -17,7 +17,7 @@ Enable decoded tile caching. Defaults to `true`.
 ### maxBytes?
 
 ```ts
-optional maxBytes: number;
+maxBytes?: number;
 ```
 
 Maximum decoded bytes retained by one provider. When omitted, a device-aware

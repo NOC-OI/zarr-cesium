@@ -8,8 +8,8 @@ Minimal interface required by the framework-neutral convenience queries.
 
 ```ts
 queryData(
-   geometry,
-   selectors?,
+   geometry, 
+   selectors?, 
    options?
 ): Promise<QueryResult>;
 ```
@@ -32,8 +32,8 @@ queryData(
 
 ```ts
 queryPoints?(
-   positions,
-   selectors?,
+   positions, 
+   selectors?, 
    options?
 ): Promise<QueryResult[]>;
 ```

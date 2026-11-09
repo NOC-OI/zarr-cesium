@@ -6,7 +6,8 @@ function deriveRectangleAndScheme(
    xyLimits, 
    levelMetadata, 
    zarrArray, 
-   dimIndices): object;
+   dimIndices
+): object;
 ```
 
 Computes a Cesium [Rectangle](https://cesium.com/learn/cesiumjs/ref-doc/Rectangle.html) and [TilingScheme](https://cesium.com/learn/cesiumjs/ref-doc/TilingScheme.html) for a Zarr dataset.

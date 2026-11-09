@@ -10,7 +10,8 @@ function calculateSliceArgs(
    root, 
    levelInfo, 
    zarrVersion, 
-   updateDimensionValues?): Promise<{
+   updateDimensionValues?
+): Promise<{
   dimensionValues: DimensionValues;
   selectors: {
    [key: string]: ZarrSelectorsProps;

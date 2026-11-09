@@ -326,9 +326,9 @@ Aborts pending reads and releases tile-renderer resources.
 
 ```ts
 getFullTransect(
-   start,
-   end,
-   selectors?,
+   start, 
+   end, 
+   selectors?, 
    options?
 ): Promise<FullTransectResult>;
 ```
@@ -374,8 +374,8 @@ Credit entries associated with every rendered tile.
 
 ```ts
 getTimeSeries(
-   position,
-   selectors?,
+   position, 
+   selectors?, 
    options?
 ): Promise<QueryResult>;
 ```
@@ -402,9 +402,9 @@ A query result ordered by the time coordinate.
 
 ```ts
 getTransect(
-   start,
-   end,
-   selectors?,
+   start, 
+   end, 
+   selectors?, 
    options?
 ): Promise<TransectResult>;
 ```
@@ -432,8 +432,8 @@ Distances, positions, and scalar values along the transect.
 
 ```ts
 getVerticalProfile(
-   position,
-   selectors?,
+   position, 
+   selectors?, 
    options?
 ): Promise<QueryResult>;
 ```
@@ -460,10 +460,10 @@ A query result ordered by the elevation coordinate.
 
 ```ts
 pickFeatures(
-   _x,
-   _y,
-   level,
-   longitude,
+   _x, 
+   _y, 
+   level, 
+   longitude, 
    latitude
 ): Promise<ImageryLayerFeatureInfo[]>;
 ```
@@ -496,8 +496,8 @@ Zero or one feature containing the queried value and coordinates.
 
 ```ts
 queryData(
-   geometry,
-   selectors?,
+   geometry, 
+   selectors?, 
    options?
 ): Promise<QueryResult>;
 ```
@@ -528,9 +528,9 @@ For unsupported geometries, invalid selectors, or failed reads.
 
 ```ts
 requestImage(
-   x,
-   y,
-   level,
+   x, 
+   y, 
+   level, 
    _request?
 ): Promise<HTMLCanvasElement | ImageBitmap>;
 ```
@@ -562,9 +562,9 @@ A vertically oriented canvas or image bitmap suitable for Cesium.
 
 ```ts
 streamFullTransect(
-   start,
-   end,
-   selectors?,
+   start, 
+   end, 
+   selectors?, 
    options?
 ): AsyncGenerator<FullTransectStreamChunk>;
 ```
@@ -588,8 +588,8 @@ streamFullTransect(
 
 ```ts
 streamTimeSeries(
-   position,
-   selectors?,
+   position, 
+   selectors?, 
    options?
 ): AsyncGenerator<QueryResult, any, any>;
 ```
@@ -612,9 +612,9 @@ streamTimeSeries(
 
 ```ts
 streamTransect(
-   start,
-   end,
-   selectors?,
+   start, 
+   end, 
+   selectors?, 
    options?
 ): AsyncGenerator<TransectStreamChunk>;
 ```
@@ -638,8 +638,8 @@ streamTransect(
 
 ```ts
 streamVerticalProfile(
-   position,
-   selectors?,
+   position, 
+   selectors?, 
    options?
 ): AsyncGenerator<QueryResult, any, any>;
 ```

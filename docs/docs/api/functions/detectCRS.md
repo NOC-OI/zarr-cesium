@@ -4,7 +4,8 @@
 function detectCRS(
    attrs, 
    arr, 
-xyLimits?): Promise<string>;
+   xyLimits?
+): Promise<string>;
 ```
 
 Detects the coordinate reference system (CRS) of a Zarr dataset based on metadata or coordinate range.

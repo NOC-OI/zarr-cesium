@@ -4,7 +4,8 @@
 function createProgram(
    gl, 
    vertexShader, 
-   fragmentShader): 
+   fragmentShader
+): 
   | WebGLProgram
   | null;
 ```

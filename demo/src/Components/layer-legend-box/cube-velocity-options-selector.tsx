@@ -22,8 +22,7 @@ export function CubeVelocityOptionsSelector({ layerLegendName }: LayerLegendBoxP
     ...DEFAULT_WIND_OPTIONS,
     ...(params.windOptions || {})
   };
-  const elevationSelection = params.selectors?.elevation?.selected;
-  const is2D = elevationSelection !== undefined && !Array.isArray(elevationSelection);
+  const is2D = !selectedLayer.dimensions?.elevation;
 
   const handleUpdateParams = (newParams: Partial<VelocityOptions>) => {
     dispatch(layersActions.setLayerAction('update-cube-params'));

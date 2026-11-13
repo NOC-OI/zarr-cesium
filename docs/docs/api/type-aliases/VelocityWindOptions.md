@@ -1,9 +1,5 @@
 # VelocityWindOptions
 
 ```ts
-type VelocityWindOptions = Omit<Partial<WindLayerOptions>, 
-  | "particleHeight"
-  | "verticalExaggeration"
-  | "elevationMode"
-| "elevationStep">;
+type VelocityWindOptions = Omit<Partial<WindLayerOptions>, "verticalExaggeration" | "elevationMode" | "elevationStep">;
 ```

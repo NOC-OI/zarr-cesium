@@ -524,6 +524,35 @@ export const layersJson: LayersJsonType = {
           windOptions: undefined
         }
       },
+      wind_2d_florence_v3: {
+        dataType: 'zarr-cube-velocity',
+        dataDescription: ['Wind Speed', 'm/s'],
+        tags: ['V3', 'atm', 'multiscale', '2D', 'epsg:4326'],
+        content:
+          'Wind speed data for Hurricane Florence from ERA5 reanalysis. This dataset contains 4D wind velocity data (time, height, latitude, longitude) stored in a Zarr v3 format and EPSG:4326 coordinate reference system.',
+        params: {
+          urls: {
+            u: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/hurricanes/era5/florence_1level',
+            v: 'https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/hurricanes/era5/florence_1level'
+          },
+          variables: { u: 'u_component_of_wind', v: 'v_component_of_wind' },
+          bounds: { west: -95, south: 15, east: -40, north: 45 },
+          flipElevation: false,
+          zarrVersion: 3,
+          colormap: 'jet',
+          scale: [0, 20],
+          sliceSpacing: undefined,
+          elevationMode: undefined,
+          multiscaleLevel: undefined,
+          opacity: undefined,
+          crs: undefined,
+          windOptions: {
+            speedFactor: 0.2,
+            lineLength: { min: 0, max: 400 },
+            particleHeight: 10
+          }
+        }
+      },
       wind_3d_florence_v3: {
         dataType: 'zarr-cube-velocity',
         dataDescription: ['Wind Speed', 'm/s'],

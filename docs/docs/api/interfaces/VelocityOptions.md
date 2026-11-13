@@ -252,7 +252,7 @@ verticalExaggeration?: number;
 windOptions?: VelocityWindOptions;
 ```
 
-Particle styling; height is derived from the selected Zarr elevation.
+Particle styling. Cube height comes from Zarr elevation coordinates. For 2D data, `particleHeight` sets the altitude in metres.
 
 ***
 

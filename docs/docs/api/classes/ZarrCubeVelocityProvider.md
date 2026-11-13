@@ -1,6 +1,6 @@
 # ZarrCubeVelocityProvider
 
-Provider responsible for loading and rendering 3D velocity fields (U and V components)
+Provider responsible for loading and rendering 2D or 3D velocity fields (U and V components)
 from Zarr datasets as animated Cesium `WindLayer`s.
 
 ## Remarks
@@ -342,7 +342,7 @@ color scale, or particle simulation parameters.
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `options` | \{ `colormap?`: `string`; `opacity?`: `number`; `scale?`: \[`number`, `number`\]; `windOptions?`: [`VelocityWindOptions`](../type-aliases/VelocityWindOptions.md); \} | Partial style update. `windOptions` are forwarded to the WindLayer except `particleHeight`, which remains derived from Zarr elevation. |
+| `options` | \{ `colormap?`: `string`; `opacity?`: `number`; `scale?`: \[`number`, `number`\]; `windOptions?`: [`VelocityWindOptions`](../type-aliases/VelocityWindOptions.md); \} | Partial style update. `windOptions` are forwarded to the WindLayer. `particleHeight` controls 2D data altitude and is ignored for cubes. |
 | `options.colormap?` | `string` | - |
 | `options.opacity?` | `number` | - |
 | `options.scale?` | \[`number`, `number`\] | - |
@@ -417,6 +417,16 @@ elevationShape: number = 0;
 ```
 
 Shape (size) of the elevation dimension.
+
+***
+
+### hasElevation
+
+```ts
+hasElevation: boolean = false;
+```
+
+Whether the loaded velocity data has a Zarr elevation dimension.
 
 ***
 

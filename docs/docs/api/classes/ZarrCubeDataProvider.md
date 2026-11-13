@@ -1,6 +1,6 @@
 # ZarrCubeDataProvider
 
-Loads and spatially subsets a three-dimensional Zarr variable without rendering it.
+Loads and spatially subsets a 2D or 3D Zarr variable without rendering it.
 
 ## Constructors
 

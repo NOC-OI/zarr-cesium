@@ -5,7 +5,7 @@ title: ZarrCubeVelocityProvider
 
 # ZarrCubeVelocityProvider
 
-The **ZarrCubeVelocityProvider** loads and visualizes **3D vector fields** (U, V components) from Zarr datasets as animated particle layers in Cesium using `WindLayer` from [`cube-cesium-wind-layer`](https://www.npmjs.com/package/cube-cesium-wind-layer), the [NOC-OI fork](https://github.com/NOC-OI/cesium-wind-layer) of the original [`cesium-wind-layer`](https://github.com/hongfaqiu/cesium-wind-layer).
+The **ZarrCubeVelocityProvider** loads and visualizes **2D or 3D vector fields** (U, V components) from Zarr datasets as animated particle layers in Cesium using `WindLayer` from [`cube-cesium-wind-layer`](https://www.npmjs.com/package/cube-cesium-wind-layer), the [NOC-OI fork](https://github.com/NOC-OI/cesium-wind-layer) of the original [`cesium-wind-layer`](https://github.com/hongfaqiu/cesium-wind-layer).
 
 The NOC-OI fork adds cube-aware particle rendering and `minVisibleRatio`, which clamps camera-driven particle width, trail-length, and speed scaling (`0.6` by default, or `1` to retain the overview scale at every zoom). It also resets visible longitude/latitude ranges and pixel scale when zooming back to a globe overview.
 
@@ -33,6 +33,7 @@ It supports:
 Use this provider when you have:
 
 - **Vector fields** stored in Zarr
+- **2D surface fields** such as 10 m wind
 - **3D volumes** representing velocity over depth or height
 - Two variables: **u** (zonal) and **v** (meridional)
 - Desire to visualize with animated particles
@@ -423,8 +424,8 @@ This applies instantly to the existing layer.
 
 The full list of supported colormaps is available in the [Colormaps section](../api/type-aliases/ColorMapName.md).
 
-`windOptions` allows fine-tuning of particle-system parameters. `particleHeight` is ignored because
-height is derived from the Zarr elevation coordinates. For more information, see the
+`windOptions` allows fine-tuning of particle-system parameters. For 2D data, `particleHeight`
+sets the altitude in metres. For 3D data, height comes from the Zarr elevation coordinates. For more information, see the
 [`WindLayerOptions` source in the NOC-OI fork](https://github.com/NOC-OI/cesium-wind-layer/tree/main/packages/cesium-wind-layer).
 
 ---

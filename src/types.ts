@@ -146,7 +146,6 @@ export interface VelocityOptions {
   noDataMax?: number;
   /** Zarr version. Defaults to null and is detected by trying v3 before v2. */
   zarrVersion?: 2 | 3 | null;
-  /** Particle styling; height is derived from the selected Zarr elevation. */
   windOptions?: VelocityWindOptions;
   multiscaleFormat?: MultiscaleFormat;
   /** Static fetch options shared by URL-backed U and V stores. */
@@ -159,10 +158,7 @@ export interface VelocityOptions {
 
 export type VelocityWindOptions = Omit<
   Partial<WindLayerOptions>,
-  | 'particleHeight'
-  | 'verticalExaggeration'
-  | 'elevationMode'
-  | 'elevationStep'
+  'verticalExaggeration' | 'elevationMode' | 'elevationStep'
 >;
 
 export interface CubeVelocityProps {

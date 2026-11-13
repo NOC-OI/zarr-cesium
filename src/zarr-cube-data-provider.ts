@@ -44,7 +44,7 @@ export interface ZarrCubeData {
   bounds: BoundsProps;
 }
 
-/** Loads and spatially subsets a three-dimensional Zarr variable without rendering it. */
+/** Loads and spatially subsets a 2D or 3D Zarr variable without rendering it. */
 export class ZarrCubeDataProvider {
   constructor(private readonly options: ZarrCubeDataOptions) {}
 
@@ -60,21 +60,22 @@ export class ZarrCubeDataProvider {
       projection,
       latIsAscending
     } = this.options;
-    if (!dimensions.elevation) {
-      throw new Error('Zarr cube requires an elevation dimension');
-    }
-
+    const elevationDimension = dimensions.elevation;
     const dimensionValues = await loadAllDimensionValues(root, dimensions, level, zarrVersion);
-    const { dimensionValuesWithElevation, elevationSlice } = await calculateElevationSlice(
-      array.shape[dimensions.elevation.index],
-      dimensions.elevation,
-      selectors.elevation,
-      withDimensionAliases(dimensionValues, dimensions),
-      root,
-      // The level-specific values are already cached above.
-      null,
-      zarrVersion
-    );
+    let dimensionValuesWithElevation = withDimensionAliases(dimensionValues, dimensions);
+    let elevationSlice: [number, number] = [0, 1];
+    if (elevationDimension) {
+      ({ dimensionValuesWithElevation, elevationSlice } = await calculateElevationSlice(
+        array.shape[elevationDimension.index],
+        elevationDimension,
+        selectors.elevation,
+        dimensionValuesWithElevation,
+        root,
+        // The level-specific values are already cached above.
+        null,
+        zarrVersion
+      ));
+    }
     const longitude = Array.from(dimensionValues.lon, Number);
     const latitude = Array.from(dimensionValues.lat, Number);
     const effectiveBounds = bounds ?? sourceBoundsToGeographic(

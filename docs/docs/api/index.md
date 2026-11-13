@@ -6,9 +6,9 @@
 | ------ | ------ |
 | [CubeGpuRenderer](classes/CubeGpuRenderer.md) | Low-level Cesium primitive that keeps cube values and colormapping on the GPU. |
 | [TileDataCache](classes/TileDataCache.md) | A simple LRU cache for tile data. The cache is keyed by a string, which is typically a combination of the layer ID and tile coordinates. |
-| [ZarrCubeDataProvider](classes/ZarrCubeDataProvider.md) | Loads and spatially subsets a three-dimensional Zarr variable without rendering it. |
+| [ZarrCubeDataProvider](classes/ZarrCubeDataProvider.md) | Loads and spatially subsets a 2D or 3D Zarr variable without rendering it. |
 | [ZarrCubeProvider](classes/ZarrCubeProvider.md) | Provides rendering of volumetric (3D) Zarr datasets as Cesium primitives. |
-| [ZarrCubeVelocityProvider](classes/ZarrCubeVelocityProvider.md) | Provider responsible for loading and rendering 3D velocity fields (U and V components) from Zarr datasets as animated Cesium `WindLayer`s. |
+| [ZarrCubeVelocityProvider](classes/ZarrCubeVelocityProvider.md) | Provider responsible for loading and rendering 2D or 3D velocity fields (U and V components) from Zarr datasets as animated Cesium `WindLayer`s. |
 | [ZarrImageryLayer](classes/ZarrImageryLayer.md) | Cesium imagery layer backed by a shared [ZarrTileProvider](classes/ZarrTileProvider.md). |
 | [ZarrLayerProvider](classes/ZarrLayerProvider.md) | Thin Cesium adapter around the framework-independent Zarr tile renderer. Dataset loading, slicing, styling, caching, and WebGL rendering live in `zarr-maps-tiling`. This class only translates Cesium tile requests. |
 | [ZarrTileProvider](classes/ZarrTileProvider.md) | Provides Zarr dataset access and rendering capabilities for web-map layers. |

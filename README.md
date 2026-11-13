@@ -57,7 +57,7 @@ The toolkit provides **three Cesium provider classes**, each specialized for a d
 | -------------------------- | -------------------- | ----------------------------------------------------------------------------------------- |
 | `ZarrLayerProvider`        | 2D scalar fields     | Renders single-level variables as Cesium imagery layers (e.g., temperature, chlorophyll). |
 | `ZarrCubeProvider`         | 3D volumetric fields | Renders volumetric cubes with horizontal and vertical slices (e.g., ocean temperature).   |
-| `ZarrCubeVelocityProvider` | 3D vector fields     | Visualizes vector flow (u/v components) using animated particle advection.                |
+| `ZarrCubeVelocityProvider` | 2D/3D vector fields  | Visualizes vector flow (u/v components) using animated particle advection.                |
 
 The 2D data pipeline is shared with OpenLayers and Leaflet through
 `zarr-maps-tiling`. Palette definitions and color-ramp helpers are provided by

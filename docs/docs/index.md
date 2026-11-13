@@ -70,7 +70,7 @@ It provides a set of **CesiumJS data providers** that stream and render multidim
 | ---------------------------- | ------------------- | ---------------------------------------------------------- |
 | **ZarrLayerProvider**        | 2D scalar fields    | Renders imagery layers from single/multiscale Zarr arrays. |
 | **ZarrCubeProvider**         | 3D volumetric cubes | Renders 3D slices (horizontal & vertical).                 |
-| **ZarrCubeVelocityProvider** | 3D vector fields    | Animated particle advection from U/V components.           |
+| **ZarrCubeVelocityProvider** | 2D/3D vector fields | Animated particle advection from U/V components.           |
 
 ---
 
